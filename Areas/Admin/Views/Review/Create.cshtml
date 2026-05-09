@@ -1,0 +1,63 @@
+@model KIGHolding.Areas.Admin.ViewModels.ReviewCreateViewModel
+
+@{
+    ViewData["Title"] = "Tạo đánh giá";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel p-6">
+        <p class="text-kicker font-black uppercase text-brand-goldDeep">Reviews</p>
+        <h2 class="mt-2 text-2xl font-black text-brand-dark">Tạo đánh giá mới</h2>
+
+        <form asp-action="Create" method="post" class="mt-6 space-y-6">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-sm text-brand-redDark"></div>
+
+            <div class="grid gap-5 lg:grid-cols-2">
+                <div>
+                    <label asp-for="CustomerName" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                    <input asp-for="CustomerName" class="form-input" />
+                    <span asp-validation-for="CustomerName" class="mt-2 block text-xs text-brand-redDark"></span>
+                </div>
+                <div>
+                    <label asp-for="Rating" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                    <input asp-for="Rating" type="number" min="1" max="5" class="form-input" />
+                    <span asp-validation-for="Rating" class="mt-2 block text-xs text-brand-redDark"></span>
+                </div>
+            </div>
+
+            <div>
+                <label asp-for="Content" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                <textarea asp-for="Content" rows="5" class="form-input"></textarea>
+                <span asp-validation-for="Content" class="mt-2 block text-xs text-brand-redDark"></span>
+            </div>
+
+            <div class="grid gap-5 lg:grid-cols-3">
+                <div>
+                    <label asp-for="BranchId" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                    <select asp-for="BranchId" asp-items="Model.BranchOptions" class="form-input"></select>
+                </div>
+                <div>
+                    <label asp-for="DisplayOrder" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                    <input asp-for="DisplayOrder" type="number" class="form-input" />
+                    <span asp-validation-for="DisplayOrder" class="mt-2 block text-xs text-brand-redDark"></span>
+                </div>
+                <div class="flex items-end">
+                    <label class="flex items-center gap-3 text-sm text-brand-dark">
+                        <input asp-for="IsVisible" type="checkbox" class="size-4 rounded border-brand-border text-brand-goldDeep" />
+                        <span>Hiển thị công khai</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <button type="submit" class="btn-primary">Lưu đánh giá</button>
+                <a asp-action="Index" class="btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

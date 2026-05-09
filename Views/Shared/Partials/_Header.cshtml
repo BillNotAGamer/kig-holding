@@ -1,0 +1,59 @@
+@model KIGHolding.ViewModels.Shared.HeaderViewModel
+
+<header data-site-header class="site-header">
+    <nav class="container-page flex h-20 items-center gap-6 xl:gap-10">
+        <a href="/" class="group flex shrink-0 items-center gap-3" aria-label="@Model.BrandName">
+            @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
+            {
+                <img src="@Model.LogoUrl" alt="@Model.BrandName" class="h-10 w-auto" />
+            }
+            else
+            {
+                <span class="brand-mark">TT</span>
+            }
+            <span class="hidden min-w-0 sm:block">
+                <span class="block truncate text-sm font-bold uppercase tracking-[0.18em] text-white">@Model.BrandName</span>
+                <span class="block text-[10px] uppercase tracking-[0.24em] text-white/55">Restaurant Group</span>
+            </span>
+        </a>
+
+        <div class="hidden flex-1 lg:block">
+            <div class="mx-auto flex w-fit items-center gap-8 xl:gap-10">
+                @foreach (var item in Model.NavItems)
+                {
+                    var isReservationItem =
+                        string.Equals(item.Url, Model.ReservationUrl, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(item.Label?.Trim(), "Đặt bàn", StringComparison.OrdinalIgnoreCase);
+                    if (!isReservationItem)
+                    {
+                        <a href="@item.Url" class="nav-link @(item.IsActive ? "is-active" : string.Empty)">
+                            @item.Label
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="hidden shrink-0 items-center lg:flex">
+            <a href="@Model.ReservationUrl"
+               class="inline-flex items-center rounded-button border border-brand-gold/30 bg-brand-gold px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.16em] text-brand-black transition-colors hover:bg-brand-goldSoft">
+                Đặt bàn
+            </a>
+        </div>
+
+        <button type="button"
+                class="ml-auto inline-flex size-11 items-center justify-center rounded-md border border-white/20 bg-white/5 text-white transition hover:border-brand-gold hover:text-brand-goldSoft lg:hidden"
+                aria-label="Mở menu"
+                aria-expanded="false"
+                data-mobile-menu-open>
+            <span class="sr-only">Mở menu</span>
+            <span class="flex w-5 flex-col gap-1.5">
+                <span class="h-0.5 rounded-full bg-white"></span>
+                <span class="h-0.5 rounded-full bg-white"></span>
+                <span class="h-0.5 rounded-full bg-white"></span>
+            </span>
+        </button>
+    </nav>
+
+    @await Html.PartialAsync("~/Views/Shared/Partials/_MobileMenu.cshtml", Model)
+</header>

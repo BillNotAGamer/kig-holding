@@ -1,0 +1,131 @@
+@using KIGHolding.Models.Entities
+@using KIGHolding.Services
+@inject IConfiguration Configuration
+@inject ISiteSettingService SiteSettingService
+
+@{
+    SiteSetting? siteSetting = null;
+
+    if (HasConfiguredDatabase(Configuration))
+    {
+        try
+        {
+            siteSetting = await SiteSettingService.GetSettingsAsync();
+        }
+        catch
+        {
+            siteSetting = null;
+        }
+    }
+
+    var brandName = string.IsNullOrWhiteSpace(siteSetting?.BrandName) ? "Truyền Thuyết Champong" : siteSetting!.BrandName;
+    var pageTitle = ViewData["Title"]?.ToString();
+    var fullTitle = string.IsNullOrWhiteSpace(pageTitle)
+        ? brandName
+        : pageTitle.Contains(brandName, StringComparison.OrdinalIgnoreCase)
+            ? pageTitle
+            : $"{pageTitle} - {brandName}";
+
+    var metaDescription = ViewData["MetaDescription"]?.ToString()
+        ?? (string.IsNullOrWhiteSpace(siteSetting?.Slogan) ? null : siteSetting!.Slogan)
+        ?? "Truyền Thuyết Champong - ẩm thực Hàn Quốc cay nóng trong không gian tối hiện đại.";
+
+    var baseUrl = GetConfiguredBaseUrl(Configuration, Context.Request);
+    var currentPath = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+    var canonicalUrl = BuildAbsoluteUrl(ViewData["CanonicalUrl"]?.ToString() ?? currentPath, baseUrl);
+    var ogTitle = ViewData["OgTitle"]?.ToString() ?? fullTitle;
+    var ogDescription = ViewData["OgDescription"]?.ToString() ?? metaDescription;
+    var ogImage = BuildAbsoluteUrl(
+        ViewData["OgImage"]?.ToString()
+            ?? (string.IsNullOrWhiteSpace(siteSetting?.LogoUrl) ? null : siteSetting!.LogoUrl)
+            ?? "/images/placeholders/champong-hero.webp",
+        baseUrl);
+    var ogType = ViewData["OgType"]?.ToString() ?? "website";
+}
+
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="@metaDescription" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <link rel="canonical" href="@canonicalUrl" />
+
+    <meta property="og:site_name" content="@brandName" />
+    <meta property="og:title" content="@ogTitle" />
+    <meta property="og:description" content="@ogDescription" />
+    <meta property="og:image" content="@ogImage" />
+    <meta property="og:url" content="@canonicalUrl" />
+    <meta property="og:type" content="@ogType" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <title>@fullTitle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+<body class="min-h-screen bg-brand-light text-brand-dark antialiased">
+    @await Component.InvokeAsync("SiteHeader")
+
+    <main id="main-content" class="min-h-screen pt-20">
+        @RenderBody()
+    </main>
+
+    @await Component.InvokeAsync("SiteFooter")
+    @await Component.InvokeAsync("FloatingContactButtons")
+
+    <button type="button"
+            class="fixed bottom-24 left-5 z-40 hidden size-11 place-items-center rounded-md border border-brand-border bg-brand-white text-brand-dark shadow-soft transition hover:border-brand-gold hover:text-brand-goldDeep md:grid"
+            aria-label="Lên đầu trang"
+            data-back-to-top>
+        ↑
+    </button>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+@functions {
+    private static bool HasConfiguredDatabase(IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+        return !string.IsNullOrWhiteSpace(connectionString)
+            && !connectionString.Contains("your-neon-host", StringComparison.OrdinalIgnoreCase)
+            && !connectionString.Contains("your_username", StringComparison.OrdinalIgnoreCase)
+            && !connectionString.Contains("your_password", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetConfiguredBaseUrl(IConfiguration configuration, HttpRequest request)
+    {
+        var configuredBaseUrl = configuration["AppSettings:AppBaseUrl"];
+        if (!string.IsNullOrWhiteSpace(configuredBaseUrl))
+        {
+            return configuredBaseUrl.TrimEnd('/');
+        }
+
+        return $"{request.Scheme}://{request.Host}".TrimEnd('/');
+    }
+
+    private static string BuildAbsoluteUrl(string? url, string baseUrl)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return baseUrl;
+        }
+
+        if (Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
+        {
+            return absoluteUri.ToString();
+        }
+
+        var relativeUrl = url.StartsWith('/') ? url : $"/{url}";
+        return $"{baseUrl.TrimEnd('/')}{relativeUrl}";
+    }
+}

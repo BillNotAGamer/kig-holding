@@ -1,0 +1,85 @@
+@model KIGHolding.Areas.Admin.ViewModels.MenuCategoryIndexViewModel
+
+@{
+    ViewData["Title"] = "Danh mục thực đơn";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-kicker font-black uppercase text-brand-goldDeep">Menu Categories</p>
+            <h2 class="mt-2 text-2xl font-black text-brand-dark">Danh mục thực đơn</h2>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Quản lý thứ tự, trạng thái công khai và ảnh đại diện cho các nhóm món ăn.</p>
+        </div>
+        <a asp-action="Create" class="btn-primary">Tạo danh mục mới</a>
+    </div>
+
+    <div class="overflow-hidden rounded-md border border-brand-border bg-white shadow-soft">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm text-brand-gray">
+                <thead class="border-b border-brand-border bg-brand-light text-xs uppercase text-brand-dark">
+                    <tr>
+                        <th class="px-6 py-4 font-semibold">Image</th>
+                        <th class="px-6 py-4 font-semibold">Display</th>
+                        <th class="px-6 py-4 font-semibold">Name</th>
+                        <th class="px-6 py-4 font-semibold">Slug</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brand-border">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <tr class="align-top transition-colors hover:bg-brand-light/50">
+                            <td class="px-6 py-4">
+                                @if (!string.IsNullOrWhiteSpace(category.ThumbnailUrl))
+                                {
+                                    <img src="@category.ThumbnailUrl" alt="@category.Name" class="h-12 w-20 rounded-md border border-brand-border object-cover" />
+                                }
+                                else
+                                {
+                                    <div class="grid h-12 w-20 place-items-center rounded-md border border-brand-border bg-brand-light text-xs font-semibold text-brand-gray">No image</div>
+                                }
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-brand-dark">@category.DisplayOrder</td>
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-brand-dark">@category.Name</p>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-brand-gray">@category.Slug</td>
+                            <td class="px-6 py-4">
+                                @if (category.IsActive)
+                                {
+                                    <span class="rounded-button border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Đang hiển thị</span>
+                                }
+                                else
+                                {
+                                    <span class="rounded-button border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Đã ẩn</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-3">
+                                    <a asp-action="Edit" asp-route-id="@category.Id" class="font-semibold text-brand-goldDeep transition hover:text-brand-dark">Sửa</a>
+                                    <form asp-action="ToggleActive" asp-route-id="@category.Id" method="post" class="inline" onsubmit="return confirm('@(category.IsActive ? "Ẩn" : "Kích hoạt") danh mục này?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="font-semibold @(category.IsActive ? "text-brand-redDark hover:text-brand-red" : "text-brand-goldDeep hover:text-brand-dark")">
+                                            @(category.IsActive ? "Ẩn" : "Kích hoạt")
+                                        </button>
+                                    </form>
+                                    <form asp-action="Delete" asp-route-id="@category.Id" method="post" class="inline" onsubmit="return confirm('Ẩn danh mục này khỏi website công khai?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="font-semibold text-brand-redDark transition hover:text-brand-red">Ẩn mềm</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Categories.Any())
+        {
+            <div class="p-8 text-center text-brand-gray">Chưa có danh mục thực đơn nào.</div>
+        }
+    </div>
+</section>

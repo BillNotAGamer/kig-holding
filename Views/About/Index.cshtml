@@ -1,0 +1,224 @@
+@model AboutIndexViewModel
+
+@{
+    ViewData["Title"] = Model.SeoTitle;
+    ViewData["MetaDescription"] = Model.SeoDescription;
+}
+
+<section class="hero-frame" data-about-section="hero">
+    <div class="container-page section-shell">
+        <div class="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+            <div class="hero-card scroll-reveal">
+                <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
+                    Brand story
+                </span>
+                <h1 class="mt-5 text-display font-black text-brand-dark sm:text-hero">Câu chuyện Truyền Thuyết Champong</h1>
+                <p class="mt-5 text-lead text-brand-gray">Một thương hiệu nhà hàng Hàn Quốc được định vị lại theo hướng sáng, tinh gọn và phù hợp ngôn ngữ corporate hospitality.</p>
+            </div>
+            <div class="food-image-wrap min-h-[22rem] shadow-panel lg:min-h-[32rem]">
+                <img src="/images/placeholders/about-hero.webp"
+                     alt="Không gian và món ăn Truyền Thuyết Champong"
+                     class="food-image absolute inset-0"
+                     onerror="this.remove();" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell" data-about-section="origin">
+    <div class="container-page grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+        <div class="scroll-reveal">
+            <div class="food-image-wrap aspect-[4/5] shadow-panel">
+                <img src="/images/placeholders/korean-street-noodle.webp"
+                     alt="Cảm hứng món ăn Hàn Quốc"
+                     class="food-image"
+                     loading="lazy"
+                     onerror="this.remove();" />
+            </div>
+        </div>
+
+        <div class="scroll-reveal">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Khởi nguồn",
+                Title = "Từ cảm hứng món ăn đến trải nghiệm hệ thống nhà hàng.",
+                Description = "Truyền Thuyết Champong bắt đầu từ món mì và món nướng chuẩn vị Hàn, nhưng hiện tại được kể lại như một thương hiệu hospitality có cấu trúc, có nhịp và có khả năng mở rộng dài hạn."
+            }})
+
+            <div class="mt-7 space-y-5 text-base leading-8 text-brand-gray">
+                <p>
+                    Giao diện mới ưu tiên hình ảnh món ăn, phân lớp nội dung rõ ràng và một tông sáng giúp thương hiệu phù hợp hơn với bối cảnh corporate restaurant group thay vì cảm giác landing page quá tối và nặng.
+                </p>
+                <p>
+                    Điều này hỗ trợ cả trải nghiệm người dùng lẫn hướng phát triển hệ thống nội dung về sau: quản lý chi nhánh, bài viết, thực đơn và media có thể bám theo cùng một khung thiết kế nhất quán.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-band section-shell" data-about-section="values">
+    <div class="container-page">
+        @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+        {
+            Eyebrow = "Giá trị cốt lõi",
+            Title = "Điều làm nên một bữa ăn đáng nhớ.",
+            Description = "Bốn nhóm giá trị được chuyển thành card sáng, bóng đổ nhẹ và cấu trúc gọn để đồng bộ với phần còn lại của website."
+        }})
+
+        <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var value in new[]
+            {
+                ("Chuẩn vị", "Giữ tinh thần món ăn Hàn Quốc bằng cấu trúc thực đơn rõ, món signature nổi bật và ngôn ngữ nội dung có kiểm soát."),
+                ("Tươi ngon", "Nguyên liệu, hình ảnh và mô tả món ăn được đặt trong cùng một hệ thống card sáng, dễ tiêu thụ thông tin."),
+                ("Tiếp khách", "Không gian thương hiệu được nhấn theo hướng phù hợp cho gia đình, bạn bè và đối tác thay vì cảm giác quán ăn nhanh."),
+                ("Mở rộng hệ thống", "Thiết kế giữ khoảng trắng lớn và các khối tái sử dụng để phục vụ phát triển dashboard quản trị sau này.")
+            })
+            {
+                <article class="surface-panel card-hover p-6">
+                    <div class="mb-5 h-10 w-10 rounded-md bg-brand-goldSoft"></div>
+                    <h2 class="text-xl font-black text-brand-dark">@value.Item1</h2>
+                    <p class="mt-3 text-sm leading-6 text-brand-gray">@value.Item2</p>
+                </article>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell" data-about-section="food-philosophy">
+    <div class="container-page grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
+        <div>
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Triết lý món ăn",
+                Title = "Món ăn là lõi, nhưng trải nghiệm là khung nâng giá trị thương hiệu.",
+                Description = "Thực đơn không còn được trình bày như một mảng tối riêng lẻ; thay vào đó, nó nằm trong một cấu trúc editorial liền mạch với chi nhánh, bài viết và booking."
+            }})
+
+            <div class="mt-8 grid gap-4 sm:grid-cols-2">
+                @foreach (var item in new[]
+                {
+                    ("Nước dùng", "Chi tiết món ăn được ưu tiên đọc dễ, dùng màu trung tính và accent mềm để phù hợp cảm giác premium."),
+                    ("Gia vị", "Các badge và nhấn mạnh thị giác chuyển từ đỏ gắt sang gold/neutral để bớt cảm giác aggressive."),
+                    ("Nguyên liệu", "Card món và card chi nhánh được đồng bộ nền trắng, bo góc và bóng đổ nhẹ."),
+                    ("Cùng thưởng thức", "Thông điệp thương hiệu được kéo gần hơn với một restaurant group hiện đại và trưởng thành hơn.")
+                })
+                {
+                    <div class="surface-muted p-5">
+                        <h3 class="font-black text-brand-dark">@item.Item1</h3>
+                        <p class="mt-3 text-sm leading-6 text-brand-gray">@item.Item2</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="food-image-wrap aspect-[4/5] shadow-panel">
+            <img src="/images/placeholders/champong-broth.webp"
+                 alt="Nước dùng Champong"
+                 class="food-image"
+                 loading="lazy"
+                 onerror="this.remove();" />
+            <div class="absolute bottom-5 left-5 right-5 rounded-md bg-white/92 p-4 shadow-soft">
+                <p class="text-kicker font-black uppercase text-brand-goldDeep">Signature taste</p>
+                <p class="mt-2 text-3xl font-black text-brand-dark">Cay nồng, đậm vị, ăn nóng.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (Model.SignatureMenuItems.Count > 0)
+{
+    <section class="section-band section-shell" data-about-section="signature-menu">
+        <div class="container-page">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+                {
+                    Eyebrow = "Món đặc trưng",
+                    Title = "Những hương vị đại diện cho thương hiệu.",
+                    Description = "Các món signature được đặt trên nền trắng để nhất quán với toàn bộ mặt tiền website."
+                }})
+                <a href="/thuc-don" class="btn-secondary">Xem thực đơn</a>
+            </div>
+
+            <div class="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                @foreach (var item in Model.SignatureMenuItems)
+                {
+                    @await Component.InvokeAsync("FoodCard", new { model = item })
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="section-shell" data-about-section="restaurant-space">
+    <div class="container-page">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Không gian",
+                Title = "Một hệ hình ảnh sáng và giàu khoảng thở hơn.",
+                Description = "Gallery chuyển sang các khối sáng, caption tối giản và hình ảnh lớn để gần hơn với cách KIG Holding tổ chức các section kể chuyện."
+            }})
+            <a href="/chi-nhanh" class="btn-secondary">Xem chi nhánh</a>
+        </div>
+
+        <div class="mt-9 grid gap-4 md:grid-cols-4 md:grid-rows-2">
+            <figure class="food-image-wrap min-h-[18rem] shadow-soft md:col-span-2 md:row-span-2">
+                <img src="/images/placeholders/group-tables.webp" alt="Bàn nhóm tại nhà hàng" class="food-image absolute inset-0" loading="lazy" onerror="this.remove();" />
+                <figcaption class="absolute bottom-4 left-4 right-4 z-20 rounded-md bg-white/90 px-4 py-3 text-lg font-black text-brand-dark">Bàn nhóm linh hoạt</figcaption>
+            </figure>
+            <figure class="food-image-wrap min-h-[13rem] shadow-soft">
+                <img src="/images/placeholders/kitchen-chef.webp" alt="Bếp nhà hàng" class="food-image absolute inset-0" loading="lazy" onerror="this.remove();" />
+                <figcaption class="absolute bottom-4 left-4 right-4 z-20 rounded-md bg-white/90 px-4 py-3 font-black text-brand-dark">Bếp nóng</figcaption>
+            </figure>
+            <figure class="food-image-wrap min-h-[13rem] shadow-soft">
+                <img src="/images/placeholders/food-table.webp" alt="Món ăn trên bàn" class="food-image absolute inset-0" loading="lazy" onerror="this.remove();" />
+                <figcaption class="absolute bottom-4 left-4 right-4 z-20 rounded-md bg-white/90 px-4 py-3 font-black text-brand-dark">Món ăn nóng</figcaption>
+            </figure>
+            <figure class="food-image-wrap min-h-[13rem] shadow-soft md:col-span-2">
+                <img src="/images/placeholders/service-counter.webp" alt="Quầy phục vụ" class="food-image absolute inset-0" loading="lazy" onerror="this.remove();" />
+                <figcaption class="absolute bottom-4 left-4 right-4 z-20 rounded-md bg-white/90 px-4 py-3 font-black text-brand-dark">Quầy phục vụ</figcaption>
+            </figure>
+        </div>
+    </div>
+</section>
+
+@if (Model.FeaturedBranches.Count > 0)
+{
+    <section class="section-band section-shell" data-about-section="featured-branches">
+        <div class="container-page">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+                {
+                    Eyebrow = "Điểm hẹn",
+                    Title = "Không gian đang chờ bạn.",
+                    Description = "Một vài chi nhánh đang hoạt động, sẵn sàng cho bữa ăn tiếp theo."
+                }})
+                <a href="/chi-nhanh" class="btn-secondary">Tìm chi nhánh</a>
+            </div>
+
+            <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                @foreach (var branch in Model.FeaturedBranches)
+                {
+                    @await Component.InvokeAsync("BranchCard", new { model = branch })
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="section-shell pt-0 lg:pt-0" data-about-section="cta">
+    <div class="container-page">
+        <div class="surface-panel p-6 sm:p-8 lg:p-10">
+            <div class="max-w-3xl">
+                <p class="text-kicker font-black uppercase text-brand-goldDeep">Trải nghiệm tại bàn</p>
+                <h2 class="mt-3 text-3xl font-black text-brand-dark sm:text-4xl">Sẵn sàng thưởng thức Truyền Thuyết Champong?</h2>
+                <p class="mt-4 text-brand-gray">Giữ bàn trước hoặc xem thực đơn để chọn món mì, món nướng và combo phù hợp cho nhóm của bạn.</p>
+                <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                    <a href="/dat-ban" class="btn-primary">Đặt bàn ngay</a>
+                    <a href="/thuc-don" class="btn-secondary">Xem thực đơn</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

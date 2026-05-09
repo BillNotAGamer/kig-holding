@@ -1,0 +1,97 @@
+@model KIGHolding.Areas.Admin.ViewModels.ReservationIndexViewModel
+
+@{
+    ViewData["Title"] = "Quản lý Đặt bàn";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel flex flex-col gap-4 p-6 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+            <p class="text-kicker font-black uppercase text-brand-goldDeep">Reservation Ops</p>
+            <h2 class="mt-2 text-2xl font-black text-brand-dark">Quản lý đặt bàn</h2>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Theo dõi yêu cầu đặt bàn, lọc theo trạng thái hoặc chi nhánh và cập nhật tiến độ xử lý ngay trong admin.</p>
+        </div>
+
+        <form method="get" class="grid gap-3 md:grid-cols-[minmax(0,14rem)_minmax(0,18rem)]">
+            <div>
+                <label asp-for="StatusFilter" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                <select asp-for="StatusFilter" asp-items="Model.StatusOptions" class="form-input"></select>
+            </div>
+            <div>
+                <label asp-for="BranchFilter" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                <select asp-for="BranchFilter" asp-items="Model.BranchOptions" class="form-input"></select>
+            </div>
+            <div class="md:col-span-2 flex gap-3">
+                <button type="submit" class="btn-primary">Lọc dữ liệu</button>
+                <a asp-action="Index" class="btn-secondary">Xóa lọc</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="overflow-hidden rounded-md border border-brand-border bg-white shadow-soft">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm text-brand-gray">
+                <thead class="border-b border-brand-border bg-brand-light text-xs uppercase text-brand-dark">
+                    <tr>
+                        <th class="px-6 py-4 font-semibold">Customer</th>
+                        <th class="px-6 py-4 font-semibold">Phone</th>
+                        <th class="px-6 py-4 font-semibold">Branch</th>
+                        <th class="px-6 py-4 font-semibold">Date & Time</th>
+                        <th class="px-6 py-4 font-semibold">Guest Count</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brand-border">
+                    @foreach (var reservation in Model.Reservations)
+                    {
+                        var statusClass = reservation.Status switch
+                        {
+                            ReservationStatus.Pending => "border-amber-200 bg-amber-50 text-amber-700",
+                            ReservationStatus.Confirmed => "border-blue-200 bg-blue-50 text-blue-700",
+                            ReservationStatus.Arrived => "border-emerald-200 bg-emerald-50 text-emerald-700",
+                            ReservationStatus.Cancelled => "border-rose-200 bg-rose-50 text-rose-700",
+                            ReservationStatus.NoShow => "border-slate-200 bg-slate-100 text-slate-600",
+                            _ => "border-slate-200 bg-slate-100 text-slate-600"
+                        };
+                        var statusLabel = reservation.Status switch
+                        {
+                            ReservationStatus.Pending => "Chờ xác nhận",
+                            ReservationStatus.Confirmed => "Đã xác nhận",
+                            ReservationStatus.Arrived => "Đã đến",
+                            ReservationStatus.Cancelled => "Đã hủy",
+                            ReservationStatus.NoShow => "Không đến",
+                            _ => reservation.Status.ToString()
+                        };
+
+                        <tr class="align-top transition-colors hover:bg-brand-light/50">
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-brand-dark">@reservation.CustomerName</p>
+                            </td>
+                            <td class="px-6 py-4">@reservation.PhoneNumber</td>
+                            <td class="px-6 py-4">@reservation.BranchName</td>
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-brand-dark">@reservation.ReservationDate.ToString("dd/MM/yyyy")</p>
+                                <p class="mt-1 text-xs text-brand-gray">@reservation.ReservationTime.ToString("HH:mm")</p>
+                            </td>
+                            <td class="px-6 py-4">@reservation.GuestCount</td>
+                            <td class="px-6 py-4">
+                                <span class="rounded-button border px-3 py-1 text-xs font-semibold @statusClass">@statusLabel</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <a asp-action="Details" asp-route-id="@reservation.Id" class="font-semibold text-brand-goldDeep transition hover:text-brand-dark">Xem chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Reservations.Any())
+        {
+            <div class="p-8 text-center text-brand-gray">
+                Không có đặt bàn nào phù hợp bộ lọc hiện tại.
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,115 @@
+@model NewsDetailViewModel
+
+@{
+    ViewData["Title"] = Model.SeoTitle;
+    ViewData["MetaDescription"] = Model.SeoDescription;
+
+    var post = Model.Post;
+    var imageUrl = string.IsNullOrWhiteSpace(post.ThumbnailUrl) ? "/images/placeholders/post-card.webp" : post.ThumbnailUrl;
+    var isPromotion = string.Equals(post.Category, "Khuyến mãi", StringComparison.OrdinalIgnoreCase);
+
+    ViewData["OgImage"] = imageUrl;
+    ViewData["OgType"] = "article";
+}
+
+<section class="hero-frame" data-news-page="detail">
+    <div class="container-page section-shell">
+        <div class="mx-auto max-w-5xl">
+            <a href="/tin-tuc" class="text-sm font-semibold text-brand-goldDeep transition hover:text-brand-dark">← Tin tức & ưu đãi</a>
+            <div class="hero-card mt-6">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="rounded-button bg-brand-goldSoft px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-dark">@post.Category</span>
+                    @if (post.PublishedAt.HasValue)
+                    {
+                        <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="text-xs uppercase tracking-[0.16em] text-brand-gray">
+                            @post.PublishedAt.Value.ToString("dd/MM/yyyy")
+                        </time>
+                    }
+                </div>
+                <h1 class="mt-5 text-4xl font-black text-brand-dark sm:text-display">@post.Title</h1>
+                <p class="mt-5 text-lead text-brand-gray">@post.Excerpt</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<article class="section-shell pt-0 lg:pt-0">
+    <div class="container-page">
+        <div class="mx-auto max-w-5xl">
+            <div class="food-image-wrap aspect-[16/9] shadow-panel">
+                <img src="@imageUrl"
+                     alt="@post.Title"
+                     class="food-image absolute inset-0"
+                     loading="lazy"
+                     onerror="this.remove();" />
+            </div>
+
+            <div class="surface-panel mt-8 p-6 sm:p-8">
+                <div class="space-y-5 text-base leading-8 text-brand-gray">
+                    @foreach (var paragraph in GetParagraphs(post.Content))
+                    {
+                        <p>@paragraph</p>
+                    }
+                </div>
+
+                @if (isPromotion)
+                {
+                    <div class="surface-muted mt-8 p-5">
+                        <p class="text-kicker font-black uppercase text-brand-goldDeep">Ưu đãi tại bàn</p>
+                        <h2 class="mt-3 text-2xl font-black text-brand-dark">Giữ bàn trước để không bỏ lỡ ưu đãi.</h2>
+                        <p class="mt-3 text-sm leading-6 text-brand-gray">
+                            Một số chương trình có thể áp dụng theo khung giờ hoặc chi nhánh. Đặt bàn trước giúp nhà hàng chuẩn bị tốt hơn.
+                        </p>
+                        <a href="/dat-ban" class="btn-primary mt-5">Đặt bàn ngay</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</article>
+
+<section class="section-band section-shell">
+    <div class="container-page">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Đọc thêm",
+                Title = "Bài viết liên quan",
+                Description = "Các cập nhật khác từ Truyền Thuyết Champong."
+            }})
+            <a href="/tin-tuc" class="btn-secondary">Xem tất cả</a>
+        </div>
+
+        @if (Model.RelatedPosts.Count > 0)
+        {
+            <div class="mt-9 grid gap-5 md:grid-cols-3">
+                @foreach (var relatedPost in Model.RelatedPosts)
+                {
+                    @await Component.InvokeAsync("PostCard", new { model = relatedPost })
+                }
+            </div>
+        }
+        else
+        {
+            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
+                Bài viết liên quan đang được cập nhật.
+            </div>
+        }
+    </div>
+</section>
+
+@functions {
+    private static IEnumerable<string> GetParagraphs(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            yield return "Nội dung bài viết đang được cập nhật.";
+            yield break;
+        }
+
+        foreach (var paragraph in content.Replace("\r\n", "\n").Split("\n\n", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            yield return paragraph;
+        }
+    }
+}

@@ -1,0 +1,65 @@
+@model KIGHolding.ViewModels.Shared.FooterViewModel
+
+<footer class="border-t border-white/10 bg-brand-black">
+    <div class="container-page py-14 lg:py-20">
+        <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_1fr_1fr]">
+            <div>
+                <a href="/" class="flex items-center gap-3" aria-label="@Model.BrandName">
+                    @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
+                    {
+                        <img src="@Model.LogoUrl" alt="@Model.BrandName" class="h-11 w-auto" />
+                    }
+                    else
+                    {
+                        <span class="brand-mark">TT</span>
+                    }
+                    <span class="text-base font-black uppercase tracking-[0.18em] text-brand-cream">@Model.BrandName</span>
+                </a>
+                <p class="mt-5 max-w-sm text-sm leading-7 text-white/62">@Model.Description</p>
+            </div>
+
+            <div>
+                <h2 class="text-sm font-black uppercase tracking-[0.2em] text-brand-cream">Liên kết</h2>
+                <ul class="mt-5 space-y-3">
+                    @foreach (var link in Model.QuickLinks)
+                    {
+                        <li>
+                            <a href="@link.Url" class="text-sm text-white/62 transition hover:text-brand-goldSoft">@link.Label</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div>
+                <h2 class="text-sm font-black uppercase tracking-[0.2em] text-brand-cream">Chi nhánh nổi bật</h2>
+                <div class="mt-5 space-y-4">
+                    @foreach (var branch in Model.Branches)
+                    {
+                        <a href="@branch.Url" class="block rounded-md border border-white/10 bg-white/[0.04] p-4 transition hover:border-brand-gold/40">
+                            <span class="block text-sm font-semibold text-brand-cream">@branch.Name</span>
+                            <span class="mt-1 block text-xs leading-5 text-white/60">@branch.Address</span>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-sm font-black uppercase tracking-[0.2em] text-brand-cream">Liên hệ</h2>
+                <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="mt-5 block text-2xl font-black text-brand-goldSoft">@Model.Hotline</a>
+                <a href="mailto:@Model.Email" class="mt-2 block text-sm text-white/62 transition hover:text-brand-cream">@Model.Email</a>
+                <p class="mt-4 text-sm text-white/62">Mở cửa: <span class="text-brand-cream">@Model.OpeningHours</span></p>
+
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="@Model.FacebookUrl" class="btn-ghost border-white/10 bg-white/[0.04] px-3 !text-white/75 hover:!border-brand-gold hover:!text-brand-goldSoft" target="_blank" rel="noopener">Facebook</a>
+                    <a href="@Model.ZaloUrl" class="btn-ghost border-white/10 bg-white/[0.04] px-3 !text-white/75 hover:!border-brand-gold hover:!text-brand-goldSoft" target="_blank" rel="noopener">Zalo</a>
+                    <a href="@Model.TiktokUrl" class="btn-ghost border-white/10 bg-white/[0.04] px-3 !text-white/75 hover:!border-brand-gold hover:!text-brand-goldSoft" target="_blank" rel="noopener">TikTok</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/46 md:flex-row md:items-center md:justify-between">
+            <p>&copy; 2026 @Model.BrandName. All rights reserved.</p>
+            <p>Modern Korean dining experiences by a premium hospitality group.</p>
+        </div>
+    </div>
+</footer>

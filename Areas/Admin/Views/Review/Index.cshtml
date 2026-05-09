@@ -1,0 +1,61 @@
+@model KIGHolding.Areas.Admin.ViewModels.ReviewIndexViewModel
+
+@{
+    ViewData["Title"] = "Đánh giá";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-kicker font-black uppercase text-brand-goldDeep">Reviews</p>
+            <h2 class="mt-2 text-2xl font-black text-brand-dark">Đánh giá</h2>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Quản lý phản hồi khách hàng và thứ tự hiển thị trên trang chủ.</p>
+        </div>
+        <a asp-action="Create" class="btn-primary">Tạo đánh giá mới</a>
+    </div>
+
+    <div class="overflow-hidden rounded-md border border-brand-border bg-white shadow-soft">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm text-brand-gray">
+                <thead class="border-b border-brand-border bg-brand-light text-xs uppercase text-brand-dark">
+                    <tr>
+                        <th class="px-6 py-4 font-semibold">CustomerName</th>
+                        <th class="px-6 py-4 font-semibold">Rating</th>
+                        <th class="px-6 py-4 font-semibold">Visible</th>
+                        <th class="px-6 py-4 font-semibold">Display Order</th>
+                        <th class="px-6 py-4 font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brand-border">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <tr class="align-top transition-colors hover:bg-brand-light/50">
+                            <td class="px-6 py-4 font-semibold text-brand-dark">@review.CustomerName</td>
+                            <td class="px-6 py-4">@review.Rating / 5</td>
+                            <td class="px-6 py-4">
+                                @if (review.IsVisible)
+                                {
+                                    <span class="rounded-button border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Hiển thị</span>
+                                }
+                                else
+                                {
+                                    <span class="rounded-button border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Ẩn</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4">@review.DisplayOrder</td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-3">
+                                    <a asp-action="Edit" asp-route-id="@review.Id" class="font-semibold text-brand-goldDeep transition hover:text-brand-dark">Sửa</a>
+                                    <form asp-action="Delete" asp-route-id="@review.Id" method="post" class="inline" onsubmit="return confirm('Ẩn đánh giá này khỏi website công khai?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="font-semibold text-brand-redDark transition hover:text-brand-red">Ẩn</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

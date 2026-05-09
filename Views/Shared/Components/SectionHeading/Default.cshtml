@@ -1,0 +1,17 @@
+@model KIGHolding.ViewModels.Shared.SectionHeadingViewModel
+
+@{
+    var isCenter = string.Equals(Model.Align, "center", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="scroll-reveal @(isCenter ? "mx-auto max-w-3xl text-center" : "max-w-3xl")">
+    @if (!string.IsNullOrWhiteSpace(Model.Eyebrow))
+    {
+        <p class="text-kicker font-black uppercase text-brand-goldDeep">@Model.Eyebrow</p>
+    }
+    <h2 class="mt-3 text-section font-black text-brand-dark sm:text-display">@Model.Title</h2>
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <p class="mt-4 text-lead text-brand-gray">@Model.Description</p>
+    }
+</div>

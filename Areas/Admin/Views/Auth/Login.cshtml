@@ -1,0 +1,116 @@
+@model AdminLoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập Admin";
+}
+
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Đăng nhập Admin</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="min-h-screen bg-brand-light text-brand-dark antialiased">
+    @{
+        var successMessage = TempData["SuccessMessage"]?.ToString();
+        var errorMessage = TempData["ErrorMessage"]?.ToString();
+    }
+
+    <div class="pointer-events-none fixed right-4 top-4 z-50 w-[min(24rem,calc(100vw-2rem))] space-y-3">
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="admin-toast pointer-events-auto rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-soft transition-all duration-300" data-toast>
+                <div class="flex items-start gap-3">
+                    <span class="mt-0.5 grid size-5 place-items-center rounded-full bg-emerald-100 text-xs font-black text-emerald-700">✓</span>
+                    <div>
+                        <p class="font-semibold text-emerald-900">Thành công</p>
+                        <p class="mt-1 leading-6">@successMessage</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="admin-toast pointer-events-auto rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-soft transition-all duration-300" data-toast>
+                <div class="flex items-start gap-3">
+                    <span class="mt-0.5 grid size-5 place-items-center rounded-full bg-red-100 text-xs font-black text-red-700">!</span>
+                    <div>
+                        <p class="font-semibold text-red-900">Có lỗi</p>
+                        <p class="mt-1 leading-6">@errorMessage</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="relative min-h-screen overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(184,154,98,0.16),transparent_26rem),radial-gradient(circle_at_bottom_right,rgba(17,24,39,0.07),transparent_24rem)]"></div>
+        <div class="container-page relative grid min-h-screen place-items-center py-12">
+            <div class="w-full max-w-md">
+                <div class="surface-panel p-6 sm:p-8">
+                    <div class="text-center">
+                        <span class="mx-auto grid size-14 place-items-center rounded-md bg-brand-gold text-xl font-black text-brand-black">AD</span>
+                        <p class="mt-5 text-kicker font-black uppercase text-brand-goldDeep">Admin Authentication</p>
+                        <h1 class="mt-3 text-3xl font-black text-brand-dark">Đăng nhập quản trị</h1>
+                        <p class="mt-3 text-sm leading-6 text-brand-gray">Đây là lớp bảo vệ nền tảng cho dashboard và Branch CRUD.</p>
+                    </div>
+
+                    <form asp-area="Admin" asp-controller="Auth" asp-action="Login" method="post" class="mt-8 space-y-5">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="ReturnUrl" type="hidden" />
+
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div asp-validation-summary="ModelOnly" class="rounded-md border border-brand-red/30 bg-brand-red/5 p-4 text-sm text-brand-redDark"></div>
+                        }
+
+                        <label class="block">
+                            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Tên đăng nhập</span>
+                            <input asp-for="Username" class="input-field" autocomplete="username" />
+                            <span asp-validation-for="Username" class="mt-2 block text-sm text-brand-redDark"></span>
+                        </label>
+
+                        <label class="block">
+                            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Mật khẩu</span>
+                            <input asp-for="Password" class="input-field" autocomplete="current-password" />
+                            <span asp-validation-for="Password" class="mt-2 block text-sm text-brand-redDark"></span>
+                        </label>
+
+                        <label class="flex items-center gap-3 text-sm text-brand-gray">
+                            <input asp-for="RememberMe" class="h-4 w-4 rounded border-brand-border text-brand-goldDeep focus:ring-brand-gold" />
+                            <span>Ghi nhớ đăng nhập</span>
+                        </label>
+
+                        <button type="submit" class="btn-primary h-12 w-full">Đăng nhập</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var toasts = document.querySelectorAll('[data-toast]');
+            if (!toasts.length) {
+                return;
+            }
+
+            toasts.forEach(function (toast) {
+                window.setTimeout(function () {
+                    toast.classList.add('opacity-0', 'translate-y-2');
+                    window.setTimeout(function () {
+                        toast.remove();
+                    }, 300);
+                }, 4000);
+            });
+        })();
+    </script>
+</body>
+</html>

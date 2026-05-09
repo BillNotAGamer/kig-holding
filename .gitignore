@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+.tmp/
+node_modules/
+wwwroot/css/site.css.map
+*.user
+*.suo
+appsettings.Local.json
+App_Data/
+appsettings.Development.json
+appsettings.json
+Migrations/

@@ -1,0 +1,87 @@
+@model KIGHolding.Areas.Admin.ViewModels.ContactDetailViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết liên hệ";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel p-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div class="max-w-3xl">
+                <p class="text-kicker font-black uppercase text-brand-goldDeep">Contact Detail</p>
+                <h2 class="mt-2 text-2xl font-black text-brand-dark">@Model.FullName</h2>
+                <p class="mt-2 text-sm leading-6 text-brand-gray">Đọc nội dung đầy đủ của tin nhắn và cập nhật trạng thái xử lý của bộ phận chăm sóc khách hàng.</p>
+            </div>
+
+            <div class="rounded-md border border-brand-border bg-brand-light px-4 py-3 text-sm text-brand-gray">
+                <p class="font-semibold text-brand-dark">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                <p class="mt-1">@Model.Subject</p>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="mt-5 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                @successMessage
+            </div>
+        }
+
+        <div class="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.9fr]">
+            <div class="surface-panel border-brand-border bg-white p-6">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Full Name</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.FullName</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Phone</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.PhoneNumber</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Email</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@(string.IsNullOrWhiteSpace(Model.Email) ? "Không có" : Model.Email)</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Status</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@(Model.Status switch
+                        {
+                            ContactMessageStatus.New => "Mới",
+                            ContactMessageStatus.Read => "Đã đọc",
+                            ContactMessageStatus.Handled => "Đã xử lý",
+                            ContactMessageStatus.Archived => "Đã lưu trữ",
+                            _ => Model.Status.ToString()
+                        })</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Subject</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@(string.IsNullOrWhiteSpace(Model.Subject) ? "Không có" : Model.Subject)</p>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Message</p>
+                    <div class="mt-2 rounded-md border border-brand-border bg-brand-light p-4 text-sm leading-7 text-brand-dark whitespace-pre-line">
+                        @Model.Message
+                    </div>
+                </div>
+            </div>
+
+            <div class="surface-panel border-brand-border bg-white p-6">
+                <h3 class="text-lg font-black text-brand-dark">Cập nhật trạng thái</h3>
+
+                <form asp-action="UpdateStatus" method="post" class="mt-4 space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <div>
+                        <label asp-for="Status" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                        <select asp-for="Status" asp-items="Model.StatusOptions" class="form-input"></select>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full">Lưu thay đổi</button>
+                    <a asp-action="Index" class="btn-secondary w-full justify-center">Quay lại danh sách</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

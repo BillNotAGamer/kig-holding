@@ -1,0 +1,109 @@
+@model KIGHolding.Areas.Admin.ViewModels.ReservationDetailViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết đặt bàn";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel p-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div class="max-w-3xl">
+                <p class="text-kicker font-black uppercase text-brand-goldDeep">Reservation Detail</p>
+                <h2 class="mt-2 text-2xl font-black text-brand-dark">@Model.CustomerName</h2>
+                <p class="mt-2 text-sm leading-6 text-brand-gray">Cập nhật trạng thái, theo dõi thông tin đặt bàn và ghi chú nội bộ cho ca vận hành.</p>
+            </div>
+
+            <div class="rounded-md border border-brand-border bg-brand-light px-4 py-3 text-sm text-brand-gray">
+                <p class="font-semibold text-brand-dark">@Model.ReservationDate.ToString("dd/MM/yyyy") @Model.ReservationTime.ToString("HH:mm")</p>
+                <p class="mt-1">@Model.BranchName</p>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="mt-5 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                @successMessage
+            </div>
+        }
+
+        <div class="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.9fr]">
+            <div class="surface-panel border-brand-border bg-white p-6">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Customer Name</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.CustomerName</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Phone</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.PhoneNumber</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Email</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@(string.IsNullOrWhiteSpace(Model.Email) ? "Không có" : Model.Email)</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Guest Count</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.GuestCount</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Branch</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.BranchName</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Address</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.BranchAddress</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Created</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Updated</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@Model.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Status</p>
+                        <p class="mt-2 font-semibold text-brand-dark">@(Model.Status switch
+                        {
+                            ReservationStatus.Pending => "Chờ xác nhận",
+                            ReservationStatus.Confirmed => "Đã xác nhận",
+                            ReservationStatus.Arrived => "Đã đến",
+                            ReservationStatus.Cancelled => "Đã hủy",
+                            ReservationStatus.NoShow => "Không đến",
+                            _ => Model.Status.ToString()
+                        })</p>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Internal Note</p>
+                    <div class="mt-2 rounded-md border border-brand-border bg-brand-light p-4 text-sm leading-6 text-brand-dark">
+                        @(string.IsNullOrWhiteSpace(Model.Note) ? "Chưa có ghi chú nội bộ." : Model.Note)
+                    </div>
+                </div>
+            </div>
+
+            <div class="surface-panel border-brand-border bg-white p-6">
+                <h3 class="text-lg font-black text-brand-dark">Cập nhật trạng thái</h3>
+
+                <form asp-action="UpdateStatus" method="post" class="mt-4 space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <div>
+                        <label asp-for="Status" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                        <select asp-for="Status" asp-items="Model.StatusOptions" class="form-input"></select>
+                    </div>
+
+                    <div>
+                        <label asp-for="Note" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                        <textarea asp-for="Note" rows="6" class="form-input" placeholder="Ghi chú nội bộ cho bộ phận vận hành..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full">Lưu thay đổi</button>
+                    <a asp-action="Index" class="btn-secondary w-full justify-center">Quay lại danh sách</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

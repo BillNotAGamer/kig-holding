@@ -1,0 +1,74 @@
+@model KIGHolding.Areas.Admin.ViewModels.PostIndexViewModel
+
+@{
+    ViewData["Title"] = "Bài viết";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-kicker font-black uppercase text-brand-goldDeep">Posts</p>
+            <h2 class="mt-2 text-2xl font-black text-brand-dark">Bài viết</h2>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Quản lý nội dung tin tức, khuyến mãi và câu chuyện ẩm thực.</p>
+        </div>
+        <a asp-action="Create" class="btn-primary">Tạo bài viết mới</a>
+    </div>
+
+    <div class="overflow-hidden rounded-md border border-brand-border bg-white shadow-soft">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm text-brand-gray">
+                <thead class="border-b border-brand-border bg-brand-light text-xs uppercase text-brand-dark">
+                    <tr>
+                        <th class="px-6 py-4 font-semibold">Thumbnail</th>
+                        <th class="px-6 py-4 font-semibold">Title</th>
+                        <th class="px-6 py-4 font-semibold">Category</th>
+                        <th class="px-6 py-4 font-semibold">Published</th>
+                        <th class="px-6 py-4 font-semibold">Published At</th>
+                        <th class="px-6 py-4 font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brand-border">
+                    @foreach (var post in Model.Posts)
+                    {
+                        <tr class="align-top transition-colors hover:bg-brand-light/50">
+                            <td class="px-6 py-4">
+                                @if (!string.IsNullOrWhiteSpace(post.ThumbnailUrl))
+                                {
+                                    <img src="@post.ThumbnailUrl" alt="@post.Title" class="h-12 w-20 rounded-md border border-brand-border object-cover" />
+                                }
+                                else
+                                {
+                                    <div class="grid h-12 w-20 place-items-center rounded-md border border-brand-border bg-brand-light text-xs font-semibold text-brand-gray">No image</div>
+                                }
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-brand-dark">@post.Title</p>
+                            </td>
+                            <td class="px-6 py-4">@post.Category</td>
+                            <td class="px-6 py-4">
+                                @if (post.IsPublished)
+                                {
+                                    <span class="rounded-button border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Đã đăng</span>
+                                }
+                                else
+                                {
+                                    <span class="rounded-button border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Bản nháp</span>
+                                }
+                            </td>
+                            <td class="px-6 py-4">@((post.PublishedAt.HasValue) ? post.PublishedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "Chưa có")</td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-3">
+                                    <a asp-action="Edit" asp-route-id="@post.Id" class="font-semibold text-brand-goldDeep transition hover:text-brand-dark">Sửa</a>
+                                    <form asp-action="Delete" asp-route-id="@post.Id" method="post" class="inline" onsubmit="return confirm('Ẩn bài viết này khỏi website công khai?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="font-semibold text-brand-redDark transition hover:text-brand-red">Ẩn</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,157 @@
+@model BranchIndexViewModel
+
+@{
+    ViewData["Title"] = Model.SeoTitle;
+    ViewData["MetaDescription"] = Model.SeoDescription;
+
+    var allCitiesActive = string.IsNullOrWhiteSpace(Model.SelectedCity);
+    var canEmbedMap = !string.IsNullOrWhiteSpace(Model.MainMapUrl)
+        && Model.MainMapUrl.Contains("google.com/maps/embed", StringComparison.OrdinalIgnoreCase);
+}
+
+<section class="hero-frame" data-branch-page="index">
+    <div class="container-page section-shell">
+        <div class="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+            <div class="hero-card scroll-reveal">
+                <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
+                    Locations
+                </span>
+                <h1 class="mt-5 text-display font-black text-brand-dark sm:text-hero">Hệ thống chi nhánh</h1>
+                <p class="mt-5 text-lead text-brand-gray">
+                    Trang chi nhánh được tổ chức lại theo hướng rõ thông tin, giàu khoảng trắng và ưu tiên tra cứu như một website restaurant group hiện đại.
+                </p>
+            </div>
+            <div class="food-image-wrap min-h-[22rem] shadow-panel lg:min-h-[32rem]">
+                <img src="/images/placeholders/branch-hero.webp"
+                     alt="Không gian nhà hàng Truyền Thuyết Champong"
+                     class="food-image absolute inset-0"
+                     onerror="this.remove();" />
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (Model.ShouldShowCityFilter)
+{
+    <section class="section-shell pt-0 lg:pt-0">
+        <div class="container-page">
+            <div class="flex flex-wrap gap-2">
+                <a href="/chi-nhanh"
+                   class="btn-ghost @(allCitiesActive ? "!border-brand-gold !bg-brand-goldSoft/40 !text-brand-goldDeep" : string.Empty)"
+                   aria-current="@(allCitiesActive ? "page" : null)">
+                    Tất cả
+                </a>
+                @foreach (var city in Model.Cities)
+                {
+                    var isActive = string.Equals(city, Model.SelectedCity, StringComparison.OrdinalIgnoreCase);
+                    <a href="/chi-nhanh?city=@Uri.EscapeDataString(city)"
+                       class="btn-ghost @(isActive ? "!border-brand-gold !bg-brand-goldSoft/40 !text-brand-goldDeep" : string.Empty)"
+                       aria-current="@(isActive ? "page" : null)">
+                        @city
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+else if (Model.Cities.Count == 1)
+{
+    <section class="section-shell pt-0 lg:pt-0">
+        <div class="container-page">
+            <div class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-sm font-semibold text-brand-goldDeep">
+                @Model.Cities[0]
+            </div>
+        </div>
+    </section>
+}
+
+<section class="section-shell pt-0 lg:pt-0">
+    <div class="container-page">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Tìm chi nhánh",
+                Title = string.IsNullOrWhiteSpace(Model.SelectedCity) ? "Chọn điểm đến gần bạn." : $"Chi nhánh tại {Model.SelectedCity}",
+                Description = "Mỗi card chi nhánh được làm sáng và chuẩn hóa để phù hợp mở rộng về sau cho admin CRUD, ảnh và nội dung địa điểm."
+            }})
+            <a href="/dat-ban" class="btn-secondary">Đặt bàn nhanh</a>
+        </div>
+
+        @if (Model.Branches.Count > 0)
+        {
+            <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                @foreach (var branch in Model.Branches)
+                {
+                    @await Component.InvokeAsync("BranchCard", new { model = branch })
+                }
+            </div>
+        }
+        else
+        {
+            <div class="surface-panel mt-9 p-8 text-center">
+                <h2 class="text-2xl font-black text-brand-dark">Danh sách chi nhánh đang được cập nhật.</h2>
+                <p class="mx-auto mt-3 max-w-xl text-brand-gray">
+                    Khi dữ liệu PostgreSQL được kết nối, các chi nhánh đang hoạt động sẽ hiển thị tại đây.
+                </p>
+                <a href="/dat-ban" class="btn-primary mt-6">Đặt bàn nhanh</a>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-band section-shell">
+    <div class="container-page">
+        <div class="grid gap-8 lg:grid-cols-[0.42fr_0.58fr] lg:items-center">
+            <div>
+                @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+                {
+                    Eyebrow = "Bản đồ",
+                    Title = "Tìm đường đến nhà hàng.",
+                    Description = "Khối bản đồ được giữ sáng và gọn, bám theo cách một website hospitality trình bày thông tin vị trí."
+                }})
+                @if (!string.IsNullOrWhiteSpace(Model.MainMapUrl))
+                {
+                    <a href="@Model.MainMapUrl" target="_blank" rel="noopener" class="btn-primary mt-7">Mở Google Maps</a>
+                }
+            </div>
+
+            <div class="surface-panel overflow-hidden p-0">
+                @if (canEmbedMap)
+                {
+                    <iframe src="@Model.MainMapUrl"
+                            title="Bản đồ Truyền Thuyết Champong"
+                            class="h-[22rem] w-full border-0 sm:h-[28rem]"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            allowfullscreen></iframe>
+                }
+                else if (!string.IsNullOrWhiteSpace(Model.MainMapUrl))
+                {
+                    <div class="grid min-h-[22rem] place-items-center p-6 text-center sm:min-h-[28rem]">
+                        <div>
+                            <p class="text-kicker font-black uppercase text-brand-goldDeep">Google Maps</p>
+                            <h3 class="mt-3 text-3xl font-black text-brand-dark">Bản đồ đang mở bằng liên kết ngoài.</h3>
+                            <p class="mx-auto mt-3 max-w-lg text-brand-gray">
+                                Đường dẫn hiện tại không phải URL nhúng iframe, nên trang hiển thị nút mở Google Maps để tránh lỗi hiển thị.
+                            </p>
+                            <a href="@Model.MainMapUrl" target="_blank" rel="noopener" class="btn-secondary mt-6">Xem bản đồ</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="grid min-h-[22rem] place-items-center p-6 text-center sm:min-h-[28rem]">
+                        <div>
+                            <p class="text-kicker font-black uppercase text-brand-goldDeep">Đang cập nhật</p>
+                            <h3 class="mt-3 text-3xl font-black text-brand-dark">Bản đồ chi nhánh chưa có sẵn.</h3>
+                            <p class="mx-auto mt-3 max-w-lg text-brand-gray">
+                                Vui lòng gọi hotline hoặc dùng nút đặt bàn để được hỗ trợ chọn chi nhánh phù hợp.
+                            </p>
+                            <a href="/dat-ban" class="btn-primary mt-6">Đặt bàn</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

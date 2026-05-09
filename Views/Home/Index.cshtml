@@ -1,0 +1,422 @@
+@model HomeIndexViewModel
+
+@{
+    ViewData["Title"] = "Trang chủ";
+    ViewData["MetaDescription"] = "Truyền Thuyết Champong phục vụ mì Champong hải sản, món Hàn Quốc và trải nghiệm nhà hàng hiện đại theo chuẩn hospitality.";
+
+    var signatureItems = Model.SignatureMenuItems.Count > 0 ? Model.SignatureMenuItems : Model.FeaturedMenuItems;
+}
+
+<section class="hero-frame" data-home-section="hero">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(231,217,189,0.7),transparent_28rem),radial-gradient(circle_at_bottom_right,rgba(17,24,39,0.06),transparent_24rem)]"></div>
+    <div class="container-page section-shell relative">
+        <div class="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div class="hero-card reveal-up">
+                <p class="text-kicker font-black uppercase text-brand-red">KIG-inspired hospitality</p>
+                <h1 class="mt-4 text-4xl font-black leading-tight text-brand-dark sm:text-6xl">
+                    @Model.BrandName
+                </h1>
+                <p class="mt-5 max-w-2xl text-lead text-brand-gray">
+                    Không gian dùng bữa hiện đại, thực đơn Hàn Quốc chỉn chu và trải nghiệm phục vụ được thiết kế như một thương hiệu nhà hàng cao cấp.
+                </p>
+
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <a href="/dat-ban" class="btn-primary">Đặt bàn</a>
+                    <a href="/thuc-don" class="btn-secondary">Xem thực đơn</a>
+                </div>
+
+                <div class="mt-8 grid gap-3 sm:grid-cols-3">
+                    <div class="stat-card">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">Hotline</p>
+                        <p class="mt-2 text-lg font-black text-brand-dark">@Model.Hotline</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">Giờ mở cửa</p>
+                        <p class="mt-2 text-lg font-black text-brand-dark">@Model.OpeningHours</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">Hệ thống</p>
+                        <p class="mt-2 text-lg font-black text-brand-dark">@Model.BranchHint</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <figure class="food-image-wrap min-h-[22rem] shadow-panel sm:col-span-2 lg:min-h-[28rem]">
+                    <img src="/images/placeholders/champong-hero.webp"
+                         alt="Món ăn signature tại Truyền Thuyết Champong"
+                         class="food-image absolute inset-0"
+                         onerror="this.remove();" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-brand-black/45 via-brand-black/10 to-transparent"></div>
+                    <figcaption class="absolute bottom-6 left-6 right-6 z-20 rounded-md bg-white/92 p-4 shadow-soft backdrop-blur">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-red">Editorial dining story</p>
+                        <p class="mt-2 text-2xl font-black text-brand-dark">Ẩm thực Hàn Quốc được kể bằng hình ảnh, khoảng trắng và trải nghiệm tại bàn.</p>
+                    </figcaption>
+                </figure>
+                <figure class="food-image-wrap min-h-[14rem] shadow-soft">
+                    <img src="/images/placeholders/combo-table.webp"
+                         alt="Combo dành cho nhóm"
+                         class="food-image absolute inset-0"
+                         loading="lazy"
+                         onerror="this.remove();" />
+                </figure>
+                <figure class="food-image-wrap min-h-[14rem] shadow-soft">
+                    <img src="/images/placeholders/korean-chef-noodle.webp"
+                         alt="Đầu bếp chuẩn bị món ăn"
+                         class="food-image absolute inset-0"
+                         loading="lazy"
+                         onerror="this.remove();" />
+                </figure>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell bg-[#111] py-20" data-home-section="brand-story">
+    <div class="container-page space-y-20">
+        
+        <!-- Row 1: Image Left, Text Right -->
+        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <div class="reveal-right order-1 lg:order-1">
+                <div class="food-image-wrap aspect-[4/3] shadow-panel overflow-hidden rounded-xl border border-white/10">
+                    <img src="/images/placeholders/korean-chef-noodle.webp"
+                         alt="Đầu bếp chuẩn bị món ăn Hàn Quốc"
+                         class="food-image absolute inset-0 h-full w-full object-cover"
+                         loading="lazy"
+                         onerror="this.remove();" />
+                </div>
+            </div>
+            
+            <div class="order-2 lg:order-2 reveal-up delay-100">
+                <h2 class="text-4xl font-black text-brand-red uppercase tracking-wide">Truyền Thuyết Champong</h2>
+                <p class="mt-4 text-lead text-white/80">
+                    Từ món ăn quen thuộc đến trải nghiệm nhà hàng chỉn chu hơn. Hình ảnh sáng, không gian thoáng, cấu trúc nội dung rõ ràng và món ăn là trung tâm của câu chuyện.
+                </p>
+                
+                <div class="mt-8 grid gap-6 sm:grid-cols-2">
+                    <div class="reveal-up delay-100">
+                        <svg class="size-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path>
+                        </svg>
+                        <h3 class="mt-3 text-lg font-black text-brand-red">Ẩm thực chuẩn vị</h3>
+                        <p class="mt-2 text-sm leading-6 text-white/60">Món mì, món nướng và các lựa chọn dùng chung được trình bày rõ ràng, dễ chọn.</p>
+                    </div>
+                    <div class="reveal-up delay-200">
+                        <svg class="size-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                        <h3 class="mt-3 text-lg font-black text-brand-red">Không gian tiếp khách</h3>
+                        <p class="mt-2 text-sm leading-6 text-white/60">Thiết kế phù hợp cho bữa ăn gia đình, đối tác hoặc các dịp gặp gỡ cuối tuần.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Text Left, Image Right -->
+        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <div class="order-2 lg:order-1 reveal-up delay-100">
+                <h2 class="text-4xl font-black text-brand-red uppercase tracking-wide">GOGIMARU</h2>
+                <p class="mt-4 text-lead text-white/80">
+                    Trải nghiệm thịt nướng Hàn Quốc đỉnh cao với hệ thống vận hành chuyên nghiệp, giữ vững sự đồng bộ trên toàn quốc.
+                </p>
+                
+                <div class="mt-8 grid gap-6 sm:grid-cols-2">
+                    <div class="reveal-up delay-100">
+                        <svg class="size-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <h3 class="mt-3 text-lg font-black text-brand-red">Hương vị nguyên bản</h3>
+                        <p class="mt-2 text-sm leading-6 text-white/60">Thịt nướng tươi ngon được tẩm ướp tinh tế, ăn kèm các loại banchan chuẩn Hàn.</p>
+                    </div>
+                    <div class="reveal-up delay-200">
+                        <svg class="size-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <h3 class="mt-3 text-lg font-black text-brand-red">Vận hành hệ thống</h3>
+                        <p class="mt-2 text-sm leading-6 text-white/60">Mỗi chi nhánh được tổ chức để giữ trải nghiệm đồng bộ trên toàn bộ website và vận hành sau này.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reveal-left order-1 lg:order-2">
+                <div class="food-image-wrap aspect-[4/3] shadow-panel overflow-hidden rounded-xl border border-white/10">
+                    <img src="/images/placeholders/korean-bbq.webp"
+                         alt="Món nướng Hàn Quốc"
+                         class="food-image absolute inset-0 h-full w-full object-cover"
+                         loading="lazy"
+                         onerror="this.remove();" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section class="py-20 bg-white section-shell" data-home-section="menu-ecosystem">
+    <div class="container-page">
+        <div class="text-center reveal-up">
+            <h2 class="text-brand-red uppercase tracking-wide font-bold text-4xl">THỰC ĐƠN</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-gray-600 font-medium text-lg">
+                Từ mì Champong cay nồng trứ danh đến các món BBQ nướng hấp dẫn. Nguyên liệu chọn lọc kỹ lưỡng - hương vị đồng bộ.
+            </p>
+        </div>
+
+        <div class="mt-16 space-y-12">
+            <!-- Card 1: Champong -->
+            <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden group">
+                <div class="lg:w-1/2 reveal-left">
+                    <div class="food-image-wrap h-64 lg:h-full w-full">
+                        <img src="/images/placeholders/champong-hero.webp" alt="Menu Mì Champong" class="food-image absolute inset-0 object-cover w-full h-full" loading="lazy" onerror="this.remove();" />
+                    </div>
+                </div>
+                <div class="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center reveal-right">
+                    <h3 class="text-3xl font-bold text-gray-900 uppercase tracking-wide">Mì Champong</h3>
+                    <p class="mt-4 text-gray-600 font-medium leading-relaxed">
+                        Món mì quốc dân của Hàn Quốc với nước dùng hải sản đậm đà, sợi mì dai ngon và vị cay đặc trưng. Một trải nghiệm bùng nổ hương vị không thể bỏ lỡ.
+                    </p>
+                    <div class="mt-8">
+                        <a href="/thuc-don?category=champong" class="inline-block border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white transition-colors rounded-button px-6 py-2 font-semibold uppercase tracking-wide text-sm">
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: BBQ -->
+            <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden group">
+                <div class="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center reveal-left order-2 lg:order-1">
+                    <h3 class="text-3xl font-bold text-gray-900 uppercase tracking-wide">Premium BBQ</h3>
+                    <p class="mt-4 text-gray-600 font-medium leading-relaxed">
+                        Thịt nướng thượng hạng được tẩm ướp công phu. Cùng hệ thống bếp nướng không khói hiện đại, mang đến bữa ăn chuẩn vị Hàn Quốc trọn vẹn nhất.
+                    </p>
+                    <div class="mt-8">
+                        <a href="/thuc-don?category=bbq" class="inline-block border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white transition-colors rounded-button px-6 py-2 font-semibold uppercase tracking-wide text-sm">
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 reveal-right order-1 lg:order-2">
+                    <div class="food-image-wrap h-64 lg:h-full w-full">
+                        <img src="/images/placeholders/korean-bbq.webp" alt="Menu BBQ" class="food-image absolute inset-0 object-cover w-full h-full" loading="lazy" onerror="this.remove();" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Combo / Nhóm -->
+            <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden group">
+                <div class="lg:w-1/2 reveal-left">
+                    <div class="food-image-wrap h-64 lg:h-full w-full">
+                        <img src="/images/placeholders/combo-table.webp" alt="Menu Combo" class="food-image absolute inset-0 object-cover w-full h-full" loading="lazy" onerror="this.remove();" />
+                    </div>
+                </div>
+                <div class="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center reveal-right">
+                    <h3 class="text-3xl font-bold text-gray-900 uppercase tracking-wide">Combo Nhóm</h3>
+                    <p class="mt-4 text-gray-600 font-medium leading-relaxed">
+                        Thiết kế dành riêng cho gia đình và nhóm bạn. Cân bằng hoàn hảo giữa món nướng, lẩu và món ăn kèm, giúp việc chọn món trở nên dễ dàng hơn bao giờ hết.
+                    </p>
+                    <div class="mt-8">
+                        <a href="/thuc-don?category=combo" class="inline-block border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white transition-colors rounded-button px-6 py-2 font-semibold uppercase tracking-wide text-sm">
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-band section-shell" data-home-section="experience">
+    <div class="container-page">
+        @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+        {
+            Eyebrow = "Restaurant experience",
+            Title = "Thiết kế cho một nhịp dùng bữa tinh gọn hơn.",
+            Description = "Các khối nội dung được giãn rộng, cân bằng văn bản và hình ảnh theo cách gần hơn với một corporate hospitality website."
+        }})
+
+        <div class="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            @foreach (var experience in new[]
+            {
+                ("Không gian tiếp khách", "Bố cục và nội dung phù hợp cho nhà hàng hệ thống, tiếp cận khách gia đình lẫn doanh nghiệp."),
+                ("Hình ảnh dẫn dắt", "Mỗi cụm nội dung đều được neo bằng hình ảnh món ăn hoặc chi nhánh thay vì nền tối đặc nặng."),
+                ("Điều hướng sạch", "Header được giữ tối và tối giản để làm khung cho phần nội dung sáng phía dưới."),
+                ("Mở rộng quản trị", "Các section đang được giữ cấu trúc rõ để phục vụ CRUD chi nhánh, ảnh và bài viết về sau.")
+            })
+            {
+                <div class="surface-panel p-6">
+                    <div class="mb-5 h-10 w-10 rounded-md bg-brand-red/10"></div>
+                    <h3 class="text-xl font-black text-brand-dark">@experience.Item1</h3>
+                    <p class="mt-3 text-sm leading-6 text-brand-gray">@experience.Item2</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell" data-home-section="branch-finder">
+    <div class="container-page">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Branch system",
+                Title = "Chọn chi nhánh phù hợp cho bữa ăn kế tiếp.",
+                Description = "Danh sách chi nhánh được trình bày như một hệ thống nhà hàng hiện đại, giúp người dùng tra cứu nhanh vị trí và thông tin vận hành."
+            }})
+            <a href="/chi-nhanh" class="btn-secondary">Xem tất cả chi nhánh</a>
+        </div>
+
+        @if (Model.Branches.Count > 0)
+        {
+            <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                @foreach (var branch in Model.Branches)
+                {
+                    @await Component.InvokeAsync("BranchCard", new { model = branch })
+                }
+            </div>
+        }
+        else
+        {
+            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
+                Danh sách chi nhánh sẽ hiển thị sau khi có dữ liệu từ PostgreSQL.
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-band section-shell" data-home-section="booking">
+    <div class="container-page grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+        <div>
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Đặt bàn",
+                Title = "Một khu vực booking nhẹ, rõ và dễ mở rộng.",
+                Description = "Form mini được đặt trên nền trắng để thuận tiện nâng cấp sang luồng đặt bàn đầy đủ hoặc tích hợp dashboard quản trị sau này."
+            }})
+            <div class="mt-6 flex flex-wrap gap-3 text-sm text-brand-gray">
+                <span class="rounded-button border border-brand-border bg-white px-4 py-2">Gia đình</span>
+                <span class="rounded-button border border-brand-border bg-white px-4 py-2">Tiếp khách</span>
+                <span class="rounded-button border border-brand-border bg-white px-4 py-2">Nhóm bạn</span>
+            </div>
+        </div>
+        @await Html.PartialAsync("~/Views/Shared/Components/BookingMiniForm/Default.cshtml", Model.ReservationForm)
+    </div>
+</section>
+
+<section class="section-shell" data-home-section="reviews">
+    <div class="container-page">
+        @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+        {
+            Eyebrow = "Guest feedback",
+            Title = "Cảm nhận khách hàng trong một giao diện thoáng và sáng.",
+            Description = "Nhóm đánh giá được chuyển sang card trắng để tăng độ đọc và giảm cảm giác landing page nặng nề của giao diện cũ."
+        }})
+
+        @if (Model.Reviews.Count > 0)
+        {
+            <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                @foreach (var review in Model.Reviews)
+                {
+                    <article class="surface-panel p-6">
+                        <div class="flex items-center gap-4">
+                            @if (!string.IsNullOrWhiteSpace(review.AvatarUrl))
+                            {
+                                <img src="@review.AvatarUrl" alt="@review.CustomerName" class="size-12 rounded-md object-cover" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="grid size-12 place-items-center rounded-md bg-brand-red/10 text-lg font-black text-brand-dark">
+                                    @GetInitial(review.CustomerName)
+                                </div>
+                            }
+                            <div>
+                                <h3 class="font-black text-brand-dark">@review.CustomerName</h3>
+                                @if (!string.IsNullOrWhiteSpace(review.BranchName))
+                                {
+                                    <p class="text-xs text-brand-gray">@review.BranchName</p>
+                                }
+                            </div>
+                        </div>
+                        <div class="mt-5 flex gap-1 text-brand-red" aria-label="@review.Rating sao">
+                            @for (var star = 1; star <= 5; star++)
+                            {
+                                <span>@(star <= review.Rating ? "★" : "☆")</span>
+                            }
+                        </div>
+                        <p class="mt-4 text-sm leading-7 text-brand-gray">@review.Content</p>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
+                Đánh giá khách hàng sẽ hiển thị sau khi dữ liệu review được seed.
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-band section-shell" data-home-section="news">
+    <div class="container-page">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "News & stories",
+                Title = "Cập nhật từ hệ thống nhà hàng.",
+                Description = "Bài viết, khai trương chi nhánh và câu chuyện thương hiệu được trình bày như một hệ sinh thái nội dung có cấu trúc."
+            }})
+            <a href="/tin-tuc" class="btn-secondary">Xem tất cả</a>
+        </div>
+
+        @if (Model.LatestPosts.Count > 0)
+        {
+            <div class="mt-9 grid gap-5 md:grid-cols-3">
+                @foreach (var post in Model.LatestPosts.Take(3))
+                {
+                    @await Component.InvokeAsync("PostCard", new { model = post })
+                }
+            </div>
+        }
+        else
+        {
+            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
+                Tin tức và bài viết sẽ hiển thị sau khi có bài viết đã xuất bản.
+            </div>
+        }
+    </div>
+</section>
+
+@functions {
+    private static string GetMenuFilterKey(FoodCardViewModel item)
+    {
+        var source = $"{item.CategoryName} {item.Name} {item.Slug}";
+
+        if (source.Contains("champong", StringComparison.OrdinalIgnoreCase))
+        {
+            return "champong";
+        }
+
+        if (source.Contains("bbq", StringComparison.OrdinalIgnoreCase))
+        {
+            return "bbq";
+        }
+
+        if (source.Contains("combo", StringComparison.OrdinalIgnoreCase))
+        {
+            return "combo";
+        }
+
+        if (source.Contains("lau", StringComparison.OrdinalIgnoreCase) || source.Contains("lẩu", StringComparison.OrdinalIgnoreCase))
+        {
+            return "lau";
+        }
+
+        return "all";
+    }
+
+    private static string GetInitial(string name)
+    {
+        return string.IsNullOrWhiteSpace(name) ? "?" : name.Trim()[0].ToString().ToUpperInvariant();
+    }
+}

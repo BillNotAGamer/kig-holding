@@ -1,0 +1,31 @@
+@model ErrorViewModel
+
+@{
+    ViewData["Title"] = "Có lỗi xảy ra";
+    ViewData["MetaDescription"] = "Truyền Thuyết Champong đang gặp lỗi xử lý yêu cầu. Vui lòng thử lại sau.";
+    ViewData["OgType"] = "website";
+}
+
+<section class="hero-frame" data-error-page="generic">
+    <div class="container-page section-shell grid min-h-[calc(100svh-5rem)] place-items-center text-center">
+        <div class="surface-panel max-w-2xl p-6 sm:p-9">
+            <p class="text-kicker font-black uppercase text-brand-goldDeep">System</p>
+            <h1 class="mt-4 text-4xl font-black text-brand-dark sm:text-display">Có lỗi xảy ra.</h1>
+            <p class="mx-auto mt-5 max-w-xl text-brand-gray">
+                Hệ thống chưa thể xử lý yêu cầu hiện tại. Vui lòng thử lại hoặc gọi hotline nếu bạn cần đặt bàn gấp.
+            </p>
+
+            @if (Model.ShowRequestId)
+            {
+                <p class="mt-5 rounded-md border border-brand-border bg-brand-light px-4 py-3 text-xs text-brand-gray">
+                    Mã tham chiếu: <code>@Model.RequestId</code>
+                </p>
+            }
+
+            <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                <a href="/" class="btn-primary">Về trang chủ</a>
+                <a href="/lien-he" class="btn-secondary">Liên hệ hỗ trợ</a>
+            </div>
+        </div>
+    </div>
+</section>

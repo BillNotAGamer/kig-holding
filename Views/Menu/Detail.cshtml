@@ -1,0 +1,178 @@
+@model MenuDetailViewModel
+
+@{
+    ViewData["Title"] = Model.SeoTitle;
+    ViewData["MetaDescription"] = Model.SeoDescription;
+
+    var item = Model.MenuItem;
+    var category = Model.Category;
+    var primaryImage = Model.GalleryImages.FirstOrDefault()?.ImageUrl;
+    var primaryAlt = Model.GalleryImages.FirstOrDefault()?.AltText ?? item.Name;
+
+    if (string.IsNullOrWhiteSpace(primaryImage))
+    {
+        primaryImage = string.IsNullOrWhiteSpace(item.ThumbnailUrl) ? "/images/placeholders/food-card.webp" : item.ThumbnailUrl;
+    }
+
+    ViewData["OgImage"] = primaryImage;
+    ViewData["OgType"] = "article";
+}
+
+<section class="section-shell pb-10 lg:pb-14" data-menu-page="detail">
+    <div class="container-page">
+        <div class="mb-6 flex flex-wrap items-center gap-3 text-sm text-brand-gray">
+            <a href="/thuc-don" class="transition hover:text-brand-goldDeep">Thực đơn</a>
+            <span>/</span>
+            <a href="/thuc-don?category=@category.Slug" class="transition hover:text-brand-goldDeep">@category.Name</a>
+        </div>
+
+        <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+            <div class="scroll-reveal">
+                <div class="food-image-wrap aspect-[4/3] shadow-panel">
+                    <img src="@primaryImage"
+                         alt="@primaryAlt"
+                         class="food-image absolute inset-0"
+                         onerror="this.remove();" />
+                </div>
+
+                @if (Model.GalleryImages.Count > 1)
+                {
+                    <div class="mt-4 grid grid-cols-4 gap-3">
+                        @foreach (var image in Model.GalleryImages.Take(4))
+                        {
+                            <div class="food-image-wrap aspect-square border border-brand-border">
+                                <img src="@image.ImageUrl"
+                                     alt="@image.AltText"
+                                     class="food-image absolute inset-0"
+                                     loading="lazy"
+                                     onerror="this.remove();" />
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <article class="scroll-reveal surface-panel p-6 sm:p-8">
+                <div class="flex flex-wrap gap-2">
+                    <span class="rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-goldDeep">@category.Name</span>
+                    @if (item.SpicyLevel > 0)
+                    {
+                        <span class="rounded-button bg-brand-black px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Cay @item.SpicyLevel/5</span>
+                    }
+                    @if (item.IsBestSeller)
+                    {
+                        <span class="rounded-button bg-brand-goldSoft px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-dark">Best seller</span>
+                    }
+                    @if (item.IsNew)
+                    {
+                        <span class="rounded-button bg-brand-gold px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-black">Món mới</span>
+                    }
+                    @if (item.IsCombo)
+                    {
+                        <span class="rounded-button border border-brand-border bg-brand-white px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-dark">Combo</span>
+                    }
+                </div>
+
+                <h1 class="mt-5 text-4xl font-black text-brand-dark sm:text-display">@item.Name</h1>
+                @if (!string.IsNullOrWhiteSpace(item.KoreanName))
+                {
+                    <p class="mt-2 text-lg text-brand-gray">@item.KoreanName</p>
+                }
+
+                <p class="mt-5 text-lead text-brand-gray">@item.ShortDescription</p>
+
+                <div class="mt-7 flex flex-wrap items-end gap-4">
+                    <span class="text-4xl font-black text-brand-goldDeep">@item.Price.ToString("N0")đ</span>
+                    @if (item.OriginalPrice.HasValue)
+                    {
+                        <span class="pb-1 text-base text-brand-gray line-through">@item.OriginalPrice.Value.ToString("N0")đ</span>
+                    }
+                </div>
+
+                <div class="mt-7 grid gap-3 sm:grid-cols-3">
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Độ cay</p>
+                        <div class="mt-3 flex gap-1" aria-label="Mức cay @item.SpicyLevel trên 5">
+                            @for (var i = 1; i <= 5; i++)
+                            {
+                                <span class="size-2.5 rounded-full @(i <= item.SpicyLevel ? "bg-brand-goldDeep" : "bg-brand-border")"></span>
+                            }
+                        </div>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Khẩu phần</p>
+                        <p class="mt-2 font-bold text-brand-dark">@(string.IsNullOrWhiteSpace(item.ServingSize) ? "Tại bàn" : item.ServingSize)</p>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Calories</p>
+                        <p class="mt-2 font-bold text-brand-dark">@(item.Calories.HasValue ? $"{item.Calories:N0} kcal" : "Đang cập nhật")</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <a href="/dat-ban" class="btn-primary">Đặt bàn ngay</a>
+                    <a href="/thuc-don" class="btn-secondary">Quay lại thực đơn</a>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section-band section-shell">
+    <div class="container-page">
+        @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+        {
+            Eyebrow = "Hương vị",
+            Title = "Chi tiết món ăn",
+            Description = "Nội dung mô tả món được đặt trong khối trắng tối giản để tăng khả năng đọc trên màn hình và thuận tiện mở rộng sau này."
+        }})
+
+        <div class="surface-panel mt-8 p-6 sm:p-8">
+            <p class="whitespace-pre-line text-base leading-8 text-brand-gray">@item.Description</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container-page">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Gợi ý thêm",
+                Title = "Món nên thử cùng",
+                Description = $"Các món cùng nhóm {category.Name} để bữa ăn cân bằng hơn."
+            }})
+            <a href="/thuc-don?category=@category.Slug" class="btn-secondary">Xem nhóm món</a>
+        </div>
+
+        @if (Model.RelatedItems.Count > 0)
+        {
+            <div class="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                @foreach (var relatedItem in Model.RelatedItems)
+                {
+                    @await Component.InvokeAsync("FoodCard", new { model = relatedItem })
+                }
+            </div>
+        }
+        else
+        {
+            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
+                Gợi ý cùng danh mục đang được cập nhật.
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-shell pt-0 lg:pt-0">
+    <div class="container-page">
+        <div class="surface-panel p-6 sm:p-8">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <p class="text-kicker font-black uppercase text-brand-goldDeep">Tại bàn là ngon nhất</p>
+                    <h2 class="mt-3 text-2xl font-black text-brand-dark sm:text-3xl">Món ngon nhất khi thưởng thức tại bàn cùng bạn bè.</h2>
+                </div>
+                <a href="/dat-ban" class="btn-primary shrink-0">Giữ bàn ngay</a>
+            </div>
+        </div>
+    </div>
+</section>

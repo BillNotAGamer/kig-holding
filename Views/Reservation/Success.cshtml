@@ -1,0 +1,53 @@
+@model ReservationSuccessViewModel
+
+@{
+    ViewData["Title"] = "Đặt bàn thành công";
+    ViewData["MetaDescription"] = "Thông tin đặt bàn của bạn đã được ghi nhận tại Truyền Thuyết Champong.";
+}
+
+<section class="hero-frame" data-reservation-page="success">
+    <div class="container-page section-shell">
+        <div class="mx-auto w-full max-w-4xl">
+            <div class="surface-panel scroll-reveal p-6 text-center sm:p-9">
+                <span class="mx-auto grid size-14 place-items-center rounded-md bg-brand-goldSoft text-2xl font-black text-brand-dark">✓</span>
+                <p class="mt-6 text-kicker font-black uppercase text-brand-goldDeep">Đã ghi nhận</p>
+                <h1 class="mt-3 text-4xl font-black text-brand-dark sm:text-display">Cảm ơn bạn đã đặt bàn.</h1>
+                <p class="mx-auto mt-4 max-w-2xl text-brand-gray">
+                    Thông tin đặt bàn đã được lưu với trạng thái chờ xác nhận. Nhà hàng sẽ liên hệ nếu cần bổ sung thông tin.
+                </p>
+
+                <div class="mt-8 grid gap-3 text-left sm:grid-cols-2">
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Khách hàng</p>
+                        <p class="mt-2 font-black text-brand-dark">@Model.CustomerName</p>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Chi nhánh</p>
+                        <p class="mt-2 font-black text-brand-dark">@Model.BranchName</p>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Ngày đến</p>
+                        <p class="mt-2 font-black text-brand-dark">@Model.ReservationDate.ToString("dd/MM/yyyy")</p>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Giờ đến</p>
+                        <p class="mt-2 font-black text-brand-dark">@Model.ReservationTime.ToString("HH:mm")</p>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Số khách</p>
+                        <p class="mt-2 font-black text-brand-dark">@Model.GuestCount khách</p>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Hotline</p>
+                        <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="mt-2 block font-black text-brand-goldDeep">@Model.Hotline</a>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                    <a href="/" class="btn-primary">Về trang chủ</a>
+                    <a href="/thuc-don" class="btn-secondary">Xem thực đơn</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,162 @@
+@model MenuIndexViewModel
+
+@{
+    ViewData["Title"] = Model.SeoTitle;
+    ViewData["MetaDescription"] = Model.SeoDescription;
+
+    var allCategoriesActive = string.IsNullOrWhiteSpace(Model.SelectedCategorySlug);
+}
+
+<section class="hero-frame" data-menu-page="index">
+    <div class="container-page section-shell">
+        <div class="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+            <div class="hero-card scroll-reveal">
+                <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
+                    Menu
+                </span>
+                <h1 class="mt-5 text-display font-black text-brand-dark sm:text-hero">
+                    Thực đơn Truyền Thuyết Champong
+                </h1>
+                <p class="mt-5 text-lead text-brand-gray">
+                    Cấu trúc thực đơn được làm sáng và rõ hơn để phù hợp một website restaurant group: dễ lọc, dễ đọc và dễ mở rộng cho vận hành nội dung sau này.
+                </p>
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <a href="/dat-ban" class="btn-primary">Đặt bàn</a>
+                    <a href="/chi-nhanh" class="btn-secondary">Xem chi nhánh</a>
+                </div>
+            </div>
+
+            <div class="food-image-wrap min-h-[22rem] shadow-panel lg:min-h-[32rem]">
+                <img src="/images/placeholders/menu-hero.webp"
+                     alt="Thực đơn Truyền Thuyết Champong"
+                     class="food-image absolute inset-0"
+                     onerror="this.remove();" />
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-black/35 via-transparent to-transparent"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0 lg:pt-0">
+    <div class="container-page">
+        <div class="flex flex-wrap gap-2">
+            <a href="/thuc-don"
+               class="btn-ghost @(allCategoriesActive ? "!border-brand-gold !bg-brand-goldSoft/40 !text-brand-goldDeep" : string.Empty)"
+               aria-current="@(allCategoriesActive ? "page" : null)">
+                Tất cả
+            </a>
+            @foreach (var category in Model.Categories)
+            {
+                <a href="/thuc-don?category=@category.Slug"
+                   class="btn-ghost @(category.IsActive ? "!border-brand-gold !bg-brand-goldSoft/40 !text-brand-goldDeep" : string.Empty)"
+                   aria-current="@(category.IsActive ? "page" : null)">
+                    @category.Name
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0 lg:pt-0">
+    <div class="container-page">
+        @if (Model.FeaturedItem is not null)
+        {
+            <article class="surface-panel overflow-hidden p-0">
+                <div class="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
+                    <a href="@Model.FeaturedItem.Url" class="food-image-wrap min-h-[19rem] lg:min-h-[25rem]" aria-label="@Model.FeaturedItem.Name">
+                        <img src="@Model.FeaturedItem.ImageUrl"
+                             alt="@Model.FeaturedItem.Name"
+                             class="food-image absolute inset-0"
+                             loading="lazy"
+                             onerror="this.remove();" />
+                    </a>
+                    <div class="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
+                        <p class="text-kicker font-black uppercase text-brand-goldDeep">Món nổi bật</p>
+                        <h2 class="mt-3 text-3xl font-black text-brand-dark sm:text-4xl">@Model.FeaturedItem.Name</h2>
+                        @if (!string.IsNullOrWhiteSpace(Model.FeaturedItem.KoreanName))
+                        {
+                            <p class="mt-2 text-brand-gray">@Model.FeaturedItem.KoreanName</p>
+                        }
+                        <p class="mt-5 max-w-xl leading-7 text-brand-gray">@Model.FeaturedItem.ShortDescription</p>
+                        <div class="mt-6 flex flex-wrap items-center gap-4">
+                            <span class="text-3xl font-black text-brand-goldDeep">@Model.FeaturedItem.Price.ToString("N0")đ</span>
+                            @if (Model.FeaturedItem.OriginalPrice.HasValue)
+                            {
+                                <span class="text-sm text-brand-gray line-through">@Model.FeaturedItem.OriginalPrice.Value.ToString("N0")đ</span>
+                            }
+                        </div>
+                        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                            <a href="@Model.FeaturedItem.Url" class="btn-primary">Xem chi tiết</a>
+                            <a href="/dat-ban" class="btn-secondary">Đặt bàn</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        }
+        else
+        {
+            <div class="surface-panel p-8">
+                <p class="text-kicker font-black uppercase text-brand-goldDeep">Món nổi bật</p>
+                <h2 class="mt-3 text-2xl font-black text-brand-dark">Thực đơn đang được cập nhật.</h2>
+                <p class="mt-3 max-w-2xl text-brand-gray">Khi seed data và PostgreSQL được kết nối, khu vực này sẽ tự động hiển thị món signature hoặc best seller.</p>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-band section-shell" data-menu-page="grid">
+    <div class="container-page">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Chọn món",
+                Title = Model.PageTitle,
+                Description = "Phần nội dung chính đã được chuyển hoàn toàn sang nền sáng, card trắng và khoảng trắng rộng hơn để phù hợp ngôn ngữ KIG Holding."
+            }})
+            <a href="/dat-ban" class="btn-secondary">Giữ bàn trước</a>
+        </div>
+
+        @if (Model.MenuItems.Count > 0)
+        {
+            <div class="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach (var item in Model.MenuItems)
+                {
+                    @await Component.InvokeAsync("FoodCard", new { model = item })
+                }
+            </div>
+        }
+        else
+        {
+            <div class="surface-panel mt-9 p-8 text-center">
+                <h2 class="text-2xl font-black text-brand-dark">Danh mục này đang được cập nhật.</h2>
+                <p class="mx-auto mt-3 max-w-xl text-brand-gray">Các món mới sẽ hiển thị sau khi dữ liệu được cập nhật. Bạn có thể quay lại toàn bộ thực đơn để xem thêm lựa chọn.</p>
+                <a href="/thuc-don" class="btn-primary mt-6">Xem tất cả món</a>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container-page">
+        <div class="surface-panel overflow-hidden p-0">
+            <div class="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
+                <div class="p-6 sm:p-8 lg:p-10">
+                    <p class="text-kicker font-black uppercase text-brand-goldDeep">Đặt bàn</p>
+                    <h2 class="mt-3 text-3xl font-black text-brand-dark">Đã chọn được món? Giữ bàn ngay để hành trình dùng bữa liền mạch hơn.</h2>
+                    <p class="mt-4 max-w-2xl leading-7 text-brand-gray">Khối CTA đã được giảm độ gắt, dùng nền sáng và chữ đậm để giữ cảm giác cao cấp thay vì landing page bán hàng.</p>
+                    <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                        <a href="/dat-ban" class="btn-primary">Đặt bàn ngay</a>
+                        <a href="/chi-nhanh" class="btn-secondary">Chọn chi nhánh</a>
+                    </div>
+                </div>
+                <div class="food-image-wrap min-h-[18rem]">
+                    <img src="/images/placeholders/booking-table.webp"
+                         alt="Bàn ăn tại nhà hàng"
+                         class="food-image absolute inset-0"
+                         loading="lazy"
+                         onerror="this.remove();" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

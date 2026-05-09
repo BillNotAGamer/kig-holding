@@ -1,0 +1,140 @@
+@model KIGHolding.Areas.Admin.ViewModels.BranchCreateViewModel
+
+@{
+    ViewData["Title"] = "Tạo Chi nhánh";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-kicker font-black uppercase text-brand-goldDeep">Create branch</p>
+            <h2 class="mt-2 text-2xl font-black text-brand-dark">Thêm chi nhánh mới</h2>
+        </div>
+        <a href="@Url.Action("Index")" class="btn-secondary">Quay lại danh sách</a>
+    </div>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="surface-panel p-6 sm:p-8">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-6 rounded-md border border-brand-red/30 bg-brand-red/5 p-4 text-sm font-semibold text-brand-redDark"></div>
+
+        <div class="grid gap-6 lg:grid-cols-2">
+            <div class="space-y-5">
+                <div>
+                    <label asp-for="Name" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                    <input asp-for="Name" class="input-field" />
+                    <span asp-validation-for="Name" class="mt-2 block text-sm text-brand-redDark"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Slug" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                    <input asp-for="Slug" class="input-field" placeholder="De trống để tự sinh từ tên chi nhánh" />
+                    <p class="mt-2 text-xs text-brand-gray">Có thể nhập thủ công hoặc để trống để hệ thống tự tạo slug duy nhất.</p>
+                    <span asp-validation-for="Slug" class="mt-2 block text-sm text-brand-redDark"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Address" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                    <input asp-for="Address" class="input-field" />
+                    <span asp-validation-for="Address" class="mt-2 block text-sm text-brand-redDark"></span>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label asp-for="District" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="District" class="input-field" />
+                        <span asp-validation-for="District" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                    <div>
+                        <label asp-for="City" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="City" class="input-field" />
+                        <span asp-validation-for="City" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label asp-for="Hotline" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="Hotline" class="input-field" />
+                        <span asp-validation-for="Hotline" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Email" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="Email" class="input-field" />
+                        <span asp-validation-for="Email" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="GoogleMapUrl" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                    <input asp-for="GoogleMapUrl" class="input-field" placeholder="https://maps.google.com/... hoặc mã embed" />
+                    <span asp-validation-for="GoogleMapUrl" class="mt-2 block text-sm text-brand-redDark"></span>
+                </div>
+            </div>
+
+            <div class="space-y-5">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label asp-for="OpeningTime" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="OpeningTime" type="time" class="input-field" />
+                        <span asp-validation-for="OpeningTime" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                    <div>
+                        <label asp-for="ClosingTime" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="ClosingTime" type="time" class="input-field" />
+                        <span asp-validation-for="ClosingTime" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <label asp-for="Capacity" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="Capacity" type="number" class="input-field" />
+                        <span asp-validation-for="Capacity" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                    <div>
+                        <label asp-for="AreaSquareMeters" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="AreaSquareMeters" type="number" step="0.01" class="input-field" />
+                        <span asp-validation-for="AreaSquareMeters" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                    <div>
+                        <label asp-for="NumberOfFloors" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                        <input asp-for="NumberOfFloors" type="number" class="input-field" />
+                        <span asp-validation-for="NumberOfFloors" class="mt-2 block text-sm text-brand-redDark"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="DisplayOrder" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                    <input asp-for="DisplayOrder" type="number" class="input-field" />
+                    <span asp-validation-for="DisplayOrder" class="mt-2 block text-sm text-brand-redDark"></span>
+                </div>
+
+                <div>
+                    <label asp-for="ThumbnailFile" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                    <input asp-for="ThumbnailFile" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="block w-full text-sm text-brand-gray file:mr-4 file:rounded-button file:border-0 file:bg-brand-black file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-brand-charcoal" />
+                    <p class="mt-2 text-xs text-brand-gray">Ảnh sẽ được lưu vào `wwwroot/uploads/branches/` dưới tên file an toàn, duy nhất.</p>
+                    <span asp-validation-for="ThumbnailFile" class="mt-2 block text-sm text-brand-redDark"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Description" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep"></label>
+                    <textarea asp-for="Description" rows="5" class="input-area"></textarea>
+                    <span asp-validation-for="Description" class="mt-2 block text-sm text-brand-redDark"></span>
+                </div>
+
+                <label class="flex items-center gap-3 text-sm font-semibold text-brand-dark">
+                    <input asp-for="IsActive" type="checkbox" class="size-4 rounded border-brand-border text-brand-goldDeep focus:ring-brand-gold" />
+                    <span>@Html.DisplayNameFor(x => x.IsActive)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="mt-8 border-t border-brand-border pt-6 text-right">
+            <button type="submit" class="btn-primary">Lưu chi nhánh</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

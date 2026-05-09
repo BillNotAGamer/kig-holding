@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply min-h-screen bg-brand-light font-sans text-brand-dark;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(184, 154, 98, 0.12), transparent 30rem),
+      radial-gradient(circle at 100% 20%, rgba(231, 217, 189, 0.6), transparent 26rem),
+      linear-gradient(180deg, #faf8f3 0%, #ffffff 45%, #f6f2ea 100%);
+  }
+
+  ::selection {
+    @apply bg-brand-red text-white;
+  }
+
+  img {
+    @apply max-w-full;
+  }
+
+  a,
+  button {
+    @apply outline-none;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply ring-2 ring-brand-red ring-offset-2 ring-offset-brand-white;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .surface-panel {
+    @apply rounded-md border border-brand-border bg-brand-white shadow-panel;
+  }
+
+  .surface-muted {
+    @apply rounded-md border border-brand-border bg-brand-light shadow-soft;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-button bg-brand-black px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-soft transition duration-200 hover:bg-brand-charcoal hover:shadow-panel;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-button border border-brand-border bg-brand-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-brand-dark transition duration-200 hover:border-brand-red hover:text-brand-red hover:shadow-soft;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-button border border-brand-border bg-brand-white px-4 py-2 text-sm font-medium text-brand-gray transition duration-200 hover:border-brand-red hover:text-brand-red hover:shadow-soft;
+  }
+
+  .nav-link {
+    @apply relative px-1 py-2 text-sm font-medium text-white/80 transition duration-200 hover:text-white;
+  }
+
+  .nav-link::after {
+    content: "";
+    @apply absolute inset-x-0 -bottom-1 h-0.5 origin-left scale-x-0 rounded-full bg-gradient-to-r from-brand-red to-brand-redDark transition-transform duration-200;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.is-active::after {
+    @apply scale-x-100;
+  }
+
+  .nav-link.is-active {
+    @apply text-white;
+  }
+
+  .brand-mark {
+    @apply grid size-10 place-items-center rounded-md bg-brand-red text-sm font-black text-white shadow-soft;
+  }
+
+  .brand-gradient-text {
+    @apply bg-gradient-to-r from-brand-redDark via-brand-red to-brand-red bg-clip-text text-transparent;
+  }
+
+  .food-image-wrap {
+    @apply relative overflow-hidden rounded-md bg-brand-sand;
+  }
+
+  .food-image-wrap::before {
+    content: "";
+    @apply absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(231,217,189,0.55),transparent_18rem),linear-gradient(180deg,rgba(255,255,255,0.0),rgba(17,24,39,0.12))];
+  }
+
+  .food-image {
+    @apply relative z-10 h-full w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)];
+  }
+
+  .food-image-wrap:hover .food-image,
+  .group:hover .food-image,
+  .image-zoom:hover {
+    transform: scale(1.08);
+  }
+
+  .fade-up {
+    animation: fadeUp 640ms ease-out both;
+  }
+
+  .fade-in {
+    animation: fadeIn 420ms ease-out both;
+  }
+
+  .button-glow {
+    animation: buttonGlow 2.4s ease-in-out infinite;
+  }
+
+  .scroll-reveal {
+    @apply translate-y-4 opacity-0 transition duration-700 ease-out;
+  }
+
+  .scroll-reveal.is-visible {
+    @apply translate-y-0 opacity-100;
+  }
+
+  .reveal-up {
+    transform: translateY(40px);
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  
+  .reveal-left {
+    transform: translateX(40px);
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  
+  .reveal-right {
+    transform: translateX(-40px);
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .reveal-up.is-visible,
+  .reveal-left.is-visible,
+  .reveal-right.is-visible {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+
+  .delay-100 { transition-delay: 100ms; }
+  .delay-200 { transition-delay: 200ms; }
+
+  .site-header {
+    @apply fixed inset-x-0 top-0 z-50 border-b border-white/10 text-white backdrop-blur transition duration-300;
+    background-color: rgba(11, 11, 11, 0.82);
+  }
+
+  .site-header.is-scrolled {
+    @apply bg-brand-black shadow-panel;
+  }
+
+  .mobile-drawer-overlay {
+    @apply pointer-events-none fixed inset-0 z-[60] bg-black/0 transition duration-300;
+  }
+
+  .mobile-drawer-overlay.is-open {
+    @apply pointer-events-auto bg-black/70;
+  }
+
+  .mobile-drawer {
+    @apply fixed right-0 top-0 z-[70] h-dvh w-[min(88vw,24rem)] translate-x-full border-l border-white/10 bg-brand-black shadow-panel transition duration-300 ease-out;
+  }
+
+  .mobile-drawer.is-open {
+    @apply translate-x-0;
+  }
+
+  .card-hover {
+    @apply transition duration-300 hover:-translate-y-1 hover:border-brand-red/50 hover:shadow-soft;
+  }
+
+  .input-field {
+    @apply h-12 w-full rounded-md border border-brand-border bg-brand-white px-3 text-sm text-brand-dark placeholder:text-brand-gray/60;
+  }
+
+  .input-area {
+    @apply w-full rounded-md border border-brand-border bg-brand-white px-3 py-3 text-sm text-brand-dark placeholder:text-brand-gray/60;
+  }
+
+  .section-shell {
+    @apply py-16 lg:py-24;
+  }
+
+  .section-band {
+    @apply border-y border-brand-border/70 bg-brand-white;
+  }
+
+  .hero-frame {
+    @apply relative overflow-hidden border-b border-brand-border bg-brand-white;
+  }
+
+  .hero-card {
+    @apply rounded-md border border-brand-border p-6 shadow-panel backdrop-blur sm:p-8 lg:p-10;
+    background-color: rgba(255, 255, 255, 0.96);
+  }
+
+  .stat-card {
+    @apply rounded-md border border-brand-border bg-brand-white p-4 shadow-soft;
+  }
+}

@@ -1,0 +1,21 @@
+@model KIGHolding.ViewModels.Shared.FloatingContactButtonsViewModel
+
+<div class="fixed bottom-24 right-5 z-40 hidden flex-col gap-3 md:flex" aria-label="Liên hệ nhanh">
+    <a href="@Model.FacebookUrl" class="btn-ghost size-12 rounded-md px-0" target="_blank" rel="noopener" aria-label="Facebook hoặc Messenger">
+        <span class="font-black">f</span>
+    </a>
+    <a href="@Model.ZaloUrl" class="btn-ghost size-12 rounded-md px-0" target="_blank" rel="noopener" aria-label="Zalo">
+        <span class="font-black">Z</span>
+    </a>
+    <a href="@Model.PhoneHref" class="btn-secondary size-12 rounded-md px-0" aria-label="Gọi ngay">
+        <span class="font-black">Call</span>
+    </a>
+    <a href="@Model.ReservationUrl" class="btn-primary size-12 rounded-md px-0" aria-label="Đặt bàn">
+        <span class="font-black">Book</span>
+    </a>
+</div>
+
+<div class="fixed inset-x-4 bottom-4 z-40 grid grid-cols-2 gap-3 md:hidden">
+    <a href="@Model.PhoneHref" class="btn-secondary h-12">Gọi ngay</a>
+    <a href="@Model.ReservationUrl" class="btn-primary h-12">Đặt bàn</a>
+</div>

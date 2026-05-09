@@ -1,0 +1,44 @@
+@model KIGHolding.ViewModels.Shared.BookingMiniFormViewModel
+
+<form action="@Model.ActionUrl" method="get" class="surface-panel p-4 sm:p-5">
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <label class="block lg:col-span-2">
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Tên khách</span>
+            <input type="text" name="customerName" autocomplete="name" placeholder="Nguyễn Văn A" class="input-field" />
+        </label>
+
+        <label class="block lg:col-span-2">
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Số điện thoại</span>
+            <input type="tel" name="phoneNumber" autocomplete="tel" placeholder="0909 888 777" class="input-field" />
+        </label>
+
+        <label class="block">
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Chi nhánh</span>
+            <select name="branchId" class="input-field">
+                @foreach (var branch in Model.Branches)
+                {
+                    <option value="@(branch.Id == Guid.Empty ? string.Empty : branch.Id)">@branch.Name</option>
+                }
+            </select>
+        </label>
+
+        <label class="block">
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Ngày</span>
+            <input type="date" name="date" class="input-field" />
+        </label>
+
+        <label class="block">
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Giờ</span>
+            <input type="time" name="time" class="input-field" />
+        </label>
+
+        <label class="block">
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Số khách</span>
+            <input type="number" name="guests" min="1" max="40" value="2" class="input-field" />
+        </label>
+
+        <div class="flex items-end lg:col-span-2">
+            <button type="submit" class="btn-primary h-12 w-full">Đặt bàn</button>
+        </div>
+    </div>
+</form>

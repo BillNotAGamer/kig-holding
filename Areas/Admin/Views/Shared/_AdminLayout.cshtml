@@ -1,0 +1,182 @@
+@{
+    var pageTitle = ViewData["Title"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+    var errorMessage = TempData["ErrorMessage"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#111827" />
+    <title>@(string.IsNullOrWhiteSpace(pageTitle) ? "Admin - Truyền Thuyết Champong" : $"{pageTitle} - Admin")</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="min-h-screen bg-brand-light text-brand-dark antialiased">
+    <div class="min-h-screen lg:grid lg:grid-cols-[18rem_1fr]">
+        <aside class="bg-brand-black text-white">
+            <div class="flex h-full flex-col">
+                <div class="border-b border-white/10 px-6 py-6">
+                    <a href="/admin" class="flex items-center gap-3">
+                        <span class="brand-mark">AD</span>
+                        <div>
+                            <p class="text-sm font-black uppercase tracking-[0.18em] text-white">Admin Panel</p>
+                            <p class="mt-1 text-xs uppercase tracking-[0.2em] text-white/45">KIG Hospitality MVP</p>
+                        </div>
+                    </a>
+                </div>
+
+                <nav class="flex-1 px-4 py-6">
+                    <p class="px-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">Điều hướng</p>
+                    <div class="mt-3 space-y-1">
+                        <a href="/Admin/Dashboard"
+                           aria-current="@(IsActive(currentController, "Dashboard") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "Dashboard")">
+                            Tổng quan
+                        </a>
+                        <a href="/Admin/Branch"
+                           aria-current="@(IsActive(currentController, "Branch") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "Branch")">
+                            Quản lý Chi nhánh
+                        </a>
+                        <a href="/Admin/MenuCategory"
+                           aria-current="@(IsActive(currentController, "MenuCategory") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "MenuCategory")">
+                            Danh mục thực đơn
+                        </a>
+                        <a href="/Admin/MenuItem"
+                           aria-current="@(IsActive(currentController, "MenuItem") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "MenuItem")">
+                            Món ăn
+                        </a>
+                        <a href="/Admin/Post"
+                           aria-current="@(IsActive(currentController, "Post") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "Post")">
+                            Bài viết
+                        </a>
+                        <a href="/Admin/Review"
+                           aria-current="@(IsActive(currentController, "Review") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "Review")">
+                            Đánh giá
+                        </a>
+                        <a href="/Admin/Setting"
+                           aria-current="@(IsActive(currentController, "Setting") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "Setting")">
+                            Cấu hình Website
+                        </a>
+                        <a href="/Admin/Reservation"
+                           aria-current="@(IsActive(currentController, "Reservation") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "Reservation")">
+                            Quản lý Đặt bàn
+                        </a>
+                        <a href="/Admin/Contact"
+                           aria-current="@(IsActive(currentController, "Contact") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "Contact")">
+                            Quản lý Liên hệ
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="border-t border-white/10 px-4 py-5">
+                    <a href="/" class="btn-ghost w-full border-white/10 bg-white/[0.04] !text-white/75 hover:!border-brand-gold hover:!text-brand-goldSoft">
+                        Xem website
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <div class="min-w-0">
+            <header class="border-b border-brand-border bg-white/90 backdrop-blur">
+                <div class="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+                    <div>
+                        <h1 class="text-lg font-black text-brand-dark">@(!string.IsNullOrWhiteSpace(pageTitle) ? pageTitle : "Admin Dashboard")</h1>
+                        <p class="text-xs uppercase tracking-[0.16em] text-brand-gray">Protected admin area</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <div class="hidden text-right sm:block">
+                            <p class="text-sm font-semibold text-brand-dark">@User.Identity?.Name</p>
+                            <p class="text-xs text-brand-gray">SuperAdmin</p>
+                        </div>
+                        <form asp-area="Admin" asp-controller="Auth" asp-action="Logout" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-secondary h-10">Đăng xuất</button>
+                        </form>
+                    </div>
+                </div>
+            </header>
+
+            <main class="min-h-[calc(100svh-4rem)] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <div class="pointer-events-none fixed right-4 top-4 z-50 w-[min(24rem,calc(100vw-2rem))] space-y-3">
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="admin-toast pointer-events-auto rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-soft transition-all duration-300" data-toast>
+                <div class="flex items-start gap-3">
+                    <span class="mt-0.5 grid size-5 place-items-center rounded-full bg-emerald-100 text-xs font-black text-emerald-700">✓</span>
+                    <div>
+                        <p class="font-semibold text-emerald-900">Thành công</p>
+                        <p class="mt-1 leading-6">@successMessage</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="admin-toast pointer-events-auto rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-soft transition-all duration-300" data-toast>
+                <div class="flex items-start gap-3">
+                    <span class="mt-0.5 grid size-5 place-items-center rounded-full bg-red-100 text-xs font-black text-red-700">!</span>
+                    <div>
+                        <p class="font-semibold text-red-900">Có lỗi</p>
+                        <p class="mt-1 leading-6">@errorMessage</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var toasts = document.querySelectorAll('[data-toast]');
+            if (!toasts.length) {
+                return;
+            }
+
+            toasts.forEach(function (toast) {
+                window.setTimeout(function () {
+                    toast.classList.add('opacity-0', 'translate-y-2');
+                    window.setTimeout(function () {
+                        toast.remove();
+                    }, 300);
+                }, 4000);
+            });
+        })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+@functions {
+    private static bool IsActive(string? currentController, string controllerName)
+    {
+        return string.Equals(currentController, controllerName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NavLinkClass(string? currentController, string controllerName)
+    {
+        var baseClass = "block rounded-md border-l-2 px-3 py-3 text-sm font-semibold transition";
+        return IsActive(currentController, controllerName)
+            ? $"{baseClass} border-brand-gold bg-brand-gold/15 text-brand-goldSoft shadow-soft"
+            : $"{baseClass} border-transparent text-white/80 hover:bg-white/10 hover:text-white";
+    }
+}

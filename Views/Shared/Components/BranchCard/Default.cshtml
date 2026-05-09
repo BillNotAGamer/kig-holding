@@ -1,0 +1,68 @@
+@model KIGHolding.ViewModels.Shared.BranchCardViewModel
+
+<article id="@Model.Slug" class="overflow-hidden rounded-md border border-brand-border bg-white shadow-soft transition-all hover:-translate-y-1 hover:shadow-panel">
+    <div class="group block">
+        <div class="food-image-wrap aspect-[16/10]">
+            <img src="@Model.ImageUrl"
+                 alt="@Model.Name"
+                 class="food-image"
+                 loading="lazy"
+                 onerror="this.remove();" />
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-black/68 via-brand-black/18 to-transparent"></div>
+            <div class="absolute bottom-4 left-4 right-4 z-30">
+                <p class="text-xs font-black uppercase tracking-[0.18em] text-brand-goldSoft">@Model.City</p>
+                <h3 class="mt-2 text-2xl font-black text-white">@Model.Name</h3>
+            </div>
+        </div>
+
+        <div class="space-y-4 p-5 text-sm text-brand-gray">
+            <p class="leading-6">@Model.Address, @Model.District, @Model.City</p>
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <p class="line-clamp-2 leading-6">@Model.Description</p>
+            }
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="rounded-md border border-brand-border bg-brand-light p-3">
+                    <p class="text-xs uppercase tracking-[0.16em] text-brand-goldDeep">Giờ mở cửa</p>
+                    <p class="mt-1 font-semibold text-brand-dark">@Model.OpeningHours</p>
+                </div>
+                <div class="rounded-md border border-brand-border bg-brand-light p-3">
+                    <p class="text-xs uppercase tracking-[0.16em] text-brand-goldDeep">Sức chứa</p>
+                    <p class="mt-1 font-semibold text-brand-dark">@Model.Capacity khách</p>
+                </div>
+                @if (Model.AreaSquareMeters.HasValue)
+                {
+                    <div class="rounded-md border border-brand-border bg-brand-light p-3">
+                        <p class="text-xs uppercase tracking-[0.16em] text-brand-goldDeep">Diện tích</p>
+                        <p class="mt-1 font-semibold text-brand-dark">@Model.AreaSquareMeters.Value.ToString("N0") m²</p>
+                    </div>
+                }
+                @if (Model.NumberOfFloors.HasValue)
+                {
+                    <div class="rounded-md border border-brand-border bg-brand-light p-3">
+                        <p class="text-xs uppercase tracking-[0.16em] text-brand-goldDeep">Tầng</p>
+                        <p class="mt-1 font-semibold text-brand-dark">@Model.NumberOfFloors tầng</p>
+                    </div>
+                }
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
+                <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="font-semibold text-brand-dark transition hover:text-brand-goldDeep">@Model.Hotline</a>
+                <a href="@Model.Url" class="font-semibold text-brand-goldDeep transition group-hover:text-brand-black">Xem vị trí</a>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                @if (!string.IsNullOrWhiteSpace(Model.GoogleMapUrl) && Model.GoogleMapUrl != "#")
+                {
+                    <a href="@Model.GoogleMapUrl" class="btn-ghost h-11" target="_blank" rel="noopener">Xem bản đồ</a>
+                }
+                else
+                {
+                    <span class="btn-ghost h-11 cursor-not-allowed opacity-60">Bản đồ</span>
+                }
+                <a href="/dat-ban?branch=@Model.Slug" class="btn-primary h-11 px-3">Đặt bàn tại đây</a>
+            </div>
+        </div>
+    </div>
+</article>

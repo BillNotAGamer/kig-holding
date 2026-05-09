@@ -1,0 +1,127 @@
+@model NewsIndexViewModel
+
+@{
+    ViewData["Title"] = Model.SeoTitle;
+    ViewData["MetaDescription"] = Model.SeoDescription;
+
+    var allCategoriesActive = string.IsNullOrWhiteSpace(Model.SelectedCategory);
+}
+
+<section class="hero-frame" data-news-page="index">
+    <div class="container-page section-shell">
+        <div class="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+            <div class="hero-card scroll-reveal">
+                <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
+                    News
+                </span>
+                <h1 class="mt-5 text-display font-black text-brand-dark sm:text-hero">Tin tức & ưu đãi</h1>
+                <p class="mt-5 text-lead text-brand-gray">
+                    Mục tin tức được làm lại theo hướng editorial và sạch hơn, để các bài viết thương hiệu, khai trương và ưu đãi trông giống một hệ nội dung có tổ chức.
+                </p>
+            </div>
+            <div class="food-image-wrap min-h-[22rem] shadow-panel lg:min-h-[32rem]">
+                <img src="/images/placeholders/news-hero.webp"
+                     alt="Tin tức Truyền Thuyết Champong"
+                     class="food-image absolute inset-0"
+                     onerror="this.remove();" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0 lg:pt-0">
+    <div class="container-page">
+        <div class="flex flex-wrap gap-2">
+            <a href="/tin-tuc"
+               class="btn-ghost @(allCategoriesActive ? "!border-brand-gold !bg-brand-goldSoft/40 !text-brand-goldDeep" : string.Empty)"
+               aria-current="@(allCategoriesActive ? "page" : null)">
+                Tất cả
+            </a>
+            @foreach (var category in Model.Categories)
+            {
+                <a href="/tin-tuc?category=@Uri.EscapeDataString(category.Name)"
+                   class="btn-ghost @(category.IsActive ? "!border-brand-gold !bg-brand-goldSoft/40 !text-brand-goldDeep" : string.Empty)"
+                   aria-current="@(category.IsActive ? "page" : null)">
+                    @category.Name
+                </a>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0 lg:pt-0">
+    <div class="container-page">
+        @if (Model.FeaturedPost is not null)
+        {
+            <article class="surface-panel overflow-hidden p-0">
+                <div class="grid gap-0 lg:grid-cols-[0.92fr_1.08fr]">
+                    <a href="@Model.FeaturedPost.Url" class="food-image-wrap min-h-[19rem] lg:min-h-[25rem]" aria-label="@Model.FeaturedPost.Title">
+                        <img src="@Model.FeaturedPost.ImageUrl"
+                             alt="@Model.FeaturedPost.Title"
+                             class="food-image absolute inset-0"
+                             loading="lazy"
+                             onerror="this.remove();" />
+                    </a>
+                    <div class="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="rounded-button bg-brand-goldSoft px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-dark">@Model.FeaturedPost.Category</span>
+                            @if (Model.FeaturedPost.PublishedAt.HasValue)
+                            {
+                                <time datetime="@Model.FeaturedPost.PublishedAt.Value.ToString("yyyy-MM-dd")" class="text-xs uppercase tracking-[0.16em] text-brand-gray">
+                                    @Model.FeaturedPost.PublishedAt.Value.ToString("dd/MM/yyyy")
+                                </time>
+                            }
+                        </div>
+                        <h2 class="mt-4 text-3xl font-black text-brand-dark sm:text-4xl">@Model.FeaturedPost.Title</h2>
+                        <p class="mt-5 max-w-xl leading-7 text-brand-gray">@Model.FeaturedPost.Excerpt</p>
+                        <a href="@Model.FeaturedPost.Url" class="btn-primary mt-8 w-fit">Xem chi tiết</a>
+                    </div>
+                </div>
+            </article>
+        }
+        else
+        {
+            <div class="surface-panel p-8 text-center">
+                <p class="text-kicker font-black uppercase text-brand-goldDeep">Tin nổi bật</p>
+                <h2 class="mt-3 text-2xl font-black text-brand-dark">Tin tức đang được cập nhật.</h2>
+                <p class="mx-auto mt-3 max-w-xl text-brand-gray">
+                    Khi PostgreSQL được kết nối và có bài viết đã xuất bản, khu vực này sẽ tự động hiển thị tin mới nhất.
+                </p>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-band section-shell">
+    <div class="container-page">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Bài viết",
+                Title = string.IsNullOrWhiteSpace(Model.SelectedCategory) ? "Cập nhật mới nhất." : Model.SelectedCategory,
+                Description = "Toàn bộ lưới bài viết đã được đưa về cùng một hệ card sáng với các trang còn lại."
+            }})
+            <a href="/dat-ban" class="btn-secondary">Đặt bàn nhận ưu đãi</a>
+        </div>
+
+        @if (Model.Posts.Count > 0)
+        {
+            <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                @foreach (var post in Model.Posts)
+                {
+                    @await Component.InvokeAsync("PostCard", new { model = post })
+                }
+            </div>
+        }
+        else
+        {
+            <div class="surface-panel mt-9 p-8 text-center">
+                <h2 class="text-2xl font-black text-brand-dark">Danh mục này đang được cập nhật.</h2>
+                <p class="mx-auto mt-3 max-w-xl text-brand-gray">
+                    Chưa có bài viết đã xuất bản cho lựa chọn hiện tại. Bạn có thể quay lại tất cả tin tức để xem thêm.
+                </p>
+                <a href="/tin-tuc" class="btn-primary mt-6">Xem tất cả tin</a>
+            </div>
+        }
+    </div>
+</section>

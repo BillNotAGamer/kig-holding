@@ -1,0 +1,86 @@
+@model KIGHolding.Areas.Admin.ViewModels.ContactIndexViewModel
+
+@{
+    ViewData["Title"] = "Quản lý Liên hệ";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel flex flex-col gap-4 p-6 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+            <p class="text-kicker font-black uppercase text-brand-goldDeep">Contact Inbox</p>
+            <h2 class="mt-2 text-2xl font-black text-brand-dark">Quản lý liên hệ</h2>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Xem nhanh các tin nhắn từ khách hàng và chuyển trạng thái từ mới sang đã đọc hoặc đã xử lý.</p>
+        </div>
+
+        <form method="get" class="grid gap-3 md:grid-cols-[minmax(0,16rem)_auto]">
+            <div>
+                <label asp-for="StatusFilter" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
+                <select asp-for="StatusFilter" asp-items="Model.StatusOptions" class="form-input"></select>
+            </div>
+            <div class="flex items-end gap-3">
+                <button type="submit" class="btn-primary">Lọc dữ liệu</button>
+                <a asp-action="Index" class="btn-secondary">Xóa lọc</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="overflow-hidden rounded-md border border-brand-border bg-white shadow-soft">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm text-brand-gray">
+                <thead class="border-b border-brand-border bg-brand-light text-xs uppercase text-brand-dark">
+                    <tr>
+                        <th class="px-6 py-4 font-semibold">Full Name</th>
+                        <th class="px-6 py-4 font-semibold">Phone</th>
+                        <th class="px-6 py-4 font-semibold">Subject</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 font-semibold">Date</th>
+                        <th class="px-6 py-4 font-semibold">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brand-border">
+                    @foreach (var message in Model.Messages)
+                    {
+                        var statusClass = message.Status switch
+                        {
+                            ContactMessageStatus.New => "border-amber-200 bg-amber-50 text-amber-700",
+                            ContactMessageStatus.Read => "border-blue-200 bg-blue-50 text-blue-700",
+                            ContactMessageStatus.Handled => "border-emerald-200 bg-emerald-50 text-emerald-700",
+                            ContactMessageStatus.Archived => "border-slate-200 bg-slate-100 text-slate-600",
+                            _ => "border-slate-200 bg-slate-100 text-slate-600"
+                        };
+                        var statusLabel = message.Status switch
+                        {
+                            ContactMessageStatus.New => "Mới",
+                            ContactMessageStatus.Read => "Đã đọc",
+                            ContactMessageStatus.Handled => "Đã xử lý",
+                            ContactMessageStatus.Archived => "Đã lưu trữ",
+                            _ => message.Status.ToString()
+                        };
+
+                        <tr class="align-top transition-colors hover:bg-brand-light/50">
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-brand-dark">@message.FullName</p>
+                            </td>
+                            <td class="px-6 py-4">@message.PhoneNumber</td>
+                            <td class="px-6 py-4">@(string.IsNullOrWhiteSpace(message.Subject) ? "Không có" : message.Subject)</td>
+                            <td class="px-6 py-4">
+                                <span class="rounded-button border px-3 py-1 text-xs font-semibold @statusClass">@statusLabel</span>
+                            </td>
+                            <td class="px-6 py-4">@message.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="px-6 py-4">
+                                <a asp-action="Details" asp-route-id="@message.Id" class="font-semibold text-brand-goldDeep transition hover:text-brand-dark">Xem chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Messages.Any())
+        {
+            <div class="p-8 text-center text-brand-gray">
+                Chưa có tin nhắn liên hệ nào.
+            </div>
+        }
+    </div>
+</section>
