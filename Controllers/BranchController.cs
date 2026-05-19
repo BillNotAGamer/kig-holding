@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using KIGHolding.Models.Entities;
 using KIGHolding.Services;
 using KIGHolding.ViewModels;
@@ -24,7 +26,7 @@ public class BranchController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> Index([FromQuery] string? city, CancellationToken cancellationToken)
+    public async Task<IActionResult> Index([FromQuery] string? city, [FromQuery] string? q, CancellationToken cancellationToken)
     {
         IReadOnlyList<Branch> activeBranches = [];
 
@@ -42,10 +44,17 @@ public class BranchController : Controller
             .OrderBy(x => x)
             .ToList();
 
+        var searchQuery = NormalizeSearchQuery(q);
+        var searchMatchedBranches = ApplySearch(activeBranches, searchQuery).ToList();
+        var cityCounts = searchMatchedBranches
+            .Where(x => !string.IsNullOrWhiteSpace(x.City))
+            .GroupBy(x => x.City, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.Count(), StringComparer.OrdinalIgnoreCase);
+
         var selectedCity = ResolveSelectedCity(cities, city);
         var filteredBranches = string.IsNullOrWhiteSpace(selectedCity)
-            ? activeBranches
-            : activeBranches
+            ? searchMatchedBranches
+            : searchMatchedBranches
                 .Where(x => string.Equals(x.City, selectedCity, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
@@ -57,6 +66,10 @@ public class BranchController : Controller
             Branches = filteredBranches.Select(BranchCardViewModel.FromBranch).ToList(),
             Cities = cities,
             SelectedCity = selectedCity,
+            SearchQuery = searchQuery,
+            TotalCount = activeBranches.Count,
+            FilteredCount = filteredBranches.Count,
+            CityCounts = cityCounts,
             MainMapUrl = mapBranch?.GoogleMapUrl,
             SeoTitle = string.IsNullOrWhiteSpace(selectedCity) ? "Hệ thống chi nhánh" : $"Chi nhánh {selectedCity}",
             SeoDescription = string.IsNullOrWhiteSpace(selectedCity)
@@ -99,5 +112,49 @@ public class BranchController : Controller
 
         var normalizedCity = city.Trim();
         return cities.FirstOrDefault(x => string.Equals(x, normalizedCity, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string? NormalizeSearchQuery(string? query)
+    {
+        return string.IsNullOrWhiteSpace(query) ? null : query.Trim();
+    }
+
+    private static IEnumerable<Branch> ApplySearch(IEnumerable<Branch> branches, string? query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return branches;
+        }
+
+        var normalizedQuery = NormalizeSearchText(query);
+
+        return branches.Where(branch =>
+            Contains(branch.Name, normalizedQuery)
+            || Contains(branch.Address, normalizedQuery)
+            || Contains(branch.City, normalizedQuery)
+            || Contains(branch.District, normalizedQuery)
+            || Contains(branch.Hotline, normalizedQuery));
+    }
+
+    private static bool Contains(string? value, string normalizedQuery)
+    {
+        return !string.IsNullOrWhiteSpace(value)
+            && NormalizeSearchText(value).Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeSearchText(string value)
+    {
+        var normalizedValue = value.Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder(capacity: normalizedValue.Length);
+
+        foreach (var character in normalizedValue)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(character) != UnicodeCategory.NonSpacingMark)
+            {
+                builder.Append(character);
+            }
+        }
+
+        return builder.ToString().Normalize(NormalizationForm.FormC);
     }
 }
