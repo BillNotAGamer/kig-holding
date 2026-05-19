@@ -156,37 +156,103 @@
     </div>
 </section>
 
-<section class="section-shell" data-home-section="culinary-essence">
-    <div class="container-page">
-        @await Component.InvokeAsync("SectionHeading", new
-        {
-            model = new SectionHeadingViewModel
-            {
-                Eyebrow = "Tinh hoa ẩm thực",
-                Title = "Nhá»¯ng Ä‘iá»ƒm nháº¥n lÃ m nÃªn tráº£i nghiá»‡m dÃ¹ng bá»¯a.",
-                Description = "Pháº§n nÃ y táº­p trung vÃ o cÃ¡c yáº¿u tá»‘ cá»‘t lÃµi cá»§a mÃ³n Äƒn vÃ  khÃ´ng gian, giá»¯ cÃ¡ch trÃ¬nh bÃ y gá»n, sang vÃ  dá»… Ä‘á»c."
-            }
-        })
+<section class="home-culinary-essence section-shell relative isolate overflow-hidden" data-home-section="culinary-essence">
+    <div class="home-culinary-essence__pattern" aria-hidden="true"></div>
+    <div class="container-page relative z-10">
+        <div class="relative mx-auto max-w-5xl text-center">
+            <img src="~/images/home/images/soyu-bottle-img.png" asp-append-version="true" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--soyu hidden w-20 sm:block lg:w-28" />
+            <img src="~/images/home/images/kimchi-img.png" asp-append-version="true" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--kimchi hidden w-24 sm:block lg:w-32" />
+            <img src="~/images/home/images/spicy-noodle-img.png" asp-append-version="true" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--noodle hidden w-28 sm:block lg:w-40z" />
+            <img src="~/images/home/images/chilli-img.png" asp-append-version="true" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--chilli hidden w-16 sm:block lg:w-24" />
 
-        <div class="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            @foreach (var item in new[]
-            {
-                ("NÆ°á»›c dÃ¹ng Ä‘áº­m vá»‹", "Nháº¥n máº¡nh táº§ng vá»‹ rÃµ rÃ ng, áº¥m vÃ  cÃ¢n báº±ng cho mÃ³n Champong vÃ  cÃ¡c lá»±a chá»n Ä‘i kÃ¨m."),
-                ("NguyÃªn liá»‡u chá»n lá»c", "Diá»…n Ä‘áº¡t sá»± tÆ°Æ¡i má»›i vÃ  tÃ­nh nháº¥t quÃ¡n trong cÃ¡ch lá»±a chá»n nguyÃªn liá»‡u."),
-                ("KhÃ´ng gian sum váº§y", "Gá»£i cáº£m giÃ¡c phÃ¹ há»£p cho gia Ä‘Ã¬nh, nhÃ³m báº¡n vÃ  cÃ¡c buá»•i tiáº¿p khÃ¡ch thÃ¢n máº­t."),
-                ("Phá»¥c vá»¥ táº­n tÃ¢m", "MÃ´ táº£ tráº£i nghiá»‡m phá»¥c vá»¥ nhÆ° má»™t pháº§n cá»§a giÃ¡ trá»‹ thÆ°Æ¡ng hiá»‡u, khÃ´ng chá»‰ lÃ  mÃ³n Äƒn.")
-            })
-            {
-                <article class="surface-panel card-hover overflow-hidden p-6" data-uw-reveal="fade-up">
-                    <div class="mb-5 flex items-center justify-between">
-                        <span class="rounded-button border border-brand-gold/20 bg-brand-goldSoft/35 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-goldDeep">Tinh hoa</span>
-                        <span class="h-2.5 w-2.5 rounded-full bg-brand-red"></span>
+            <div class="mx-auto max-w-[46rem]" data-uw-reveal="fade-up">
+                <p class="text-xs font-black uppercase tracking-[0.34em] text-white/60">Korean dining spirit</p>
+                <h2 class="home-culinary-essence__title mt-4 font-black uppercase tracking-[-0.045em] text-brand-red">
+                    TINH HOA ẨM THỰC<br />
+                    <span class="text-white">GỬI TRỌN ĐAM MÊ</span>
+                </h2>
+                <p class="mx-auto mt-5 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
+                    "Ăn là sẽ nhớ - nhớ rồi sẽ tới ăn"
+                </p>
+                <p class="mx-auto mt-5 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
+                    - KIG HOLDING -
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-14 space-y-14 lg:mt-20 lg:space-y-20">
+            <article class="home-culinary-essence__block grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:gap-14">
+                <div class="home-culinary-essence__image" data-uw-reveal="fade-up" data-uw-delay="100">
+                    <img src="~/images/home/images/truyen-thuyet-champong.webp" asp-append-version="true" alt="Món Truyền Thuyết Champong" class="h-full w-full object-cover" />
+                </div>
+
+                <div>
+                    <div data-uw-reveal="fade-up" data-uw-delay="180">
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-brand-red">Signature spicy noodle</p>
+                        <h3 class="mt-3 text-3xl font-black uppercase leading-tight text-brand-red sm:text-4xl lg:text-5xl">
+                            Truyền Thuyết ChamPong- 전설의 짬뽕
+                        </h3>
+                        
                     </div>
-                    <h3 class="text-xl font-black text-brand-dark">@item.Item1</h3>
-                    <p class="mt-3 text-sm leading-7 text-brand-gray">@item.Item2</p>
-                    <div class="mt-6 h-1 w-16 rounded-full bg-brand-red"></div>
-                </article>
-            }
+
+                    <div class="mt-8 grid gap-5 sm:grid-cols-2">
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="260">
+                            <img src="~/images/home/icons/team-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Phù hợp đi theo nhóm</h4>
+                            <p>Với mỗi phần ăn có thể phục vụ cho 2-3 người, Truyền thuyết Champong là nơi lý tưởng để họp mặt gia đình , bạn bè, đồng nghiệp.</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="340">
+                            <img src="~/images/home/icons/vegetable-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Nguyên liệu đa dạng</h4>
+                            <p>Nguồn nguyên liệu tươi mới mỗi ngày và đa dạng : bò, heo, mực, ghẹ biển, bạch tuộc, ốc móng tay, vẹm...</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="420">
+                            <img src="~/images/home/icons/noodle-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Sợi mì tươi tự làm</h4>
+                            <p>Mì tươi do chính đầu bếp người hàn thực hiện từ những khâu nhỏ nhất, đảm bảo không chất bảo quản.</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="500">
+                            <img src="~/images/home/icons/korea-icon-symbol.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Hương vị chuẩn Hàn</h4>
+                            <p>Với các gia vị hầu hết nhập khẩu chính gốc từ Hàn, đem đến hương vị chuẩn chỉnh đúng nguyên bản, khó tìm được hương vị này ở nơi khác.</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="home-culinary-essence__block grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-14">
+                <div class="lg:order-1">
+                    <div data-uw-reveal="fade-up" data-uw-delay="100">
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-brand-red">Korean BBQ table</p>
+                        <h3 class="mt-3 text-3xl font-black uppercase leading-tight text-brand-red sm:text-4xl lg:text-5xl">
+                            GOGIMARU - 고기마루 고기 숙성 전문
+                        </h3>
+                    
+                    </div>
+
+                    <div class="mt-8 grid gap-5 sm:grid-cols-3 lg:grid-cols-3">
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="180">
+                            <img src="~/images/home/icons/korea-icon-symbol.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Đúng chuẩn Hàn Quốc</h4>
+                                <p>Thưởng thức bữa thịt nướng trọn vẹn, đúng chuẩn bản xứ khi ăn cùng với nhiều loại panchan và các món như trứng hấp, mì lạnh,...</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="260">
+                            <img src="~/images/home/icons/meat-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Thịt nướng chọn lọc</h4>
+                                <p>Thịt tươi không tẩm ướp gia vị sẽ được các đầu bếp ủ lên men theo công thức đặc biệt trong 15 ngày trước khi phục vụ thực khách</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="340">
+                            <img src="~/images/home/icons/space-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Không gian cực chill</h4>
+                            <p>Nhà hàng sân thượng cực chill để bạn thưởng thức đặc biệt nướng ngoài trời lý tưởng, tạo nên bữa tối hoàn hảo.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="home-culinary-essence__image lg:order-2" data-uw-reveal="fade-up" data-uw-delay="420">
+                    <img src="~/images/home/images/gogimaru-img.webp" asp-append-version="true" alt="Bàn tiệc Gogimaru" class="h-full w-full object-cover" />
+                </div>
+            </article>
         </div>
     </div>
 </section>

@@ -419,6 +419,230 @@
     }
   }
 
+  .home-culinary-essence {
+    background:
+      radial-gradient(ellipse at 50% 12%, rgba(229, 9, 20, 0.11), transparent 26rem),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(8, 7, 6, 0.95)),
+      url("/images/home/images/texture.png"),
+      url("/images/home/images/about-bg.png");
+    background-size: auto, auto, 20rem auto, cover;
+    background-position: center, center, center, center;
+    background-blend-mode: normal, normal, overlay, normal;
+  }
+
+  .home-culinary-essence .container-page {
+    max-width: 88rem;
+  }
+
+  .home-culinary-essence::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.12), transparent 15rem, rgba(0, 0, 0, 0.48)),
+      radial-gradient(ellipse at 50% 6rem, rgba(184, 154, 98, 0.08), transparent 20rem);
+    pointer-events: none;
+  }
+
+  .home-culinary-essence__pattern {
+    position: absolute;
+    left: 50%;
+    top: 4.25rem;
+    z-index: -1;
+    width: min(64rem, 104vw);
+    height: 6.15rem;
+    transform: translateX(-50%);
+    background-image: url("/images/home/images/hoavan.png");
+    background-repeat: repeat-x;
+    background-position: center;
+    background-size: auto 6.15rem;
+    opacity: 0.62;
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+
+  .home-culinary-essence__title {
+    font-size: clamp(2.55rem, 5.7vw, 5.25rem);
+    line-height: 0.94;
+    text-shadow: 0 18px 44px rgba(0, 0, 0, 0.64);
+  }
+
+  .home-culinary-essence__copy {
+    position: relative;
+    z-index: 4;
+  }
+
+  .home-culinary-essence__float {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.42));
+    will-change: transform;
+  }
+
+  .home-culinary-essence__float--soyu {
+    left: clamp(-5.25rem, -4vw, -2.75rem);
+    top: -0.2rem;
+    width: clamp(6.6rem, 9vw, 9rem);
+    animation: homeCulinaryFloatY 5.8s ease-in-out infinite;
+  }
+
+  .home-culinary-essence__float--kimchi {
+    left: clamp(-3.75rem, -3vw, -1.75rem);
+    bottom: -2.35rem;
+    width: clamp(7.8rem, 11vw, 10.5rem);
+    animation: homeCulinarySlideLeft 6.8s ease-in-out infinite;
+  }
+
+  .home-culinary-essence__float--noodle {
+    right: clamp(-9rem, -6vw, -4.25rem);
+    top: -1.75rem;
+    width: clamp(11rem, 16vw, 15rem);
+    animation: homeCulinarySlideRight 7.2s ease-in-out infinite;
+  }
+
+  .home-culinary-essence__float--chilli {
+    right: clamp(-5rem, -3.5vw, -2.25rem);
+    bottom: -1.95rem;
+    width: clamp(5.7rem, 8vw, 7.6rem);
+    animation: homeCulinaryFloatY 5.2s ease-in-out infinite reverse;
+  }
+
+  .home-culinary-essence__block {
+    position: relative;
+  }
+
+  .home-culinary-essence__block::before {
+    content: "";
+    position: absolute;
+    inset: auto -0.5rem -1.35rem -0.5rem;
+    z-index: -1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(229, 9, 20, 0.42), transparent);
+    opacity: 0.7;
+  }
+
+  .home-culinary-essence__image {
+    @apply relative overflow-hidden bg-black shadow-panel;
+    min-height: clamp(21rem, 39vw, 35rem);
+  }
+
+  .home-culinary-essence__block:nth-of-type(2) .home-culinary-essence__image {
+    min-height: clamp(22rem, 41vw, 37rem);
+  }
+
+  .home-culinary-essence__image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.36)),
+      radial-gradient(circle at 50% 0%, rgba(229, 9, 20, 0.12), transparent 45%);
+    pointer-events: none;
+  }
+
+  .home-culinary-essence__image > img {
+    min-height: inherit;
+  }
+
+  .home-culinary-essence__feature {
+    @apply transition duration-300;
+    border-left: 0;
+    background: transparent;
+    padding: 0.25rem 0;
+  }
+
+  .home-culinary-essence__feature h4 {
+    @apply mt-4 font-black uppercase tracking-[0.06em] text-brand-red;
+    font-size: 1.05rem;
+    line-height: 1.25;
+  }
+
+  .home-culinary-essence__feature p {
+    margin-top: 0.7rem;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.96rem;
+    line-height: 1.75;
+  }
+
+  .home-culinary-essence__feature > img {
+    width: 3.35rem;
+    height: 3.35rem;
+    filter: drop-shadow(0 12px 22px rgba(229, 9, 20, 0.18));
+  }
+
+  @keyframes homeCulinaryFloatY {
+    0%,
+    100% {
+      transform: translate3d(0, -20px, 0) rotate(-4deg);
+    }
+    50% {
+      transform: translate3d(0, 20px, 0) rotate(4deg);
+    }
+  }
+
+  @keyframes homeCulinarySlideRight {
+    0%,
+    100% {
+      transform: translate3d(-20px, 0, 0) rotate(-4deg);    
+    }
+    50% {
+      transform: translate3d(20px, 0, 0) rotate(4deg);
+    }
+  }
+
+  @keyframes homeCulinarySlideLeft {
+    0%,
+    100% {
+      transform: translate3d(20px, 0, 0) rotate(4deg);
+    }
+    50% {
+      transform: translate3d(-20px, 0, 0) rotate(-4deg);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .home-culinary-essence {
+      background-size: auto, auto, 17rem auto, cover;
+    }
+
+    .home-culinary-essence__pattern {
+      top: 2.2rem;
+      height: 4.5rem;
+      background-size: auto 4.5rem;
+      opacity: 0.38;
+    }
+
+    .home-culinary-essence__title {
+      font-size: clamp(2.35rem, 12vw, 3.75rem);
+      line-height: 0.98;
+    }
+
+    .home-culinary-essence__block::before {
+      inset: auto 0 -1rem 0;
+    }
+
+    .home-culinary-essence__image {
+      min-height: 17rem;
+    }
+
+    .home-culinary-essence__block:nth-of-type(2) .home-culinary-essence__image {
+      min-height: 18rem;
+    }
+
+    .home-culinary-essence__feature > img {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-culinary-essence__float {
+      animation: none;
+    }
+  }
+
   .champong-takehome__visual {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 247, 239, 0.98));
   }
