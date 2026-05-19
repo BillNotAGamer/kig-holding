@@ -33,26 +33,6 @@
         body.classList.remove('overflow-hidden');
     };
 
-    const revealOnScroll = () => {
-        const targets = document.querySelectorAll('.scroll-reveal, .reveal-up, .reveal-left, .reveal-right');
-
-        if (!('IntersectionObserver' in window)) {
-            targets.forEach((target) => target.classList.add('is-visible'));
-            return;
-        }
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.15 });
-
-        targets.forEach((target) => observer.observe(target));
-    };
-
     const filterMenuCards = (filter) => {
         if (!menuCards.length) {
             return;
@@ -68,8 +48,6 @@
             button.dataset.active = button.getAttribute('data-menu-filter') === filter ? 'true' : 'false';
         });
     };
-
-    document.addEventListener('DOMContentLoaded', revealOnScroll);
 
     if (openButton) {
         openButton.addEventListener('click', openDrawer);

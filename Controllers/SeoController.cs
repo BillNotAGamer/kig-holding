@@ -12,6 +12,8 @@ public class SeoController : Controller
     [
         "/",
         "/gioi-thieu",
+        "/thanh-vien",
+        "/lien-he-nhuong-quyen",
         "/thuc-don",
         "/dat-ban",
         "/chi-nhanh",

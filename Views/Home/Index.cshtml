@@ -1,422 +1,564 @@
-@model HomeIndexViewModel
+﻿@model HomeIndexViewModel
 
 @{
-    ViewData["Title"] = "Trang chủ";
-    ViewData["MetaDescription"] = "Truyền Thuyết Champong phục vụ mì Champong hải sản, món Hàn Quốc và trải nghiệm nhà hàng hiện đại theo chuẩn hospitality.";
+    ViewData["Title"] = "Truyền Thuyết Champong - Trải nghiệm ẩm thực Hàn Quốc đậm vị và hiện đại";
+    ViewData["MetaDescription"] = "Khám phá câu chuyện thương hiệu, tinh hoa ẩm thực và những điểm nhấn tạo nên trải nghiệm dùng bữa đậm vị, sum vầy và hiện đại tại Champong.";
 
-    var signatureItems = Model.SignatureMenuItems.Count > 0 ? Model.SignatureMenuItems : Model.FeaturedMenuItems;
+    var menuItems = Model.SignatureMenuItems.Count > 0 ? Model.SignatureMenuItems : Model.FeaturedMenuItems;
+    var menuCards = menuItems.Take(4).ToList();
+    var hasMenuItems = menuCards.Count > 0;
+    var featuredMenuItem = hasMenuItems ? menuCards[0] : null;
+    var supportingMenuItems = hasMenuItems && menuCards.Count > 1
+        ? menuCards.Skip(1).Take(3).ToList()
+        : new List<FoodCardViewModel>();
+    var promoPosts = Model.LatestPosts.Take(3).ToList();
 }
 
-<section class="hero-frame" data-home-section="hero">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(231,217,189,0.7),transparent_28rem),radial-gradient(circle_at_bottom_right,rgba(17,24,39,0.06),transparent_24rem)]"></div>
-    <div class="container-page section-shell relative">
-        <div class="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-            <div class="hero-card reveal-up">
-                <p class="text-kicker font-black uppercase text-brand-red">KIG-inspired hospitality</p>
-                <h1 class="mt-4 text-4xl font-black leading-tight text-brand-dark sm:text-6xl">
-                    @Model.BrandName
-                </h1>
-                <p class="mt-5 max-w-2xl text-lead text-brand-gray">
-                    Không gian dùng bữa hiện đại, thực đơn Hàn Quốc chỉn chu và trải nghiệm phục vụ được thiết kế như một thương hiệu nhà hàng cao cấp.
-                </p>
+<section class="champong-hero relative overflow-hidden bg-brand-black" data-home-section="hero">
+    <div data-champong-hero-slider class="champong-hero__slider relative overflow-hidden" aria-roledescription="carousel" aria-label="Champong hero slider">
+        <article data-champong-hero-slide class="champong-hero__slide champong-hero__slide--one is-active absolute inset-0 z-20 opacity-100" aria-hidden="false">
+            <div class="champong-hero__media" aria-hidden="true"></div>
+            <div class="champong-hero__overlay" aria-hidden="true"></div>
 
-                <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="/dat-ban" class="btn-primary">Đặt bàn</a>
-                    <a href="/thuc-don" class="btn-secondary">Xem thực đơn</a>
-                </div>
+            <div class="container-page champong-hero__inner">
+                <div class="champong-hero__content champong-hero__content--left">
+                    <span data-champong-hero-reveal class="champong-hero__eyebrow champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="0">
+                        PREMIUM KOREAN DINING EXPERIENCE
+                    </span>
+                    <h1 data-champong-hero-reveal class="champong-hero__title champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="140">
+                        Champong cho những bữa ăn có gu.
+                    </h1>
+                    <p data-champong-hero-reveal class="champong-hero__description champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="280">
+                        Không gian hiện đại, nhịp phục vụ chỉn chu và thực đơn đậm vị tạo nên một điểm hẹn dễ nhớ cho khách ghé thăm.
+                    </p>
 
-                <div class="mt-8 grid gap-3 sm:grid-cols-3">
-                    <div class="stat-card">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">Hotline</p>
-                        <p class="mt-2 text-lg font-black text-brand-dark">@Model.Hotline</p>
-                    </div>
-                    <div class="stat-card">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">Giờ mở cửa</p>
-                        <p class="mt-2 text-lg font-black text-brand-dark">@Model.OpeningHours</p>
-                    </div>
-                    <div class="stat-card">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">Hệ thống</p>
-                        <p class="mt-2 text-lg font-black text-brand-dark">@Model.BranchHint</p>
+                    <div data-champong-hero-reveal class="champong-hero__actions champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="420">
+                        <a href="/dat-ban" class="champong-hero__btn champong-hero__btn--primary">
+                            Đặt bàn ngay
+                        </a>
+                        <a href="/thuc-don" data-uw-reveal="fade-up" class="champong-hero__btn champong-hero__btn--ghost">
+                            Xem thực đơn
+                        </a>
                     </div>
                 </div>
             </div>
+        </article>
 
-            <div class="grid gap-4 sm:grid-cols-2">
-                <figure class="food-image-wrap min-h-[22rem] shadow-panel sm:col-span-2 lg:min-h-[28rem]">
-                    <img src="/images/placeholders/champong-hero.webp"
-                         alt="Món ăn signature tại Truyền Thuyết Champong"
-                         class="food-image absolute inset-0"
-                         onerror="this.remove();" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-brand-black/45 via-brand-black/10 to-transparent"></div>
-                    <figcaption class="absolute bottom-6 left-6 right-6 z-20 rounded-md bg-white/92 p-4 shadow-soft backdrop-blur">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-red">Editorial dining story</p>
-                        <p class="mt-2 text-2xl font-black text-brand-dark">Ẩm thực Hàn Quốc được kể bằng hình ảnh, khoảng trắng và trải nghiệm tại bàn.</p>
-                    </figcaption>
-                </figure>
-                <figure class="food-image-wrap min-h-[14rem] shadow-soft">
-                    <img src="/images/placeholders/combo-table.webp"
-                         alt="Combo dành cho nhóm"
-                         class="food-image absolute inset-0"
-                         loading="lazy"
-                         onerror="this.remove();" />
-                </figure>
-                <figure class="food-image-wrap min-h-[14rem] shadow-soft">
-                    <img src="/images/placeholders/korean-chef-noodle.webp"
-                         alt="Đầu bếp chuẩn bị món ăn"
-                         class="food-image absolute inset-0"
-                         loading="lazy"
-                         onerror="this.remove();" />
-                </figure>
+        <article data-champong-hero-slide hidden class="champong-hero__slide champong-hero__slide--two absolute inset-0 z-10 opacity-0" aria-hidden="true">
+            <div class="champong-hero__media" aria-hidden="true"></div>
+            <div class="champong-hero__overlay champong-hero__overlay--right" aria-hidden="true"></div>
+
+            <div class="container-page champong-hero__inner">
+                <div class="champong-hero__content champong-hero__content--right">
+                    <span data-champong-hero-reveal class="champong-hero__eyebrow champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="0">
+                        SIGNATURE CHAMPONG FLAVOURS
+                    </span>
+                    <h2 data-champong-hero-reveal class="champong-hero__title champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="140">
+                        Hương vị đậm đà, nâng nhịp mọi cuộc gặp.
+                    </h2>
+                    <p data-champong-hero-reveal class="champong-hero__subtitle champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="240">
+                        Đậm vị Hàn Quốc trong một không gian hiện đại và gần gũi.
+                    </p>
+                    <p data-champong-hero-reveal class="champong-hero__description champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="340">
+                        Sự cân bằng giữa món ăn, ánh sáng và nhịp phục vụ giúp Champong giữ được cảm giác mới mẻ nhưng vẫn dễ quay lại.
+                    </p>
+
+                    <div data-champong-hero-reveal class="champong-hero__actions champong-hero__actions--right champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="480">
+                        <a href="/thuc-don" class="champong-hero__btn champong-hero__btn--primary">
+                            Khám phá thực đơn
+                        </a>
+                        <a href="/chi-nhanh" data-uw-reveal="fade-up" class="champong-hero__btn champong-hero__btn--ghost">
+                            Xem chi nhánh
+                        </a>
+                    </div>
+                </div>
             </div>
+        </article>
+
+        <button type="button" class="champong-hero__nav champong-hero__nav--prev" aria-label="Previous slide" data-champong-hero-prev>
+            <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"></path>
+            </svg>
+        </button>
+        <button type="button" class="champong-hero__nav champong-hero__nav--next" aria-label="Next slide" data-champong-hero-next>
+            <svg viewBox="0 0 24 24" class="size-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 6l6 6-6 6"></path>
+            </svg>
+        </button>
+
+        <div class="champong-hero__dots" aria-label="Slide navigation">
+            <button type="button" class="champong-hero__dot" aria-label="Go to slide 1" aria-current="true" data-champong-hero-dot="0"></button>
+            <button type="button" class="champong-hero__dot" aria-label="Go to slide 2" aria-current="false" data-champong-hero-dot="1"></button>
         </div>
     </div>
 </section>
 
-<section class="section-shell bg-[#111] py-20" data-home-section="brand-story">
-    <div class="container-page space-y-20">
-        
-        <!-- Row 1: Image Left, Text Right -->
-        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div class="reveal-right order-1 lg:order-1">
-                <div class="food-image-wrap aspect-[4/3] shadow-panel overflow-hidden rounded-xl border border-white/10">
-                    <img src="/images/placeholders/korean-chef-noodle.webp"
-                         alt="Đầu bếp chuẩn bị món ăn Hàn Quốc"
-                         class="food-image absolute inset-0 h-full w-full object-cover"
-                         loading="lazy"
-                         onerror="this.remove();" />
-                </div>
-            </div>
-            
-            <div class="order-2 lg:order-2 reveal-up delay-100">
-                <h2 class="text-4xl font-black text-brand-red uppercase tracking-wide">Truyền Thuyết Champong</h2>
-                <p class="mt-4 text-lead text-white/80">
-                    Từ món ăn quen thuộc đến trải nghiệm nhà hàng chỉn chu hơn. Hình ảnh sáng, không gian thoáng, cấu trúc nội dung rõ ràng và món ăn là trung tâm của câu chuyện.
-                </p>
-                
-                <div class="mt-8 grid gap-6 sm:grid-cols-2">
-                    <div class="reveal-up delay-100">
-                        <svg class="size-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path>
-                        </svg>
-                        <h3 class="mt-3 text-lg font-black text-brand-red">Ẩm thực chuẩn vị</h3>
-                        <p class="mt-2 text-sm leading-6 text-white/60">Món mì, món nướng và các lựa chọn dùng chung được trình bày rõ ràng, dễ chọn.</p>
-                    </div>
-                    <div class="reveal-up delay-200">
-                        <svg class="size-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                        </svg>
-                        <h3 class="mt-3 text-lg font-black text-brand-red">Không gian tiếp khách</h3>
-                        <p class="mt-2 text-sm leading-6 text-white/60">Thiết kế phù hợp cho bữa ăn gia đình, đối tác hoặc các dịp gặp gỡ cuối tuần.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Row 2: Text Left, Image Right -->
-        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div class="order-2 lg:order-1 reveal-up delay-100">
-                <h2 class="text-4xl font-black text-brand-red uppercase tracking-wide">GOGIMARU</h2>
-                <p class="mt-4 text-lead text-white/80">
-                    Trải nghiệm thịt nướng Hàn Quốc đỉnh cao với hệ thống vận hành chuyên nghiệp, giữ vững sự đồng bộ trên toàn quốc.
-                </p>
-                
-                <div class="mt-8 grid gap-6 sm:grid-cols-2">
-                    <div class="reveal-up delay-100">
-                        <svg class="size-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                        <h3 class="mt-3 text-lg font-black text-brand-red">Hương vị nguyên bản</h3>
-                        <p class="mt-2 text-sm leading-6 text-white/60">Thịt nướng tươi ngon được tẩm ướp tinh tế, ăn kèm các loại banchan chuẩn Hàn.</p>
-                    </div>
-                    <div class="reveal-up delay-200">
-                        <svg class="size-8 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                        <h3 class="mt-3 text-lg font-black text-brand-red">Vận hành hệ thống</h3>
-                        <p class="mt-2 text-sm leading-6 text-white/60">Mỗi chi nhánh được tổ chức để giữ trải nghiệm đồng bộ trên toàn bộ website và vận hành sau này.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="reveal-left order-1 lg:order-2">
-                <div class="food-image-wrap aspect-[4/3] shadow-panel overflow-hidden rounded-xl border border-white/10">
-                    <img src="/images/placeholders/korean-bbq.webp"
-                         alt="Món nướng Hàn Quốc"
-                         class="food-image absolute inset-0 h-full w-full object-cover"
-                         loading="lazy"
-                         onerror="this.remove();" />
-                </div>
-            </div>
-        </div>
-
-    </div>
-</section>
-
-<section class="py-20 bg-white section-shell" data-home-section="menu-ecosystem">
+<section class="section-band section-shell" data-home-section="brand-story">
     <div class="container-page">
-        <div class="text-center reveal-up">
-            <h2 class="text-brand-red uppercase tracking-wide font-bold text-4xl">THỰC ĐƠN</h2>
-            <p class="mt-4 max-w-2xl mx-auto text-gray-600 font-medium text-lg">
-                Từ mì Champong cay nồng trứ danh đến các món BBQ nướng hấp dẫn. Nguyên liệu chọn lọc kỹ lưỡng - hương vị đồng bộ.
-            </p>
+        <div class="grid gap-8 lg:grid-cols-[0.42fr_0.58fr] lg:items-start">
+            <div data-uw-reveal="fade-up">
+                @await Component.InvokeAsync("SectionHeading", new
+                {
+                    model = new SectionHeadingViewModel
+                    {
+                        Eyebrow = "Câu chuyện thương hiệu",
+                        Title = "Từ trải nghiệm món ăn đến một hệ thống hospitality có bản sắc.",
+                        Description = "Trang chủ đang đóng lại vai trò giới thiệu để tập trung vào một câu chuyện thương hiệu ngắn gọn, sáng và dễ nhớ hơn."
+                    }
+                })
+                <div class="mt-7 flex flex-wrap gap-3">
+                    <a href="/gioi-thieu" class="btn-primary">Khám phá KIG Holding</a>
+                    <a href="/lien-he" class="btn-secondary">Liên hệ</a>
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2" data-uw-reveal="fade-up" data-uw-delay="100">
+                @{
+                    var storyItems = new[]
+                    {
+                        ("HÆ°Æ¡ng vá»‹ HÃ n Quá»‘c", "KhÃ´ng gian vÃ  nhá»‹p Ä‘iá»‡u trÃ¬nh bÃ y Ä‘á»u hÆ°á»›ng tá»›i tráº£i nghiá»‡m áº©m thá»±c HÃ n Quá»‘c chá»‰n chu."),
+                        ("KhÃ´ng gian sum váº§y", "Bá»‘ cá»¥c má»Ÿ, sáº¡ch vÃ  sÃ¡ng Ä‘á»ƒ phÃ¹ há»£p bá»¯a Äƒn gia Ä‘Ã¬nh, nhÃ³m báº¡n vÃ  khÃ¡ch tiáº¿p Ä‘Ã³n."),
+                        ("Tráº£i nghiá»‡m chá»‰n chu", "Tá»«ng pháº§n ná»™i dung Ä‘Æ°á»£c giá»¯ ngáº¯n, rÃµ vÃ  sang Ä‘á»ƒ táº¡o cáº£m giÃ¡c premium nháº¥t quÃ¡n."),
+                        ("PhÃ¡t triá»ƒn cÃ¹ng KIG", "ThÆ°Æ¡ng hiá»‡u Ä‘Æ°á»£c ká»ƒ nhÆ° má»™t há»‡ thá»‘ng cÃ³ thá»ƒ má»Ÿ rá»™ng dáº§n theo cÃ¹ng má»™t giá»ng Ä‘iá»‡u.")
+                    };
+                }
+
+                @for (var i = 0; i < storyItems.Length; i++)
+                {
+                    var item = storyItems[i];
+
+                    <article class="surface-panel card-hover p-5">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">@(i + 1).</span>
+                            <span class="h-2 w-2 rounded-full bg-brand-red"></span>
+                        </div>
+                        <h3 class="mt-4 text-lg font-black text-brand-dark">@item.Item1</h3>
+                        <p class="mt-3 text-sm leading-7 text-brand-gray">@item.Item2</p>
+                    </article>
+                }
+            </div>
         </div>
 
-        <div class="mt-16 space-y-12">
-            <!-- Card 1: Champong -->
-            <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden group">
-                <div class="lg:w-1/2 reveal-left">
-                    <div class="food-image-wrap h-64 lg:h-full w-full">
-                        <img src="/images/placeholders/champong-hero.webp" alt="Menu Mì Champong" class="food-image absolute inset-0 object-cover w-full h-full" loading="lazy" onerror="this.remove();" />
-                    </div>
-                </div>
-                <div class="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center reveal-right">
-                    <h3 class="text-3xl font-bold text-gray-900 uppercase tracking-wide">Mì Champong</h3>
-                    <p class="mt-4 text-gray-600 font-medium leading-relaxed">
-                        Món mì quốc dân của Hàn Quốc với nước dùng hải sản đậm đà, sợi mì dai ngon và vị cay đặc trưng. Một trải nghiệm bùng nổ hương vị không thể bỏ lỡ.
-                    </p>
-                    <div class="mt-8">
-                        <a href="/thuc-don?category=champong" class="inline-block border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white transition-colors rounded-button px-6 py-2 font-semibold uppercase tracking-wide text-sm">
-                            Xem chi tiết
-                        </a>
-                    </div>
-                </div>
+        <div class="mt-5 grid gap-4 lg:grid-cols-[0.38fr_0.62fr]" data-uw-reveal="fade-up" data-uw-delay="200">
+            <div class="surface-muted p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Tá»•ng quan</p>
+                <p class="mt-3 text-sm leading-7 text-brand-gray">
+                    Khu vá»±c nÃ y giá»¯ vai trÃ² ká»ƒ chuyá»‡n ngáº¯n gá»n hÆ¡n lÃ  Ä‘Æ°a sá»‘ liá»‡u cá»¥ thá»ƒ, giÃºp pháº§n Ä‘áº§u trang váº«n má»m vÃ  cÃ¢n báº±ng vá»›i cÃ¡c section cÃ²n láº¡i.
+                </p>
             </div>
-
-            <!-- Card 2: BBQ -->
-            <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden group">
-                <div class="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center reveal-left order-2 lg:order-1">
-                    <h3 class="text-3xl font-bold text-gray-900 uppercase tracking-wide">Premium BBQ</h3>
-                    <p class="mt-4 text-gray-600 font-medium leading-relaxed">
-                        Thịt nướng thượng hạng được tẩm ướp công phu. Cùng hệ thống bếp nướng không khói hiện đại, mang đến bữa ăn chuẩn vị Hàn Quốc trọn vẹn nhất.
-                    </p>
-                    <div class="mt-8">
-                        <a href="/thuc-don?category=bbq" class="inline-block border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white transition-colors rounded-button px-6 py-2 font-semibold uppercase tracking-wide text-sm">
-                            Xem chi tiết
-                        </a>
-                    </div>
-                </div>
-                <div class="lg:w-1/2 reveal-right order-1 lg:order-2">
-                    <div class="food-image-wrap h-64 lg:h-full w-full">
-                        <img src="/images/placeholders/korean-bbq.webp" alt="Menu BBQ" class="food-image absolute inset-0 object-cover w-full h-full" loading="lazy" onerror="this.remove();" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3: Combo / Nhóm -->
-            <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden group">
-                <div class="lg:w-1/2 reveal-left">
-                    <div class="food-image-wrap h-64 lg:h-full w-full">
-                        <img src="/images/placeholders/combo-table.webp" alt="Menu Combo" class="food-image absolute inset-0 object-cover w-full h-full" loading="lazy" onerror="this.remove();" />
-                    </div>
-                </div>
-                <div class="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center reveal-right">
-                    <h3 class="text-3xl font-bold text-gray-900 uppercase tracking-wide">Combo Nhóm</h3>
-                    <p class="mt-4 text-gray-600 font-medium leading-relaxed">
-                        Thiết kế dành riêng cho gia đình và nhóm bạn. Cân bằng hoàn hảo giữa món nướng, lẩu và món ăn kèm, giúp việc chọn món trở nên dễ dàng hơn bao giờ hết.
-                    </p>
-                    <div class="mt-8">
-                        <a href="/thuc-don?category=combo" class="inline-block border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white transition-colors rounded-button px-6 py-2 font-semibold uppercase tracking-wide text-sm">
-                            Xem chi tiết
-                        </a>
-                    </div>
-                </div>
+            <div class="surface-panel p-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">CTA</p>
+                <p class="mt-3 text-sm leading-7 text-brand-gray">
+                    NgÆ°á»i dÃ¹ng cÃ³ thá»ƒ Ä‘i tiáº¿p tá»›i trang giá»›i thiá»‡u Ä‘á»ƒ Ä‘á»c ná»™i dung dÃ i hÆ¡n hoáº·c chuyá»ƒn sang thá»±c Ä‘Æ¡n vÃ  Ä‘áº·t bÃ n.
+                </p>
             </div>
         </div>
     </div>
 </section>
 
-<section class="section-band section-shell" data-home-section="experience">
+<section class="section-shell" data-home-section="culinary-essence">
     <div class="container-page">
-        @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+        @await Component.InvokeAsync("SectionHeading", new
         {
-            Eyebrow = "Restaurant experience",
-            Title = "Thiết kế cho một nhịp dùng bữa tinh gọn hơn.",
-            Description = "Các khối nội dung được giãn rộng, cân bằng văn bản và hình ảnh theo cách gần hơn với một corporate hospitality website."
-        }})
+            model = new SectionHeadingViewModel
+            {
+                Eyebrow = "Tinh hoa áº©m thá»±c",
+                Title = "Nhá»¯ng Ä‘iá»ƒm nháº¥n lÃ m nÃªn tráº£i nghiá»‡m dÃ¹ng bá»¯a.",
+                Description = "Pháº§n nÃ y táº­p trung vÃ o cÃ¡c yáº¿u tá»‘ cá»‘t lÃµi cá»§a mÃ³n Äƒn vÃ  khÃ´ng gian, giá»¯ cÃ¡ch trÃ¬nh bÃ y gá»n, sang vÃ  dá»… Ä‘á»c."
+            }
+        })
 
         <div class="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            @foreach (var experience in new[]
+            @foreach (var item in new[]
             {
-                ("Không gian tiếp khách", "Bố cục và nội dung phù hợp cho nhà hàng hệ thống, tiếp cận khách gia đình lẫn doanh nghiệp."),
-                ("Hình ảnh dẫn dắt", "Mỗi cụm nội dung đều được neo bằng hình ảnh món ăn hoặc chi nhánh thay vì nền tối đặc nặng."),
-                ("Điều hướng sạch", "Header được giữ tối và tối giản để làm khung cho phần nội dung sáng phía dưới."),
-                ("Mở rộng quản trị", "Các section đang được giữ cấu trúc rõ để phục vụ CRUD chi nhánh, ảnh và bài viết về sau.")
+                ("NÆ°á»›c dÃ¹ng Ä‘áº­m vá»‹", "Nháº¥n máº¡nh táº§ng vá»‹ rÃµ rÃ ng, áº¥m vÃ  cÃ¢n báº±ng cho mÃ³n Champong vÃ  cÃ¡c lá»±a chá»n Ä‘i kÃ¨m."),
+                ("NguyÃªn liá»‡u chá»n lá»c", "Diá»…n Ä‘áº¡t sá»± tÆ°Æ¡i má»›i vÃ  tÃ­nh nháº¥t quÃ¡n trong cÃ¡ch lá»±a chá»n nguyÃªn liá»‡u."),
+                ("KhÃ´ng gian sum váº§y", "Gá»£i cáº£m giÃ¡c phÃ¹ há»£p cho gia Ä‘Ã¬nh, nhÃ³m báº¡n vÃ  cÃ¡c buá»•i tiáº¿p khÃ¡ch thÃ¢n máº­t."),
+                ("Phá»¥c vá»¥ táº­n tÃ¢m", "MÃ´ táº£ tráº£i nghiá»‡m phá»¥c vá»¥ nhÆ° má»™t pháº§n cá»§a giÃ¡ trá»‹ thÆ°Æ¡ng hiá»‡u, khÃ´ng chá»‰ lÃ  mÃ³n Äƒn.")
             })
             {
-                <div class="surface-panel p-6">
-                    <div class="mb-5 h-10 w-10 rounded-md bg-brand-red/10"></div>
-                    <h3 class="text-xl font-black text-brand-dark">@experience.Item1</h3>
-                    <p class="mt-3 text-sm leading-6 text-brand-gray">@experience.Item2</p>
-                </div>
+                <article class="surface-panel card-hover overflow-hidden p-6" data-uw-reveal="fade-up">
+                    <div class="mb-5 flex items-center justify-between">
+                        <span class="rounded-button border border-brand-gold/20 bg-brand-goldSoft/35 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-goldDeep">Tinh hoa</span>
+                        <span class="h-2.5 w-2.5 rounded-full bg-brand-red"></span>
+                    </div>
+                    <h3 class="text-xl font-black text-brand-dark">@item.Item1</h3>
+                    <p class="mt-3 text-sm leading-7 text-brand-gray">@item.Item2</p>
+                    <div class="mt-6 h-1 w-16 rounded-full bg-brand-red"></div>
+                </article>
             }
         </div>
     </div>
 </section>
 
-<section class="section-shell" data-home-section="branch-finder">
+<section class="section-band section-shell" data-home-section="menu">
     <div class="container-page">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+            @await Component.InvokeAsync("SectionHeading", new
             {
-                Eyebrow = "Branch system",
-                Title = "Chọn chi nhánh phù hợp cho bữa ăn kế tiếp.",
-                Description = "Danh sách chi nhánh được trình bày như một hệ thống nhà hàng hiện đại, giúp người dùng tra cứu nhanh vị trí và thông tin vận hành."
-            }})
-            <a href="/chi-nhanh" class="btn-secondary">Xem tất cả chi nhánh</a>
-        </div>
-
-        @if (Model.Branches.Count > 0)
-        {
-            <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                @foreach (var branch in Model.Branches)
+                model = new SectionHeadingViewModel
                 {
-                    @await Component.InvokeAsync("BranchCard", new { model = branch })
+                    Eyebrow = "Thá»±c Ä‘Æ¡n",
+                    Title = "Teaser cho cÃ¡c mÃ³n ná»•i báº­t trong há»‡ thá»‘ng.",
+                    Description = "Báº£n skeleton nÃ y hiá»ƒn thá»‹ má»™t teaser text-only an toÃ n Ä‘á»ƒ giá»¯ nhá»‹p ná»™i dung, trÃ¡nh phá»¥ thuá»™c áº£nh vÃ  cho phÃ©p Phase D gáº¯n dá»¯ liá»‡u menu sÃ¢u hÆ¡n."
                 }
-            </div>
-        }
-        else
-        {
-            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
-                Danh sách chi nhánh sẽ hiển thị sau khi có dữ liệu từ PostgreSQL.
-            </div>
-        }
-    </div>
-</section>
-
-<section class="section-band section-shell" data-home-section="booking">
-    <div class="container-page grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
-        <div>
-            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-            {
-                Eyebrow = "Đặt bàn",
-                Title = "Một khu vực booking nhẹ, rõ và dễ mở rộng.",
-                Description = "Form mini được đặt trên nền trắng để thuận tiện nâng cấp sang luồng đặt bàn đầy đủ hoặc tích hợp dashboard quản trị sau này."
-            }})
-            <div class="mt-6 flex flex-wrap gap-3 text-sm text-brand-gray">
-                <span class="rounded-button border border-brand-border bg-white px-4 py-2">Gia đình</span>
-                <span class="rounded-button border border-brand-border bg-white px-4 py-2">Tiếp khách</span>
-                <span class="rounded-button border border-brand-border bg-white px-4 py-2">Nhóm bạn</span>
-            </div>
+            })
+            <a href="/thuc-don" class="btn-secondary">Xem thá»±c Ä‘Æ¡n</a>
         </div>
-        @await Html.PartialAsync("~/Views/Shared/Components/BookingMiniForm/Default.cshtml", Model.ReservationForm)
-    </div>
-</section>
 
-<section class="section-shell" data-home-section="reviews">
-    <div class="container-page">
-        @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+        @if (hasMenuItems && featuredMenuItem is not null)
         {
-            Eyebrow = "Guest feedback",
-            Title = "Cảm nhận khách hàng trong một giao diện thoáng và sáng.",
-            Description = "Nhóm đánh giá được chuyển sang card trắng để tăng độ đọc và giảm cảm giác landing page nặng nề của giao diện cũ."
-        }})
-
-        @if (Model.Reviews.Count > 0)
-        {
-            <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                @foreach (var review in Model.Reviews)
-                {
-                    <article class="surface-panel p-6">
-                        <div class="flex items-center gap-4">
-                            @if (!string.IsNullOrWhiteSpace(review.AvatarUrl))
+            <div class="mt-9 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+                <article class="surface-panel overflow-hidden" data-uw-reveal="fade-up">
+                    <div class="border-b border-brand-border/70 bg-brand-light px-5 py-4 sm:px-6">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-goldDeep">Menu teaser</p>
+                    </div>
+                    <div class="grid gap-0 lg:grid-cols-[0.96fr_1.04fr]">
+                        <div class="p-6 sm:p-7">
+                            <span class="inline-flex rounded-button border border-brand-gold/20 bg-brand-goldSoft/35 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">
+                                Signature
+                            </span>
+                            <h3 class="mt-5 text-3xl font-black text-brand-dark">@featuredMenuItem.Name</h3>
+                            @if (!string.IsNullOrWhiteSpace(featuredMenuItem.KoreanName))
                             {
-                                <img src="@review.AvatarUrl" alt="@review.CustomerName" class="size-12 rounded-md object-cover" loading="lazy" />
+                                <p class="mt-2 text-sm text-brand-gray">@featuredMenuItem.KoreanName</p>
                             }
-                            else
-                            {
-                                <div class="grid size-12 place-items-center rounded-md bg-brand-red/10 text-lg font-black text-brand-dark">
-                                    @GetInitial(review.CustomerName)
+                            <p class="mt-4 text-sm leading-7 text-brand-gray">@featuredMenuItem.ShortDescription</p>
+
+                            <div class="mt-6 flex flex-wrap gap-2">
+                                <span class="rounded-button border border-brand-border bg-brand-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">MÃ³n ná»•i báº­t</span>
+                                <span class="rounded-button border border-brand-border bg-brand-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Äá» xuáº¥t thá»­</span>
+                            </div>
+
+                            <div class="mt-7 flex items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">GiÃ¡ tham kháº£o</p>
+                                    <p class="mt-1 text-2xl font-black text-brand-dark">@featuredMenuItem.Price.ToString("N0")Ä‘</p>
                                 </div>
-                            }
-                            <div>
-                                <h3 class="font-black text-brand-dark">@review.CustomerName</h3>
-                                @if (!string.IsNullOrWhiteSpace(review.BranchName))
+                                <a href="@featuredMenuItem.Url" class="btn-primary">Má»Ÿ mÃ³n</a>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-brand-border/70 bg-brand-light p-6 lg:border-l lg:border-t-0">
+                            <div class="grid gap-3">
+                                @if (supportingMenuItems.Count > 0)
                                 {
-                                    <p class="text-xs text-brand-gray">@review.BranchName</p>
+                                    foreach (var item in supportingMenuItems)
+                                    {
+                                        <article class="surface-muted p-4">
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div class="min-w-0">
+                                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">
+                                                        @(string.IsNullOrWhiteSpace(item.CategoryName) ? "Signature" : item.CategoryName)
+                                                    </p>
+                                                    <h4 class="mt-2 text-lg font-black text-brand-dark">@item.Name</h4>
+                                                </div>
+                                                <span class="shrink-0 rounded-button border border-brand-border bg-brand-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
+                                                    @item.Price.ToString("N0")Ä‘
+                                                </span>
+                                            </div>
+                                            <p class="mt-3 text-sm leading-6 text-brand-gray">@item.ShortDescription</p>
+                                            <a href="@item.Url" class="mt-4 inline-flex text-sm font-semibold text-brand-goldDeep transition hover:text-brand-red">
+                                                Xem mÃ³n
+                                            </a>
+                                        </article>
+                                    }
+                                }
+                                else
+                                {
+                                    <article class="surface-muted p-4">
+                                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Menu teaser</p>
+                                        <h4 class="mt-2 text-lg font-black text-brand-dark">Ná»™i dung menu chÃ­nh thá»©c</h4>
+                                        <p class="mt-3 text-sm leading-6 text-brand-gray">
+                                            Phase D cÃ³ thá»ƒ nÃ¢ng cáº¥p pháº§n nÃ y khi cáº§n trÃ¬nh bÃ y sÃ¢u hÆ¡n cÃ¡c nhÃ³m mÃ³n vÃ  media.
+                                        </p>
+                                    </article>
                                 }
                             </div>
                         </div>
-                        <div class="mt-5 flex gap-1 text-brand-red" aria-label="@review.Rating sao">
-                            @for (var star = 1; star <= 5; star++)
-                            {
-                                <span>@(star <= review.Rating ? "★" : "☆")</span>
-                            }
+                    </div>
+                </article>
+
+                <div class="grid gap-4" data-uw-reveal="fade-up" data-uw-delay="100">
+                    @if (supportingMenuItems.Count > 0)
+                    {
+                        foreach (var item in supportingMenuItems)
+                        {
+                            <article class="surface-panel card-hover p-5">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="min-w-0">
+                                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">
+                                            @(string.IsNullOrWhiteSpace(item.CategoryName) ? "Signature" : item.CategoryName)
+                                        </p>
+                                        <h3 class="mt-2 text-xl font-black text-brand-dark">@item.Name</h3>
+                                    </div>
+                                    <span class="rounded-button border border-brand-border bg-brand-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-dark">
+                                        @item.Price.ToString("N0")Ä‘
+                                    </span>
+                                </div>
+                                <p class="mt-3 text-sm leading-7 text-brand-gray">@item.ShortDescription</p>
+                                <a href="@item.Url" class="mt-4 inline-flex text-sm font-semibold text-brand-goldDeep transition hover:text-brand-red">
+                                    Xem chi tiáº¿t mÃ³n
+                                </a>
+                            </article>
+                        }
+                    }
+                    else
+                    {
+                        foreach (var item in new[]
+                        {
+                            ("Champong signature", "MÃ³n chá»§ lá»±c thá»ƒ hiá»‡n rÃµ phong cÃ¡ch áº©m thá»±c cá»§a thÆ°Æ¡ng hiá»‡u."),
+                            ("BBQ tuyá»ƒn chá»n", "Gá»£i Ã½ cÃ¡c mÃ³n nÆ°á»›ng cho nhÃ³m khÃ¡ch thÃ­ch tráº£i nghiá»‡m Ä‘áº­m vá»‹."),
+                            ("Combo gia Ä‘Ã¬nh", "PhÃ¹ há»£p cho nhÃ³m nhiá»u ngÆ°á»i vá»›i cáº¥u trÃºc chá»n mÃ³n gá»n hÆ¡n.")
+                        })
+                        {
+                            <article class="surface-panel card-hover p-5">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Menu teaser</p>
+                                <h3 class="mt-2 text-xl font-black text-brand-dark">@item.Item1</h3>
+                                <p class="mt-3 text-sm leading-7 text-brand-gray">@item.Item2</p>
+                            </article>
+                        }
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="mt-9 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+                <article class="surface-panel overflow-hidden" data-uw-reveal="fade-up">
+                    <div class="border-b border-brand-border/70 bg-brand-light px-5 py-4 sm:px-6">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-goldDeep">Menu teaser</p>
+                    </div>
+                    <div class="grid gap-0 lg:grid-cols-[0.96fr_1.04fr]">
+                        <div class="p-6 sm:p-7">
+                            <span class="inline-flex rounded-button border border-brand-gold/20 bg-brand-goldSoft/35 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">
+                                Signature
+                            </span>
+                            <h3 class="mt-5 text-3xl font-black text-brand-dark">MÃ³n chá»§ lá»±c cá»§a Champong</h3>
+                            <p class="mt-4 text-sm leading-7 text-brand-gray">
+                                Báº£n skeleton hiá»‡n giá»¯ khá»‘i menu á»Ÿ dáº¡ng an toÃ n, gá»n vÃ  sáºµn sÃ ng Ä‘Æ°á»£c thay báº±ng dá»¯ liá»‡u/menu thumbnail khi Phase D tiáº¿p theo cáº§n nÃ¢ng cáº¥p.
+                            </p>
+                            <div class="mt-7 flex items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Thá»±c Ä‘Æ¡n</p>
+                                    <p class="mt-1 text-2xl font-black text-brand-dark">Xem ngay</p>
+                                </div>
+                                <a href="/thuc-don" class="btn-primary">Má»Ÿ mÃ³n</a>
+                            </div>
                         </div>
-                        <p class="mt-4 text-sm leading-7 text-brand-gray">@review.Content</p>
+
+                        <div class="border-t border-brand-border/70 bg-brand-light p-6 lg:border-l lg:border-t-0">
+                            <div class="grid gap-3">
+                                @foreach (var item in new[]
+                                {
+                                    ("Champong signature", "MÃ³n chá»§ lá»±c thá»ƒ hiá»‡n rÃµ phong cÃ¡ch áº©m thá»±c cá»§a thÆ°Æ¡ng hiá»‡u."),
+                                    ("BBQ tuyá»ƒn chá»n", "Gá»£i Ã½ cÃ¡c mÃ³n nÆ°á»›ng cho nhÃ³m khÃ¡ch thÃ­ch tráº£i nghiá»‡m Ä‘áº­m vá»‹."),
+                                    ("Combo gia Ä‘Ã¬nh", "PhÃ¹ há»£p cho nhÃ³m nhiá»u ngÆ°á»i vá»›i cáº¥u trÃºc chá»n mÃ³n gá»n hÆ¡n.")
+                                })
+                                {
+                                    <article class="surface-muted p-4">
+                                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Menu teaser</p>
+                                        <h4 class="mt-2 text-lg font-black text-brand-dark">@item.Item1</h4>
+                                        <p class="mt-3 text-sm leading-6 text-brand-gray">@item.Item2</p>
+                                    </article>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <div class="grid gap-4" data-uw-reveal="fade-up" data-uw-delay="100">
+                    <article class="surface-panel card-hover p-5">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Menu teaser</p>
+                        <h3 class="mt-2 text-xl font-black text-brand-dark">Giá»¯ nhá»‹p mÃ³n chá»§ lá»±c</h3>
+                        <p class="mt-3 text-sm leading-7 text-brand-gray">Khu vá»±c nÃ y cÃ³ thá»ƒ chuyá»ƒn sang menu Ä‘á»™ng sÃ¢u hÆ¡n khi thumbnails vÃ  curation sáºµn sÃ ng.</p>
                     </article>
-                }
+                    <article class="surface-panel card-hover p-5">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Menu teaser</p>
+                        <h3 class="mt-2 text-xl font-black text-brand-dark">Äá»‹nh vá»‹ thá»±c Ä‘Æ¡n rÃµ hÆ¡n</h3>
+                        <p class="mt-3 text-sm leading-7 text-brand-gray">Thiáº¿t káº¿ hiá»‡n táº¡i Æ°u tiÃªn an toÃ n vÃ  rÃµ rÃ ng, khÃ´ng phá»¥ thuá»™c áº£nh chÆ°a xÃ¡c minh.</p>
+                    </article>
+                    <article class="surface-panel card-hover p-5">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Menu teaser</p>
+                        <h3 class="mt-2 text-xl font-black text-brand-dark">Chuáº©n bá»‹ cho Phase D</h3>
+                        <p class="mt-3 text-sm leading-7 text-brand-gray">CÃ³ thá»ƒ má»Ÿ rá»™ng sang menu card hÃ¬nh áº£nh sau khi tÃ i sáº£n media Ä‘Æ°á»£c xÃ¡c nháº­n.</p>
+                    </article>
+                </div>
             </div>
         }
-        else
-        {
-            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
-                Đánh giá khách hàng sẽ hiển thị sau khi dữ liệu review được seed.
-            </div>
-        }
+
+        <p class="mt-5 text-sm text-brand-gray" data-uw-reveal="fade-up">
+            TODO: Phase D cÃ³ thá»ƒ nÃ¢ng cáº¥p pháº§n nÃ y sang hiá»ƒn thá»‹ menu Ä‘á»™ng sÃ¢u hÆ¡n náº¿u cáº§n thÃªm chi tiáº¿t vÃ  media.
+        </p>
     </div>
 </section>
 
-<section class="section-band section-shell" data-home-section="news">
+<section class="champong-takehome section-shell bg-brand-light" data-home-section="take-home">
     <div class="container-page">
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-            {
-                Eyebrow = "News & stories",
-                Title = "Cập nhật từ hệ thống nhà hàng.",
-                Description = "Bài viết, khai trương chi nhánh và câu chuyện thương hiệu được trình bày như một hệ sinh thái nội dung có cấu trúc."
-            }})
-            <a href="/tin-tuc" class="btn-secondary">Xem tất cả</a>
-        </div>
+        <div class="grid gap-10 lg:grid-cols-[0.52fr_0.48fr] lg:items-center">
+            <div data-uw-reveal="fade-up">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-brand-goldDeep">Mang Champong về nhà</p>
+                <h2 class="mt-4 max-w-xl text-5xl font-black leading-[0.94] tracking-tight text-brand-dark sm:text-6xl lg:text-[4.75rem]">
+                    Mang <span class="text-brand-red">Champong</span><br />về nhà
+                </h2>
+                <p class="mt-6 max-w-xl text-base leading-8 text-brand-gray">
+                    Một khoảng dừng nhẹ, sạch và đủ ấm để gợi mở cảm giác thưởng thức Champong ở nhà, trong những bữa sum vầy nhỏ hoặc các dịp muốn giữ nhịp ăn ngon thật gọn gàng.
+                </p>
+            </div>
 
-        @if (Model.LatestPosts.Count > 0)
-        {
-            <div class="mt-9 grid gap-5 md:grid-cols-3">
-                @foreach (var post in Model.LatestPosts.Take(3))
-                {
-                    @await Component.InvokeAsync("PostCard", new { model = post })
-                }
+            <div class="mx-auto w-full max-w-[34rem]" data-uw-reveal="fade-up" data-uw-delay="100" aria-hidden="true">
+                <div class="champong-takehome__visual rounded-[2rem] border border-brand-border bg-brand-white p-6 shadow-soft">
+                    <div class="champong-takehome__frame relative overflow-hidden rounded-[1.6rem] border border-brand-border bg-brand-light p-6 sm:p-8">
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(229,9,20,0.08),transparent_18rem)]"></div>
+
+                        <div class="relative flex min-h-[20rem] items-center justify-center">
+                            <div class="absolute left-4 top-4 rounded-full border border-brand-border bg-brand-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-red">
+                                Take-home
+                            </div>
+
+                            <div class="relative flex h-[21rem] w-full items-center justify-center">
+                                <div class="absolute left-1/2 top-1/2 h-60 w-60 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-border bg-brand-white shadow-soft"></div>
+                                <div class="absolute left-1/2 top-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-red/12 bg-brand-cream"></div>
+                                <div class="absolute left-1/2 top-[6.9rem] h-14 w-40 -translate-x-1/2 rounded-full bg-brand-red/12"></div>
+                                <div class="absolute left-1/2 top-[8.9rem] h-20 w-28 -translate-x-1/2 rounded-[999px] border border-brand-red/15 bg-brand-red"></div>
+                                <div class="absolute left-1/2 top-[6.2rem] h-12 w-12 -translate-x-1/2 rounded-full border border-brand-red/20 bg-brand-white shadow-soft"></div>
+                                <div class="absolute left-[31%] top-20 h-10 w-1.5 -translate-x-1/2 rounded-full bg-brand-red/35 blur-[1px]"></div>
+                                <div class="absolute left-[39%] top-16 h-14 w-1.5 -translate-x-1/2 rounded-full bg-brand-red/25 blur-[1px]"></div>
+                                <div class="absolute left-[61%] top-15 h-12 w-1.5 -translate-x-1/2 rounded-full bg-brand-red/25 blur-[1px]"></div>
+                                <div class="absolute left-[69%] top-19 h-10 w-1.5 -translate-x-1/2 rounded-full bg-brand-red/35 blur-[1px]"></div>
+                                <div class="absolute bottom-8 left-1/2 h-8 w-36 -translate-x-1/2 rounded-full bg-black/10 blur-lg"></div>
+                                <div class="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-brand-border bg-brand-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-goldDeep shadow-soft">
+                                    Đậm vị, gọn gàng, sẵn sàng
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-center">
+                    <a href="/thuc-don" class="champong-takehome__button inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-soft transition duration-200 hover:bg-brand-redDark">
+                        Đặt ngay
+                    </a>
+                </div>
             </div>
-        }
-        else
-        {
-            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
-                Tin tức và bài viết sẽ hiển thị sau khi có bài viết đã xuất bản.
-            </div>
-        }
+        </div>
     </div>
 </section>
 
-@functions {
-    private static string GetMenuFilterKey(FoodCardViewModel item)
-    {
-        var source = $"{item.CategoryName} {item.Name} {item.Slug}";
+<section class="section-band section-shell" data-home-section="promotions">
+    <div class="container-page">
+        <div class="grid gap-8 lg:grid-cols-[0.42fr_0.58fr] lg:items-start">
+            <div data-uw-reveal="fade-up">
+                @await Component.InvokeAsync("SectionHeading", new
+                {
+                    model = new SectionHeadingViewModel
+                    {
+                        Eyebrow = "ChÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i",
+                        Title = "Nhá»¯ng cáº­p nháº­t má»›i nháº¥t cÃ³ thá»ƒ dÃ¹ng lÃ m nhá»‹p thÃ´ng tin Æ°u Ä‘Ã£i.",
+                        Description = "Khá»‘i nÃ y tiáº¿p tá»¥c táº­n dá»¥ng bÃ i viáº¿t hiá»‡n cÃ³, nhÆ°ng Ä‘Æ°á»£c Ä‘áº·t tÃªn vÃ  trÃ¬nh bÃ y theo hÆ°á»›ng promotion Ä‘á»ƒ bÃ¡m sÃ¡t Ä‘á»‹nh hÆ°á»›ng má»›i."
+                    }
+                })
 
-        if (source.Contains("champong", StringComparison.OrdinalIgnoreCase))
-        {
-            return "champong";
-        }
+                <div class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    @foreach (var note in new[]
+                    {
+                        "Æ¯u Ä‘Ã£i theo mÃ¹a",
+                        "Cáº­p nháº­t khai trÆ°Æ¡ng",
+                        "ThÃ´ng tin thÆ°Æ¡ng hiá»‡u"
+                    })
+                    {
+                        <div class="surface-panel p-4" data-uw-reveal="fade-up" data-uw-delay="100">
+                            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">@note</p>
+                            <p class="mt-2 text-sm leading-6 text-brand-gray">
+                                PhÃ¹ há»£p Ä‘á»ƒ truyá»n táº£i cÃ¡c chÆ°Æ¡ng trÃ¬nh, Æ°u Ä‘Ã£i hoáº·c thÃ´ng bÃ¡o Ä‘ang diá»…n ra mÃ  khÃ´ng cáº§n thÃªm route má»›i.
+                            </p>
+                        </div>
+                    }
+                </div>
 
-        if (source.Contains("bbq", StringComparison.OrdinalIgnoreCase))
-        {
-            return "bbq";
-        }
+                <a href="/tin-tuc" class="btn-secondary mt-7">Xem tin tá»©c</a>
+            </div>
 
-        if (source.Contains("combo", StringComparison.OrdinalIgnoreCase))
-        {
-            return "combo";
-        }
+            <div>
+                @if (promoPosts.Count > 0)
+                {
+                    <div class="grid gap-5 md:grid-cols-3">
+                        @foreach (var post in promoPosts)
+                        {
+                            <div data-uw-reveal="fade-up">
+                                @await Component.InvokeAsync("PostCard", new { model = post })
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="grid gap-4 md:grid-cols-3">
+                        @foreach (var item in new[]
+                        {
+                            ("Æ¯u Ä‘Ã£i theo mÃ¹a", "Khá»‘i khuyáº¿n mÃ£i placeholder nÃ y sáº½ Ä‘Æ°á»£c thay báº±ng ná»™i dung chÃ­nh thá»©c khi cÃ³ bÃ i viáº¿t."),
+                            ("ThÃ´ng bÃ¡o há»‡ thá»‘ng", "CÃ³ thá»ƒ dÃ¹ng láº¡i cho cÃ¡c cáº­p nháº­t liÃªn quan Ä‘áº¿n chÆ°Æ¡ng trÃ¬nh Ä‘ang diá»…n ra."),
+                            ("Tin tá»©c thÆ°Æ¡ng hiá»‡u", "Giá»¯ má»™t khu vá»±c tin tá»©c rÃµ rÃ ng Ä‘á»ƒ há»— trá»£ lá»‹ch Ä‘Äƒng táº£i vá» sau.")
+                        })
+                        {
+                            <article class="surface-panel p-6" data-uw-reveal="fade-up">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Khuyáº¿n mÃ£i</p>
+                                <h3 class="mt-3 text-xl font-black text-brand-dark">@item.Item1</h3>
+                                <p class="mt-3 text-sm leading-7 text-brand-gray">@item.Item2</p>
+                                <div class="mt-5 inline-flex rounded-button border border-brand-border bg-brand-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">
+                                    Xem thÃªm
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
 
-        if (source.Contains("lau", StringComparison.OrdinalIgnoreCase) || source.Contains("lẩu", StringComparison.OrdinalIgnoreCase))
-        {
-            return "lau";
-        }
+<section class="section-shell pt-0 lg:pt-0" data-home-section="reservation">
+    <div class="container-page">
+        <div class="grid gap-8 lg:grid-cols-[0.42fr_0.58fr] lg:items-start">
+            <div data-uw-reveal="fade-up">
+                @await Component.InvokeAsync("SectionHeading", new
+                {
+                    model = new SectionHeadingViewModel
+                    {
+                        Eyebrow = "Äáº·t bÃ n ngay",
+                        Title = "Khung booking nháº¹ vÃ  rÃµ cho bÆ°á»›c cuá»‘i cÃ¹ng.",
+                        Description = "Pháº§n Ä‘áº·t bÃ n giá»¯ nguyÃªn luá»“ng hiá»‡n cÃ³ Ä‘á»ƒ khÃ´ng áº£nh hÆ°á»Ÿng Ä‘áº¿n controller hay service, Ä‘á»“ng thá»i váº«n táº¡o CTA rÃµ rÃ ng á»Ÿ cuá»‘i trang."
+                    }
+                })
 
-        return "all";
-    }
+                <div class="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Gia Ä‘Ã¬nh</p>
+                        <p class="mt-2 text-sm leading-6 text-brand-gray">Giá»¯ chá»— cho bá»¯a Äƒn cuá»‘i tuáº§n hoáº·c dá»‹p Ä‘oÃ n tá»¥.</p>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Tiáº¿p khÃ¡ch</p>
+                        <p class="mt-2 text-sm leading-6 text-brand-gray">KhÃ´ng gian phÃ¹ há»£p cho cÃ¡c cuá»™c gáº·p gá»¡ gá»n vÃ  rÃµ.</p>
+                    </div>
+                    <div class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">NhÃ³m báº¡n</p>
+                        <p class="mt-2 text-sm leading-6 text-brand-gray">Chia sáº» tráº£i nghiá»‡m mÃ³n Äƒn theo cÃ¡ch thoáº£i mÃ¡i hÆ¡n.</p>
+                    </div>
+                </div>
+            </div>
 
-    private static string GetInitial(string name)
-    {
-        return string.IsNullOrWhiteSpace(name) ? "?" : name.Trim()[0].ToString().ToUpperInvariant();
-    }
+            <div class="space-y-4" data-uw-reveal="fade-up" data-uw-delay="100">
+                <div class="rounded-md border border-brand-gold/20 bg-brand-goldSoft/25 p-4 shadow-soft">
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Booking</p>
+                    <p class="mt-2 text-sm leading-6 text-brand-gray">
+                        Giá»¯ pháº§n Ä‘áº·t bÃ n rÃµ rÃ ng, gá»n vÃ  Ä‘á»§ ná»•i báº­t Ä‘á»ƒ ngÆ°á»i dÃ¹ng cÃ³ thá»ƒ chuyá»ƒn sang hÃ nh Ä‘á»™ng ngay.
+                    </p>
+                </div>
+                @await Html.PartialAsync("~/Views/Shared/Components/BookingMiniForm/Default.cshtml", Model.ReservationForm)
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <script src="~/js/home-hero-slider.js" asp-append-version="true"></script>
 }

@@ -5,18 +5,13 @@
         <a href="/" class="group flex shrink-0 items-center gap-3" aria-label="@Model.BrandName">
             @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
             {
-                <img src="@Model.LogoUrl" alt="@Model.BrandName" class="h-10 w-auto" />
+                <img src="@Model.LogoUrl" alt="@Model.BrandName" class="h-12 w-12 rounded-full object-contain" />
             }
             else
             {
                 <span class="brand-mark">TT</span>
             }
-            <span class="hidden min-w-0 sm:block">
-                <span class="block truncate text-sm font-bold uppercase tracking-[0.18em] text-white">@Model.BrandName</span>
-                <span class="block text-[10px] uppercase tracking-[0.24em] text-white/55">Restaurant Group</span>
-            </span>
         </a>
-
         <div class="hidden flex-1 lg:block">
             <div class="mx-auto flex w-fit items-center gap-8 xl:gap-10">
                 @foreach (var item in Model.NavItems)
@@ -26,9 +21,44 @@
                         string.Equals(item.Label?.Trim(), "Đặt bàn", StringComparison.OrdinalIgnoreCase);
                     if (!isReservationItem)
                     {
-                        <a href="@item.Url" class="nav-link @(item.IsActive ? "is-active" : string.Empty)">
-                            @item.Label
-                        </a>
+                        if (item.HasChildren)
+                        {
+                            <div class="group relative">
+                                <button type="button"
+                                        class="nav-link inline-flex items-center gap-1 @(item.IsActive ? "is-active" : string.Empty) focus-visible:outline-none"
+                                        aria-haspopup="true">
+                                    <span>@item.Label</span>
+                                    <svg class="size-3.5 text-current transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                                         viewBox="0 0 12 12"
+                                         fill="none"
+                                         aria-hidden="true">
+                                        <path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </button>
+
+                                <div class="pointer-events-none absolute right-0 top-full z-50 mt-3 w-64 translate-y-2 rounded-2xl border border-white/10 bg-brand-black/95 p-2 opacity-0 shadow-[0_20px_50px_rgba(0,0,0,0.28)] transition duration-200 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                                    <div class="space-y-1">
+                                        @foreach (var child in item.Children)
+                                        {
+                                            <a href="@child.Url"
+                                               class="flex items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-white/75 transition-colors hover:bg-white/10 hover:text-white @(child.IsActive ? "bg-brand-gold/15 text-brand-goldSoft" : string.Empty)">
+                                                <span>@child.Label</span>
+                                                @if (child.IsActive)
+                                                {
+                                                    <span class="h-1.5 w-1.5 rounded-full bg-brand-goldSoft"></span>
+                                                }
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="@item.Url" class="nav-link @(item.IsActive ? "is-active" : string.Empty)">
+                                @item.Label
+                            </a>
+                        }
                     }
                 }
             </div>

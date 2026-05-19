@@ -1,65 +1,175 @@
-@model KIGHolding.ViewModels.Shared.FooterViewModel
+﻿@model KIGHolding.ViewModels.Shared.FooterViewModel
 
-<footer class="border-t border-white/10 bg-brand-black">
-    <div class="container-page py-14 lg:py-20">
-        <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_1fr_1fr]">
-            <div>
-                <a href="/" class="flex items-center gap-3" aria-label="@Model.BrandName">
-                    @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
-                    {
-                        <img src="@Model.LogoUrl" alt="@Model.BrandName" class="h-11 w-auto" />
-                    }
-                    else
-                    {
-                        <span class="brand-mark">TT</span>
-                    }
-                    <span class="text-base font-black uppercase tracking-[0.18em] text-brand-cream">@Model.BrandName</span>
+@{
+    var footerLogoUrl = string.IsNullOrWhiteSpace(Model.FooterLogoUrl) ? Model.LogoUrl : Model.FooterLogoUrl;
+    var addressText = string.IsNullOrWhiteSpace(Model.Address) ? "Địa chỉ đang cập nhật" : Model.Address;
+    var currentYear = DateTime.Now.Year;
+    var hasMapLink = !string.IsNullOrWhiteSpace(Model.GoogleMapUrl);
+    var hasFacebook = !string.IsNullOrWhiteSpace(Model.FacebookUrl) && !string.Equals(Model.FacebookUrl, "#", StringComparison.Ordinal);
+    var hasZalo = !string.IsNullOrWhiteSpace(Model.ZaloUrl) && !string.Equals(Model.ZaloUrl, "#", StringComparison.Ordinal);
+    var hasTiktok = !string.IsNullOrWhiteSpace(Model.TiktokUrl) && !string.Equals(Model.TiktokUrl, "#", StringComparison.Ordinal);
+}
+
+<footer class="relative overflow-hidden border-t border-white/10 bg-brand-black text-brand-cream">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(184,154,98,0.12),transparent_28rem),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_24rem)] opacity-80" aria-hidden="true"></div>
+
+    <div class="container-page relative z-10 py-16 pb-28 sm:py-20 lg:py-16 lg:pb-16">
+        <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.35fr_1fr_1.1fr] lg:gap-16">
+            <section aria-labelledby="footer-brand-heading" data-uw-reveal="fade-left">
+                <a href="/" class="inline-flex items-center gap-4" aria-label="Về trang chủ">
+                    <span class="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] shadow-soft sm:h-20 sm:w-20">
+                        @if (!string.IsNullOrWhiteSpace(footerLogoUrl))
+                        {
+                            <img src="@footerLogoUrl" alt="@Model.BrandName" class="h-full w-full object-contain" />
+                        }
+                        else
+                        {
+                            <span class="brand-mark">TT</span>
+                        }
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block text-[11px] font-black uppercase tracking-[0.24em] text-brand-goldSoft">Premium restaurant</span>
+                        <span id="footer-brand-heading" class="mt-2 block text-xl font-black uppercase tracking-[0.18em] text-brand-cream sm:text-3xl">@Model.BrandName</span>
+                    </span>
                 </a>
-                <p class="mt-5 max-w-sm text-sm leading-7 text-white/62">@Model.Description</p>
-            </div>
 
-            <div>
-                <h2 class="text-sm font-black uppercase tracking-[0.2em] text-brand-cream">Liên kết</h2>
-                <ul class="mt-5 space-y-3">
-                    @foreach (var link in Model.QuickLinks)
-                    {
-                        <li>
-                            <a href="@link.Url" class="text-sm text-white/62 transition hover:text-brand-goldSoft">@link.Label</a>
-                        </li>
-                    }
-                </ul>
-            </div>
+                <div class="mt-6 max-w-md space-y-4 text-sm leading-7 text-white/60">
+                    <div>
+                        <p class="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Địa chỉ</p>
+                        @if (hasMapLink)
+                        {
+                            <a href="@Model.GoogleMapUrl" target="_blank" rel="noopener" class="mt-1 block text-brand-cream transition hover:text-brand-goldSoft">@addressText</a>
+                        }
+                        else
+                        {
+                            <p class="mt-1 text-brand-cream">@addressText</p>
+                        }
+                    </div>
 
-            <div>
-                <h2 class="text-sm font-black uppercase tracking-[0.2em] text-brand-cream">Chi nhánh nổi bật</h2>
-                <div class="mt-5 space-y-4">
-                    @foreach (var branch in Model.Branches)
-                    {
-                        <a href="@branch.Url" class="block rounded-md border border-white/10 bg-white/[0.04] p-4 transition hover:border-brand-gold/40">
-                            <span class="block text-sm font-semibold text-brand-cream">@branch.Name</span>
-                            <span class="mt-1 block text-xs leading-5 text-white/60">@branch.Address</span>
-                        </a>
-                    }
+                    <div>
+                        <p class="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Email</p>
+                        <a href="mailto:@Model.Email" class="mt-1 block text-brand-cream transition hover:text-brand-goldSoft">@Model.Email</a>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div>
-                <h2 class="text-sm font-black uppercase tracking-[0.2em] text-brand-cream">Liên hệ</h2>
-                <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="mt-5 block text-2xl font-black text-brand-goldSoft">@Model.Hotline</a>
-                <a href="mailto:@Model.Email" class="mt-2 block text-sm text-white/62 transition hover:text-brand-cream">@Model.Email</a>
-                <p class="mt-4 text-sm text-white/62">Mở cửa: <span class="text-brand-cream">@Model.OpeningHours</span></p>
+            <section aria-labelledby="footer-links-heading" data-uw-reveal="fade-up" data-uw-delay="100">
+                <h2 id="footer-links-heading" class="text-xs font-black uppercase tracking-[0.24em] text-brand-cream">Truy cập nhanh</h2>
+                <nav aria-label="Truy cập nhanh">
+                    <ul class="mt-6 grid grid-cols-2 gap-x-8 gap-y-4 sm:gap-x-10">
+                        @foreach (var link in Model.QuickLinks)
+                        {
+                            <li>
+                                <a href="@link.Url" class="block text-sm leading-6 text-white/60 transition hover:text-brand-goldSoft">@link.Label</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </section>
 
-                <div class="mt-6 flex flex-wrap gap-3">
-                    <a href="@Model.FacebookUrl" class="btn-ghost border-white/10 bg-white/[0.04] px-3 !text-white/75 hover:!border-brand-gold hover:!text-brand-goldSoft" target="_blank" rel="noopener">Facebook</a>
-                    <a href="@Model.ZaloUrl" class="btn-ghost border-white/10 bg-white/[0.04] px-3 !text-white/75 hover:!border-brand-gold hover:!text-brand-goldSoft" target="_blank" rel="noopener">Zalo</a>
-                    <a href="@Model.TiktokUrl" class="btn-ghost border-white/10 bg-white/[0.04] px-3 !text-white/75 hover:!border-brand-gold hover:!text-brand-goldSoft" target="_blank" rel="noopener">TikTok</a>
+            <section aria-labelledby="footer-connect-heading" data-uw-reveal="fade-right" data-uw-delay="200">
+                <h2 id="footer-connect-heading" class="text-xs font-black uppercase tracking-[0.24em] text-brand-cream">Kết nối</h2>
+
+                <div class="mt-6 space-y-6">
+                    <div class="flex items-start gap-5">
+                        <div class="shrink-0">
+                            <p class="mb-3 text-[10px] font-bold uppercase tracking-[0.35em] text-white/45">
+                                QUÉT MÃ QR
+                            </p>
+
+                            <div class="flex size-32 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white p-2 shadow-soft md:size-32 lg:size-32">
+                                <img src="~/images/general/kig-holding-qr.png"
+                                     alt="Mã QR KIG Holding"
+                                     class="h-full w-full object-contain"
+                                     loading="lazy"
+                                     decoding="async" />
+                            </div>
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+                            <p class="mb-3 text-[10px] font-bold uppercase tracking-[0.35em] text-white/45">
+                                TẢI ỨNG DỤNG
+                            </p>
+
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                                    <span class="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 text-xs font-bold text-brand-cream">
+                                        A
+                                    </span>
+                                    <span>
+                                        <span class="block text-[10px] uppercase tracking-[0.28em] text-white/35">APP</span>
+                                        <span class="block text-sm font-semibold text-brand-cream">App Store</span>
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                                    <span class="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 text-xs font-bold text-brand-cream">
+                                        G
+                                    </span>
+                                    <span>
+                                        <span class="block text-[10px] uppercase tracking-[0.28em] text-white/35">MOBILE</span>
+                                        <span class="block text-sm font-semibold text-brand-cream">Google Play</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Social</p>
+                        <div class="mt-4 flex flex-wrap gap-3">
+                            @if (hasFacebook)
+                            {
+                                <a href="@Model.FacebookUrl" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft" target="_blank" rel="noopener" aria-label="Facebook">F</a>
+                            }
+                            else
+                            {
+                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream opacity-50" role="img" aria-label="Facebook placeholder">F</span>
+                            }
+
+                            @if (hasZalo)
+                            {
+                                <a href="@Model.ZaloUrl" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft" target="_blank" rel="noopener" aria-label="Zalo">Z</a>
+                            }
+                            else
+                            {
+                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream opacity-50" role="img" aria-label="Zalo placeholder">Z</span>
+                            }
+
+                            @if (hasTiktok)
+                            {
+                                <a href="@Model.TiktokUrl" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft" target="_blank" rel="noopener" aria-label="TikTok">T</a>
+                            }
+                            else
+                            {
+                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream opacity-50" role="img" aria-label="TikTok placeholder">T</span>
+                            }
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
         </div>
 
-        <div class="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/46 md:flex-row md:items-center md:justify-between">
-            <p>&copy; 2026 @Model.BrandName. All rights reserved.</p>
-            <p>Modern Korean dining experiences by a premium hospitality group.</p>
+        <div class="relative mt-14 border-t border-white/10 pt-6 lg:mt-16">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-uw-reveal="fade-up" data-uw-delay="100">
+                <div class="space-y-2 text-sm leading-6 text-white/60">
+                    <p class="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Thông tin pháp lý mẫu</p>
+                    <p class="text-brand-cream">@Model.CompanyLegalName</p>
+                    <p>@Model.BusinessRegistrationNumber</p>
+                    <p>&copy; @currentYear @Model.BrandName. Tất cả quyền được bảo lưu.</p>
+                </div>
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center lg:justify-end">
+                    <div class="text-xs font-black uppercase tracking-[0.24em] text-brand-cream">Ngôn ngữ</div>
+                    <div class="relative inline-flex w-full sm:w-auto">
+                        <select aria-label="Ngôn ngữ" class="appearance-none rounded-full border border-white/10 bg-white/[0.04] py-2 pl-4 pr-10 text-sm text-brand-cream shadow-soft transition focus:border-brand-gold focus:outline-none focus:ring-0">
+                            <option selected>Tiếng Việt</option>
+                        </select>
+                        <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08Z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </footer>

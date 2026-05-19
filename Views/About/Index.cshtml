@@ -8,7 +8,7 @@
 <section class="hero-frame" data-about-section="hero">
     <div class="container-page section-shell">
         <div class="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-            <div class="hero-card scroll-reveal">
+            <div class="hero-card" data-uw-reveal="fade-up">
                 <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
                     Brand story
                 </span>
@@ -27,7 +27,7 @@
 
 <section class="section-shell" data-about-section="origin">
     <div class="container-page grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-        <div class="scroll-reveal">
+        <div data-uw-reveal="fade-up">
             <div class="food-image-wrap aspect-[4/5] shadow-panel">
                 <img src="/images/placeholders/korean-street-noodle.webp"
                      alt="Cảm hứng món ăn Hàn Quốc"
@@ -37,7 +37,7 @@
             </div>
         </div>
 
-        <div class="scroll-reveal">
+        <div data-uw-reveal="fade-up">
             @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
             {
                 Eyebrow = "Khởi nguồn",

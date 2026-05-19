@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "Thành viên KIG Holding";
+    ViewData["MetaDescription"] = "Trang thành viên KIG Holding đang được hoàn thiện, với các thông tin ưu đãi, tích điểm và cập nhật chương trình mới.";
+}
+
+<section class="hero-frame">
+    <div class="container-page section-shell">
+        <div class="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
+            <div class="hero-card" data-uw-reveal="fade-up">
+                <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
+                    KIG Holding
+                </span>
+                <h1 class="mt-5 text-display font-black text-brand-dark sm:text-hero">Thành viên KIG Holding</h1>
+                <p class="mt-5 text-lead text-brand-gray">
+                    Chương trình thành viên đang được hoàn thiện để mang đến trải nghiệm gắn kết hơn giữa thương hiệu và khách hàng thân thiết.
+                </p>
+
+                <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                    <a href="/thuc-don" class="btn-primary">Xem thực đơn</a>
+                    <a href="/lien-he" class="btn-secondary">Liên hệ</a>
+                </div>
+            </div>
+
+            <div class="surface-panel p-6 sm:p-7" data-uw-reveal="fade-up">
+                <p class="text-kicker font-black uppercase text-brand-goldDeep">Sắp ra mắt</p>
+                <h2 class="mt-3 text-3xl font-black text-brand-dark">Một không gian hội viên được xây dựng theo hướng tinh gọn và cao cấp.</h2>
+                <p class="mt-4 text-sm leading-7 text-brand-gray">
+                    Thông tin chính thức sẽ được cập nhật khi chương trình hoàn thiện. Hiện tại, trang này đóng vai trò giới thiệu sơ bộ cho các quyền lợi thành viên trong tương lai.
+                </p>
+
+                <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                    <article class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Ưu đãi thành viên</p>
+                        <p class="mt-2 text-sm leading-6 text-brand-gray">Các quyền lợi được thiết kế để tạo trải nghiệm thân thuộc và dễ ghi nhớ hơn.</p>
+                    </article>
+                    <article class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Tích điểm</p>
+                        <p class="mt-2 text-sm leading-6 text-brand-gray">Hệ thống tích lũy và đổi quà sẽ được công bố ở giai đoạn tiếp theo.</p>
+                    </article>
+                    <article class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Quà sinh nhật</p>
+                        <p class="mt-2 text-sm leading-6 text-brand-gray">Một số ưu đãi cá nhân hóa có thể được đưa vào chương trình sau này.</p>
+                    </article>
+                    <article class="surface-muted p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Cập nhật chương trình</p>
+                        <p class="mt-2 text-sm leading-6 text-brand-gray">Thông tin mới sẽ được truyền tải theo một giao diện rõ ràng và nhất quán.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-band section-shell">
+    <div class="container-page">
+        <div class="grid gap-8 lg:grid-cols-[0.45fr_0.55fr] lg:items-start">
+            <div data-uw-reveal="fade-up">
+                @await Component.InvokeAsync("SectionHeading", new
+                {
+                    model = new SectionHeadingViewModel
+                    {
+                        Eyebrow = "Lộ trình",
+                        Title = "Chương trình hội viên sẽ được hoàn thiện theo từng giai đoạn.",
+                        Description = "Trang này hiện là bản xem trước an toàn, phù hợp để giữ liên kết không bị lỗi trong khi nội dung chính thức được chốt."
+                    }
+                })
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2" data-uw-reveal="fade-up">
+                <article class="surface-panel p-5">
+                    <p class="text-kicker font-black uppercase text-brand-goldDeep">Trải nghiệm mới</p>
+                    <p class="mt-3 text-sm leading-7 text-brand-gray">Các nội dung về quyền lợi, quy trình và cách tham gia sẽ được cập nhật khi chương trình sẵn sàng.</p>
+                </article>
+                <article class="surface-panel p-5">
+                    <p class="text-kicker font-black uppercase text-brand-goldDeep">Kết nối thương hiệu</p>
+                    <p class="mt-3 text-sm leading-7 text-brand-gray">Trang này là điểm chạm ban đầu cho khách hàng quan tâm đến hệ sinh thái KIG Holding.</p>
+                </article>
+                <article class="surface-panel p-5">
+                    <p class="text-kicker font-black uppercase text-brand-goldDeep">Thông tin rõ ràng</p>
+                    <p class="mt-3 text-sm leading-7 text-brand-gray">Nội dung cuối cùng sẽ được thay thế bằng thông tin chính thức khi chương trình hoàn tất.</p>
+                </article>
+                <article class="surface-panel p-5">
+                    <p class="text-kicker font-black uppercase text-brand-goldDeep">Hành động tiếp theo</p>
+                    <p class="mt-3 text-sm leading-7 text-brand-gray">Trong lúc chờ cập nhật, bạn có thể xem thực đơn hoặc liên hệ trực tiếp với đội ngũ hỗ trợ.</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0 lg:pt-0">
+    <div class="container-page">
+        <div class="surface-panel p-6 sm:p-8 lg:p-10" data-uw-reveal="fade-up">
+            <div class="max-w-3xl">
+                <p class="text-kicker font-black uppercase text-brand-goldDeep">Tiếp tục khám phá</p>
+                <h2 class="mt-3 text-3xl font-black text-brand-dark sm:text-4xl">Xem thực đơn hoặc liên hệ để được hỗ trợ thêm.</h2>
+                <p class="mt-4 text-brand-gray">Khu vực này vẫn đang được hoàn thiện, vì vậy các liên kết dưới đây sẽ đưa bạn đến những trang hiện có và an toàn.</p>
+                <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+                    <a href="/thuc-don" class="btn-primary">Xem thực đơn</a>
+                    <a href="/lien-he" class="btn-secondary">Liên hệ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

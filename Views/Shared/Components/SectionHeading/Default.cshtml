@@ -4,7 +4,7 @@
     var isCenter = string.Equals(Model.Align, "center", StringComparison.OrdinalIgnoreCase);
 }
 
-<div class="scroll-reveal @(isCenter ? "mx-auto max-w-3xl text-center" : "max-w-3xl")">
+<div class="@(isCenter ? "mx-auto max-w-3xl text-center" : "max-w-3xl")" data-uw-reveal="fade-up">
     @if (!string.IsNullOrWhiteSpace(Model.Eyebrow))
     {
         <p class="text-kicker font-black uppercase text-brand-goldDeep">@Model.Eyebrow</p>
