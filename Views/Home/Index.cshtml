@@ -11,7 +11,7 @@
     var supportingMenuItems = hasMenuItems && menuCards.Count > 1
         ? menuCards.Skip(1).Take(3).ToList()
         : new List<FoodCardViewModel>();
-    var promoPosts = Model.LatestPosts.Take(3).ToList();
+    var homeNewsPosts = Model.LatestPosts.Take(3).ToList();
 }
 
 <section class="champong-hero relative overflow-hidden bg-brand-black" data-home-section="hero">
@@ -93,64 +93,69 @@
     </div>
 </section>
 
-<section class="section-band section-shell" data-home-section="brand-story">
-    <div class="container-page">
-        <div class="grid gap-8 lg:grid-cols-[0.42fr_0.58fr] lg:items-start">
-            <div data-uw-reveal="fade-up">
-                @await Component.InvokeAsync("SectionHeading", new
-                {
-                    model = new SectionHeadingViewModel
-                    {
-                        Eyebrow = "Câu chuyện thương hiệu",
-                        Title = "Từ trải nghiệm món ăn đến một hệ thống hospitality có bản sắc.",
-                        Description = "Trang chủ đang đóng lại vai trò giới thiệu để tập trung vào một câu chuyện thương hiệu ngắn gọn, sáng và dễ nhớ hơn."
+<section class="home-brand-story-dark section-shell relative isolate overflow-hidden" data-home-section="brand-story">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div class="absolute -left-20 top-8 size-72 rounded-full border border-white/6"></div>
+        <div class="absolute right-[8%] top-12 size-[26rem] rounded-full border border-white/8"></div>
+        <div class="absolute right-[16%] top-[20%] size-[20rem] rounded-full bg-white/[0.03] blur-3xl"></div>
+        <div class="absolute bottom-0 left-1/2 h-px w-[min(72rem,92vw)] -translate-x-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+    </div>
+
+    <div class="container-page relative z-10">
+        <div class="grid gap-10 lg:grid-cols-[0.43fr_0.57fr] lg:items-center">
+            <div class="max-w-xl" data-uw-reveal="fade-up">
+                <p class="text-xs font-black uppercase tracking-[0.34em] text-brand-red">CÂU CHUYỆN THƯƠNG HIỆU</p>
+                <h2 class="mt-4 text-3xl font-black leading-tight text-white sm:text-4xl lg:text-[3.2rem]">
+                    Không chỉ là một bữa ăn
+                </h2>
+                <p class="mt-5 max-w-[42rem] text-base leading-8 text-white sm:text-lg">
+                    Truyền Thuyết Champong mang tinh thần ẩm thực Hàn Quốc vào những bữa ăn gần gũi tại Việt Nam. Từ chi nhánh đầu tiên tại Phú Mỹ Hưng, thương hiệu từng bước trở thành điểm hẹn quen thuộc cho những ai yêu thích món Hàn chuẩn vị.
+                </p>
+
+                <div class="mt-8 flex flex-wrap gap-3" data-uw-reveal="fade-up" data-uw-delay="120">
+                    <a href="/gioi-thieu" class="inline-flex items-center justify-center rounded-full bg-brand-red px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-soft transition duration-200 hover:bg-brand-redDark">
+                        Khám phá KIG Holding
+                    </a>
+                    <a href="/chi-nhanh" class="inline-flex items-center justify-center rounded-full border border-white/18 bg-white/[0.04] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition duration-200 hover:border-white/35 hover:bg-white/[0.08]">
+                        Xem chi nhánh
+                    </a>
+                </div>
+
+                <div class="mt-8 grid gap-4 sm:grid-cols-2" data-uw-reveal="fade-up" data-uw-delay="100">
+                    @{
+                        var storyItems = new[]
+                        {
+                            ("~/images/home/icons/icons8-origin-50.png", "Phú Mỹ Hưng", "Chi nhánh đầu tiên"),
+                            ("~/images/home/icons/icons8-shop-64.png", "3+ năm", "Hình thành và phát triển"),
+                            ("~/images/home/icons/icons8-korea-50.png", "Chuẩn vị Hàn", "Dấu ấn ẩm thực Kim Chi"),
+                            ("~/images/home/icons/icons8-restaurant-50.png", "An tâm", "Chọn lọc kỹ, chế biến chỉn chu")
+                        };
                     }
-                })
-                <div class="mt-7 flex flex-wrap gap-3">
-                    <a href="/gioi-thieu" class="btn-primary">Khám phá KIG Holding</a>
-                    <a href="/lien-he" class="btn-secondary">Liên hệ</a>
+
+                    @for (var i = 0; i < storyItems.Length; i++)
+                    {
+                        var item = storyItems[i];
+
+                        <article class="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3" data-uw-reveal="fade-up" data-uw-delay="@(160 + (i * 60))">
+                            <img src="@item.Item1" asp-append-version="true" alt="@item.Item2" class="mt-0.5 h-11 w-11 shrink-0 object-contain" />
+                            <div>
+                                <p class="text-sm font-black uppercase tracking-[0.08em] text-brand-red sm:text-base">@item.Item2</p>
+                                <p class="mt-1 text-sm leading-7 text-white/70">@item.Item3</p>
+                            </div>
+                        </article>
+                    }
                 </div>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2" data-uw-reveal="fade-up" data-uw-delay="100">
-                @{
-                    var storyItems = new[]
-                    {
-                        ("HÆ°Æ¡ng vá»‹ HÃ n Quá»‘c", "KhÃ´ng gian vÃ  nhá»‹p Ä‘iá»‡u trÃ¬nh bÃ y Ä‘á»u hÆ°á»›ng tá»›i tráº£i nghiá»‡m áº©m thá»±c HÃ n Quá»‘c chá»‰n chu."),
-                        ("KhÃ´ng gian sum váº§y", "Bá»‘ cá»¥c má»Ÿ, sáº¡ch vÃ  sÃ¡ng Ä‘á»ƒ phÃ¹ há»£p bá»¯a Äƒn gia Ä‘Ã¬nh, nhÃ³m báº¡n vÃ  khÃ¡ch tiáº¿p Ä‘Ã³n."),
-                        ("Tráº£i nghiá»‡m chá»‰n chu", "Tá»«ng pháº§n ná»™i dung Ä‘Æ°á»£c giá»¯ ngáº¯n, rÃµ vÃ  sang Ä‘á»ƒ táº¡o cáº£m giÃ¡c premium nháº¥t quÃ¡n."),
-                        ("PhÃ¡t triá»ƒn cÃ¹ng KIG", "ThÆ°Æ¡ng hiá»‡u Ä‘Æ°á»£c ká»ƒ nhÆ° má»™t há»‡ thá»‘ng cÃ³ thá»ƒ má»Ÿ rá»™ng dáº§n theo cÃ¹ng má»™t giá»ng Ä‘iá»‡u.")
-                    };
-                }
+            <div class="relative mx-auto w-full max-w-3xl" data-uw-reveal="fade-up" data-uw-delay="160">
+                <div class="absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10" aria-hidden="true"></div>
+                <div class="absolute left-1/2 top-1/2 h-[20rem] w-[20rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.04] blur-3xl" aria-hidden="true"></div>
+                <div class="absolute left-[10%] top-[12%] size-20 rounded-full border border-brand-red/12 bg-brand-red/6" aria-hidden="true"></div>
+                <div class="absolute bottom-[12%] right-[10%] size-24 rounded-full border border-brand-goldSoft/12 bg-brand-goldSoft/10" aria-hidden="true"></div>
 
-                @for (var i = 0; i < storyItems.Length; i++)
-                {
-                    var item = storyItems[i];
-
-                    <article class="surface-panel card-hover p-5">
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">@(i + 1).</span>
-                            <span class="h-2 w-2 rounded-full bg-brand-red"></span>
-                        </div>
-                        <h3 class="mt-4 text-lg font-black text-brand-dark">@item.Item1</h3>
-                        <p class="mt-3 text-sm leading-7 text-brand-gray">@item.Item2</p>
-                    </article>
-                }
-            </div>
-        </div>
-
-        <div class="mt-5 grid gap-4 lg:grid-cols-[0.38fr_0.62fr]" data-uw-reveal="fade-up" data-uw-delay="200">
-            <div class="surface-muted p-5">
-                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Tá»•ng quan</p>
-                <p class="mt-3 text-sm leading-7 text-brand-gray">
-                    Khu vá»±c nÃ y giá»¯ vai trÃ² ká»ƒ chuyá»‡n ngáº¯n gá»n hÆ¡n lÃ  Ä‘Æ°a sá»‘ liá»‡u cá»¥ thá»ƒ, giÃºp pháº§n Ä‘áº§u trang váº«n má»m vÃ  cÃ¢n báº±ng vá»›i cÃ¡c section cÃ²n láº¡i.
-                </p>
-            </div>
-            <div class="surface-panel p-5">
-                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">CTA</p>
-                <p class="mt-3 text-sm leading-7 text-brand-gray">
-                    NgÆ°á»i dÃ¹ng cÃ³ thá»ƒ Ä‘i tiáº¿p tá»›i trang giá»›i thiá»‡u Ä‘á»ƒ Ä‘á»c ná»™i dung dÃ i hÆ¡n hoáº·c chuyá»ƒn sang thá»±c Ä‘Æ¡n vÃ  Ä‘áº·t bÃ n.
-                </p>
+                <div class="relative mx-auto w-full max-w-[38rem]">
+                    <img src="~/images/home/images/korean-food-no-bg.png" asp-append-version="true" alt="Món ăn Hàn Quốc đặc trưng của Truyền Thuyết Champong" class="relative z-10 w-full object-contain drop-shadow-[0_28px_60px_rgba(0,0,0,0.45)]" />
+                </div>
             </div>
         </div>
     </div>
@@ -251,6 +256,44 @@
 
                 <div class="home-culinary-essence__image lg:order-2" data-uw-reveal="fade-up" data-uw-delay="420">
                     <img src="~/images/home/images/gogimaru-img.webp" asp-append-version="true" alt="Bàn tiệc Gogimaru" class="h-full w-full object-cover" />
+                </div>
+            </article>
+
+            <article class="home-culinary-essence__block grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:gap-14" data-uw-reveal="fade-up">
+                <div class="home-culinary-essence__image" data-uw-reveal="fade-up" data-uw-delay="0">
+                    <img src="~/images/home/images/kbb-cook-img.png" asp-append-version="true" alt="Không gian và món nướng KBB Cook" class="h-full w-full object-cover" />
+                </div>
+
+                <div>
+                    <div data-uw-reveal="fade-up" data-uw-delay="80">
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-brand-red">KOREAN BBQ TABLE</p>
+                        <h3 class="mt-3 text-3xl font-black uppercase leading-tight text-brand-red sm:text-4xl lg:text-5xl">
+                            KBB COOK – 프리미엄 BBQ & 런치 전문점
+                        </h3>
+                    </div>
+
+                    <div class="mt-8 grid gap-5 sm:grid-cols-2">
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="160">
+                            <img src="~/images/home/icons/bbq-grill-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Nướng chuẩn vị</h4>
+                            <p>Bàn nướng nóng hổi, hương vị đậm đà và cách thưởng thức đúng tinh thần BBQ Hàn Quốc.</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="220">
+                            <img src="~/images/home/icons/fresh-ingredients-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Nguyên liệu tươi</h4>
+                            <p>Thịt, hải sản và rau ăn kèm được chọn lọc kỹ để giữ trọn độ ngon khi phục vụ.</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="280">
+                            <img src="~/images/home/icons/team-table-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Bữa ăn sum vầy</h4>
+                            <p>Không gian phù hợp cho nhóm bạn, gia đình và những buổi tụ họp ấm cúng.</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="340">
+                            <img src="~/images/home/icons/various-side-dish-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>Món ăn kèm đa dạng</h4>
+                            <p>Các món phụ kiểu Hàn giúp bữa nướng thêm tròn vị và phong phú hơn.</p>
+                        </div>
+                    </div>
                 </div>
             </article>
         </div>
@@ -511,75 +554,172 @@
     </div>
 </section>
 
-<section class="section-band section-shell" data-home-section="promotions">
-    <div class="container-page">
-        <div class="grid gap-8 lg:grid-cols-[0.42fr_0.58fr] lg:items-start">
-            <div data-uw-reveal="fade-up">
-                @await Component.InvokeAsync("SectionHeading", new
-                {
-                    model = new SectionHeadingViewModel
-                    {
-                        Eyebrow = "ChÆ°Æ¡ng trÃ¬nh khuyáº¿n mÃ£i",
-                        Title = "Nhá»¯ng cáº­p nháº­t má»›i nháº¥t cÃ³ thá»ƒ dÃ¹ng lÃ m nhá»‹p thÃ´ng tin Æ°u Ä‘Ã£i.",
-                        Description = "Khá»‘i nÃ y tiáº¿p tá»¥c táº­n dá»¥ng bÃ i viáº¿t hiá»‡n cÃ³, nhÆ°ng Ä‘Æ°á»£c Ä‘áº·t tÃªn vÃ  trÃ¬nh bÃ y theo hÆ°á»›ng promotion Ä‘á»ƒ bÃ¡m sÃ¡t Ä‘á»‹nh hÆ°á»›ng má»›i."
-                    }
-                })
-
-                <div class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                    @foreach (var note in new[]
-                    {
-                        "Æ¯u Ä‘Ã£i theo mÃ¹a",
-                        "Cáº­p nháº­t khai trÆ°Æ¡ng",
-                        "ThÃ´ng tin thÆ°Æ¡ng hiá»‡u"
-                    })
-                    {
-                        <div class="surface-panel p-4" data-uw-reveal="fade-up" data-uw-delay="100">
-                            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">@note</p>
-                            <p class="mt-2 text-sm leading-6 text-brand-gray">
-                                PhÃ¹ há»£p Ä‘á»ƒ truyá»n táº£i cÃ¡c chÆ°Æ¡ng trÃ¬nh, Æ°u Ä‘Ã£i hoáº·c thÃ´ng bÃ¡o Ä‘ang diá»…n ra mÃ  khÃ´ng cáº§n thÃªm route má»›i.
-                            </p>
-                        </div>
-                    }
-                </div>
-
-                <a href="/tin-tuc" class="btn-secondary mt-7">Xem tin tá»©c</a>
+<section class="home-news-section home-news-section--dark section-shell relative isolate overflow-hidden" data-home-section="news">
+    <div class="container-page relative z-10">
+        <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-[48rem]" data-uw-reveal="fade-up">
+                <p class="text-xs font-black uppercase tracking-[0.34em] text-brand-red">TIN TỨC & ƯU ĐÃI</p>
+                <h2 class="mt-5 text-3xl font-black leading-tight text-white sm:text-4xl lg:text-[3.2rem]">
+                    Cập nhật mới từ Truyền Thuyết Champong
+                </h2>
+                <p class="mt-6 max-w-[44rem] text-sm leading-7 text-white sm:text-[1.04rem] sm:leading-8">
+                    Khám phá các chương trình mới, thông tin chi nhánh, sự kiện và những cập nhật mới nhất từ Truyền Thuyết Champong.
+                </p>
             </div>
 
-            <div>
-                @if (promoPosts.Count > 0)
+            <div class="flex flex-wrap items-center gap-4" data-uw-reveal="fade-up" data-uw-delay="100">
+                @if (homeNewsPosts.Count > 0)
                 {
-                    <div class="grid gap-5 md:grid-cols-3">
-                        @foreach (var post in promoPosts)
-                        {
-                            <div data-uw-reveal="fade-up">
-                                @await Component.InvokeAsync("PostCard", new { model = post })
-                            </div>
-                        }
-                    </div>
+                    <span class="inline-flex items-center rounded-full border border-white/12 bg-white/[0.06] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_14px_32px_rgba(0,0,0,0.16)] backdrop-blur">
+                        @homeNewsPosts.Count bài viết mới
+                    </span>
                 }
-                else
+
+                <a href="/tin-tuc" class="inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3.5 text-[0.82rem] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_18px_36px_rgba(229,9,20,0.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-brand-redDark">
+                    Xem tất cả tin tức
+                </a>
+            </div>
+        </div>
+
+        @if (homeNewsPosts.Count > 0)
+        {
+            var leadPost = homeNewsPosts[0];
+            var supportingPosts = homeNewsPosts.Skip(1).Take(2).ToList();
+            var editorialLayoutClass = supportingPosts.Count > 0
+                ? "grid gap-6 xl:gap-7 lg:grid-cols-[1.12fr_0.88fr] lg:items-start"
+                : "max-w-5xl";
+
+            <div class="mt-12 flex items-center justify-between gap-4" data-uw-reveal="fade-up" data-uw-delay="140">
+                <p class="text-xs font-black uppercase tracking-[0.28em] text-white">Nổi bật trong tuần</p>
+                <a href="/tin-tuc" class="hidden text-sm font-semibold text-white transition hover:text-white sm:inline-flex">
+                    Xem trang tin tức
+                </a>
+            </div>
+
+            <div class="mt-7 @editorialLayoutClass">
+                <article class="home-news-card home-news-card--lead group" data-uw-reveal="fade-up" data-uw-delay="180">
+                    <a href="@leadPost.Url" class="flex h-full flex-col">
+                        <div class="home-news-card__media" data-home-news-media>
+                            <div class="home-news-card__fallback home-news-card__fallback--lead">
+                                <span class="home-news-card__eyebrow">Truyền Thuyết Champong</span>
+                                <p class="home-news-card__title">@leadPost.Title</p>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(leadPost.ImageUrl))
+                            {
+                                <img src="@leadPost.ImageUrl"
+                                     alt="@leadPost.Title"
+                                     class="home-news-card__image"
+                                     loading="lazy"
+                                     onerror="this.closest('[data-home-news-media]')?.classList.add('is-image-missing'); this.remove();" />
+                            }
+                        </div>
+
+                        <div class="flex flex-1 flex-col p-6 sm:p-7 lg:p-6 xl:p-7">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="inline-flex rounded-full border border-brand-red/25 bg-brand-red/14 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-red-300">
+                                    @leadPost.Category
+                                </span>
+                                @if (leadPost.PublishedAt.HasValue)
+                                {
+                                    <span class="text-xs font-medium uppercase tracking-[0.14em] text-white/60">
+                                        @leadPost.PublishedAt.Value.ToString("dd/MM/yyyy")
+                                    </span>
+                                }
+                            </div>
+
+                            <h3 class="mt-4 text-2xl font-black leading-tight text-white sm:text-[2rem] xl:max-w-[28rem]">
+                                @leadPost.Title
+                            </h3>
+
+                            @if (!string.IsNullOrWhiteSpace(leadPost.Excerpt))
+                            {
+                                <p class="mt-4 max-w-2xl text-sm leading-7 text-white sm:text-base sm:leading-8">
+                                    @leadPost.Excerpt
+                                </p>
+                            }
+
+                            <div class="mt-7 flex items-center gap-2 text-sm font-semibold text-brand-red transition group-hover:text-white">
+                                <span>Đọc tiếp</span>
+                                <span aria-hidden="true" class="transition duration-300 group-hover:translate-x-1">→</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                @if (supportingPosts.Count > 0)
                 {
-                    <div class="grid gap-4 md:grid-cols-3">
-                        @foreach (var item in new[]
+                    <div class="grid gap-6">
+                        @for (var i = 0; i < supportingPosts.Count; i++)
                         {
-                            ("Æ¯u Ä‘Ã£i theo mÃ¹a", "Khá»‘i khuyáº¿n mÃ£i placeholder nÃ y sáº½ Ä‘Æ°á»£c thay báº±ng ná»™i dung chÃ­nh thá»©c khi cÃ³ bÃ i viáº¿t."),
-                            ("ThÃ´ng bÃ¡o há»‡ thá»‘ng", "CÃ³ thá»ƒ dÃ¹ng láº¡i cho cÃ¡c cáº­p nháº­t liÃªn quan Ä‘áº¿n chÆ°Æ¡ng trÃ¬nh Ä‘ang diá»…n ra."),
-                            ("Tin tá»©c thÆ°Æ¡ng hiá»‡u", "Giá»¯ má»™t khu vá»±c tin tá»©c rÃµ rÃ ng Ä‘á»ƒ há»— trá»£ lá»‹ch Ä‘Äƒng táº£i vá» sau.")
-                        })
-                        {
-                            <article class="surface-panel p-6" data-uw-reveal="fade-up">
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Khuyáº¿n mÃ£i</p>
-                                <h3 class="mt-3 text-xl font-black text-brand-dark">@item.Item1</h3>
-                                <p class="mt-3 text-sm leading-7 text-brand-gray">@item.Item2</p>
-                                <div class="mt-5 inline-flex rounded-button border border-brand-border bg-brand-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">
-                                    Xem thÃªm
-                                </div>
+                            var post = supportingPosts[i];
+
+                            <article class="home-news-card home-news-card--support group h-full" data-uw-reveal="fade-up" data-uw-delay="@(240 + (i * 80))">
+                                <a href="@post.Url" class="flex h-full flex-col sm:flex-row lg:flex-col">
+                                    <div class="home-news-card__media" data-home-news-media>
+                                        <div class="home-news-card__fallback">
+                                            <span class="home-news-card__eyebrow">Tin mới</span>
+                                            <p class="home-news-card__title text-base sm:text-lg">@post.Title</p>
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
+                                        {
+                                            <img src="@post.ImageUrl"
+                                                 alt="@post.Title"
+                                                 class="home-news-card__image"
+                                                 loading="lazy"
+                                                 onerror="this.closest('[data-home-news-media]')?.classList.add('is-image-missing'); this.remove();" />
+                                        }
+                                    </div>
+
+                                    <div class="flex flex-1 flex-col p-5 sm:p-6">
+                                        <div class="flex flex-wrap items-center gap-3">
+                                            <span class="inline-flex rounded-full border border-brand-red/25 bg-brand-red/14 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-red-300">
+                                                @post.Category
+                                            </span>
+                                            @if (post.PublishedAt.HasValue)
+                                            {
+                                                <span class="text-xs font-medium uppercase tracking-[0.14em] text-white/60">
+                                                    @post.PublishedAt.Value.ToString("dd/MM/yyyy")
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <h3 class="mt-4 text-xl font-black leading-tight text-white">
+                                            @post.Title
+                                        </h3>
+
+                                        @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+                                        {
+                                            <p class="mt-3 text-sm leading-7 text-white">
+                                                @post.Excerpt
+                                            </p>
+                                        }
+
+                                        <div class="mt-5 flex items-center gap-2 text-sm font-semibold text-brand-red transition group-hover:text-white">
+                                            <span>Đọc tiếp</span>
+                                            <span aria-hidden="true" class="transition duration-300 group-hover:translate-x-1">→</span>
+                                        </div>
+                                    </div>
+                                </a>
                             </article>
                         }
                     </div>
                 }
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="mt-10 rounded-[1.6rem] border border-white/10 bg-white/[0.045] p-7 shadow-[0_24px_70px_rgba(0,0,0,0.24)] backdrop-blur" data-uw-reveal="fade-up" data-uw-delay="160">
+                <p class="text-lg font-black text-white">Chưa có bài viết mới.</p>
+                <p class="mt-3 max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
+                    Các cập nhật mới từ Truyền Thuyết Champong sẽ sớm được đăng tải.
+                </p>
+                <a href="/tin-tuc" class="mt-6 inline-flex items-center justify-center rounded-full bg-brand-red px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-soft transition duration-300 hover:-translate-y-0.5 hover:bg-brand-redDark">
+                    Xem trang tin tức
+                </a>
+            </div>
+        }
     </div>
 </section>
 

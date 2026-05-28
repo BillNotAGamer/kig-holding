@@ -25,21 +25,21 @@
     });
 }
 
-<div class="branch-locator bg-white pb-16" data-branch-locator>
-    <section class="branch-locator__header bg-gradient-to-b from-brand-light via-white to-white pb-4 pt-7 sm:pt-9">
+<div class="branch-locator branch-locator--dark relative isolate overflow-hidden pb-16 text-white" data-branch-locator>
+    <section class="branch-locator__header relative pb-4 pt-7 sm:pt-9">
         <div class="container-page">
             <div class="mx-auto max-w-4xl text-center" data-uw-reveal="fade-up">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">HỆ THỐNG CHI NHÁNH</p>
-                <h1 class="mt-3 text-3xl font-black leading-tight text-brand-dark sm:text-4xl lg:text-5xl">
+                <p class="text-kicker font-black uppercase text-brand-red">HỆ THỐNG CHI NHÁNH</p>
+                <h1 class="mt-3 text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
                     Tìm Champong gần bạn
                 </h1>
-                <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-brand-gray sm:text-base">
+                <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
                     Chọn khu vực hoặc tìm theo tên chi nhánh, địa chỉ, quận để gọi ngay, chỉ đường hoặc đặt bàn.
                 </p>
             </div>
 
             <div class="mx-auto mt-5 max-w-5xl" data-uw-reveal="fade-up" data-uw-delay="100">
-                <form action="@Url.Action("Index", "Branch")" method="get" class="branch-locator__search rounded-[1.5rem] border border-brand-border bg-white p-2 shadow-soft" data-branch-search-form>
+                <form action="@Url.Action("Index", "Branch")" method="get" class="branch-locator__search rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-2 shadow-panel backdrop-blur" data-branch-search-form>
                     @if (hasSelectedCity)
                     {
                         <input type="hidden" name="city" value="@Model.SelectedCity" />
@@ -47,19 +47,19 @@
 
                     <div class="grid gap-2 lg:grid-cols-[13rem_minmax(0,1fr)_3rem] lg:items-center">
                         <details class="branch-locator-dropdown group relative" data-branch-city-dropdown>
-                            <summary class="flex h-11 cursor-pointer list-none items-center justify-between rounded-[1.15rem] bg-brand-light px-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
+                            <summary class="flex h-11 cursor-pointer list-none items-center justify-between rounded-[1.15rem] bg-white/[0.05] px-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus-visible:ring-offset-2 focus-visible:ring-offset-brand-black [&::-webkit-details-marker]:hidden">
                                 <span class="min-w-0">
-                                    <span class="block text-[11px] font-black uppercase tracking-[0.18em] text-brand-goldDeep">Khu vực</span>
-                                    <span class="block truncate text-sm font-black text-brand-dark">@selectedAreaLabel</span>
+                                    <span class="block text-[11px] font-black uppercase tracking-[0.18em] text-brand-red">Khu vực</span>
+                                    <span class="block truncate text-sm font-black text-white">@selectedAreaLabel</span>
                                 </span>
                                 <svg class="ml-3 size-4 shrink-0 text-brand-red transition group-open:rotate-180" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                     <path d="m5 7.5 5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </summary>
 
-                            <div class="absolute left-0 top-full z-40 mt-2 w-72 overflow-hidden rounded-2xl border border-brand-border bg-white p-2 shadow-panel">
+                            <div class="absolute left-0 top-full z-40 mt-2 w-72 overflow-hidden rounded-2xl border border-white/10 bg-brand-black/95 p-2 shadow-panel backdrop-blur">
                                 <a href="@Url.Action("Index", "Branch", new { q = Model.SearchQuery })"
-                                   class="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-bold transition @(hasSelectedCity ? "text-brand-dark hover:bg-brand-light hover:text-brand-red" : "bg-brand-red text-white")"
+                                   class="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-bold transition @(hasSelectedCity ? "text-white/80 hover:bg-white/[0.06] hover:text-white" : "bg-brand-red text-white")"
                                    aria-current="@(!hasSelectedCity ? "page" : null)">
                                     <span>Tất cả địa điểm</span>
                                     <span class="text-xs opacity-75">@Model.FilteredCount</span>
@@ -71,7 +71,7 @@
                                     var cityCount = Model.CityCounts.TryGetValue(city, out var count) ? count : 0;
 
                                     <a href="@Url.Action("Index", "Branch", new { city, q = Model.SearchQuery })"
-                                       class="mt-1 flex items-center justify-between rounded-xl px-3 py-2 text-sm font-bold transition @(isActive ? "bg-brand-red text-white" : "text-brand-dark hover:bg-brand-light hover:text-brand-red")"
+                                       class="mt-1 flex items-center justify-between rounded-xl px-3 py-2 text-sm font-bold transition @(isActive ? "bg-brand-red text-white" : "text-white/80 hover:bg-white/[0.06] hover:text-white")"
                                        aria-current="@(isActive ? "page" : null)">
                                         <span>@city</span>
                                         <span class="text-xs opacity-75">@cityCount</span>
@@ -81,7 +81,7 @@
                         </details>
 
                         <div class="relative">
-                            <label class="flex h-11 min-w-0 items-center gap-3 rounded-[1.15rem] bg-brand-light px-4 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-brand-red/25">
+                            <label class="flex h-11 min-w-0 items-center gap-3 rounded-[1.15rem] border border-transparent bg-white/[0.05] px-4 transition focus-within:border-brand-red/60 focus-within:bg-white/[0.06] focus-within:ring-2 focus-within:ring-brand-red/25">
                                 <svg class="size-5 shrink-0 text-brand-red" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="m20 20-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                 </svg>
@@ -95,16 +95,16 @@
                                        aria-controls="branch-search-suggestions"
                                        aria-expanded="false"
                                        data-branch-search-input
-                                       class="min-w-0 flex-1 border-0 bg-transparent text-sm font-semibold text-brand-dark outline-none placeholder:text-brand-gray/70 focus:outline-none focus:ring-0 focus-visible:outline-none" />
+                                       class="min-w-0 flex-1 appearance-none border-0 bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/45 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" />
                             </label>
 
                             <div id="branch-search-suggestions"
-                                 class="absolute left-0 right-0 top-full z-40 mt-2 hidden overflow-hidden rounded-2xl border border-brand-border bg-white shadow-panel"
+                                 class="absolute left-0 right-0 top-full z-40 mt-2 hidden overflow-hidden rounded-2xl border border-white/10 bg-brand-black/95 shadow-panel backdrop-blur"
                                  role="listbox"
                                  data-branch-suggestions></div>
                         </div>
 
-                        <button type="submit" class="inline-flex size-11 items-center justify-center rounded-full bg-brand-red text-white shadow-soft transition hover:bg-brand-redDark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus-visible:ring-offset-2" aria-label="Tìm kiếm chi nhánh">
+                        <button type="submit" class="inline-flex size-11 items-center justify-center rounded-full bg-brand-red text-white shadow-soft transition hover:bg-brand-redDark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus-visible:ring-offset-2 focus-visible:ring-offset-brand-black" aria-label="Tìm kiếm chi nhánh">
                             <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                 <path d="m20 20-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                             </svg>
@@ -118,7 +118,7 @@
                     }
 
                     <a href="@Url.Action("Index", "Branch", new { q = Model.SearchQuery })"
-                       class="inline-flex h-8 items-center justify-center rounded-full border px-3 text-xs font-bold transition sm:text-sm @(allActive ? "border-brand-red bg-brand-red text-white shadow-soft" : "border-brand-border bg-white text-brand-dark hover:border-brand-red hover:text-brand-red")"
+                       class="inline-flex h-8 items-center justify-center rounded-full border px-3 text-xs font-bold transition sm:text-sm @(allActive ? "border-brand-red bg-brand-red text-white shadow-soft" : "border-white/10 bg-white/[0.04] text-white/80 hover:border-brand-red/60 hover:text-white")"
                        aria-current="@(allActive ? "page" : null)">
                         Tất cả địa điểm
                     </a>
@@ -129,7 +129,7 @@
                         var cityCount = Model.CityCounts.TryGetValue(city, out var count) ? count : 0;
 
                         <a href="@Url.Action("Index", "Branch", new { city, q = Model.SearchQuery })"
-                           class="inline-flex h-8 items-center justify-center rounded-full border px-3 text-xs font-bold transition sm:text-sm @(isActive ? "border-brand-red bg-brand-red text-white shadow-soft" : "border-brand-border bg-white text-brand-dark hover:border-brand-red hover:text-brand-red")"
+                           class="inline-flex h-8 items-center justify-center rounded-full border px-3 text-xs font-bold transition sm:text-sm @(isActive ? "border-brand-red bg-brand-red text-white shadow-soft" : "border-white/10 bg-white/[0.04] text-white/80 hover:border-brand-red/60 hover:text-white")"
                            aria-current="@(isActive ? "page" : null)">
                             @city
                             <span class="ml-2 text-[11px] opacity-75">@cityCount</span>
@@ -138,7 +138,7 @@
 
                     @if (Model.HasActiveFilters)
                     {
-                        <a href="@Url.Action("Index", "Branch")" class="inline-flex h-8 items-center justify-center rounded-full border border-brand-border bg-brand-light px-3 text-xs font-bold text-brand-gray transition hover:border-brand-red hover:text-brand-red sm:text-sm">
+                        <a href="@Url.Action("Index", "Branch")" class="inline-flex h-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] px-3 text-xs font-bold text-white/65 transition hover:border-brand-red/60 hover:text-white sm:text-sm">
                             Xóa bộ lọc
                         </a>
                     }
@@ -152,20 +152,20 @@
             <div class="mx-auto max-w-6xl">
                 <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" data-uw-reveal="fade-up">
                     <div class="flex flex-wrap items-center gap-2">
-                        <h2 class="text-sm font-black uppercase tracking-[0.16em] text-brand-dark">
+                        <h2 class="text-sm font-black uppercase tracking-[0.16em] text-white">
                             Hiển thị @Model.FilteredCount chi nhánh
                         </h2>
 
                         @if (hasSearch)
                         {
-                            <span class="inline-flex h-8 items-center rounded-full bg-brand-red/10 px-3 text-xs font-bold text-brand-red">
+                            <span class="inline-flex h-8 items-center rounded-full bg-brand-red/12 px-3 text-xs font-bold text-brand-red">
                                 Từ khóa: @Model.SearchQuery
                             </span>
                         }
 
                         @if (hasSelectedCity)
                         {
-                            <span class="inline-flex h-8 items-center rounded-full bg-brand-goldSoft/50 px-3 text-xs font-bold text-brand-goldDeep">
+                            <span class="inline-flex h-8 items-center rounded-full bg-white/[0.08] px-3 text-xs font-bold text-white/75">
                                 Khu vực: @Model.SelectedCity
                             </span>
                         }
@@ -173,7 +173,7 @@
 
                     @if (Model.HasActiveFilters)
                     {
-                        <a href="@Url.Action("Index", "Branch")" class="inline-flex h-8 items-center justify-center rounded-full border border-brand-border bg-white px-3 text-xs font-bold text-brand-gray transition hover:border-brand-red hover:text-brand-red sm:text-sm">
+                        <a href="@Url.Action("Index", "Branch")" class="inline-flex h-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-3 text-xs font-bold text-white/65 transition hover:border-brand-red/60 hover:text-white sm:text-sm">
                             Xóa bộ lọc
                         </a>
                     }
@@ -193,9 +193,9 @@
                                     <span class="flex size-6 items-center justify-center rounded-full bg-brand-red/10 text-brand-red" aria-hidden="true">
                                         <span class="h-2 w-2 rounded-full bg-brand-red"></span>
                                     </span>
-                                    <h3 class="text-lg font-black text-brand-dark sm:text-xl">
+                                    <h3 class="text-lg font-black text-white sm:text-xl">
                                         @group.Key
-                                        <span class="text-brand-goldDeep">(@groupCount)</span>
+                                        <span class="text-brand-red">(@groupCount)</span>
                                     </h3>
                                 </div>
 
@@ -220,16 +220,16 @@
                 }
                 else
                 {
-                    <div class="surface-panel p-6 text-center sm:p-8" data-uw-reveal="fade-up">
-                        <p class="text-kicker font-black uppercase text-brand-goldDeep">Không có kết quả</p>
-                        <h2 class="mt-3 text-2xl font-black text-brand-dark">Không tìm thấy chi nhánh phù hợp</h2>
-                        <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-brand-gray">
+                    <div class="rounded-[1.35rem] border border-white/10 bg-white/[0.04] p-6 text-center shadow-panel backdrop-blur sm:p-8" data-uw-reveal="fade-up">
+                        <p class="text-kicker font-black uppercase text-brand-red">Không có kết quả</p>
+                        <h2 class="mt-3 text-2xl font-black text-white">Không tìm thấy chi nhánh phù hợp</h2>
+                        <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-white/65">
                             Hãy thử từ khóa khác, đổi khu vực hoặc xóa bộ lọc để xem toàn bộ hệ thống chi nhánh.
                         </p>
                         <div class="mt-5 flex flex-wrap justify-center gap-3">
-                            <a href="@Url.Action("Index", "Branch")" class="btn-primary">Xóa bộ lọc</a>
-                            <a href="/dat-ban" class="btn-secondary">Đặt bàn ngay</a>
-                            <a href="/lien-he" class="btn-ghost">Liên hệ</a>
+                            <a href="@Url.Action("Index", "Branch")" class="inline-flex items-center justify-center rounded-full bg-brand-red px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-soft transition hover:bg-brand-redDark">Xóa bộ lọc</a>
+                            <a href="/dat-ban" class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:border-brand-red/60 hover:text-white">Đặt bàn ngay</a>
+                            <a href="/lien-he" class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-medium text-white/70 transition hover:border-brand-red/60 hover:text-white">Liên hệ</a>
                         </div>
                     </div>
                 }
@@ -240,19 +240,19 @@
     <section id="branch-map" class="branch-location-map section-shell scroll-mt-24 pt-0" data-uw-reveal="fade-up">
         <div class="container-page">
             <div class="mx-auto max-w-6xl">
-                <div class="overflow-hidden rounded-[1.35rem] border border-brand-border bg-white shadow-soft">
-                    <div class="border-b border-brand-border p-5 sm:flex sm:items-end sm:justify-between sm:gap-6 sm:p-6">
+                <div class="overflow-hidden rounded-[1.35rem] border border-white/10 bg-white/[0.03] shadow-panel backdrop-blur">
+                    <div class="border-b border-white/10 p-5 sm:flex sm:items-end sm:justify-between sm:gap-6 sm:p-6">
                         <div>
-                            <p class="text-kicker font-black uppercase text-brand-goldDeep">Bản đồ chi nhánh</p>
-                            <h2 class="mt-2 text-2xl font-black text-brand-dark sm:text-3xl">Xem vị trí trước khi ghé cửa hàng</h2>
-                            <p class="mt-2 text-sm leading-6 text-brand-gray">
+                            <p class="text-kicker font-black uppercase text-brand-red">Bản đồ chi nhánh</p>
+                            <h2 class="mt-2 text-2xl font-black text-white sm:text-3xl">Xem vị trí trước khi ghé cửa hàng</h2>
+                            <p class="mt-2 text-sm leading-6 text-white/65">
                                 Xem vị trí trước khi ghé cửa hàng.
                             </p>
                         </div>
 
                         @if (hasMainMapLink)
                         {
-                            <a href="@Model.MainMapUrl" class="btn-secondary mt-4 shrink-0 sm:mt-0" target="_blank" rel="noopener">Mở Google Maps</a>
+                            <a href="@Model.MainMapUrl" class="mt-4 inline-flex shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:border-brand-red/60 hover:text-white sm:mt-0" target="_blank" rel="noopener">Mở Google Maps</a>
                         }
                     </div>
 
@@ -268,12 +268,12 @@
                     {
                         <div class="flex min-h-[18rem] items-center justify-center px-6 py-8 text-center sm:min-h-[22rem]">
                             <div class="max-w-md">
-                                <p class="text-kicker font-black uppercase text-brand-goldDeep">Liên kết bản đồ</p>
-                                <h3 class="mt-3 text-2xl font-black text-brand-dark">Mở chi nhánh trên Google Maps</h3>
-                                <p class="mt-3 text-sm leading-7 text-brand-gray">
+                                <p class="text-kicker font-black uppercase text-brand-red">Liên kết bản đồ</p>
+                                <h3 class="mt-3 text-2xl font-black text-white">Mở chi nhánh trên Google Maps</h3>
+                                <p class="mt-3 text-sm leading-7 text-white/65">
                                     Bản đồ đang ở dạng liên kết ngoài. Bạn vẫn có thể mở Google Maps để xem đường đi.
                                 </p>
-                                <a href="@Model.MainMapUrl" class="btn-primary mt-5" target="_blank" rel="noopener">Xem bản đồ</a>
+                                <a href="@Model.MainMapUrl" class="mt-5 inline-flex items-center justify-center rounded-full bg-brand-red px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-soft transition hover:bg-brand-redDark" target="_blank" rel="noopener">Xem bản đồ</a>
                             </div>
                         </div>
                     }
@@ -281,12 +281,12 @@
                     {
                         <div class="flex min-h-[18rem] items-center justify-center px-6 py-8 text-center sm:min-h-[22rem]">
                             <div class="max-w-md">
-                                <p class="text-kicker font-black uppercase text-brand-goldDeep">Bản đồ chưa sẵn sàng</p>
-                                <h3 class="mt-3 text-2xl font-black text-brand-dark">Một số chi nhánh chưa có liên kết bản đồ</h3>
-                                <p class="mt-3 text-sm leading-7 text-brand-gray">
+                                <p class="text-kicker font-black uppercase text-brand-red">Bản đồ chưa sẵn sàng</p>
+                                <h3 class="mt-3 text-2xl font-black text-white">Một số chi nhánh chưa có liên kết bản đồ</h3>
+                                <p class="mt-3 text-sm leading-7 text-white/65">
                                     Phần này sẽ hiển thị khi dữ liệu Google Maps được bổ sung trong hệ thống chi nhánh.
                                 </p>
-                                <a href="/dat-ban" class="btn-secondary mt-5">Đặt bàn ngay</a>
+                                <a href="/dat-ban" class="mt-5 inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:border-brand-red/60 hover:text-white">Đặt bàn ngay</a>
                             </div>
                         </div>
                     }

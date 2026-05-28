@@ -1,4 +1,6 @@
 using KIGHolding.Models.Entities;
+using KIGHolding.Models;
+using KIGHolding.Models.Content;
 using KIGHolding.Services;
 using KIGHolding.ViewModels;
 using KIGHolding.ViewModels.Shared;
@@ -9,13 +11,7 @@ namespace KIGHolding.Controllers;
 [Route("tin-tuc")]
 public class NewsController : Controller
 {
-    private static readonly string[] SupportedCategories =
-    [
-        "Khuyến mãi",
-        "Món mới",
-        "Sự kiện",
-        "Câu chuyện ẩm thực"
-    ];
+    private const int DefaultPageSize = 9;
 
     private readonly INewsService _newsService;
     private readonly IConfiguration _configuration;
@@ -32,35 +28,49 @@ public class NewsController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> Index([FromQuery] string? category, CancellationToken cancellationToken)
+    public async Task<IActionResult> Index([FromQuery] string? category, [FromQuery] int page = 1, CancellationToken cancellationToken = default)
     {
-        var selectedCategory = ResolveCategory(category);
-        IReadOnlyList<Post> posts = [];
+        var selectedCategorySlug = NewsCategories.NormalizeCategory(category);
+        var postsPage = new PagedResult<Post>
+        {
+            Page = Math.Max(1, page),
+            PageSize = DefaultPageSize
+        };
 
         if (HasConfiguredDatabase())
         {
-            posts = await TryLoadAsync(
-                () => _newsService.GetPublishedPostsByCategoryAsync(selectedCategory, null, cancellationToken),
-                "published posts") ?? [];
+            postsPage = await TryLoadAsync(
+                () => _newsService.GetPublishedPostsPageAsync(selectedCategorySlug, page, DefaultPageSize, cancellationToken),
+                "published posts") ?? postsPage;
         }
 
-        var featuredPost = posts.FirstOrDefault();
+        var selectedCategoryName = NewsCategories.GetDisplayName(selectedCategorySlug);
+        var featuredPost = postsPage.Items.FirstOrDefault();
         var model = new NewsIndexViewModel
         {
-            Categories = SupportedCategories
+            Categories = NewsCategories.All
                 .Select(x => new NewsCategoryViewModel
                 {
-                    Name = x,
-                    IsActive = string.Equals(x, selectedCategory, StringComparison.OrdinalIgnoreCase)
+                    Slug = x.Slug,
+                    Name = x.DisplayName,
+                    IsActive = string.Equals(x.Slug, selectedCategorySlug, StringComparison.OrdinalIgnoreCase)
                 })
                 .ToList(),
-            SelectedCategory = selectedCategory,
+            SelectedCategory = selectedCategorySlug,
+            SelectedCategorySlug = selectedCategorySlug,
+            SelectedCategoryName = string.IsNullOrWhiteSpace(selectedCategorySlug) ? null : selectedCategoryName,
             FeaturedPost = featuredPost is null ? null : PostCardViewModel.FromPost(featuredPost),
-            Posts = posts.Select(PostCardViewModel.FromPost).ToList(),
-            SeoTitle = string.IsNullOrWhiteSpace(selectedCategory) ? "Tin tức & ưu đãi" : $"{selectedCategory} - Tin tức",
-            SeoDescription = string.IsNullOrWhiteSpace(selectedCategory)
+            Posts = postsPage.Items.Select(PostCardViewModel.FromPost).ToList(),
+            Page = postsPage.Page,
+            PageSize = postsPage.PageSize,
+            TotalItems = postsPage.TotalItems,
+            TotalPages = postsPage.TotalPages,
+            HasPreviousPage = postsPage.HasPreviousPage,
+            HasNextPage = postsPage.HasNextPage,
+            SeoTitle = string.IsNullOrWhiteSpace(selectedCategoryName) ? "Tin tức & ưu đãi" : $"{selectedCategoryName} - Tin tức",
+            SeoDescription = string.IsNullOrWhiteSpace(selectedCategoryName)
                 ? "Cập nhật món mới, khuyến mãi và câu chuyện ẩm thực Hàn Quốc tại Truyền Thuyết Champong."
-                : $"Cập nhật {selectedCategory.ToLowerInvariant()} mới nhất từ Truyền Thuyết Champong."
+                : $"Cập nhật {selectedCategoryName} mới nhất từ Truyền Thuyết Champong."
         };
 
         return View(model);
@@ -108,6 +118,9 @@ public class NewsController : Controller
         var model = new NewsDetailViewModel
         {
             Post = post,
+            CategorySlug = NewsCategories.NormalizeCategory(post.Category) ?? string.Empty,
+            CategoryDisplayName = NewsCategories.GetDisplayName(post.Category),
+            IsPromotion = string.Equals(NewsCategories.NormalizeCategory(post.Category), NewsCategories.KhuyenMaiUuDai, StringComparison.OrdinalIgnoreCase),
             RelatedPosts = relatedPosts.Select(PostCardViewModel.FromPost).ToList(),
             SeoTitle = string.IsNullOrWhiteSpace(post.SeoTitle) ? post.Title : post.SeoTitle,
             SeoDescription = string.IsNullOrWhiteSpace(post.SeoDescription) ? post.Excerpt : post.SeoDescription
@@ -137,17 +150,6 @@ public class NewsController : Controller
             && !connectionString.Contains("your-neon-host", StringComparison.OrdinalIgnoreCase)
             && !connectionString.Contains("your_username", StringComparison.OrdinalIgnoreCase)
             && !connectionString.Contains("your_password", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string? ResolveCategory(string? category)
-    {
-        if (string.IsNullOrWhiteSpace(category))
-        {
-            return null;
-        }
-
-        var normalizedCategory = category.Trim();
-        return SupportedCategories.FirstOrDefault(x => string.Equals(x, normalizedCategory, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string? NormalizeSlug(string? slug)

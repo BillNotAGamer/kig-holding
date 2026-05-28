@@ -1,0 +1,199 @@
+@model KIGHolding.Areas.Admin.ViewModels.MenuGroupImagesViewModel
+
+@{
+    ViewData["Title"] = "Quản lý ảnh thực đơn";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel flex flex-col gap-5 p-6 sm:p-7 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+            <a asp-action="Index" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-gray transition hover:text-brand-red">
+                <span aria-hidden="true">←</span>
+                <span>Quay lại nhóm thực đơn</span>
+            </a>
+            <p class="mt-4 text-xs font-black uppercase tracking-[0.24em] text-brand-red">MENU PAGES</p>
+            <h1 class="mt-3 text-3xl font-black tracking-tight text-brand-dark">Quản lý ảnh thực đơn</h1>
+            <p class="mt-2 text-sm font-semibold text-brand-dark">@Model.MenuGroupName</p>
+            <p class="mt-1 text-xs uppercase tracking-[0.16em] text-brand-gray">@Model.MenuGroupSlug</p>
+            <p class="mt-3 text-sm leading-7 text-brand-gray">
+                Tải lên và sắp xếp các ảnh thực đơn sẽ hiển thị trong trang menu của nhóm này.
+            </p>
+        </div>
+    </div>
+
+    <div class="surface-panel p-6 sm:p-7">
+        <h2 class="text-lg font-black text-brand-dark">Tải ảnh thực đơn</h2>
+        <p class="mt-2 text-sm leading-7 text-brand-gray">
+            Hỗ trợ định dạng jpg, jpeg, png, webp. Mỗi file tối đa 50MB. Tối đa 10 ảnh mỗi lần tải lên. Ảnh mới sẽ được tự động thêm theo thứ tự 1, 2, 3...
+        </p>
+
+        <form method="post"
+              action="@Url.RouteUrl("AdminMenuGroupImagesUpload", new { menuGroupId = Model.MenuGroupId })"
+              enctype="multipart/form-data"
+              id="menu-page-upload-form"
+              class="mt-6 space-y-6">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="MenuGroupId" value="@Model.MenuGroupId" />
+
+            <div class="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+                <div>
+                    <label for="Upload_ImageFiles" class="admin-post-label">Ảnh thực đơn</label>
+                    <input id="Upload_ImageFiles"
+                           name="ImageFiles"
+                           type="file"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                           multiple
+                           class="admin-post-file" />
+                </div>
+
+                <div>
+                    <label for="Upload_AltText" class="admin-post-label">Alt text chung</label>
+                    <input id="Upload_AltText"
+                           name="AltText"
+                           type="text"
+                           value="@Model.Upload.AltText"
+                           class="admin-post-field"
+                           placeholder="Để trống để tự tạo theo tên nhóm và số trang" />
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <label class="admin-post-checkbox-shell">
+                    <input name="IsPublished" type="checkbox" value="true" checked="@Model.Upload.IsPublished" class="admin-post-checkbox" />
+                    <input name="IsPublished" type="hidden" value="false" />
+                    <span>Đăng công khai ngay sau khi tải lên</span>
+                </label>
+
+                <button type="submit" class="btn-primary">
+                    Tải ảnh lên
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="surface-panel overflow-hidden">
+        <div class="border-b border-brand-border bg-brand-light/60 px-6 py-4 sm:px-7">
+            @if (Model.Images.Count > 0)
+            {
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm font-semibold text-brand-dark">
+                        Tổng cộng @Model.Images.Count ảnh thực đơn
+                    </p>
+                    <p class="text-sm text-brand-gray">
+                        @Model.Images.Count(x => x.IsPublished) đang hiển thị, @Model.Images.Count(x => !x.IsPublished) đã ẩn
+                    </p>
+                </div>
+            }
+            else
+            {
+                <p class="text-sm font-semibold text-brand-dark">
+                    Chưa có ảnh thực đơn nào.
+                </p>
+            }
+        </div>
+
+        @if (Model.Images.Count > 0)
+        {
+            <div class="grid gap-4 p-4 md:grid-cols-2 md:p-6 xl:grid-cols-3">
+                @foreach (var image in Model.Images)
+                {
+                    <article class="rounded-3xl border border-brand-border bg-white p-5 shadow-soft">
+                        <div class="overflow-hidden rounded-2xl border border-brand-border bg-brand-light">
+                            <img src="@image.ImageUrl" alt="@image.AltText" class="aspect-[4/3] w-full object-cover" />
+                        </div>
+
+                        <div class="mt-4 flex flex-wrap items-center gap-2">
+                            @if (image.IsPublished)
+                            {
+                                <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
+                                    Đang hiển thị
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600">
+                                    Đã ẩn
+                                </span>
+                            }
+                        </div>
+
+                        <p class="mt-4 break-all text-xs leading-6 text-brand-gray">@image.ImageUrl</p>
+
+                        <form method="post"
+                              action="@Url.RouteUrl("AdminMenuGroupImagesUpdate", new { menuGroupId = Model.MenuGroupId })"
+                              id="menu-page-update-@image.Id"
+                              class="mt-5 space-y-4">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="Id" value="@image.Id" />
+                            <input type="hidden" name="MenuGroupId" value="@Model.MenuGroupId" />
+
+                            <div>
+                                <label class="admin-post-label" for="alt-@image.Id">Alt text</label>
+                                <input id="alt-@image.Id"
+                                       name="AltText"
+                                       type="text"
+                                       value="@image.AltText"
+                                       class="admin-post-field" />
+                            </div>
+
+                            <div>
+                                <label class="admin-post-label" for="order-@image.Id">Thứ tự hiển thị</label>
+                                <input id="order-@image.Id"
+                                       name="DisplayOrder"
+                                       type="number"
+                                       min="0"
+                                       value="@image.DisplayOrder"
+                                       class="admin-post-field" />
+                            </div>
+
+                            <label class="admin-post-checkbox-shell">
+                                <input name="IsPublished" type="checkbox" value="true" checked="@image.IsPublished" class="admin-post-checkbox" />
+                                <input name="IsPublished" type="hidden" value="false" />
+                                <span>Hiển thị công khai</span>
+                            </label>
+
+                            <dl class="grid gap-3 text-sm sm:grid-cols-2">
+                                <div>
+                                    <dt class="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-gray">Tạo lúc</dt>
+                                    <dd class="mt-1 text-brand-dark">@image.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-gray">Cập nhật</dt>
+                                    <dd class="mt-1 text-brand-dark">@image.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                                </div>
+                            </dl>
+
+                            <div class="flex flex-col gap-3 sm:flex-row">
+                                <button type="submit" form="menu-page-update-@image.Id" class="btn-primary sm:flex-1">
+                                    Lưu thay đổi
+                                </button>
+                            </div>
+                        </form>
+
+                        <form method="post"
+                              action="@Url.RouteUrl("AdminMenuGroupImagesDelete", new { menuGroupId = Model.MenuGroupId, imageId = image.Id })"
+                              id="menu-page-delete-@image.Id"
+                              class="mt-3"
+                              onsubmit="return confirm('Xóa ảnh thực đơn này? Hành động này sẽ xóa bản ghi và thử xóa file vật lý nếu thuộc thư mục uploads/menu-pages.');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="inline-flex w-full items-center justify-center rounded-full border border-brand-red/20 bg-brand-red/5 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-brand-redDark transition hover:border-brand-red hover:bg-brand-red hover:text-white">
+                                Xóa ảnh
+                            </button>
+                        </form>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="p-8 sm:p-10">
+                <div class="rounded-3xl border border-dashed border-brand-border bg-brand-light/60 p-8 text-center">
+                    <h2 class="text-2xl font-black text-brand-dark">Chưa có ảnh thực đơn nào</h2>
+                    <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-brand-gray">
+                        Tải ảnh đầu tiên để bắt đầu xây dựng menu cho nhóm này.
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+</section>

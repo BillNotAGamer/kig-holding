@@ -22,6 +22,9 @@ public class DbInitializer
     private static readonly Guid ComboCategoryId = Guid.Parse("4e342495-cd19-4bc9-aa54-ebc8e33164c7");
     private static readonly Guid PanchanCategoryId = Guid.Parse("ad2c7f64-b917-46fd-bd2f-7f4422ab5fce");
     private static readonly Guid DrinkCategoryId = Guid.Parse("3906f5fe-dc9c-43bd-a9c7-89cc295b6c0a");
+    private static readonly Guid ChampongMenuGroupId = Guid.Parse("a0d8dd4e-7d90-4282-bb9e-a3ca66a78c56");
+    private static readonly Guid GogimaruMenuGroupId = Guid.Parse("2a8ec6cf-7707-4d3c-bf74-0c4a20cd5f70");
+    private static readonly Guid KbbCookMenuGroupId = Guid.Parse("569b5831-f436-4438-882c-5123c65f9957");
 
     private readonly AppDbContext _dbContext;
 
@@ -51,6 +54,7 @@ public class DbInitializer
         await AddMissingBySlugAsync(_dbContext.Branches, CreateBranches(), cancellationToken);
         await AddMissingBySlugAsync(_dbContext.MenuCategories, CreateMenuCategories(), cancellationToken);
         await AddMissingBySlugAsync(_dbContext.MenuItems, CreateMenuItems(), cancellationToken);
+        await AddMissingBySlugAsync(_dbContext.MenuGroups, CreateMenuGroups(), cancellationToken);
         await AddMissingByIdAsync(_dbContext.Reviews, CreateReviews(), cancellationToken);
         await AddMissingBySlugAsync(_dbContext.Posts, CreatePosts(), cancellationToken);
 
@@ -66,7 +70,7 @@ public class DbInitializer
             BrandName = "Truyền Thuyết Champong",
             Slogan = "Mì cay Hàn Quốc, nước dùng đậm vị, không gian tối hiện đại.",
             Hotline = "0909 888 777",
-            Email = "hello@truyenthuyetchampong.vn",
+            Email = "truyenthuyetchamponghcm@gmail.com",
             FacebookUrl = "https://facebook.com/truyenthuyetchampong",
             ZaloUrl = "https://zalo.me/0909888777",
             TiktokUrl = "https://tiktok.com/@truyenthuyetchampong",
@@ -210,6 +214,48 @@ public class DbInitializer
         };
     }
 
+    private static IReadOnlyList<MenuGroup> CreateMenuGroups()
+    {
+        return
+        [
+            CreateMenuGroup(
+                ChampongMenuGroupId,
+                "Truyền Thuyết Champong",
+                "truyen-thuyet-champong",
+                "Thực đơn món Hàn đậm vị với các món chủ lực gắn liền với thương hiệu Truyền Thuyết Champong.",
+                1),
+            CreateMenuGroup(
+                GogimaruMenuGroupId,
+                "Gogimaru",
+                "gogimaru",
+                "Không gian thịt nướng Hàn Quốc với các lựa chọn nướng, lẩu và món ăn kèm phong phú.",
+                2),
+            CreateMenuGroup(
+                KbbCookMenuGroupId,
+                "KBB Cook",
+                "kbb-cook",
+                "Trải nghiệm BBQ Hàn Quốc hiện đại với nguyên liệu chọn lọc và thực đơn phù hợp cho nhóm.",
+                3)
+        ];
+    }
+
+    private static MenuGroup CreateMenuGroup(Guid id, string name, string slug, string shortDescription, int displayOrder)
+    {
+        return new MenuGroup
+        {
+            Id = id,
+            Name = name,
+            Slug = slug,
+            ShortDescription = shortDescription,
+            Description = null,
+            CoverImageUrl = null,
+            DisplayOrder = displayOrder,
+            IsPublished = true,
+            CreatedAt = SeedTime,
+            UpdatedAt = SeedTime
+        };
+    }
+
     private static IReadOnlyList<MenuItem> CreateMenuItems()
     {
         return
@@ -317,11 +363,11 @@ public class DbInitializer
     {
         return
         [
-            CreatePost("aa5d0f52-724d-4fa7-a15e-ab20ce6fcc63", "Khai trương chi nhánh Champong Quận 1", "khai-truong-chi-nhanh-champong-q1", "Không gian tối hiện đại cùng thực đơn mì cay Hàn Quốc tại trung tâm thành phố.", "Tin tức", 1),
-            CreatePost("a8366e02-4227-4c3f-ba03-31e5e0dd1004", "Ưu đãi combo trưa Hàn Quốc", "uu-dai-combo-trua", "Combo trưa gọn nhẹ cho khách văn phòng yêu món Hàn cay nóng.", "Khuyến mãi", 2),
-            CreatePost("4a647b3d-ffa7-48ce-8c15-5f0df8fe738c", "Bí quyết nước dùng Champong đỏ cay", "bi-quyet-nuoc-dung-champong", "Nước dùng được nấu từ hải sản, rau củ và nền gia vị Hàn Quốc.", "Ẩm thực", 3),
-            CreatePost("885f08bc-fe9e-4eb7-bc52-7032d7463e33", "Món mới: BBQ gà phô mai", "mon-moi-bbq-ga-pho-mai", "Gà sốt cay phủ phô mai kéo sợi dành cho nhóm bạn.", "Món mới", 4),
-            CreatePost("a65e5f3c-ffd1-40a6-9660-246d6c1d8e0c", "Lịch hoạt động dịp lễ", "lich-hoat-dong-le", "Cập nhật giờ mở cửa các chi nhánh trong những ngày cao điểm.", "Tin tức", 5)
+            CreatePost("aa5d0f52-724d-4fa7-a15e-ab20ce6fcc63", "Khai trương chi nhánh Champong Quận 1", "khai-truong-chi-nhanh-champong-q1", "Không gian tối hiện đại cùng thực đơn mì cay Hàn Quốc tại trung tâm thành phố.", "he-thong-chi-nhanh", 1),
+            CreatePost("a8366e02-4227-4c3f-ba03-31e5e0dd1004", "Ưu đãi combo trưa Hàn Quốc", "uu-dai-combo-trua", "Combo trưa gọn nhẹ cho khách văn phòng yêu món Hàn cay nóng.", "khuyen-mai-uu-dai", 2),
+            CreatePost("4a647b3d-ffa7-48ce-8c15-5f0df8fe738c", "Bí quyết nước dùng Champong đỏ cay", "bi-quyet-nuoc-dung-champong", "Nước dùng được nấu từ hải sản, rau củ và nền gia vị Hàn Quốc.", "menu-mon-moi", 3),
+            CreatePost("885f08bc-fe9e-4eb7-bc52-7032d7463e33", "Món mới: BBQ gà phô mai", "mon-moi-bbq-ga-pho-mai", "Gà sốt cay phủ phô mai kéo sợi dành cho nhóm bạn.", "menu-mon-moi", 4),
+            CreatePost("a65e5f3c-ffd1-40a6-9660-246d6c1d8e0c", "Lịch hoạt động dịp lễ", "lich-hoat-dong-le", "Cập nhật giờ mở cửa các chi nhánh trong những ngày cao điểm.", "tin-tuc-thong-bao", 5)
         ];
     }
 

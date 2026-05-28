@@ -16,6 +16,8 @@ public class AppDbContext : DbContext
     public DbSet<MenuCategory> MenuCategories => Set<MenuCategory>();
     public DbSet<MenuItem> MenuItems => Set<MenuItem>();
     public DbSet<MenuItemImage> MenuItemImages => Set<MenuItemImage>();
+    public DbSet<MenuGroup> MenuGroups => Set<MenuGroup>();
+    public DbSet<MenuPageImage> MenuPageImages => Set<MenuPageImage>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<Review> Reviews => Set<Review>();

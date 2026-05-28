@@ -66,11 +66,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="min-h-screen bg-brand-light text-brand-dark antialiased">
     @await Component.InvokeAsync("SiteHeader")
 
-    <main id="main-content" class="min-h-screen pt-20">
+    <main id="main-content" class="min-h-screen pt-20 lg:pt-[5.5rem]">
         @RenderBody()
     </main>
 

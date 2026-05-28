@@ -159,7 +159,7 @@ internal static class LayoutFallbacks
             Address = string.IsNullOrWhiteSpace(setting?.Address) ? "Địa chỉ đang cập nhật" : setting!.Address,
             GoogleMapUrl = string.IsNullOrWhiteSpace(setting?.GoogleMapUrl) ? string.Empty : setting!.GoogleMapUrl,
             Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0909 888 777" : setting!.Hotline,
-            Email = string.IsNullOrWhiteSpace(setting?.Email) ? "hello@truyenthuyetchampong.vn" : setting!.Email,
+            Email = string.IsNullOrWhiteSpace(setting?.Email) ? "truyenthuyetchamponghcm@gmail.com" : setting!.Email,
             FacebookUrl = string.IsNullOrWhiteSpace(setting?.FacebookUrl) ? "#" : setting!.FacebookUrl,
             ZaloUrl = string.IsNullOrWhiteSpace(setting?.ZaloUrl) ? "#" : setting!.ZaloUrl,
             TiktokUrl = string.IsNullOrWhiteSpace(setting?.TiktokUrl) ? "#" : setting!.TiktokUrl,

@@ -1,15 +1,15 @@
 @model KIGHolding.Areas.Admin.ViewModels.MenuCategoryIndexViewModel
 
 @{
-    ViewData["Title"] = "Danh mục thực đơn";
+    ViewData["Title"] = "Danh mục món";
 }
 
 <section class="space-y-6">
     <div class="surface-panel flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <p class="text-kicker font-black uppercase text-brand-goldDeep">Menu Categories</p>
-            <h2 class="mt-2 text-2xl font-black text-brand-dark">Danh mục thực đơn</h2>
-            <p class="mt-2 text-sm leading-6 text-brand-gray">Quản lý thứ tự, trạng thái công khai và ảnh đại diện cho các nhóm món ăn.</p>
+            <h2 class="mt-2 text-2xl font-black text-brand-dark">Danh mục món</h2>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Quản lý danh mục cho hệ thống món ăn hiện tại.</p>
         </div>
         <a asp-action="Create" class="btn-primary">Tạo danh mục mới</a>
     </div>
@@ -79,7 +79,7 @@
 
         @if (!Model.Categories.Any())
         {
-            <div class="p-8 text-center text-brand-gray">Chưa có danh mục thực đơn nào.</div>
+            <div class="p-8 text-center text-brand-gray">Chưa có danh mục món nào.</div>
         }
     </div>
 </section>

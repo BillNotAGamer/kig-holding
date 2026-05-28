@@ -10,70 +10,104 @@ namespace KIGHolding.Controllers;
 public class MenuController : Controller
 {
     private readonly IMenuService _menuService;
+    private readonly IMenuGroupService _menuGroupService;
+    private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly IConfiguration _configuration;
     private readonly ILogger<MenuController> _logger;
 
     public MenuController(
         IMenuService menuService,
+        IMenuGroupService menuGroupService,
+        IWebHostEnvironment webHostEnvironment,
         IConfiguration configuration,
         ILogger<MenuController> logger)
     {
         _menuService = menuService;
+        _menuGroupService = menuGroupService;
+        _webHostEnvironment = webHostEnvironment;
         _configuration = configuration;
         _logger = logger;
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> Index([FromQuery] string? category, CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        var selectedCategorySlug = NormalizeSlug(category);
-        IReadOnlyList<MenuCategory> categories = [];
-        IReadOnlyList<MenuItem> menuItems = [];
-        IReadOnlyList<MenuItem> featuredItems = [];
+        IReadOnlyList<MenuGroup> groups = [];
 
         if (HasConfiguredDatabase())
         {
-            categories = await TryLoadAsync(
-                () => _menuService.GetActiveCategoriesAsync(cancellationToken),
-                "menu categories") ?? [];
-
-            menuItems = await TryLoadAsync(
-                () => _menuService.GetActiveMenuItemsAsync(selectedCategorySlug, cancellationToken),
-                "menu items") ?? [];
-
-            featuredItems = await TryLoadAsync(
-                () => _menuService.GetFeaturedMenuItemsAsync(1, cancellationToken),
-                "featured menu item") ?? [];
+            groups = await TryLoadAsync(
+                () => _menuGroupService.GetPublishedGroupsAsync(cancellationToken),
+                "menu groups") ?? [];
         }
 
-        var categoryFilters = categories.Count > 0
-            ? categories.Select(x => new MenuCategoryFilterViewModel
-            {
-                Name = x.Name,
-                Slug = x.Slug,
-                IsActive = string.Equals(x.Slug, selectedCategorySlug, StringComparison.OrdinalIgnoreCase)
-            }).ToList()
-            : CreateDefaultCategories(selectedCategorySlug);
-
-        var selectedCategory = categoryFilters.FirstOrDefault(x => x.IsActive);
-        var pageTitle = selectedCategory is null
-            ? "Thực đơn Truyền Thuyết Champong"
-            : selectedCategory.Name;
-
-        var featuredItem = menuItems.FirstOrDefault(x => x.IsSignature || x.IsBestSeller)
-            ?? featuredItems.FirstOrDefault();
-
-        var model = new MenuIndexViewModel
+        var model = new MenuGroupLandingViewModel
         {
-            Categories = categoryFilters,
-            SelectedCategorySlug = selectedCategorySlug,
-            MenuItems = menuItems.Select(FoodCardViewModel.FromMenuItem).ToList(),
-            FeaturedItem = featuredItem is null ? null : FoodCardViewModel.FromMenuItem(featuredItem),
-            PageTitle = pageTitle,
-            SeoTitle = selectedCategory is null ? "Thực đơn" : $"{selectedCategory.Name} - Thực đơn",
-            SeoDescription = selectedCategory is null
-                ? "Khám phá mì Champong hải sản cay nồng, Korean BBQ, lẩu, combo, panchan và đồ uống tại Truyền Thuyết Champong."
-                : $"Khám phá các món {selectedCategory.Name.ToLowerInvariant()} tại Truyền Thuyết Champong."
+            Groups = groups.Select(CreateMenuGroupCard).ToList()
+        };
+
+        return View(model);
+    }
+
+    [HttpGet("nhom/{slug}")]
+    public async Task<IActionResult> Group(string slug, CancellationToken cancellationToken)
+    {
+        if (!HasConfiguredDatabase())
+        {
+            return NotFound();
+        }
+
+        var normalizedSlug = NormalizeSlug(slug);
+        if (string.IsNullOrWhiteSpace(normalizedSlug))
+        {
+            return NotFound();
+        }
+
+        var group = await TryLoadAsync(
+            () => _menuGroupService.GetPublishedGroupBySlugAsync(normalizedSlug, cancellationToken),
+            "menu group detail");
+
+        if (group is null)
+        {
+            return NotFound();
+        }
+
+        var images = await TryLoadAsync(
+            () => _menuGroupService.GetPublishedImagesByGroupSlugAsync(normalizedSlug, cancellationToken),
+            "menu group images") ?? [];
+
+        var imageViewModels = images
+            .Select((image, index) => new MenuPageImageViewModel
+            {
+                ImageUrl = image.ImageUrl,
+                AltText = string.IsNullOrWhiteSpace(image.AltText)
+                    ? $"{group.Name} - Trang thực đơn {(index + 1):00}"
+                    : image.AltText,
+                DisplayOrder = image.DisplayOrder,
+                PageNumber = index + 1
+            })
+            .ToList();
+
+        var firstImageUrl = imageViewModels.FirstOrDefault()?.ImageUrl;
+        var viewerCoverImageUrl = string.IsNullOrWhiteSpace(group.CoverImageUrl)
+            ? firstImageUrl
+            : group.CoverImageUrl;
+
+        var model = new MenuGroupDetailViewModel
+        {
+            Name = group.Name,
+            Slug = group.Slug,
+            ShortDescription = string.IsNullOrWhiteSpace(group.ShortDescription)
+                ? GetFallbackGroupDescription(group.Slug)
+                : group.ShortDescription,
+            Description = group.Description,
+            CoverImageUrl = viewerCoverImageUrl,
+            FirstImageUrl = firstImageUrl,
+            BackUrl = "/thuc-don",
+            GroupUrl = $"/thuc-don/nhom/{group.Slug}",
+            TotalPages = imageViewModels.Count,
+            HasImages = imageViewModels.Count > 0,
+            Images = imageViewModels
         };
 
         return View(model);
@@ -149,31 +183,6 @@ public class MenuController : Controller
             : slug.Trim().ToLowerInvariant();
     }
 
-    private static IReadOnlyList<MenuCategoryFilterViewModel> CreateDefaultCategories(string? selectedCategorySlug)
-    {
-        return
-        [
-            CreateDefaultCategory("Mì Champong", "mi-champong", selectedCategorySlug),
-            CreateDefaultCategory("Mì tương đen", "mi-tuong-den", selectedCategorySlug),
-            CreateDefaultCategory("BBQ", "bbq", selectedCategorySlug),
-            CreateDefaultCategory("Lẩu", "lau", selectedCategorySlug),
-            CreateDefaultCategory("Cơm & món Hàn", "com-mon-han", selectedCategorySlug),
-            CreateDefaultCategory("Combo", "combo", selectedCategorySlug),
-            CreateDefaultCategory("Panchan", "panchan", selectedCategorySlug),
-            CreateDefaultCategory("Đồ uống", "do-uong", selectedCategorySlug)
-        ];
-    }
-
-    private static MenuCategoryFilterViewModel CreateDefaultCategory(string name, string slug, string? selectedCategorySlug)
-    {
-        return new MenuCategoryFilterViewModel
-        {
-            Name = name,
-            Slug = slug,
-            IsActive = string.Equals(slug, selectedCategorySlug, StringComparison.OrdinalIgnoreCase)
-        };
-    }
-
     private static IReadOnlyList<MenuGalleryImageViewModel> CreateGallery(MenuItem menuItem)
     {
         var galleryImages = menuItem.Images
@@ -195,5 +204,68 @@ public class MenuController : Controller
         }
 
         return galleryImages;
+    }
+
+    private MenuGroupCardViewModel CreateMenuGroupCard(MenuGroup group)
+    {
+        return new MenuGroupCardViewModel
+        {
+            Name = group.Name,
+            Slug = group.Slug,
+            ShortDescription = string.IsNullOrWhiteSpace(group.ShortDescription)
+                ? GetFallbackGroupDescription(group.Slug)
+                : group.ShortDescription,
+            Description = group.Description,
+            CoverImageUrl = ResolveMenuGroupCoverImage(group.CoverImageUrl, group.Slug),
+            DisplayOrder = group.DisplayOrder,
+            Url = $"/thuc-don/nhom/{group.Slug}",
+            PageImageCount = group.PageImages.Count(x => x.IsPublished)
+        };
+    }
+
+    private string? ResolveMenuGroupCoverImage(string? coverImageUrl, string slug)
+    {
+        if (!string.IsNullOrWhiteSpace(coverImageUrl))
+        {
+            return coverImageUrl;
+        }
+
+        var fallbackUrl = slug switch
+        {
+            "truyen-thuyet-champong" => "/images/home/images/truyen-thuyet-champong.webp",
+            "gogimaru" => "/images/home/images/gogimaru-img.webp",
+            "kbb-cook" => "/images/home/images/kbb-cook-img.png",
+            _ => null
+        };
+
+        return StaticWebFileExists(fallbackUrl) ? fallbackUrl : null;
+    }
+
+    private bool StaticWebFileExists(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(_webHostEnvironment.WebRootPath))
+        {
+            return false;
+        }
+
+        var normalizedUrl = url.Split('?', '#')[0]
+            .TrimStart('/', '~')
+            .Replace('/', Path.DirectorySeparatorChar);
+        var webRootPath = Path.GetFullPath(_webHostEnvironment.WebRootPath);
+        var filePath = Path.GetFullPath(Path.Combine(webRootPath, normalizedUrl));
+
+        return filePath.StartsWith(webRootPath, StringComparison.OrdinalIgnoreCase)
+            && System.IO.File.Exists(filePath);
+    }
+
+    private static string GetFallbackGroupDescription(string slug)
+    {
+        return slug switch
+        {
+            "truyen-thuyet-champong" => "Các món Hàn đậm vị, nổi bật với tinh thần Champong hiện đại và trải nghiệm dùng bữa chỉn chu.",
+            "gogimaru" => "Thực đơn nướng Hàn Quốc với các lựa chọn thịt, lẩu và món ăn kèm phù hợp cho nhóm.",
+            "kbb-cook" => "Không gian BBQ hiện đại với nguyên liệu chọn lọc và thực đơn phù hợp cho những buổi gặp gỡ.",
+            _ => "Chọn nhóm thực đơn để xem các trang menu được cập nhật từ Truyền Thuyết Champong."
+        };
     }
 }

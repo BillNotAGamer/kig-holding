@@ -1,0 +1,311 @@
+@model KIGHolding.Areas.Admin.ViewModels.MenuGroupIndexViewModel
+
+@{
+    ViewData["Title"] = "Quản lý nhóm thực đơn";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel flex flex-col gap-5 p-6 sm:p-7 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+            <p class="text-xs font-black uppercase tracking-[0.24em] text-brand-red">MENU GROUPS</p>
+            <h1 class="mt-3 text-3xl font-black tracking-tight text-brand-dark">Quản lý nhóm thực đơn</h1>
+            <p class="mt-3 text-sm leading-7 text-brand-gray">
+                Tạo và sắp xếp các nhóm thực đơn thương hiệu hiển thị trên trang thực đơn.
+            </p>
+        </div>
+
+        <a asp-action="Create" class="btn-primary">
+            Tạo nhóm thực đơn
+        </a>
+    </div>
+
+    <form method="get" asp-action="Index" class="surface-panel p-6 sm:p-7">
+        <div class="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,0.95fr)_auto_auto] xl:items-end">
+            <div>
+                <label for="q" class="admin-post-label">Tìm kiếm</label>
+                <input id="q"
+                       name="q"
+                       type="search"
+                       value="@Model.SearchQuery"
+                       class="admin-post-field"
+                       placeholder="Tên nhóm, slug, mô tả ngắn..." />
+            </div>
+
+            <div>
+                <label for="status" class="admin-post-label">Trạng thái</label>
+                <select id="status" name="status" class="admin-post-field">
+                    @foreach (var option in Model.StatusOptions)
+                    {
+                        <option value="@option.Value" selected="@(Model.SelectedStatus == option.Value || (string.IsNullOrWhiteSpace(Model.SelectedStatus) && string.IsNullOrWhiteSpace(option.Value)) ? "selected" : null)">
+                            @option.Text
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn-primary h-12">
+                Lọc
+            </button>
+
+            <a asp-action="Index" class="btn-secondary h-12">
+                Xóa lọc
+            </a>
+        </div>
+    </form>
+
+    <div class="surface-panel overflow-hidden">
+        <div class="border-b border-brand-border bg-brand-light/60 px-6 py-4 sm:px-7">
+            @if (Model.TotalCount > 0)
+            {
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm font-semibold text-brand-dark">
+                        Tổng cộng @Model.TotalCount nhóm thực đơn
+                    </p>
+                    <p class="text-sm text-brand-gray">
+                        @Model.Groups.Count(x => x.IsPublished) đang hiển thị, @Model.Groups.Count(x => !x.IsPublished) đã ẩn
+                    </p>
+                </div>
+            }
+            else
+            {
+                <p class="text-sm font-semibold text-brand-dark">
+                    Không tìm thấy nhóm thực đơn phù hợp.
+                </p>
+            }
+        </div>
+
+        @if (Model.Groups.Count > 0)
+        {
+            <div class="grid gap-4 p-4 md:p-6 lg:hidden">
+                @foreach (var group in Model.Groups)
+                {
+                    <article class="rounded-3xl border border-brand-border bg-white p-5 shadow-soft">
+                        <div class="flex gap-4">
+                            @if (!string.IsNullOrWhiteSpace(group.CoverImageUrl))
+                            {
+                                <img src="@group.CoverImageUrl" alt="@group.Name" class="h-20 w-24 shrink-0 rounded-2xl border border-brand-border object-cover" />
+                            }
+                            else
+                            {
+                                <div class="grid h-20 w-24 shrink-0 place-items-center rounded-2xl border border-dashed border-brand-border bg-brand-light text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-gray">
+                                    No cover
+                                </div>
+                            }
+
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    @if (group.IsPublished)
+                                    {
+                                        <span class="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
+                                            Đang hiển thị
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600">
+                                            Đã ẩn
+                                        </span>
+                                    }
+
+                                    <span class="rounded-full border border-brand-border bg-brand-light px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-gray">
+                                        @group.PageImageCount ảnh menu
+                                    </span>
+                                </div>
+
+                                <h2 class="mt-3 text-lg font-black leading-tight text-brand-dark">@group.Name</h2>
+                                <p class="mt-1 text-xs text-brand-gray">@group.Slug</p>
+                            </div>
+                        </div>
+
+                        <p class="mt-4 text-sm leading-7 text-brand-gray">
+                            @group.ShortDescription
+                        </p>
+
+                        <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                            <div>
+                                <dt class="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-gray">Thứ tự hiển thị</dt>
+                                <dd class="mt-1 text-brand-dark">@group.DisplayOrder</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-gray">Cập nhật</dt>
+                                <dd class="mt-1 text-brand-dark">@group.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                            </div>
+                        </dl>
+
+                        <div class="mt-5 flex flex-wrap gap-3">
+                            <a asp-action="Edit"
+                               asp-route-id="@group.Id"
+                               class="inline-flex items-center justify-center rounded-full border border-brand-border bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                                Sửa
+                            </a>
+
+                            <form asp-action="TogglePublished"
+                                  asp-route-id="@group.Id"
+                                  asp-route-q="@Model.SearchQuery"
+                                  asp-route-status="@Model.SelectedStatus"
+                                  method="post"
+                                  class="inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="inline-flex items-center justify-center rounded-full border border-brand-border bg-brand-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                                    @(group.IsPublished ? "Ẩn" : "Hiện lại")
+                                </button>
+                            </form>
+
+                            @if (group.IsPublished)
+                            {
+                                <form asp-action="Delete"
+                                      asp-route-id="@group.Id"
+                                      asp-route-q="@Model.SearchQuery"
+                                      asp-route-status="@Model.SelectedStatus"
+                                      method="post"
+                                      class="inline"
+                                      onsubmit="return confirm('Ẩn nhóm thực đơn này khỏi trạng thái công khai?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="inline-flex items-center justify-center rounded-full border border-brand-red/20 bg-brand-red/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-redDark transition hover:border-brand-red hover:bg-brand-red hover:text-white">
+                                        Ẩn nhóm
+                                    </button>
+                                </form>
+                            }
+
+                            <a asp-action="Images"
+                               asp-route-id="@group.Id"
+                               class="inline-flex items-center justify-center rounded-full border border-brand-border bg-brand-light px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                                Ảnh menu
+                            </a>
+                        </div>
+                    </article>
+                }
+            </div>
+
+            <div class="hidden overflow-x-auto lg:block">
+                <table class="min-w-full text-left text-sm text-brand-gray">
+                    <thead class="border-b border-brand-border bg-brand-light text-xs uppercase tracking-[0.14em] text-brand-dark">
+                        <tr>
+                            <th class="px-6 py-4 font-semibold">Ảnh bìa</th>
+                            <th class="px-6 py-4 font-semibold">Tên nhóm</th>
+                            <th class="px-6 py-4 font-semibold">Mô tả ngắn</th>
+                            <th class="px-6 py-4 font-semibold">Thứ tự</th>
+                            <th class="px-6 py-4 font-semibold">Ảnh menu</th>
+                            <th class="px-6 py-4 font-semibold">Trạng thái</th>
+                            <th class="px-6 py-4 font-semibold">Cập nhật</th>
+                            <th class="px-6 py-4 font-semibold">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-brand-border">
+                        @foreach (var group in Model.Groups)
+                        {
+                            <tr class="align-top transition-colors hover:bg-brand-light/35">
+                                <td class="px-6 py-5">
+                                    @if (!string.IsNullOrWhiteSpace(group.CoverImageUrl))
+                                    {
+                                        <img src="@group.CoverImageUrl" alt="@group.Name" class="h-14 w-24 rounded-2xl border border-brand-border object-cover" />
+                                    }
+                                    else
+                                    {
+                                        <div class="grid h-14 w-24 place-items-center rounded-2xl border border-dashed border-brand-border bg-brand-light text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-gray">
+                                            No cover
+                                        </div>
+                                    }
+                                </td>
+                                <td class="px-6 py-5">
+                                    <div class="max-w-[15rem]">
+                                        <p class="text-base font-bold leading-tight text-brand-dark">@group.Name</p>
+                                        <p class="mt-1 text-xs text-brand-gray">@group.Slug</p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5">
+                                    <p class="max-w-[20rem] text-sm leading-6 text-brand-gray">@group.ShortDescription</p>
+                                </td>
+                                <td class="px-6 py-5 text-brand-dark">
+                                    @group.DisplayOrder
+                                </td>
+                                <td class="px-6 py-5 text-brand-dark">
+                                    @group.PageImageCount
+                                </td>
+                                <td class="px-6 py-5">
+                                    @if (group.IsPublished)
+                                    {
+                                        <span class="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+                                            Đang hiển thị
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+                                            Đã ẩn
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-6 py-5 text-brand-dark">
+                                    @group.UpdatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="px-6 py-5">
+                                    <div class="flex flex-col items-start gap-2">
+                                        <a asp-action="Edit"
+                                           asp-route-id="@group.Id"
+                                           class="inline-flex items-center justify-center rounded-full border border-brand-border bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                                            Sửa
+                                        </a>
+
+                                        <form asp-action="TogglePublished"
+                                              asp-route-id="@group.Id"
+                                              asp-route-q="@Model.SearchQuery"
+                                              asp-route-status="@Model.SelectedStatus"
+                                              method="post"
+                                              class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="inline-flex items-center justify-center rounded-full border border-brand-border bg-brand-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                                                @(group.IsPublished ? "Ẩn" : "Hiện lại")
+                                            </button>
+                                        </form>
+
+                                        @if (group.IsPublished)
+                                        {
+                                            <form asp-action="Delete"
+                                                  asp-route-id="@group.Id"
+                                                  asp-route-q="@Model.SearchQuery"
+                                                  asp-route-status="@Model.SelectedStatus"
+                                                  method="post"
+                                                  class="inline"
+                                                  onsubmit="return confirm('Ẩn nhóm thực đơn này khỏi trạng thái công khai?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="inline-flex items-center justify-center rounded-full border border-brand-red/20 bg-brand-red/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-redDark transition hover:border-brand-red hover:bg-brand-red hover:text-white">
+                                                    Ẩn nhóm
+                                                </button>
+                                            </form>
+                                        }
+
+                                        <a asp-action="Images"
+                                           asp-route-id="@group.Id"
+                                           class="inline-flex items-center justify-center rounded-full border border-brand-border bg-brand-light px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                                            Ảnh menu
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="p-8 sm:p-10">
+                <div class="rounded-3xl border border-dashed border-brand-border bg-brand-light/60 p-8 text-center">
+                    <h2 class="text-2xl font-black text-brand-dark">Chưa có nhóm thực đơn phù hợp</h2>
+                    <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-brand-gray">
+                        Hãy điều chỉnh bộ lọc hoặc tạo nhóm thực đơn mới để chuẩn bị cho menu hub thương hiệu.
+                    </p>
+                    <div class="mt-6 flex flex-wrap justify-center gap-3">
+                        <a asp-action="Index" class="btn-secondary">
+                            Xóa lọc
+                        </a>
+                        <a asp-action="Create" class="btn-primary">
+                            Tạo nhóm thực đơn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

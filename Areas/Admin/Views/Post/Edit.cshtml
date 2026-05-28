@@ -12,66 +12,66 @@
         <form asp-action="Edit" method="post" enctype="multipart/form-data" class="mt-6 space-y-6">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
-            <div asp-validation-summary="ModelOnly" class="text-sm text-brand-redDark"></div>
+            <div asp-validation-summary="ModelOnly" class="admin-post-summary"></div>
 
             <div class="grid gap-5 lg:grid-cols-2">
                 <div>
-                    <label asp-for="Title" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                    <input asp-for="Title" class="form-input" />
-                    <span asp-validation-for="Title" class="mt-2 block text-xs text-brand-redDark"></span>
+                    <label asp-for="Title" class="admin-post-label"></label>
+                    <input asp-for="Title" class="admin-post-field" />
+                    <span asp-validation-for="Title" class="admin-post-validation"></span>
                 </div>
                 <div>
-                    <label asp-for="Slug" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                    <input asp-for="Slug" class="form-input" />
-                    <span asp-validation-for="Slug" class="mt-2 block text-xs text-brand-redDark"></span>
+                    <label asp-for="Slug" class="admin-post-label"></label>
+                    <input asp-for="Slug" class="admin-post-field" />
+                    <span asp-validation-for="Slug" class="admin-post-validation"></span>
                 </div>
             </div>
 
             <div class="grid gap-5 lg:grid-cols-2">
                 <div>
-                    <label asp-for="Category" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                    <select asp-for="Category" asp-items="Model.CategoryOptions" class="form-input"></select>
-                    <span asp-validation-for="Category" class="mt-2 block text-xs text-brand-redDark"></span>
+                    <label asp-for="Category" class="admin-post-label"></label>
+                    <select asp-for="Category" asp-items="Model.CategoryOptions" class="admin-post-field"></select>
+                    <span asp-validation-for="Category" class="admin-post-validation"></span>
                 </div>
                 <div>
-                    <label asp-for="PublishedAt" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                    <input asp-for="PublishedAt" type="datetime-local" class="form-input" />
-                    <span asp-validation-for="PublishedAt" class="mt-2 block text-xs text-brand-redDark"></span>
+                    <label asp-for="PublishedAt" class="admin-post-label"></label>
+                    <input asp-for="PublishedAt" type="datetime-local" class="admin-post-field" />
+                    <span asp-validation-for="PublishedAt" class="admin-post-validation"></span>
                 </div>
             </div>
 
             <div>
-                <label asp-for="Excerpt" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                <textarea asp-for="Excerpt" rows="3" class="form-input"></textarea>
-                <span asp-validation-for="Excerpt" class="mt-2 block text-xs text-brand-redDark"></span>
+                <label asp-for="Excerpt" class="admin-post-label"></label>
+                <textarea asp-for="Excerpt" rows="3" class="admin-post-area min-h-32"></textarea>
+                <span asp-validation-for="Excerpt" class="admin-post-validation"></span>
             </div>
 
             <div>
-                <label asp-for="Content" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                <textarea asp-for="Content" rows="10" class="form-input"></textarea>
-                <span asp-validation-for="Content" class="mt-2 block text-xs text-brand-redDark"></span>
+                <label asp-for="Content" class="admin-post-label"></label>
+                <textarea asp-for="Content" rows="10" class="admin-post-area min-h-56"></textarea>
+                <span asp-validation-for="Content" class="admin-post-validation"></span>
             </div>
 
             <div class="grid gap-5 lg:grid-cols-3">
                 <div>
-                    <label asp-for="SeoTitle" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                    <input asp-for="SeoTitle" class="form-input" />
+                    <label asp-for="SeoTitle" class="admin-post-label"></label>
+                    <input asp-for="SeoTitle" class="admin-post-field" />
                 </div>
                 <div class="lg:col-span-2">
-                    <label asp-for="SeoDescription" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                    <input asp-for="SeoDescription" class="form-input" />
+                    <label asp-for="SeoDescription" class="admin-post-label"></label>
+                    <input asp-for="SeoDescription" class="admin-post-field" />
                 </div>
             </div>
 
             <div class="grid gap-5 lg:grid-cols-3">
                 <div>
-                    <label asp-for="ThumbnailFile" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                    <input asp-for="ThumbnailFile" type="file" accept=".jpg,.jpeg,.png,.webp" class="form-input" />
-                    <span asp-validation-for="ThumbnailFile" class="mt-2 block text-xs text-brand-redDark"></span>
+                    <label asp-for="ThumbnailFile" class="admin-post-label"></label>
+                    <input asp-for="ThumbnailFile" type="file" accept=".jpg,.jpeg,.png,.webp" class="admin-post-file" />
+                    <span asp-validation-for="ThumbnailFile" class="admin-post-validation"></span>
                 </div>
                 <div class="lg:col-span-2 flex items-end gap-5">
-                    <label class="flex items-center gap-3 text-sm text-brand-dark">
-                        <input asp-for="IsPublished" type="checkbox" class="size-4 rounded border-brand-border text-brand-goldDeep" />
+                    <label class="admin-post-checkbox-shell">
+                        <input asp-for="IsPublished" type="checkbox" class="admin-post-checkbox" />
                         <span>Đăng công khai</span>
                     </label>
                 </div>

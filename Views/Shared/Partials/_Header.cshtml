@@ -1,11 +1,11 @@
 @model KIGHolding.ViewModels.Shared.HeaderViewModel
 
 <header data-site-header class="site-header">
-    <nav class="container-page flex h-20 items-center gap-6 xl:gap-10">
+    <nav class="container-page flex h-20 items-center gap-6 xl:gap-10 lg:h-[5.5rem]">
         <a href="/" class="group flex shrink-0 items-center gap-3" aria-label="@Model.BrandName">
             @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
             {
-                <img src="@Model.LogoUrl" alt="@Model.BrandName" class="h-12 w-12 rounded-full object-contain" />
+                <img src="@Model.LogoUrl" alt="@Model.BrandName" class="h-20 w-20 rounded-full object-contain lg:h-20 lg:w-20" />
             }
             else
             {
@@ -41,11 +41,11 @@
                                         @foreach (var child in item.Children)
                                         {
                                             <a href="@child.Url"
-                                               class="flex items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-white/75 transition-colors hover:bg-white/10 hover:text-white @(child.IsActive ? "bg-brand-gold/15 text-brand-goldSoft" : string.Empty)">
+                                               class="flex items-center justify-between rounded-xl px-4 py-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-white/10 hover:text-white @(child.IsActive ? "bg-brand-red/12 text-brand-red" : string.Empty)">
                                                 <span>@child.Label</span>
                                                 @if (child.IsActive)
                                                 {
-                                                    <span class="h-1.5 w-1.5 rounded-full bg-brand-goldSoft"></span>
+                                                    <span class="h-1.5 w-1.5 rounded-full bg-brand-red"></span>
                                                 }
                                             </a>
                                         }
@@ -66,13 +66,13 @@
 
         <div class="hidden shrink-0 items-center lg:flex">
             <a href="@Model.ReservationUrl"
-               class="inline-flex items-center rounded-button border border-brand-gold/30 bg-brand-gold px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.16em] text-brand-black transition-colors hover:bg-brand-goldSoft">
+               class="inline-flex items-center rounded-button border border-brand-red/30 bg-brand-red px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-brand-redDark">
                 Đặt bàn
             </a>
         </div>
 
         <button type="button"
-                class="ml-auto inline-flex size-11 items-center justify-center rounded-md border border-white/20 bg-white/5 text-white transition hover:border-brand-gold hover:text-brand-goldSoft lg:hidden"
+                class="ml-auto inline-flex size-11 items-center justify-center rounded-md border border-white/20 bg-white/5 text-white transition hover:border-brand-red hover:text-brand-red lg:hidden"
                 aria-label="Mở menu"
                 aria-expanded="false"
                 data-mobile-menu-open>

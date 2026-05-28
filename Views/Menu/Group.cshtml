@@ -1,0 +1,156 @@
+@model MenuGroupDetailViewModel
+
+@{
+    ViewData["Title"] = $"{Model.Name} - Thực đơn";
+    ViewData["MetaDescription"] = Model.ShortDescription;
+
+    var pageCountLabel = Model.TotalPages == 1
+        ? "1 trang menu"
+        : $"{Model.TotalPages} trang menu";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/css/dflip.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/css/themify-icons.min.css" />
+}
+
+<section class="menu-group-viewer menu-group-viewer--dark relative overflow-hidden py-12 text-white sm:py-16 lg:py-20"
+         data-menu-group-viewer>
+    <div class="container-page relative z-10">
+        <!-- Back Link & CTA Reservation -->
+        <div class="flex items-center justify-between border-b border-white/10 pb-4" data-uw-reveal="fade-up">
+            <a href="@Model.BackUrl"
+               class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/70 transition duration-300 hover:border-brand-red/50 hover:text-white">
+                ← Quay lại thực đơn
+            </a>
+            
+            <a href="/dat-ban"
+               class="inline-flex items-center justify-center rounded-full bg-brand-red px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_rgba(229,9,20,0.2)] transition duration-300 hover:bg-brand-redDark">
+                Đặt bàn ngay
+            </a>
+        </div>
+
+        <!-- Premium Compact Intro Bar -->
+        <header class="mt-6 flex flex-col justify-between gap-4 md:flex-row md:items-end border-b border-white/5 pb-6" data-uw-reveal="fade-up" data-uw-delay="80">
+            <div>
+                <span class="inline-flex rounded-full border border-brand-red/30 bg-brand-red/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-red-300">
+                    Thực đơn
+                </span>
+                <h1 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
+                    @Model.Name
+                </h1>
+                @if (!string.IsNullOrWhiteSpace(Model.ShortDescription) && !string.Equals(Model.ShortDescription.Trim(), Model.Name.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-white/70 sm:text-base">
+                        @Model.ShortDescription
+                    </p>
+                }
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.Description) && !string.Equals(Model.Description.Trim(), Model.Name.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="max-w-xl text-xs leading-5 text-white/50 md:text-sm md:leading-6">
+                    @Model.Description
+                </div>
+            }
+        </header>
+
+        <!-- Main Book Section -->
+        <section id="menu-viewer" class="menu-dearflip-section mt-8" data-uw-reveal="fade-up" data-uw-delay="120">
+            <div class="menu-dearflip-shell relative py-4 bg-gradient-to-b from-black/45 to-black/20 rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden">
+                <!-- Ambient Backdrop Glow -->
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(229,9,20,0.03),transparent_70%)] pointer-events-none"></div>
+
+                @if (Model.HasImages)
+                {
+                    <!-- DearFlip container -->
+                    <div class="_df_book menu-dearflip-book" id="menu_group_flipbook"></div>
+                }
+                else
+                {
+                    <div class="rounded-[2rem] border border-white/10 bg-white/[0.045] p-8 text-center shadow-[0_28px_80px_rgba(0,0,0,0.28)] backdrop-blur">
+                        <span class="inline-flex rounded-full border border-brand-red/30 bg-brand-red/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-red-300">
+                            Đang cập nhật
+                        </span>
+                        <h3 class="mt-5 text-2xl font-black text-white sm:text-3xl">
+                            Menu đang được cập nhật
+                        </h3>
+                        <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/[0.65] sm:text-base">
+                            Nhà hàng đang chuẩn bị hình ảnh thực đơn cho nhóm này. Vui lòng quay lại sau hoặc liên hệ để được tư vấn.
+                        </p>
+                        <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                            <a href="@Model.BackUrl"
+                               class="inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white transition duration-300 hover:bg-brand-redDark">
+                                Quay lại thực đơn
+                            </a>
+                            <a href="/dat-ban"
+                               class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white/80 transition duration-300 hover:border-brand-red/50 hover:text-white">
+                                Đặt bàn
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- CTA Reservation Bottom -->
+        <section class="mt-12 lg:mt-16" data-uw-reveal="fade-up" data-uw-delay="160">
+            <div class="rounded-[2rem] border border-white/10 bg-white/[0.05] p-7 shadow-[0_28px_80px_rgba(0,0,0,0.28)] backdrop-blur sm:p-8 lg:p-10">
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-[0.24em] text-red-300">Đặt bàn</span>
+                        <h2 class="mt-3 text-2xl font-black text-white sm:text-3xl">
+                            Bạn đã chọn được món?
+                        </h2>
+                        <p class="mt-3 max-w-2xl text-sm leading-7 text-white/[0.65] sm:text-base">
+                            Đặt bàn trước để được hỗ trợ nhanh hơn và chuẩn bị trải nghiệm phù hợp cho nhóm của bạn.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col gap-3 sm:flex-row">
+                        <a href="/dat-ban"
+                           class="inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white shadow-[0_18px_44px_rgba(229,9,20,0.24)] transition duration-300 hover:bg-brand-redDark">
+                            Đặt bàn ngay
+                        </a>
+                        <a href="/chi-nhanh"
+                           class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white/80 transition duration-300 hover:border-brand-red/50 hover:text-white">
+                            Xem chi nhánh
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (Model.HasImages)
+        {
+            <noscript>
+                <section class="menu-flipbook-noscript py-8 text-center">
+                    <h2 class="text-xl font-bold mb-4 text-white">Trang thực đơn</h2>
+                    <ul class="flex flex-col gap-8 max-w-2xl mx-auto">
+                        @foreach (var img in Model.Images)
+                        {
+                            <li class="border border-white/10 p-2 rounded-lg bg-black/40">
+                                <img src="@img.ImageUrl" alt="@img.AltText" class="w-full h-auto rounded" loading="lazy" />
+                                <p class="mt-2 text-sm text-white/60">Trang @img.PageNumber.ToString("00"): @img.AltText</p>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            </noscript>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    @if (Model.HasImages)
+    {
+        <script>
+            window.option_menu_group_flipbook = {
+                source: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Images.Select(img => img.ImageUrl))),
+                webgl: true,
+                fancybox: false
+            };
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/@@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/js/dflip.min.js"></script>
+        <script src="~/js/menu-flipbook.js" asp-append-version="true"></script>
+    }
+}

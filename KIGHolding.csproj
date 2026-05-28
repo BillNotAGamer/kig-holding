@@ -22,6 +22,8 @@
   <ItemGroup>
     <Folder Include="wwwroot\images\home\" />
     <Folder Include="wwwroot\images\general\" />
+    <Folder Include="wwwroot\images\menu\" />
+    <Folder Include="wwwroot\images\introduce\" />
   </ItemGroup>
 
 </Project>

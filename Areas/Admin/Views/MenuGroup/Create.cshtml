@@ -1,0 +1,74 @@
+@model KIGHolding.Areas.Admin.ViewModels.MenuGroupFormViewModel
+
+@{
+    ViewData["Title"] = "Tạo nhóm thực đơn";
+}
+
+<section class="space-y-6">
+    <div class="surface-panel p-6">
+        <p class="text-kicker font-black uppercase text-brand-goldDeep">Menu Groups</p>
+        <h2 class="mt-2 text-2xl font-black text-brand-dark">Tạo nhóm thực đơn</h2>
+
+        <form asp-action="Create" method="post" class="mt-6 space-y-6">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="admin-post-summary"></div>
+
+            <div class="grid gap-5 lg:grid-cols-2">
+                <div>
+                    <label asp-for="Name" class="admin-post-label"></label>
+                    <input asp-for="Name" class="admin-post-field" />
+                    <span asp-validation-for="Name" class="admin-post-validation"></span>
+                </div>
+                <div>
+                    <label asp-for="Slug" class="admin-post-label"></label>
+                    <input asp-for="Slug" class="admin-post-field" placeholder="Để trống để tự tạo từ tên nhóm" />
+                    <span asp-validation-for="Slug" class="admin-post-validation"></span>
+                </div>
+            </div>
+
+            <div>
+                <label asp-for="ShortDescription" class="admin-post-label"></label>
+                <textarea asp-for="ShortDescription" rows="3" class="admin-post-area min-h-32"></textarea>
+                <span asp-validation-for="ShortDescription" class="admin-post-validation"></span>
+            </div>
+
+            <div>
+                <label asp-for="Description" class="admin-post-label"></label>
+                <textarea asp-for="Description" rows="6" class="admin-post-area min-h-40" placeholder="Mô tả dài cho trang chi tiết nhóm thực đơn trong các phase sau."></textarea>
+                <span asp-validation-for="Description" class="admin-post-validation"></span>
+            </div>
+
+            <div class="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)]">
+                <div>
+                    <label asp-for="CoverImageUrl" class="admin-post-label"></label>
+                    <input asp-for="CoverImageUrl" class="admin-post-field" placeholder="/uploads/menu-groups/example.webp hoặc URL CDN" />
+                    <p class="mt-2 text-sm leading-6 text-brand-gray">
+                        Phase C dùng URL ảnh bìa thủ công. Upload ảnh bìa và quản lý ảnh menu sẽ được triển khai ở Phase D.
+                    </p>
+                    <span asp-validation-for="CoverImageUrl" class="admin-post-validation"></span>
+                </div>
+                <div>
+                    <label asp-for="DisplayOrder" class="admin-post-label"></label>
+                    <input asp-for="DisplayOrder" type="number" min="0" class="admin-post-field" />
+                    <span asp-validation-for="DisplayOrder" class="admin-post-validation"></span>
+                </div>
+            </div>
+
+            <div>
+                <label class="admin-post-checkbox-shell">
+                    <input asp-for="IsPublished" type="checkbox" class="admin-post-checkbox" />
+                    <span>Hiển thị công khai</span>
+                </label>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <button type="submit" class="btn-primary">Lưu nhóm thực đơn</button>
+                <a asp-action="Index" class="btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,4 +1,5 @@
 using KIGHolding.Models.Entities;
+using KIGHolding.Models.Content;
 
 namespace KIGHolding.ViewModels.Shared;
 
@@ -21,7 +22,7 @@ public class PostCardViewModel
             Url = $"/tin-tuc/{post.Slug}",
             ImageUrl = string.IsNullOrWhiteSpace(post.ThumbnailUrl) ? "/images/placeholders/post-card.webp" : post.ThumbnailUrl,
             Excerpt = post.Excerpt,
-            Category = post.Category,
+            Category = NewsCategories.GetDisplayName(post.Category),
             PublishedAt = post.PublishedAt
         };
     }

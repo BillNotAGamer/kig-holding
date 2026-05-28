@@ -1,4 +1,6 @@
 using KIGHolding.Data;
+using KIGHolding.Models;
+using KIGHolding.Models.Content;
 using KIGHolding.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,13 +29,7 @@ public class NewsService : INewsService
 
     public async Task<IReadOnlyList<Post>> GetPublishedPostsByCategoryAsync(string? category, int? take = null, CancellationToken cancellationToken = default)
     {
-        var query = CreatePublishedPostsQuery();
-
-        if (!string.IsNullOrWhiteSpace(category))
-        {
-            var categoryAliases = GetCategoryAliases(category);
-            query = query.Where(x => categoryAliases.Contains(x.Category));
-        }
+        var query = ApplyCategoryFilter(CreatePublishedPostsQuery(), category);
 
         if (take.HasValue)
         {
@@ -41,6 +37,39 @@ public class NewsService : INewsService
         }
 
         return await query.ToListAsync(cancellationToken);
+    }
+
+    public async Task<PagedResult<Post>> GetPublishedPostsPageAsync(string? category, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var resolvedPage = Math.Max(1, page);
+        var resolvedPageSize = pageSize > 0 ? pageSize : 9;
+        var query = ApplyCategoryFilter(CreatePublishedPostsQuery(), category);
+
+        var totalItems = await query.CountAsync(cancellationToken);
+        var totalPages = totalItems == 0
+            ? 0
+            : (int)Math.Ceiling(totalItems / (double)resolvedPageSize);
+
+        if (totalPages > 0 && resolvedPage > totalPages)
+        {
+            resolvedPage = totalPages;
+        }
+
+        var items = totalItems == 0
+            ? []
+            : await query
+                .Skip((resolvedPage - 1) * resolvedPageSize)
+                .Take(resolvedPageSize)
+                .ToListAsync(cancellationToken);
+
+        return new PagedResult<Post>
+        {
+            Items = items,
+            Page = resolvedPage,
+            PageSize = resolvedPageSize,
+            TotalItems = totalItems,
+            TotalPages = totalPages
+        };
     }
 
     public Task<Post?> GetPostBySlugAsync(string slug, CancellationToken cancellationToken = default)
@@ -52,10 +81,8 @@ public class NewsService : INewsService
 
     public async Task<IReadOnlyList<Post>> GetRelatedPostsAsync(string category, Guid excludePostId, int take = 3, CancellationToken cancellationToken = default)
     {
-        var categoryAliases = GetCategoryAliases(category);
-
-        return await CreatePublishedPostsQuery()
-            .Where(x => x.Id != excludePostId && categoryAliases.Contains(x.Category))
+        return await ApplyCategoryFilter(CreatePublishedPostsQuery(), category)
+            .Where(x => x.Id != excludePostId)
             .Take(take)
             .ToListAsync(cancellationToken);
     }
@@ -69,17 +96,14 @@ public class NewsService : INewsService
             .ThenByDescending(x => x.CreatedAt);
     }
 
-    private static string[] GetCategoryAliases(string category)
+    private static IQueryable<Post> ApplyCategoryFilter(IQueryable<Post> query, string? category)
     {
-        var normalizedCategory = category.Trim();
-
-        return normalizedCategory switch
+        var categoryAliases = NewsCategories.GetStorageAliases(category);
+        if (categoryAliases.Count == 0)
         {
-            "Câu chuyện ẩm thực" => ["Câu chuyện ẩm thực", "Ẩm thực"],
-            "Ẩm thực" => ["Câu chuyện ẩm thực", "Ẩm thực"],
-            "Sự kiện" => ["Sự kiện", "Tin tức"],
-            "Tin tức" => ["Sự kiện", "Tin tức"],
-            _ => [normalizedCategory]
-        };
+            return query;
+        }
+
+        return query.Where(x => categoryAliases.Contains(x.Category));
     }
 }

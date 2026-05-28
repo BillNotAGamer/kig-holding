@@ -91,7 +91,7 @@
 
         options.forEach(function (option, optionIndex) {
             var isActive = optionIndex === activeIndex;
-            option.classList.toggle("bg-brand-light", isActive);
+            option.classList.toggle("bg-white/[0.08]", isActive);
             option.setAttribute("aria-selected", isActive ? "true" : "false");
         });
 
@@ -109,7 +109,7 @@
 
         suggestions.innerHTML = items.map(function (item, index) {
             var meta = [item.district, item.city].filter(Boolean).join(", ") || item.address;
-            var address = item.address ? "<span class=\"mt-0.5 block truncate text-xs font-semibold text-brand-gray\">" + escapeHtml(item.address) + "</span>" : "";
+            var address = item.address ? "<span class=\"mt-0.5 block truncate text-xs font-semibold text-white/60\">" + escapeHtml(item.address) + "</span>" : "";
 
             return [
                 "<button type=\"button\"",
@@ -118,9 +118,9 @@
                 " aria-selected=\"false\"",
                 " data-branch-suggestion-item",
                 " data-index=\"" + index + "\"",
-                " class=\"block w-full px-4 py-3 text-left transition hover:bg-brand-light focus:bg-brand-light focus:outline-none\">",
-                "<span class=\"block text-sm font-black text-brand-dark\">" + escapeHtml(item.name) + "</span>",
-                "<span class=\"mt-1 block text-xs font-bold uppercase tracking-[0.12em] text-brand-goldDeep\">" + escapeHtml(meta) + "</span>",
+                " class=\"block w-full px-4 py-3 text-left text-white transition hover:bg-white/[0.08] focus:bg-white/[0.08] focus:outline-none\">",
+                "<span class=\"block text-sm font-black text-white\">" + escapeHtml(item.name) + "</span>",
+                "<span class=\"mt-1 block text-xs font-bold uppercase tracking-[0.12em] text-brand-red\">" + escapeHtml(meta) + "</span>",
                 address,
                 "</button>"
             ].join("");

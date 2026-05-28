@@ -12,8 +12,8 @@
     var hotlineHref = string.IsNullOrWhiteSpace(hotlineDigits) ? "#" : $"tel:{hotlineDigits}";
 }
 
-<article id="@Model.Slug" class="flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-brand-border bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-panel" data-uw-reveal="fade-up">
-    <div class="relative aspect-[16/9] overflow-hidden bg-brand-light">
+<article id="@Model.Slug" class="branch-card flex h-full flex-col overflow-hidden rounded-[1.35rem] border border-brand-border bg-white shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-panel" data-uw-reveal="fade-up">
+    <div class="branch-card__media relative aspect-[16/9] overflow-hidden bg-brand-light">
         <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-red to-brand-goldDeep"></div>
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.24),transparent_34%)]"></div>
         <div class="absolute inset-0 flex items-center justify-center">
@@ -37,28 +37,28 @@
 
         <div class="absolute inset-0 z-20 bg-gradient-to-t from-brand-black/50 via-brand-black/5 to-transparent"></div>
         <div class="absolute left-3 top-3 z-30">
-            <span class="rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-brand-red shadow-soft">@Model.City</span>
+            <span class="branch-card__city-badge rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-brand-red shadow-soft">@Model.City</span>
         </div>
     </div>
 
-    <div class="flex flex-1 flex-col p-4 sm:p-5">
-        <div class="border-b border-brand-border pb-3">
-            <p class="text-[11px] font-black uppercase tracking-[0.18em] text-brand-goldDeep">@Model.District, @Model.City</p>
-            <h3 class="mt-1 text-lg font-black leading-tight text-brand-dark sm:text-xl">@Model.Name</h3>
+    <div class="branch-card__body flex flex-1 flex-col p-4 sm:p-5">
+        <div class="branch-card__heading border-b border-brand-border pb-3">
+            <p class="branch-card__meta text-[11px] font-black uppercase tracking-[0.18em] text-brand-goldDeep">@Model.District, @Model.City</p>
+            <h3 class="branch-card__title mt-1 text-lg font-black leading-tight text-brand-dark sm:text-xl">@Model.Name</h3>
         </div>
 
-        <div class="mt-4 space-y-3 text-sm">
+        <div class="branch-card__details mt-4 space-y-3 text-sm">
             <div class="flex gap-3">
                 <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-red" aria-hidden="true"></span>
                 <div>
-                    <p class="text-[11px] font-black uppercase tracking-[0.16em] text-brand-goldDeep">Hotline</p>
+                    <p class="branch-card__label text-[11px] font-black uppercase tracking-[0.16em] text-brand-goldDeep">Hotline</p>
                     @if (!string.IsNullOrWhiteSpace(Model.Hotline))
                     {
-                        <a href="@hotlineHref" class="mt-1 inline-flex font-semibold text-brand-dark transition hover:text-brand-red">@Model.Hotline</a>
+                        <a href="@hotlineHref" class="branch-card__value mt-1 inline-flex font-semibold text-brand-dark transition hover:text-brand-red">@Model.Hotline</a>
                     }
                     else
                     {
-                        <p class="mt-1 font-semibold text-brand-dark">Đang cập nhật</p>
+                        <p class="branch-card__value mt-1 font-semibold text-brand-dark">Đang cập nhật</p>
                     }
                 </div>
             </div>
@@ -66,40 +66,40 @@
             <div class="flex gap-3">
                 <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-red" aria-hidden="true"></span>
                 <div>
-                    <p class="text-[11px] font-black uppercase tracking-[0.16em] text-brand-goldDeep">Giờ mở cửa</p>
-                    <p class="mt-1 font-semibold text-brand-dark">@Model.OpeningHours</p>
+                    <p class="branch-card__label text-[11px] font-black uppercase tracking-[0.16em] text-brand-goldDeep">Giờ mở cửa</p>
+                    <p class="branch-card__value mt-1 font-semibold text-brand-dark">@Model.OpeningHours</p>
                 </div>
             </div>
 
             <div class="flex gap-3">
                 <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-red" aria-hidden="true"></span>
                 <div>
-                    <p class="text-[11px] font-black uppercase tracking-[0.16em] text-brand-goldDeep">Địa chỉ</p>
-                    <p class="mt-1 line-clamp-3 leading-6 text-brand-gray">@Model.Address</p>
+                    <p class="branch-card__label text-[11px] font-black uppercase tracking-[0.16em] text-brand-goldDeep">Địa chỉ</p>
+                    <p class="branch-card__address mt-1 line-clamp-3 leading-6 text-brand-gray">@Model.Address</p>
                 </div>
             </div>
         </div>
 
-        <div class="mt-auto grid gap-2 pt-5 sm:grid-cols-3">
+        <div class="branch-card__actions mt-auto grid gap-2 pt-5 sm:grid-cols-3">
             @if (!string.IsNullOrWhiteSpace(Model.GoogleMapUrl) && Model.GoogleMapUrl != "#")
             {
-                <a href="@Model.GoogleMapUrl" class="inline-flex h-10 items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-black text-brand-dark transition hover:border-brand-red hover:text-brand-red" target="_blank" rel="noopener">Chỉ đường</a>
+                <a href="@Model.GoogleMapUrl" class="branch-card__action branch-card__action--secondary inline-flex h-10 items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-black text-brand-dark transition hover:border-brand-red hover:text-brand-red" target="_blank" rel="noopener">Chỉ đường</a>
             }
             else
             {
-                <span class="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-black text-brand-dark opacity-55">Chỉ đường</span>
+                <span class="branch-card__action branch-card__action--secondary branch-card__action--disabled inline-flex h-10 cursor-not-allowed items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-black text-brand-dark opacity-55">Chỉ đường</span>
             }
 
             @if (!string.IsNullOrWhiteSpace(Model.Hotline))
             {
-                <a href="@hotlineHref" class="inline-flex h-10 items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-black text-brand-dark transition hover:border-brand-red hover:text-brand-red">Gọi ngay</a>
+                <a href="@hotlineHref" class="branch-card__action branch-card__action--secondary inline-flex h-10 items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-black text-brand-dark transition hover:border-brand-red hover:text-brand-red">Gọi ngay</a>
             }
             else
             {
-                <span class="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-black text-brand-dark opacity-55">Gọi ngay</span>
+                <span class="branch-card__action branch-card__action--secondary branch-card__action--disabled inline-flex h-10 cursor-not-allowed items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-black text-brand-dark opacity-55">Gọi ngay</span>
             }
 
-            <a href="/dat-ban?branch=@Model.Slug" class="inline-flex h-10 items-center justify-center rounded-full bg-brand-red px-3 text-sm font-black text-white shadow-soft transition hover:bg-brand-redDark">Đặt bàn</a>
+            <a href="/dat-ban?branch=@Model.Slug" class="branch-card__action branch-card__action--primary inline-flex h-10 items-center justify-center rounded-full bg-brand-red px-3 text-sm font-black text-white shadow-soft transition hover:bg-brand-redDark">Đặt bàn</a>
         </div>
     </div>
 </article>

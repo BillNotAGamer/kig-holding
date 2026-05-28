@@ -5,96 +5,272 @@
     ViewData["MetaDescription"] = Model.SeoDescription;
 
     var post = Model.Post;
-    var imageUrl = string.IsNullOrWhiteSpace(post.ThumbnailUrl) ? "/images/placeholders/post-card.webp" : post.ThumbnailUrl;
-    var isPromotion = string.Equals(post.Category, "Khuyến mãi", StringComparison.OrdinalIgnoreCase);
+    var hasThumbnail = HasRenderableImage(post.ThumbnailUrl);
+    var imageUrl = hasThumbnail ? post.ThumbnailUrl.Trim() : string.Empty;
+    var categoryUrl = string.IsNullOrWhiteSpace(Model.CategorySlug)
+        ? "/tin-tuc"
+        : $"/tin-tuc?category={Uri.EscapeDataString(Model.CategorySlug)}";
 
-    ViewData["OgImage"] = imageUrl;
+    ViewData["OgImage"] = hasThumbnail ? imageUrl : "/images/placeholders/post-card.webp";
     ViewData["OgType"] = "article";
 }
 
-<section class="hero-frame" data-news-page="detail">
-    <div class="container-page section-shell">
-        <div class="mx-auto max-w-5xl">
-            <a href="/tin-tuc" class="text-sm font-semibold text-brand-goldDeep transition hover:text-brand-dark">← Tin tức & ưu đãi</a>
-            <div class="hero-card mt-6">
-                <div class="flex flex-wrap items-center gap-3">
-                    <span class="rounded-button bg-brand-goldSoft px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-dark">@post.Category</span>
+<section class="news-detail news-detail--dark relative isolate overflow-hidden py-16 lg:py-20" data-news-page="detail">
+    <div class="container-page relative z-10">
+        <div class="mx-auto max-w-6xl">
+            <div class="flex flex-col gap-4 rounded-[1.6rem] border border-white/10 bg-white/[0.03] px-5 py-4 shadow-[0_22px_60px_rgba(0,0,0,0.2)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6"
+                 data-uw-reveal="fade-up">
+                <a href="/tin-tuc"
+                   class="inline-flex items-center gap-2 text-sm font-semibold text-white/72 transition duration-200 hover:text-white">
+                    <span aria-hidden="true">←</span>
+                    Quay lại tin tức
+                </a>
+
+                <div class="flex flex-wrap items-center gap-3 text-sm">
+                    @if (!string.IsNullOrWhiteSpace(Model.CategorySlug))
+                    {
+                        <a href="@categoryUrl"
+                           class="inline-flex items-center rounded-full border border-brand-red/25 bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
+                            @Model.CategoryDisplayName
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="inline-flex items-center rounded-full border border-brand-red/25 bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
+                            @Model.CategoryDisplayName
+                        </span>
+                    }
+
                     @if (post.PublishedAt.HasValue)
                     {
-                        <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="text-xs uppercase tracking-[0.16em] text-brand-gray">
+                        <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")"
+                              class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">
                             @post.PublishedAt.Value.ToString("dd/MM/yyyy")
                         </time>
                     }
+
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35">
+                        Tin tức
+                    </span>
                 </div>
-                <h1 class="mt-5 text-4xl font-black text-brand-dark sm:text-display">@post.Title</h1>
-                <p class="mt-5 text-lead text-brand-gray">@post.Excerpt</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<article class="section-shell pt-0 lg:pt-0">
-    <div class="container-page">
-        <div class="mx-auto max-w-5xl">
-            <div class="food-image-wrap aspect-[16/9] shadow-panel">
-                <img src="@imageUrl"
-                     alt="@post.Title"
-                     class="food-image absolute inset-0"
-                     loading="lazy"
-                     onerror="this.remove();" />
             </div>
 
-            <div class="surface-panel mt-8 p-6 sm:p-8">
-                <div class="space-y-5 text-base leading-8 text-brand-gray">
+            <div class="mt-8 rounded-[2rem] border border-white/10 bg-white/[0.03] px-6 py-8 shadow-[0_28px_80px_rgba(0,0,0,0.24)] backdrop-blur sm:px-8 lg:px-10"
+                 data-uw-reveal="fade-up"
+                 data-uw-delay="60">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-brand-red">
+                    @Model.CategoryDisplayName
+                </p>
+                <h1 class="mt-4 text-[clamp(2.35rem,5vw,4.9rem)] font-black leading-[0.96] text-white">
+                    @post.Title
+                </h1>
+
+                @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+                {
+                    <p class="mt-5 max-w-4xl text-base leading-8 text-white/68 sm:text-lg">
+                        @post.Excerpt
+                    </p>
+                }
+
+                <div class="mt-6 flex flex-wrap items-center gap-3 text-sm text-white">
+                    @if (!string.IsNullOrWhiteSpace(Model.CategorySlug))
+                    {   
+                        <a href="@categoryUrl"
+                           class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition duration-200 hover:border-brand-red/45 hover:text-white">
+                            @Model.CategoryDisplayName
+                        </a>
+                    }
+
+                    @if (post.PublishedAt.HasValue)
+                    {
+                        <span>•</span>
+                        <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")">
+                            @post.PublishedAt.Value.ToString("dd/MM/yyyy")
+                        </time>
+                    }
+
+                    <span>•</span>
+                    <span>Truyền Thuyết Champong</span>
+                </div>
+            </div>
+
+            <div class="news-detail-media mt-8 rounded-[1.9rem] border border-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.34)]"
+                 data-news-detail-media
+                 data-uw-reveal="fade-up"
+                 data-uw-delay="110">
+                <div class="news-detail-media__fallback">
+                    <span class="news-detail-media__eyebrow">
+                        @(!string.IsNullOrWhiteSpace(Model.CategoryDisplayName) ? Model.CategoryDisplayName : "Tin tức")
+                    </span>
+                    <h2 class="news-detail-media__title">Truyền Thuyết Champong</h2>
+                </div>
+
+                @if (hasThumbnail)
+                {
+                    <img src="@imageUrl"
+                         alt="@post.Title"
+                         class="news-detail-media__image"
+                         loading="lazy"
+                         onerror="this.closest('[data-news-detail-media]')?.classList.add('is-image-missing'); this.remove();" />
+                }
+            </div>
+
+            <div class="news-detail-article mx-auto mt-8 max-w-4xl rounded-[1.8rem] border border-white/12 bg-white/[0.055] p-6 shadow-[0_24px_70px_rgba(0,0,0,0.26)] backdrop-blur sm:p-8 lg:p-10"
+                 data-uw-reveal="fade-up"
+                 data-uw-delay="160">
+                <div class="space-y-6 text-base leading-[2.02] text-white sm:text-[1.05rem]">
                     @foreach (var paragraph in GetParagraphs(post.Content))
                     {
                         <p>@paragraph</p>
                     }
                 </div>
+            </div>
 
-                @if (isPromotion)
-                {
-                    <div class="surface-muted mt-8 p-5">
-                        <p class="text-kicker font-black uppercase text-brand-goldDeep">Ưu đãi tại bàn</p>
-                        <h2 class="mt-3 text-2xl font-black text-brand-dark">Giữ bàn trước để không bỏ lỡ ưu đãi.</h2>
-                        <p class="mt-3 text-sm leading-6 text-brand-gray">
-                            Một số chương trình có thể áp dụng theo khung giờ hoặc chi nhánh. Đặt bàn trước giúp nhà hàng chuẩn bị tốt hơn.
+            @if (Model.IsPromotion)
+            {
+                <div class="mx-auto mt-8 max-w-4xl"
+                     data-uw-reveal="fade-up"
+                     data-uw-delay="220">
+                    <div class="rounded-[1.8rem] border border-brand-red/20 bg-[radial-gradient(circle_at_top_right,rgba(229,9,20,0.22),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur sm:p-8">
+                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-brand-red">Ưu đãi tại bàn</p>
+                        <h2 class="mt-4 text-3xl font-black text-white">Sẵn sàng đặt bàn?</h2>
+                        <p class="mt-4 max-w-3xl text-sm leading-7 text-white sm:text-base">
+                            Giữ chỗ trước để không bỏ lỡ ưu đãi và trải nghiệm món ngon tại Truyền Thuyết Champong.
                         </p>
-                        <a href="/dat-ban" class="btn-primary mt-5">Đặt bàn ngay</a>
+                        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+                            <a href="/dat-ban"
+                               class="inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-[0_16px_34px_rgba(229,9,20,0.24)] transition duration-200 hover:bg-brand-redDark">
+                                Đặt bàn ngay
+                            </a>
+                            <a href="/chi-nhanh"
+                               class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white transition duration-200 hover:border-brand-red/60 hover:text-white">
+                                Xem chi nhánh
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <section class="mt-14"
+                     aria-labelledby="news-related-heading">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+                     data-uw-reveal="fade-up"
+                     data-uw-delay="260">
+                    <div class="max-w-3xl">
+                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-brand-red">Tin liên quan</p>
+                        <h2 id="news-related-heading" class="mt-3 text-[clamp(2rem,3vw,3rem)] font-black leading-tight text-white">
+                            Khám phá thêm những cập nhật mới
+                        </h2>
+                        <p class="mt-4 text-sm leading-7 text-white/62 sm:text-base">
+                            Khám phá thêm những cập nhật mới từ Truyền Thuyết Champong.
+                        </p>
+                    </div>
+
+                    <a href="/tin-tuc"
+                       class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white transition duration-200 hover:border-brand-red/60 hover:text-white">
+                        Xem tất cả
+                    </a>
+                </div>
+
+                @if (Model.RelatedPosts.Count > 0)
+                {
+                    <div class="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        @for (var index = 0; index < Model.RelatedPosts.Count; index++)
+                        {
+                            var relatedPost = Model.RelatedPosts[index];
+                            var hasRelatedImage = HasRenderableImage(relatedPost.ImageUrl);
+                            var delay = 320 + (index * 60);
+
+                            <article class="news-detail-related-card group"
+                                     data-uw-reveal="fade-up"
+                                     data-uw-delay="@delay">
+                                <a href="@relatedPost.Url" class="block h-full" aria-label="@relatedPost.Title">
+                                    <div class="news-detail-media news-detail-related-card__media"
+                                         data-news-detail-media>
+                                        <div class="news-detail-media__fallback news-detail-media__fallback--compact">
+                                            <span class="news-detail-media__eyebrow">@relatedPost.Category</span>
+                                            <h3 class="news-detail-media__title">@relatedPost.Title</h3>
+                                        </div>
+
+                                        @if (hasRelatedImage)
+                                        {
+                                            <img src="@relatedPost.ImageUrl"
+                                                 alt="@relatedPost.Title"
+                                                 class="news-detail-media__image"
+                                                 loading="lazy"
+                                                 onerror="this.closest('[data-news-detail-media]')?.classList.add('is-image-missing'); this.remove();" />
+                                        }
+
+                                        <div class="absolute left-4 top-4 z-10 rounded-full bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
+                                            @relatedPost.Category
+                                        </div>
+                                    </div>
+
+                                    <div class="p-5 sm:p-6">
+                                        @if (relatedPost.PublishedAt.HasValue)
+                                        {
+                                            <time datetime="@relatedPost.PublishedAt.Value.ToString("yyyy-MM-dd")"
+                                                  class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
+                                                @relatedPost.PublishedAt.Value.ToString("dd/MM/yyyy")
+                                            </time>
+                                        }
+
+                                        <h3 class="mt-3 text-[1.35rem] font-black leading-tight text-white transition duration-200 group-hover:text-white/92">
+                                            @relatedPost.Title
+                                        </h3>
+                                        <p class="mt-4 line-clamp-3 text-sm leading-7 text-white/60">
+                                            @relatedPost.Excerpt
+                                        </p>
+                                        <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-red transition duration-200 group-hover:text-white">
+                                            Đọc tiếp
+                                            <span aria-hidden="true">&rarr;</span>
+                                        </span>
+                                    </div>
+                                </a>
+                            </article>
+                        }
                     </div>
                 }
-            </div>
-        </div>
-    </div>
-</article>
-
-<section class="section-band section-shell">
-    <div class="container-page">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-            {
-                Eyebrow = "Đọc thêm",
-                Title = "Bài viết liên quan",
-                Description = "Các cập nhật khác từ Truyền Thuyết Champong."
-            }})
-            <a href="/tin-tuc" class="btn-secondary">Xem tất cả</a>
-        </div>
-
-        @if (Model.RelatedPosts.Count > 0)
-        {
-            <div class="mt-9 grid gap-5 md:grid-cols-3">
-                @foreach (var relatedPost in Model.RelatedPosts)
+                else
                 {
-                    @await Component.InvokeAsync("PostCard", new { model = relatedPost })
+                    <div class="mt-8 rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-8 text-center shadow-[0_22px_60px_rgba(0,0,0,0.22)] backdrop-blur"
+                         data-uw-reveal="fade-up"
+                         data-uw-delay="320">
+                        <p class="text-sm leading-7 text-white/65">Chưa có bài viết liên quan.</p>
+                        <a href="/tin-tuc"
+                           class="mt-5 inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-[0_16px_34px_rgba(229,9,20,0.24)] transition duration-200 hover:bg-brand-redDark">
+                            Xem tất cả tin tức
+                        </a>
+                    </div>
                 }
+            </section>
+
+            <div class="mx-auto mt-14 max-w-4xl rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-6 text-center shadow-[0_24px_70px_rgba(0,0,0,0.24)] backdrop-blur sm:p-8"
+                 data-uw-reveal="fade-up"
+                 data-uw-delay="420">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-white/45">Tiếp tục khám phá</p>
+                <h2 class="mt-3 text-[clamp(1.9rem,3vw,2.8rem)] font-black text-white">
+                    Quay lại trang tin tức
+                </h2>
+                <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/64 sm:text-base">
+                    Theo dõi thêm những thông tin mới nhất về ưu đãi, sự kiện và các món ngon từ Truyền Thuyết Champong.
+                </p>
+                <div class="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    <a href="/tin-tuc"
+                       class="inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-[0_16px_34px_rgba(229,9,20,0.24)] transition duration-200 hover:bg-brand-redDark">
+                        Xem tất cả tin tức
+                    </a>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.CategorySlug))
+                    {
+                        <a href="@categoryUrl"
+                           class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white transition duration-200 hover:border-brand-red/60 hover:text-white">
+                            Xem @Model.CategoryDisplayName
+                        </a>
+                    }
+                </div>
             </div>
-        }
-        else
-        {
-            <div class="surface-panel mt-9 p-8 text-center text-brand-gray">
-                Bài viết liên quan đang được cập nhật.
-            </div>
-        }
+        </div>
     </div>
 </section>
 
@@ -111,5 +287,11 @@
         {
             yield return paragraph;
         }
+    }
+
+    private static bool HasRenderableImage(string? imageUrl)
+    {
+        return !string.IsNullOrWhiteSpace(imageUrl)
+            && !string.Equals(imageUrl, "/images/placeholders/post-card.webp", StringComparison.OrdinalIgnoreCase);
     }
 }

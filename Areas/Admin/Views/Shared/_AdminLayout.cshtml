@@ -42,10 +42,15 @@
                            class="@NavLinkClass(currentController, "Branch")">
                             Quản lý Chi nhánh
                         </a>
+                        <a href="/Admin/MenuGroup"
+                           aria-current="@(IsActive(currentController, "MenuGroup") ? "page" : null)"
+                           class="@NavLinkClass(currentController, "MenuGroup")">
+                            Nhóm thực đơn
+                        </a>
                         <a href="/Admin/MenuCategory"
                            aria-current="@(IsActive(currentController, "MenuCategory") ? "page" : null)"
                            class="@NavLinkClass(currentController, "MenuCategory")">
-                            Danh mục thực đơn
+                            Danh mục món
                         </a>
                         <a href="/Admin/MenuItem"
                            aria-current="@(IsActive(currentController, "MenuItem") ? "page" : null)"

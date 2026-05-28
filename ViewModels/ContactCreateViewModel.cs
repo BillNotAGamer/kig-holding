@@ -36,7 +36,7 @@ public class ContactCreateViewModel
 
     public string BrandName => string.IsNullOrWhiteSpace(SiteSetting?.BrandName) ? "Truyền Thuyết Champong" : SiteSetting!.BrandName;
     public string Hotline => string.IsNullOrWhiteSpace(SiteSetting?.Hotline) ? "0909 888 777" : SiteSetting!.Hotline;
-    public string EmailDisplay => string.IsNullOrWhiteSpace(SiteSetting?.Email) ? "hello@truyenthuyetchampong.vn" : SiteSetting!.Email;
+    public string EmailDisplay => string.IsNullOrWhiteSpace(SiteSetting?.Email) ? "truyenthuyetchamponghcm@gmail.com" : SiteSetting!.Email;
     public string Address => string.IsNullOrWhiteSpace(SiteSetting?.Address) ? "Hệ thống chi nhánh Truyền Thuyết Champong" : SiteSetting!.Address;
     public string GoogleMapUrl => string.IsNullOrWhiteSpace(SiteSetting?.GoogleMapUrl) ? string.Empty : SiteSetting!.GoogleMapUrl;
     public string FacebookUrl => string.IsNullOrWhiteSpace(SiteSetting?.FacebookUrl) ? "#" : SiteSetting!.FacebookUrl;
