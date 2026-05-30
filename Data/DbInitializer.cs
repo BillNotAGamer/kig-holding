@@ -14,14 +14,6 @@ public class DbInitializer
     private static readonly Guid BranchGoVapId = Guid.Parse("16ffa04e-a45f-4c4d-bd85-f7ffd40afa47");
     private static readonly Guid BranchCauGiayId = Guid.Parse("d329b911-5bf2-4fb1-96f6-ffb09b3c7c33");
 
-    private static readonly Guid ChampongCategoryId = Guid.Parse("0aefe79b-91ed-410a-a9e6-26bf762ffcf8");
-    private static readonly Guid JajangCategoryId = Guid.Parse("6541c869-1189-4185-b3ee-b7e84ba65519");
-    private static readonly Guid BbqCategoryId = Guid.Parse("dc9b6379-3f0b-4473-bb84-e9be70a9bae9");
-    private static readonly Guid HotpotCategoryId = Guid.Parse("57bcdd44-0e17-4c0a-bd58-fd43b829ce73");
-    private static readonly Guid KoreanRiceCategoryId = Guid.Parse("66bd46a4-de76-4bb5-8fd5-79ad47e833dd");
-    private static readonly Guid ComboCategoryId = Guid.Parse("4e342495-cd19-4bc9-aa54-ebc8e33164c7");
-    private static readonly Guid PanchanCategoryId = Guid.Parse("ad2c7f64-b917-46fd-bd2f-7f4422ab5fce");
-    private static readonly Guid DrinkCategoryId = Guid.Parse("3906f5fe-dc9c-43bd-a9c7-89cc295b6c0a");
     private static readonly Guid ChampongMenuGroupId = Guid.Parse("a0d8dd4e-7d90-4282-bb9e-a3ca66a78c56");
     private static readonly Guid GogimaruMenuGroupId = Guid.Parse("2a8ec6cf-7707-4d3c-bf74-0c4a20cd5f70");
     private static readonly Guid KbbCookMenuGroupId = Guid.Parse("569b5831-f436-4438-882c-5123c65f9957");
@@ -52,8 +44,6 @@ public class DbInitializer
         }
 
         await AddMissingBySlugAsync(_dbContext.Branches, CreateBranches(), cancellationToken);
-        await AddMissingBySlugAsync(_dbContext.MenuCategories, CreateMenuCategories(), cancellationToken);
-        await AddMissingBySlugAsync(_dbContext.MenuItems, CreateMenuItems(), cancellationToken);
         await AddMissingBySlugAsync(_dbContext.MenuGroups, CreateMenuGroups(), cancellationToken);
         await AddMissingByIdAsync(_dbContext.Reviews, CreateReviews(), cancellationToken);
         await AddMissingBySlugAsync(_dbContext.Posts, CreatePosts(), cancellationToken);
@@ -182,38 +172,6 @@ public class DbInitializer
         ];
     }
 
-    private static IReadOnlyList<MenuCategory> CreateMenuCategories()
-    {
-        return
-        [
-            CreateCategory(ChampongCategoryId, "Mì Champong", "mi-champong", 1),
-            CreateCategory(JajangCategoryId, "Mì tương đen", "mi-tuong-den", 2),
-            CreateCategory(BbqCategoryId, "BBQ", "bbq", 3),
-            CreateCategory(HotpotCategoryId, "Lẩu", "lau", 4),
-            CreateCategory(KoreanRiceCategoryId, "Cơm & món Hàn", "com-mon-han", 5),
-            CreateCategory(ComboCategoryId, "Combo", "combo", 6),
-            CreateCategory(PanchanCategoryId, "Panchan", "panchan", 7),
-            CreateCategory(DrinkCategoryId, "Đồ uống", "do-uong", 8)
-        ];
-    }
-
-    private static MenuCategory CreateCategory(Guid id, string name, string slug, int order)
-    {
-        return new MenuCategory
-        {
-            Id = id,
-            Name = name,
-            Slug = slug,
-            Description = $"Nhóm món {name.ToLowerInvariant()} của Truyền Thuyết Champong.",
-            ThumbnailUrl = $"/images/categories/{slug}.webp",
-            IconUrl = $"/images/categories/icons/{slug}.svg",
-            DisplayOrder = order,
-            IsActive = true,
-            CreatedAt = SeedTime,
-            UpdatedAt = SeedTime
-        };
-    }
-
     private static IReadOnlyList<MenuGroup> CreateMenuGroups()
     {
         return
@@ -251,81 +209,6 @@ public class DbInitializer
             CoverImageUrl = null,
             DisplayOrder = displayOrder,
             IsPublished = true,
-            CreatedAt = SeedTime,
-            UpdatedAt = SeedTime
-        };
-    }
-
-    private static IReadOnlyList<MenuItem> CreateMenuItems()
-    {
-        return
-        [
-            CreateMenuItem("7320c429-951d-4483-b6ba-2dd002ec6902", ChampongCategoryId, "Champong hải sản", "해물짬뽕", "champong-hai-san", "Nước dùng đỏ cay với tôm, mực và nghêu.", 149000, 4, 1, true, true),
-            CreateMenuItem("264be533-6d56-45b9-a58e-aa0ffda87dfb", ChampongCategoryId, "Champong bò cay", null, "champong-bo-cay", "Mì cay cùng lát bò mềm và rau củ xào lửa lớn.", 159000, 4, 2, true, false),
-            CreateMenuItem("dc28e221-4a29-4760-9591-6077eb96f075", ChampongCategoryId, "Champong gà nấm", null, "champong-ga-nam", "Vị cay vừa, nhiều nấm và thịt gà áp chảo.", 139000, 3, 3),
-            CreateMenuItem("443dc786-62cd-4f6e-bfd5-01bac0ebdff8", ChampongCategoryId, "Champong đặc biệt", "특짬뽕", "champong-dac-biet", "Topping hải sản, bò, trứng và nước dùng cô đặc.", 189000, 5, 4, true, true),
-            CreateMenuItem("ae8a4e37-b8d6-4061-bb4f-973303d87489", JajangCategoryId, "Mì tương đen truyền thống", "짜장면", "mi-tuong-den-truyen-thong", "Sốt tương đen Hàn Quốc nấu cùng thịt và hành tây.", 119000, 0, 1, false, true),
-            CreateMenuItem("f3bebf3a-a6bf-4632-a500-865b8189762a", JajangCategoryId, "Mì tương đen hải sản", null, "mi-tuong-den-hai-san", "Sốt tương đen đậm vị với tôm, mực và rau củ.", 145000, 1, 2),
-            CreateMenuItem("1de20b52-f331-40d5-90a3-25b312f4a54a", JajangCategoryId, "Jajang bap", null, "jajang-bap", "Cơm trắng nóng phủ sốt tương đen và trứng lòng đào.", 129000, 0, 3),
-            CreateMenuItem("598fb186-de86-4e77-bdd4-b804ddf28041", BbqCategoryId, "BBQ ba chỉ heo", null, "bbq-ba-chi-heo", "Ba chỉ heo nướng than ăn kèm rau sống và sốt ssamjang.", 189000, 2, 1, false, true),
-            CreateMenuItem("2c3d587e-cf4d-49c5-83a6-3d3240eed95e", BbqCategoryId, "BBQ bò sốt cay", null, "bbq-bo-sot-cay", "Bò ướp sốt cay ngọt, nướng nhanh trên lửa lớn.", 229000, 4, 2, true, true),
-            CreateMenuItem("6a81a5ff-db18-4b50-923a-9673196babe3", BbqCategoryId, "BBQ gà phô mai", null, "bbq-ga-pho-mai", "Gà sốt cay phủ phô mai kéo sợi.", 179000, 3, 3, false, false, true),
-            CreateMenuItem("0bb7c5ec-910f-4885-b885-f62fbf92230e", HotpotCategoryId, "Lẩu kimchi hải sản", null, "lau-kimchi-hai-san", "Nồi lẩu kimchi cay nồng với hải sản và đậu phụ.", 329000, 4, 1, true, false),
-            CreateMenuItem("a6eee88c-71c8-4c98-8cf4-1cfd2d1a1444", HotpotCategoryId, "Lẩu bulgogi", null, "lau-bulgogi", "Nước lẩu ngọt thanh cùng bò bulgogi và nấm.", 349000, 1, 2),
-            CreateMenuItem("1a140e16-a4ac-4476-b1d3-ab5978a3fbd9", KoreanRiceCategoryId, "Cơm trộn bibimbap", "비빔밥", "com-tron-bibimbap", "Cơm trộn Hàn Quốc với rau củ, bò và trứng.", 139000, 2, 1, false, true),
-            CreateMenuItem("94a5138b-c246-4789-b4e7-75e9c7005a4c", KoreanRiceCategoryId, "Cơm gà sốt cay", null, "com-ga-sot-cay", "Cơm nóng với gà áp chảo và sốt cay Champong.", 129000, 3, 2),
-            CreateMenuItem("b8859910-336a-4c3f-908b-1561a4c39921", KoreanRiceCategoryId, "Tokbokki phô mai", null, "tokbokki-pho-mai", "Bánh gạo cay phủ phô mai, dùng nóng tại bàn.", 119000, 3, 3),
-            CreateMenuItem("8634b5bb-4989-40c1-9f2c-d3230dc86add", KoreanRiceCategoryId, "Kimbap bò", null, "kimbap-bo", "Kimbap cuộn bò, rau củ và mè rang.", 99000, 0, 4),
-            CreateMenuItem("0c34bf38-4003-4e6b-be8c-dd4a4599e4cf", ComboCategoryId, "Combo Champong BBQ", null, "combo-champong-bbq", "Một mì Champong hải sản, BBQ ba chỉ và panchan.", 299000, 4, 1, true, true, false, true, 349000),
-            CreateMenuItem("2a443b53-6d91-4275-a922-1400a46eddc1", ComboCategoryId, "Combo gia đình", null, "combo-gia-dinh", "Lẩu kimchi, BBQ bò, kimbap và đồ uống cho 4 người.", 699000, 3, 2, false, true, false, true, 789000),
-            CreateMenuItem("05d7defe-428c-4434-b84e-8b104f0c4929", ComboCategoryId, "Combo trưa Hàn Quốc", null, "combo-trua-han-quoc", "Cơm trộn, mì tương đen và nước gạo Hàn Quốc.", 229000, 1, 3, false, false, true, true, 259000),
-            CreateMenuItem("6b837eb5-e756-4250-a9e7-093c3fa391ab", PanchanCategoryId, "Kimchi cải thảo", null, "kimchi-cai-thao", "Kimchi cải thảo lên men, vị chua cay cân bằng.", 39000, 2, 1),
-            CreateMenuItem("add48e63-7d78-4fb4-9fe6-dae4c25095b8", PanchanCategoryId, "Panchan mix", null, "panchan-mix", "Set món ăn kèm thay đổi theo ngày.", 59000, 1, 2),
-            CreateMenuItem("9b1959ac-fe73-49b1-9e92-10aa29e34e64", DrinkCategoryId, "Trà đào cam sả", null, "tra-dao-cam-sa", "Trà trái cây thơm mát cân bằng vị cay.", 49000, 0, 1),
-            CreateMenuItem("32c58f56-9e5b-42ad-8dec-9fc72b5e5071", DrinkCategoryId, "Nước gạo Hàn Quốc", null, "nuoc-gao-han-quoc", "Đồ uống gạo rang kiểu Hàn, dịu nhẹ.", 45000, 0, 2),
-            CreateMenuItem("c55a1467-abb1-4ac5-b50a-86c8357ec28c", DrinkCategoryId, "Soju không cồn", null, "soju-khong-con", "Mocktail lấy cảm hứng từ soju trái cây.", 69000, 0, 3, false, false, true)
-        ];
-    }
-
-    private static MenuItem CreateMenuItem(
-        string id,
-        Guid categoryId,
-        string name,
-        string? koreanName,
-        string slug,
-        string shortDescription,
-        decimal price,
-        int spicyLevel,
-        int displayOrder,
-        bool isSignature = false,
-        bool isBestSeller = false,
-        bool isNew = false,
-        bool isCombo = false,
-        decimal? originalPrice = null)
-    {
-        return new MenuItem
-        {
-            Id = Guid.Parse(id),
-            CategoryId = categoryId,
-            Name = name,
-            KoreanName = koreanName,
-            Slug = slug,
-            ShortDescription = shortDescription,
-            Description = $"{shortDescription} Chế biến theo phong cách Hàn Quốc cay nóng, phù hợp dùng tại nhà hàng.",
-            Price = price,
-            OriginalPrice = originalPrice,
-            ThumbnailUrl = $"/images/menu/{slug}.webp",
-            SpicyLevel = spicyLevel,
-            ServingSize = isCombo ? "2-4 người" : "1 phần",
-            Calories = null,
-            IsSignature = isSignature,
-            IsBestSeller = isBestSeller,
-            IsNew = isNew,
-            IsCombo = isCombo,
-            IsAvailable = true,
-            DisplayOrder = displayOrder,
-            SeoTitle = $"{name} | Truyền Thuyết Champong",
-            SeoDescription = shortDescription,
             CreatedAt = SeedTime,
             UpdatedAt = SeedTime
         };

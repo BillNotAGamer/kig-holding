@@ -7,7 +7,6 @@ public class AboutIndexViewModel
 {
     public SiteSetting? SiteSetting { get; set; }
     public IReadOnlyList<BranchCardViewModel> FeaturedBranches { get; set; } = [];
-    public IReadOnlyList<FoodCardViewModel> SignatureMenuItems { get; set; } = [];
     public string SeoTitle { get; set; } = "Giới thiệu";
     public string SeoDescription { get; set; } = "Câu chuyện Truyền Thuyết Champong: mì cay Hàn Quốc, nước dùng đậm vị, BBQ nóng lửa và trải nghiệm ăn uống ấm cúng.";
 

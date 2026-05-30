@@ -11,20 +11,17 @@ public class AboutController : Controller
 {
     private readonly ISiteSettingService _siteSettingService;
     private readonly IBranchService _branchService;
-    private readonly IMenuService _menuService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AboutController> _logger;
 
     public AboutController(
         ISiteSettingService siteSettingService,
         IBranchService branchService,
-        IMenuService menuService,
         IConfiguration configuration,
         ILogger<AboutController> logger)
     {
         _siteSettingService = siteSettingService;
         _branchService = branchService;
-        _menuService = menuService;
         _configuration = configuration;
         _logger = logger;
     }
@@ -34,7 +31,6 @@ public class AboutController : Controller
     {
         SiteSetting? siteSetting = null;
         IReadOnlyList<Branch> branches = [];
-        IReadOnlyList<MenuItem> signatureMenuItems = [];
 
         if (HasConfiguredDatabase())
         {
@@ -45,17 +41,12 @@ public class AboutController : Controller
             branches = await TryLoadAsync(
                 () => _branchService.GetActiveBranchesAsync(cancellationToken),
                 "featured branches") ?? [];
-
-            signatureMenuItems = await TryLoadAsync(
-                () => _menuService.GetSignatureMenuItemsAsync(4, cancellationToken),
-                "signature menu items") ?? [];
         }
 
         var model = new AboutIndexViewModel
         {
             SiteSetting = siteSetting,
             FeaturedBranches = branches.Take(3).Select(BranchCardViewModel.FromBranch).ToList(),
-            SignatureMenuItems = signatureMenuItems.Select(FoodCardViewModel.FromMenuItem).ToList(),
             SeoTitle = "Giới thiệu",
             SeoDescription = "Khám phá câu chuyện Truyền Thuyết Champong: cảm hứng ẩm thực Hàn Quốc, nước dùng cay nồng, nguyên liệu tươi và không gian dùng bữa ấm cúng."
         };

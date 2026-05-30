@@ -6,8 +6,6 @@ namespace KIGHolding.ViewModels;
 public class HomeIndexViewModel
 {
     public SiteSetting? SiteSetting { get; set; }
-    public IReadOnlyList<FoodCardViewModel> FeaturedMenuItems { get; set; } = [];
-    public IReadOnlyList<FoodCardViewModel> SignatureMenuItems { get; set; } = [];
     public IReadOnlyList<BranchCardViewModel> Branches { get; set; } = [];
     public IReadOnlyList<HomeReviewViewModel> Reviews { get; set; } = [];
     public IReadOnlyList<PostCardViewModel> LatestPosts { get; set; } = [];

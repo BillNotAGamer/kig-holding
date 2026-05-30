@@ -75,6 +75,33 @@
         <div class="border-b border-brand-border bg-brand-light/60 px-6 py-4 sm:px-7">
             @if (Model.Images.Count > 0)
             {
+                <form id="bulk-delete-form"
+                      method="post"
+                      action="@Url.RouteUrl("AdminMenuGroupImagesBulkDelete", new { menuGroupId = Model.MenuGroupId })"
+                      onsubmit="return confirm('Bạn có chắc muốn xóa các ảnh đã chọn?');">
+                    @Html.AntiForgeryToken()
+                </form>
+
+                <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-brand-gray">
+                            <input type="checkbox" class="admin-post-checkbox" data-menu-image-select-all />
+                            <span>Chọn tất cả</span>
+                        </label>
+                        <span class="text-sm font-semibold text-brand-gray" data-menu-image-selected-count>
+                            Đã chọn 0 ảnh
+                        </span>
+                    </div>
+
+                    <button type="submit"
+                            form="bulk-delete-form"
+                            class="inline-flex items-center justify-center rounded-full border border-brand-red/20 bg-brand-red/5 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-brand-redDark transition hover:border-brand-red hover:bg-brand-red hover:text-white"
+                            data-bulk-delete-submit
+                            disabled>
+                        Xóa ảnh đã chọn
+                    </button>
+                </div>
+
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <p class="text-sm font-semibold text-brand-dark">
                         Tổng cộng @Model.Images.Count ảnh thực đơn
@@ -98,7 +125,17 @@
                 @foreach (var image in Model.Images)
                 {
                     <article class="rounded-3xl border border-brand-border bg-white p-5 shadow-soft">
-                        <div class="overflow-hidden rounded-2xl border border-brand-border bg-brand-light">
+                        <label class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-brand-gray">
+                            <input type="checkbox"
+                                   name="selectedImageIds"
+                                   value="@image.Id"
+                                   form="bulk-delete-form"
+                                   class="admin-post-checkbox"
+                                   data-menu-image-select />
+                            <span>Chọn ảnh này</span>
+                        </label>
+
+                        <div class="mt-4 overflow-hidden rounded-2xl border border-brand-border bg-brand-light">
                             <img src="@image.ImageUrl" alt="@image.AltText" class="aspect-[4/3] w-full object-cover" />
                         </div>
 
@@ -197,3 +234,41 @@
         }
     </div>
 </section>
+
+@if (Model.Images.Count > 0)
+{
+    <script>
+        (() => {
+            const selectAllInput = document.querySelector('[data-menu-image-select-all]');
+            const imageSelectInputs = Array.from(document.querySelectorAll('[data-menu-image-select]'));
+            const selectedCountText = document.querySelector('[data-menu-image-selected-count]');
+            const bulkDeleteSubmit = document.querySelector('[data-bulk-delete-submit]');
+
+            if (!selectAllInput || imageSelectInputs.length === 0 || !selectedCountText || !bulkDeleteSubmit) {
+                return;
+            }
+
+            const syncSelectionState = () => {
+                const checkedCount = imageSelectInputs.filter((input) => input.checked).length;
+                selectedCountText.textContent = `Đã chọn ${checkedCount} ảnh`;
+                bulkDeleteSubmit.disabled = checkedCount === 0;
+                selectAllInput.checked = checkedCount > 0 && checkedCount === imageSelectInputs.length;
+                selectAllInput.indeterminate = checkedCount > 0 && checkedCount < imageSelectInputs.length;
+            };
+
+            selectAllInput.addEventListener('change', () => {
+                for (const input of imageSelectInputs) {
+                    input.checked = selectAllInput.checked;
+                }
+
+                syncSelectionState();
+            });
+
+            for (const input of imageSelectInputs) {
+                input.addEventListener('change', syncSelectionState);
+            }
+
+            syncSelectionState();
+        })();
+    </script>
+}

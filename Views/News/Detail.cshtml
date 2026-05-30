@@ -61,13 +61,13 @@
                 <p class="text-xs font-semibold uppercase tracking-[0.24em] text-brand-red">
                     @Model.CategoryDisplayName
                 </p>
-                <h1 class="mt-4 text-[clamp(2.35rem,5vw,4.9rem)] font-black leading-[0.96] text-white">
+                <h1 class="news-detail-title mt-4 text-white">
                     @post.Title
                 </h1>
 
                 @if (!string.IsNullOrWhiteSpace(post.Excerpt))
                 {
-                    <p class="mt-5 max-w-4xl text-base leading-8 text-white/68 sm:text-lg">
+                    <p class="mt-5 max-w-4xl text-base leading-8 text-white sm:text-lg">
                         @post.Excerpt
                     </p>
                 }

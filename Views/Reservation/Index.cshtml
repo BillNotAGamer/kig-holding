@@ -5,150 +5,165 @@
     ViewData["MetaDescription"] = "Đặt bàn trước tại Truyền Thuyết Champong. Chọn chi nhánh, thời gian và số khách để giữ bàn nhanh chóng.";
 }
 
-<section class="hero-frame" data-reservation-page="index">
-    <div class="container-page section-shell">
-        <div class="grid gap-8 lg:grid-cols-[1fr_0.45fr] lg:items-end">
-            <div class="hero-card max-w-3xl" data-uw-reveal="fade-up">
-                <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
-                    Reservation
-                </span>
-                <h1 class="mt-5 text-display font-black text-brand-dark sm:text-hero">Đặt bàn trước</h1>
-                <p class="mt-5 text-lead text-brand-gray">
-                    Luồng booking được chuyển sang giao diện sáng, gọn và dễ đọc hơn để phù hợp một website hospitality cao cấp.
-                </p>
-            </div>
-            <div class="surface-panel p-5" data-uw-reveal="fade-up">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Cần đặt bàn gấp?</p>
-                <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="mt-3 block text-3xl font-black text-brand-dark">@Model.Hotline</a>
-                <p class="mt-3 text-sm leading-6 text-brand-gray">Gọi hotline để được hỗ trợ nhanh cho khung giờ gần hoặc nhóm đông.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section-shell">
-    <div class="container-page grid gap-8 lg:grid-cols-[0.68fr_0.32fr]">
-        <div class="surface-panel p-5 sm:p-7">
-            <div class="mb-7">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Thông tin giữ bàn</p>
-                <h2 class="mt-3 text-3xl font-black text-brand-dark">Hoàn tất đặt bàn</h2>
-                <p class="mt-3 text-sm leading-6 text-brand-gray">Thông tin của bạn sẽ được lưu với trạng thái chờ xác nhận. Nhà hàng sẽ liên hệ lại nếu cần làm rõ.</p>
-            </div>
-
-            <form asp-action="Index" asp-controller="Reservation" method="post" class="space-y-5" novalidate>
-                @Html.AntiForgeryToken()
-
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div asp-validation-summary="ModelOnly" class="rounded-md border border-brand-red/30 bg-brand-red/5 p-4 text-sm text-brand-redDark"></div>
-                }
-
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Họ tên</span>
-                        <input asp-for="CustomerName" autocomplete="name" class="input-field" placeholder="Nguyễn Văn A" />
-                        <span asp-validation-for="CustomerName" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
-
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Số điện thoại</span>
-                        <input asp-for="PhoneNumber" autocomplete="tel" class="input-field" placeholder="0909 888 777" />
-                        <span asp-validation-for="PhoneNumber" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
+<main data-reservation-page="index" class="reservation-page--dark">
+    <section class="reservation-page__hero section-shell">
+        <div class="container-page">
+            <div class="reservation-page__hero-grid">
+                <div class="reservation-page__hero-card" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="reservation-page__eyebrow">Reservation</span>
+                    <h1 class="reservation-page__hero-title">Đặt bàn trước</h1>
+                    <p class="reservation-page__hero-copy">
+                        Giữ chỗ trước để đội ngũ Truyền Thuyết Champong chuẩn bị trải nghiệm dùng bữa chỉn chu cho bạn và người thân.
+                    </p>
                 </div>
 
-                <label class="block">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Email</span>
-                    <input asp-for="Email" autocomplete="email" class="input-field" placeholder="email@example.com" />
-                    <span asp-validation-for="Email" class="mt-2 block text-sm text-brand-redDark"></span>
-                </label>
+                <div class="reservation-page__support reservation-page__support--hotline" data-uw-reveal="fade-up" data-uw-delay="100" data-uw-once="true">
+                    <p class="reservation-page__support-label">Cần đặt bàn gấp?</p>
+                    <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="reservation-page__hotline-link">@Model.Hotline</a>
+                    <p class="reservation-page__support-copy">
+                        Gọi hotline để được hỗ trợ nhanh cho khung giờ gần hoặc nhóm đông cần sắp bàn linh hoạt.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                <label class="block">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Chi nhánh</span>
-                    <select asp-for="BranchId" class="input-field">
-                        <option value="">Chọn chi nhánh</option>
-                        @foreach (var branch in Model.Branches)
-                        {
-                            <option value="@branch.Id">@branch.Name - @branch.OpeningHours</option>
-                        }
-                    </select>
-                    <span asp-validation-for="BranchId" class="mt-2 block text-sm text-brand-redDark"></span>
-                </label>
-
-                <div class="grid gap-4 sm:grid-cols-3">
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Số lượng khách</span>
-                        <input asp-for="GuestCount" type="number" min="1" max="100" class="input-field" />
-                        <span asp-validation-for="GuestCount" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
-
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Ngày đến</span>
-                        <input asp-for="ReservationDate" type="date" asp-format="{0:yyyy-MM-dd}" class="input-field" />
-                        <span asp-validation-for="ReservationDate" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
-
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Giờ đến</span>
-                        <input asp-for="ReservationTime" type="time" asp-format="{0:HH:mm}" class="input-field" />
-                        <span asp-validation-for="ReservationTime" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
+    <section class="reservation-page__shell">
+        <div class="container-page reservation-page__grid">
+            <div class="reservation-page__form-card" data-uw-reveal="fade-up" data-uw-delay="140" data-uw-once="true">
+                <div class="reservation-page__section-intro">
+                    <p class="reservation-page__section-label">Thông tin giữ bàn</p>
+                    <h2 class="reservation-page__section-title">Hoàn tất đặt bàn</h2>
+                    <p class="reservation-page__section-copy">
+                        Điền đầy đủ thông tin để nhà hàng giữ chỗ và liên hệ lại khi cần xác nhận thêm chi tiết.
+                    </p>
                 </div>
 
-                @if (Model.ShouldShowLargeGroupNotice)
-                {
-                    <div class="rounded-md border border-brand-gold/25 bg-brand-goldSoft/30 p-4 text-sm leading-6 text-brand-dark">
-                        Nhóm trên 12 người nên gọi hotline <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="font-black text-brand-goldDeep">@Model.Hotline</a> để xác nhận khu vực bàn phù hợp.
-                    </div>
-                }
+                <form asp-action="Index" asp-controller="Reservation" method="post" class="space-y-5" novalidate>
+                    @Html.AntiForgeryToken()
 
-                <label class="block">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Ghi chú</span>
-                    <textarea asp-for="Note" rows="4" class="input-area" placeholder="Ví dụ: cần ghế trẻ em, sinh nhật, bàn yên tĩnh..."></textarea>
-                    <span asp-validation-for="Note" class="mt-2 block text-sm text-brand-redDark"></span>
-                </label>
-
-                <button type="submit" class="btn-primary h-12 w-full sm:w-auto">Hoàn tất đặt bàn</button>
-            </form>
-        </div>
-
-        <aside class="space-y-5">
-            <div class="surface-panel p-5">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Gợi ý nhóm</p>
-                <div class="mt-5 grid gap-3">
-                    @foreach (var item in new[] { ("Đi 1-2 người", "Bàn nhỏ, phục vụ nhanh cho bữa ăn nhẹ."), ("Nhóm 3-6", "Phù hợp combo, món nướng và nhiều phần dùng chung."), ("Nhóm 7-12", "Nên đặt trước để sắp bàn nhóm thoải mái."), ("Trên 12 người", "Gọi hotline để xác nhận khu vực và thời gian.") })
+                    @if (!ViewData.ModelState.IsValid)
                     {
-                        <div class="surface-muted p-4">
-                            <h3 class="font-black text-brand-dark">@item.Item1</h3>
-                            <p class="mt-2 text-sm leading-6 text-brand-gray">@item.Item2</p>
+                        <div asp-validation-summary="ModelOnly" class="reservation-page__summary"></div>
+                    }
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="reservation-page__field-group">
+                            <span class="reservation-page__field-label">Họ tên</span>
+                            <input asp-for="CustomerName" autocomplete="name" class="reservation-page__field" placeholder="Nguyễn Văn A" />
+                            <span asp-validation-for="CustomerName" class="reservation-page__validation"></span>
+                        </label>
+
+                        <label class="reservation-page__field-group">
+                            <span class="reservation-page__field-label">Số điện thoại</span>
+                            <input asp-for="PhoneNumber" autocomplete="tel" class="reservation-page__field" placeholder="0909 888 777" />
+                            <span asp-validation-for="PhoneNumber" class="reservation-page__validation"></span>
+                        </label>
+                    </div>
+
+                    <label class="reservation-page__field-group">
+                        <span class="reservation-page__field-label">Email</span>
+                        <input asp-for="Email" autocomplete="email" class="reservation-page__field" placeholder="email@example.com" />
+                        <span asp-validation-for="Email" class="reservation-page__validation"></span>
+                    </label>
+
+                    <label class="reservation-page__field-group">
+                        <span class="reservation-page__field-label">Chi nhánh</span>
+                        <select asp-for="BranchId" class="reservation-page__field reservation-page__select">
+                            <option value="">Chọn chi nhánh</option>
+                            @foreach (var branch in Model.Branches)
+                            {
+                                <option value="@branch.Id">@branch.Name - @branch.OpeningHours</option>
+                            }
+                        </select>
+                        <span asp-validation-for="BranchId" class="reservation-page__validation"></span>
+                    </label>
+
+                    <div class="grid gap-4 sm:grid-cols-3">
+                        <label class="reservation-page__field-group">
+                            <span class="reservation-page__field-label">Số lượng khách</span>
+                            <input asp-for="GuestCount" type="number" min="1" max="100" class="reservation-page__field" />
+                            <span asp-validation-for="GuestCount" class="reservation-page__validation"></span>
+                        </label>
+
+                        <label class="reservation-page__field-group">
+                            <span class="reservation-page__field-label">Ngày đến</span>
+                            <input asp-for="ReservationDate" type="date" asp-format="{0:yyyy-MM-dd}" class="reservation-page__field" />
+                            <span asp-validation-for="ReservationDate" class="reservation-page__validation"></span>
+                        </label>
+
+                        <label class="reservation-page__field-group">
+                            <span class="reservation-page__field-label">Giờ đến</span>
+                            <input asp-for="ReservationTime" type="time" asp-format="{0:HH:mm}" class="reservation-page__field" />
+                            <span asp-validation-for="ReservationTime" class="reservation-page__validation"></span>
+                        </label>
+                    </div>
+
+                    @if (Model.ShouldShowLargeGroupNotice)
+                    {
+                        <div class="reservation-page__advisory">
+                            Nhóm trên 12 người nên gọi hotline
+                            <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="font-black text-brand-gold">@Model.Hotline</a>
+                            để xác nhận khu vực bàn phù hợp và thời gian phục vụ.
                         </div>
                     }
-                </div>
+
+                    <label class="reservation-page__field-group">
+                        <span class="reservation-page__field-label">Ghi chú</span>
+                        <textarea asp-for="Note" rows="4" class="reservation-page__textarea" placeholder="Ví dụ: cần ghế trẻ em, sinh nhật, bàn yên tĩnh..."></textarea>
+                        <span asp-validation-for="Note" class="reservation-page__validation"></span>
+                    </label>
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="reservation-page__form-note">Mọi thông tin được tiếp nhận với trạng thái chờ xác nhận từ nhà hàng.</p>
+                        <button type="submit" class="btn-primary reservation-page__submit">Hoàn tất đặt bàn</button>
+                    </div>
+                </form>
             </div>
 
-            <div class="surface-panel p-5">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Chi nhánh</p>
-                @if (Model.Branches.Count > 0)
-                {
-                    <div class="mt-4 space-y-3">
-                        @foreach (var branch in Model.Branches.Take(3))
-                        {
-                            <div class="surface-muted p-4">
-                                <h3 class="font-black text-brand-dark">@branch.Name</h3>
-                                <p class="mt-2 text-sm leading-6 text-brand-gray">@branch.Address</p>
-                                <p class="mt-2 text-sm font-semibold text-brand-goldDeep">@branch.OpeningHours</p>
-                            </div>
-                        }
+            <aside class="reservation-page__aside" data-uw-reveal="fade-up" data-uw-delay="200" data-uw-once="true">
+                <div class="reservation-page__support">
+                    <p class="reservation-page__support-label">Gợi ý theo nhóm</p>
+                    <div class="reservation-page__hint-list">
+                        <div class="reservation-page__hint-item">
+                            <h3>1-2 người</h3>
+                            <p>Bàn nhỏ, phục vụ nhanh cho bữa ăn gọn và thoải mái.</p>
+                        </div>
+                        <div class="reservation-page__hint-item">
+                            <h3>3-6 người</h3>
+                            <p>Phù hợp cho combo, món nướng và nhiều phần dùng chung.</p>
+                        </div>
+                        <div class="reservation-page__hint-item">
+                            <h3>7+ người</h3>
+                            <p>Nên đặt trước để đội ngũ sắp xếp khu vực bàn phù hợp hơn.</p>
+                        </div>
                     </div>
-                }
-                else
-                {
-                    <p class="mt-4 text-sm leading-6 text-brand-gray">Danh sách chi nhánh sẽ hiển thị sau khi kết nối cơ sở dữ liệu.</p>
-                }
-            </div>
-        </aside>
-    </div>
-</section>
+                </div>
+
+                <div class="reservation-page__support">
+                    <p class="reservation-page__support-label">Chi nhánh đang phục vụ</p>
+                    @if (Model.Branches.Count > 0)
+                    {
+                        <div class="reservation-page__branch-list">
+                            @foreach (var branch in Model.Branches.Take(3))
+                            {
+                                <div class="reservation-page__branch-item">
+                                    <h3>@branch.Name</h3>
+                                    <p>@branch.Address</p>
+                                    <span>@branch.OpeningHours</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="reservation-page__support-copy">Danh sách chi nhánh sẽ hiển thị sau khi kết nối cơ sở dữ liệu.</p>
+                    }
+                </div>
+            </aside>
+        </div>
+    </section>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

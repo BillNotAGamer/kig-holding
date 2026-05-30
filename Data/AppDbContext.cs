@@ -13,9 +13,6 @@ public class AppDbContext : DbContext
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<Branch> Branches => Set<Branch>();
-    public DbSet<MenuCategory> MenuCategories => Set<MenuCategory>();
-    public DbSet<MenuItem> MenuItems => Set<MenuItem>();
-    public DbSet<MenuItemImage> MenuItemImages => Set<MenuItemImage>();
     public DbSet<MenuGroup> MenuGroups => Set<MenuGroup>();
     public DbSet<MenuPageImage> MenuPageImages => Set<MenuPageImage>();
     public DbSet<Reservation> Reservations => Set<Reservation>();

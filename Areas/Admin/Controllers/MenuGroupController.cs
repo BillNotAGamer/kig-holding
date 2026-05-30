@@ -407,6 +407,49 @@ public class MenuGroupController : AdminBaseController
         return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
     }
 
+    [HttpPost("~/Admin/MenuGroup/Images/{menuGroupId:guid}/BulkDelete", Name = "AdminMenuGroupImagesBulkDelete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> BulkDelete(
+        [FromRoute] Guid menuGroupId,
+        [FromForm] List<Guid> selectedImageIds)
+    {
+        var normalizedSelectedImageIds = selectedImageIds
+            .Where(x => x != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (normalizedSelectedImageIds.Count == 0)
+        {
+            SetErrorMessage("Vui lòng chọn ít nhất một ảnh để xóa.");
+            return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
+        }
+
+        var images = await _dbContext.MenuPageImages
+            .Where(x => x.MenuGroupId == menuGroupId && normalizedSelectedImageIds.Contains(x.Id))
+            .ToListAsync();
+
+        if (images.Count == 0)
+        {
+            SetErrorMessage("Không tìm thấy ảnh hợp lệ để xóa.");
+            return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
+        }
+
+        var imageUrls = images
+            .Select(x => x.ImageUrl)
+            .ToList();
+
+        _dbContext.MenuPageImages.RemoveRange(images);
+        await _dbContext.SaveChangesAsync();
+
+        foreach (var imageUrl in imageUrls)
+        {
+            TryDeleteMenuPageImageFile(imageUrl);
+        }
+
+        SetSuccessMessage($"Đã xóa {images.Count} ảnh thực đơn đã chọn.");
+        return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TogglePublished(Guid id, string? q, string? status)

@@ -1,7 +1,6 @@
 using KIGHolding.Models.Entities;
 using KIGHolding.Services;
 using KIGHolding.ViewModels;
-using KIGHolding.ViewModels.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KIGHolding.Controllers;
@@ -9,20 +8,17 @@ namespace KIGHolding.Controllers;
 [Route("thuc-don")]
 public class MenuController : Controller
 {
-    private readonly IMenuService _menuService;
     private readonly IMenuGroupService _menuGroupService;
     private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly IConfiguration _configuration;
     private readonly ILogger<MenuController> _logger;
 
     public MenuController(
-        IMenuService menuService,
         IMenuGroupService menuGroupService,
         IWebHostEnvironment webHostEnvironment,
         IConfiguration configuration,
         ILogger<MenuController> logger)
     {
-        _menuService = menuService;
         _menuGroupService = menuGroupService;
         _webHostEnvironment = webHostEnvironment;
         _configuration = configuration;
@@ -114,43 +110,9 @@ public class MenuController : Controller
     }
 
     [HttpGet("{slug}")]
-    public async Task<IActionResult> Detail(string slug, CancellationToken cancellationToken)
+    public IActionResult Detail(string slug)
     {
-        if (!HasConfiguredDatabase())
-        {
-            return NotFound();
-        }
-
-        var normalizedSlug = NormalizeSlug(slug);
-        if (string.IsNullOrWhiteSpace(normalizedSlug))
-        {
-            return NotFound();
-        }
-
-        var menuItem = await TryLoadAsync(
-            () => _menuService.GetMenuItemBySlugAsync(normalizedSlug, cancellationToken),
-            "menu item detail");
-
-        if (menuItem is null)
-        {
-            return NotFound();
-        }
-
-        var relatedItems = await TryLoadAsync(
-            () => _menuService.GetRelatedMenuItemsAsync(menuItem.CategoryId, menuItem.Id, 4, cancellationToken),
-            "related menu items") ?? [];
-
-        var model = new MenuDetailViewModel
-        {
-            MenuItem = menuItem,
-            Category = menuItem.Category,
-            GalleryImages = CreateGallery(menuItem),
-            RelatedItems = relatedItems.Select(FoodCardViewModel.FromMenuItem).ToList(),
-            SeoTitle = string.IsNullOrWhiteSpace(menuItem.SeoTitle) ? menuItem.Name : menuItem.SeoTitle,
-            SeoDescription = string.IsNullOrWhiteSpace(menuItem.SeoDescription) ? menuItem.ShortDescription : menuItem.SeoDescription
-        };
-
-        return View(model);
+        return RedirectToAction(nameof(Index));
     }
 
     private async Task<T?> TryLoadAsync<T>(Func<Task<T>> loader, string dataName)
@@ -181,29 +143,6 @@ public class MenuController : Controller
         return string.IsNullOrWhiteSpace(slug)
             ? null
             : slug.Trim().ToLowerInvariant();
-    }
-
-    private static IReadOnlyList<MenuGalleryImageViewModel> CreateGallery(MenuItem menuItem)
-    {
-        var galleryImages = menuItem.Images
-            .OrderBy(x => x.DisplayOrder)
-            .Select(x => new MenuGalleryImageViewModel
-            {
-                ImageUrl = x.ImageUrl,
-                AltText = string.IsNullOrWhiteSpace(x.AltText) ? menuItem.Name : x.AltText
-            })
-            .ToList();
-
-        if (galleryImages.Count == 0 && !string.IsNullOrWhiteSpace(menuItem.ThumbnailUrl))
-        {
-            galleryImages.Add(new MenuGalleryImageViewModel
-            {
-                ImageUrl = menuItem.ThumbnailUrl,
-                AltText = menuItem.Name
-            });
-        }
-
-        return galleryImages;
     }
 
     private MenuGroupCardViewModel CreateMenuGroupCard(MenuGroup group)

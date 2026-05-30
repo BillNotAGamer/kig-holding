@@ -1,6 +1,5 @@
 using System.Text;
 using System.Xml;
-using KIGHolding.Models.Entities;
 using KIGHolding.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,18 +20,18 @@ public class SeoController : Controller
         "/lien-he"
     ];
 
-    private readonly IMenuService _menuService;
+    private readonly IMenuGroupService _menuGroupService;
     private readonly INewsService _newsService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<SeoController> _logger;
 
     public SeoController(
-        IMenuService menuService,
+        IMenuGroupService menuGroupService,
         INewsService newsService,
         IConfiguration configuration,
         ILogger<SeoController> logger)
     {
-        _menuService = menuService;
+        _menuGroupService = menuGroupService;
         _newsService = newsService;
         _configuration = configuration;
         _logger = logger;
@@ -50,15 +49,15 @@ public class SeoController : Controller
 
         if (HasConfiguredDatabase())
         {
-            var menuItems = await TryLoadAsync(
-                () => _menuService.GetActiveMenuItemsAsync(null, cancellationToken),
-                "sitemap menu items") ?? [];
+            var menuGroups = await TryLoadAsync(
+                () => _menuGroupService.GetPublishedGroupsAsync(cancellationToken),
+                "sitemap menu groups") ?? [];
 
-            urls.AddRange(menuItems.Select(item => new SitemapUrl(
-                BuildAbsoluteUrl($"/thuc-don/{item.Slug}", baseUrl),
-                item.UpdatedAt,
+            urls.AddRange(menuGroups.Select(group => new SitemapUrl(
+                BuildAbsoluteUrl($"/thuc-don/nhom/{group.Slug}", baseUrl),
+                group.UpdatedAt,
                 "weekly",
-                "0.7")));
+                "0.8")));
 
             var posts = await TryLoadAsync(
                 () => _newsService.GetPublishedPostsAsync(null, cancellationToken),

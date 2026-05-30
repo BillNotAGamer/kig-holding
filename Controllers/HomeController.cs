@@ -11,7 +11,6 @@ namespace KIGHolding.Controllers;
 public class HomeController : Controller
 {
     private readonly ISiteSettingService _siteSettingService;
-    private readonly IMenuService _menuService;
     private readonly IBranchService _branchService;
     private readonly INewsService _newsService;
     private readonly IConfiguration _configuration;
@@ -19,14 +18,12 @@ public class HomeController : Controller
 
     public HomeController(
         ISiteSettingService siteSettingService,
-        IMenuService menuService,
         IBranchService branchService,
         INewsService newsService,
         IConfiguration configuration,
         ILogger<HomeController> logger)
     {
         _siteSettingService = siteSettingService;
-        _menuService = menuService;
         _branchService = branchService;
         _newsService = newsService;
         _configuration = configuration;
@@ -36,8 +33,6 @@ public class HomeController : Controller
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         SiteSetting? siteSetting = null;
-        IReadOnlyList<MenuItem> signatureMenuItems = [];
-        IReadOnlyList<MenuItem> featuredMenuItems = [];
         IReadOnlyList<Branch> branches = [];
         IReadOnlyList<Review> reviews = [];
         IReadOnlyList<Post> latestPosts = [];
@@ -47,14 +42,6 @@ public class HomeController : Controller
             siteSetting = await TryLoadAsync(
                 () => _siteSettingService.GetSettingsAsync(cancellationToken),
                 "site settings");
-
-            signatureMenuItems = await TryLoadAsync(
-                () => _menuService.GetSignatureMenuItemsAsync(8, cancellationToken),
-                "signature menu items") ?? [];
-
-            featuredMenuItems = await TryLoadAsync(
-                () => _menuService.GetFeaturedMenuItemsAsync(8, cancellationToken),
-                "featured menu items") ?? [];
 
             branches = await TryLoadAsync(
                 () => _branchService.GetActiveBranchesAsync(cancellationToken),
@@ -72,8 +59,6 @@ public class HomeController : Controller
         var model = new HomeIndexViewModel
         {
             SiteSetting = siteSetting,
-            SignatureMenuItems = signatureMenuItems.Select(FoodCardViewModel.FromMenuItem).ToList(),
-            FeaturedMenuItems = featuredMenuItems.Select(FoodCardViewModel.FromMenuItem).ToList(),
             Branches = branches.Select(BranchCardViewModel.FromBranch).ToList(),
             Reviews = reviews.Select(HomeReviewViewModel.FromReview).ToList(),
             LatestPosts = latestPosts.Select(PostCardViewModel.FromPost).ToList(),

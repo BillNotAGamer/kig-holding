@@ -49,7 +49,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddScoped<ISiteSettingService, SiteSettingService>();
-builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IMenuGroupService, MenuGroupService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<INewsService, NewsService>();

@@ -47,16 +47,7 @@
                            class="@NavLinkClass(currentController, "MenuGroup")">
                             Nhóm thực đơn
                         </a>
-                        <a href="/Admin/MenuCategory"
-                           aria-current="@(IsActive(currentController, "MenuCategory") ? "page" : null)"
-                           class="@NavLinkClass(currentController, "MenuCategory")">
-                            Danh mục món
-                        </a>
-                        <a href="/Admin/MenuItem"
-                           aria-current="@(IsActive(currentController, "MenuItem") ? "page" : null)"
-                           class="@NavLinkClass(currentController, "MenuItem")">
-                            Món ăn
-                        </a>
+                        @* Legacy MenuCategory/MenuItem links hidden after migration to MenuGroup/MenuPageImage flow. Controllers/entities kept temporarily for safe staged removal. *@
                         <a href="/Admin/Post"
                            aria-current="@(IsActive(currentController, "Post") ? "page" : null)"
                            class="@NavLinkClass(currentController, "Post")">
