@@ -13,9 +13,6 @@
     var hasSelectedCity = !string.IsNullOrWhiteSpace(Model.SelectedCity);
     var hasSearch = !string.IsNullOrWhiteSpace(Model.SearchQuery);
     var selectedAreaLabel = hasSelectedCity ? Model.SelectedCity : "Tất cả địa điểm";
-    var canEmbedMainMap = !string.IsNullOrWhiteSpace(Model.MainMapUrl)
-        && Model.MainMapUrl.Contains("google.com/maps/embed", StringComparison.OrdinalIgnoreCase);
-    var hasMainMapLink = !string.IsNullOrWhiteSpace(Model.MainMapUrl) && Model.MainMapUrl != "#";
     var suggestionItems = Model.Branches.Select(branch => new
     {
         name = branch.Name,
@@ -234,64 +231,6 @@
                         </div>
                     </div>
                 }
-            </div>
-        </div>
-    </section>
-
-    <section id="branch-map" class="branch-location-map section-shell scroll-mt-24 pt-0" data-uw-reveal="fade-up">
-        <div class="container-page">
-            <div class="mx-auto max-w-6xl">
-                <div class="overflow-hidden rounded-[1.35rem] border border-white/10 bg-white/[0.03] shadow-panel backdrop-blur">
-                    <div class="border-b border-white/10 p-5 sm:flex sm:items-end sm:justify-between sm:gap-6 sm:p-6">
-                        <div>
-                            <p class="text-kicker font-black uppercase text-brand-red">Bản đồ chi nhánh</p>
-                            <h2 class="mt-2 text-2xl font-black text-white sm:text-3xl">Xem vị trí trước khi ghé cửa hàng</h2>
-                            <p class="mt-2 text-sm leading-6 text-white/65">
-                                Xem vị trí trước khi ghé cửa hàng.
-                            </p>
-                        </div>
-
-                        @if (hasMainMapLink)
-                        {
-                            <a href="@Model.MainMapUrl" class="mt-4 inline-flex shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:border-brand-red/60 hover:text-white sm:mt-0" target="_blank" rel="noopener">Mở Google Maps</a>
-                        }
-                    </div>
-
-                    @if (canEmbedMainMap)
-                    {
-                        <iframe src="@Model.MainMapUrl"
-                                class="h-[18rem] w-full border-0 sm:h-[22rem] lg:h-[24rem]"
-                                title="Bản đồ hệ thống chi nhánh Champong"
-                                loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    }
-                    else if (hasMainMapLink)
-                    {
-                        <div class="flex min-h-[18rem] items-center justify-center px-6 py-8 text-center sm:min-h-[22rem]">
-                            <div class="max-w-md">
-                                <p class="text-kicker font-black uppercase text-brand-red">Liên kết bản đồ</p>
-                                <h3 class="mt-3 text-2xl font-black text-white">Mở chi nhánh trên Google Maps</h3>
-                                <p class="mt-3 text-sm leading-7 text-white/65">
-                                    Bản đồ đang ở dạng liên kết ngoài. Bạn vẫn có thể mở Google Maps để xem đường đi.
-                                </p>
-                                <a href="@Model.MainMapUrl" class="mt-5 inline-flex items-center justify-center rounded-full bg-brand-red px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-soft transition hover:bg-brand-redDark" target="_blank" rel="noopener">Xem bản đồ</a>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="flex min-h-[18rem] items-center justify-center px-6 py-8 text-center sm:min-h-[22rem]">
-                            <div class="max-w-md">
-                                <p class="text-kicker font-black uppercase text-brand-red">Bản đồ chưa sẵn sàng</p>
-                                <h3 class="mt-3 text-2xl font-black text-white">Một số chi nhánh chưa có liên kết bản đồ</h3>
-                                <p class="mt-3 text-sm leading-7 text-white/65">
-                                    Phần này sẽ hiển thị khi dữ liệu Google Maps được bổ sung trong hệ thống chi nhánh.
-                                </p>
-                                <a href="/dat-ban" class="mt-5 inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:border-brand-red/60 hover:text-white">Đặt bàn ngay</a>
-                            </div>
-                        </div>
-                    }
-                </div>
             </div>
         </div>
     </section>

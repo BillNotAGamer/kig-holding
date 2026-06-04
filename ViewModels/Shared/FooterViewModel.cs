@@ -14,7 +14,7 @@ public class FooterViewModel
     public string ZaloUrl { get; set; } = "https://oa.zalo.me/3191309080595223416";
     public string TiktokUrl { get; set; } = "#";
     public string CompanyLegalName { get; set; } = "CÔNG TY TNHH KIG HOLDING VIỆT NAM";
-    public string BusinessRegistrationNumber { get; set; } = "Mã số DN: 0123456789";
+    public string BusinessRegistrationNumber { get; set; } = "Mã số DN: 0318814931";
     public string QrPlaceholderText { get; set; } = "QR";
     public string AppStorePlaceholderText { get; set; } = "App Store";
     public string GooglePlayPlaceholderText { get; set; } = "Google Play";

@@ -1,8 +1,12 @@
-﻿@model KIGHolding.ViewModels.Shared.FooterViewModel
+@model KIGHolding.ViewModels.Shared.FooterViewModel
 
 @{
     var footerLogoUrl = string.IsNullOrWhiteSpace(Model.FooterLogoUrl) ? Model.LogoUrl : Model.FooterLogoUrl;
-    var addressText = string.IsNullOrWhiteSpace(Model.Address) ? "Địa chỉ đang cập nhật" : Model.Address;
+    var addressText = string.IsNullOrWhiteSpace(Model.Address)
+        || string.Equals(Model.Address, "Địa chỉ đang cập nhật", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Model.Address, "Trung tâm TP. Hồ Chí Minh", StringComparison.OrdinalIgnoreCase)
+            ? "366/3 Phạm Hữu Lầu, Nhà Bè, Hồ Chí Minh, Việt Nam"
+            : Model.Address;
     var currentYear = DateTime.Now.Year;
     var hasMapLink = !string.IsNullOrWhiteSpace(Model.GoogleMapUrl);
     var hasFacebook = !string.IsNullOrWhiteSpace(Model.FacebookUrl) && !string.Equals(Model.FacebookUrl, "#", StringComparison.Ordinal);
@@ -79,7 +83,7 @@
 
                             <div class="flex size-32 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white p-2 shadow-soft md:size-32 lg:size-32">
                                 <img src="~/images/general/kig-holding-qr-app.webp"
-                                     alt="Mã QR KIG Holding"
+                                     alt="Quét mã QR để tải ứng dụng KIG Holding"
                                      class="h-full w-full object-contain"
                                      loading="lazy"
                                      decoding="async" />
@@ -92,25 +96,13 @@
                             </p>
 
                             <div class="space-y-3">
-                                <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                                    <span class="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 text-xs font-bold text-brand-cream">
-                                        A
-                                    </span>
-                                    <span>
-                                        <span class="block text-[10px] uppercase tracking-[0.28em] text-white/35">APP</span>
-                                        <span class="block text-sm font-semibold text-brand-cream">App Store</span>
-                                    </span>
-                                </div>
+                                <a href="https://apps.apple.com/vn/app/truy%E1%BB%81n-thuy%E1%BA%BFt-champong-%EC%A0%88%EC%84%A4%EC%9D%98%EC%A7%AC%EB%BD%BB/id6753157313?l=vi" target="_blank" rel="noopener noreferrer" aria-label="Tải ứng dụng trên App Store" class="block transition hover:opacity-80">
+                                    <img src="~/images/general/icons/app-store-download.svg" alt="Tải ứng dụng trên App Store" class="h-10 w-auto object-contain" asp-append-version="true" />
+                                </a>
 
-                                <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                                    <span class="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 text-xs font-bold text-brand-cream">
-                                        G
-                                    </span>
-                                    <span>
-                                        <span class="block text-[10px] uppercase tracking-[0.28em] text-white/35">MOBILE</span>
-                                        <span class="block text-sm font-semibold text-brand-cream">Google Play</span>
-                                    </span>
-                                </div>
+                                <a href="https://play.google.com/store/apps/details?id=com.eggstech.champong.app&pcampaignid=web_share" target="_blank" rel="noopener noreferrer" aria-label="Tải ứng dụng trên Google Play" class="block transition hover:opacity-80">
+                                    <img src="~/images/general/icons/google-play-download.svg" alt="Tải ứng dụng trên Google Play" class="h-10 w-auto object-contain" asp-append-version="true" />
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -119,29 +111,61 @@
                         <div class="mt-4 flex flex-wrap gap-3">
                             @if (hasFacebook)
                             {
-                                <a href="@Model.FacebookUrl" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft" target="_blank" rel="noopener" aria-label="Facebook">F</a>
+                                <a href="@Model.FacebookUrl" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft" target="_blank" rel="noopener noreferrer" aria-label="Facebook Truyền Thuyết Champong">
+                                    <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 8H7v3h2v9h4v-9h3.6l.4-3h-4V6.5C13 5.3 13.5 5 15 5h3V1H15C11.5 1 9 2.5 9 5.8V8Z"/>
+                                    </svg>
+                                </a>
                             }
                             else
                             {
-                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream opacity-50" role="img" aria-label="Facebook placeholder">F</span>
+                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-brand-cream opacity-50" role="img" aria-label="Facebook placeholder">
+                                    <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 8H7v3h2v9h4v-9h3.6l.4-3h-4V6.5C13 5.3 13.5 5 15 5h3V1H15C11.5 1 9 2.5 9 5.8V8Z"/>
+                                    </svg>
+                                </span>
                             }
 
                             @if (hasZalo)
                             {
-                                <a href="@Model.ZaloUrl" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft" target="_blank" rel="noopener" aria-label="Zalo">Z</a>
+                                <a href="@Model.ZaloUrl"
+                                       class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       aria-label="Zalo Truyền Thuyết Champong">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path fill="currentColor"
+                                              d="M7.15 6.25h9.7c.42 0 .75.33.75.75v.58c0 .18-.06.35-.17.49l-7.02 8.68h6.44c.42 0 .75.33.75.75v.5c0 .42-.33.75-.75.75h-9.7a.75.75 0 0 1-.75-.75v-.58c0-.18.06-.35.17-.49l7.02-8.68H7.15A.75.75 0 0 1 6.4 7.5V7c0-.42.33-.75.75-.75Z" />
+                                    </svg>
+                                </a>
                             }
                             else
                             {
-                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream opacity-50" role="img" aria-label="Zalo placeholder">Z</span>
+                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-brand-cream opacity-50"
+                                      role="img"
+                                      aria-label="Zalo placeholder">
+                                    <svg class="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path fill="currentColor"
+                                              d="M7.15 6.25h9.7c.42 0 .75.33.75.75v.58c0 .18-.06.35-.17.49l-7.02 8.68h6.44c.42 0 .75.33.75.75v.5c0 .42-.33.75-.75.75h-9.7a.75.75 0 0 1-.75-.75v-.58c0-.18.06-.35.17-.49l7.02-8.68H7.15A.75.75 0 0 1 6.4 7.5V7c0-.42.33-.75.75-.75Z" />
+                                    </svg>
+                                </span>
                             }
 
                             @if (hasTiktok)
                             {
-                                <a href="@Model.TiktokUrl" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft" target="_blank" rel="noopener" aria-label="TikTok">T</a>
+                                <a href="@Model.TiktokUrl" class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-brand-cream transition hover:-translate-y-0.5 hover:border-brand-gold hover:text-brand-goldSoft" target="_blank" rel="noopener noreferrer" aria-label="TikTok Truyền Thuyết Champong">
+                                    <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12.53.02C13.84 0 15.14.01 16.44.02c.08 1.53.63 3.09 1.75 4.17 1.12.98 2.59 1.49 4.03 1.58v3.52c-1.34-.17-2.62-.82-3.62-1.77-.28-.29-.53-.6-.74-.93v6.07c0 1.95-.59 3.91-1.85 5.37-1.5 1.75-3.88 2.65-6.16 2.4-2.88-.13-5.63-2.22-6.22-5.04-.76-3.15.93-6.72 3.97-7.69 1.13-.39 2.37-.41 3.52-.16v3.66c-.95-.27-2.02-.17-2.85.34-1.04.59-1.57 1.88-1.37 3.08.19 1.34 1.32 2.47 2.68 2.56.96.09 1.98-.36 2.46-1.19.46-.73.49-1.63.49-2.45V.02h-.24Z"/>
+                                    </svg>
+                                </a>
                             }
                             else
                             {
-                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-sm font-black uppercase tracking-[0.2em] text-brand-cream opacity-50" role="img" aria-label="TikTok placeholder">T</span>
+                                <span class="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-brand-cream opacity-50" role="img" aria-label="TikTok placeholder">
+                                    <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12.53.02C13.84 0 15.14.01 16.44.02c.08 1.53.63 3.09 1.75 4.17 1.12.98 2.59 1.49 4.03 1.58v3.52c-1.34-.17-2.62-.82-3.62-1.77-.28-.29-.53-.6-.74-.93v6.07c0 1.95-.59 3.91-1.85 5.37-1.5 1.75-3.88 2.65-6.16 2.4-2.88-.13-5.63-2.22-6.22-5.04-.76-3.15.93-6.72 3.97-7.69 1.13-.39 2.37-.41 3.52-.16v3.66c-.95-.27-2.02-.17-2.85.34-1.04.59-1.57 1.88-1.37 3.08.19 1.34 1.32 2.47 2.68 2.56.96.09 1.98-.36 2.46-1.19.46-.73.49-1.63.49-2.45V.02h-.24Z"/>
+                                    </svg>
+                                </span>
                             }
                         </div>
                     </div>
@@ -152,7 +176,6 @@
         <div class="relative mt-14 border-t border-white/10 pt-6 lg:mt-16">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between" data-uw-reveal="fade-up" data-uw-delay="100">
                 <div class="space-y-2 text-sm leading-6 text-white/60">
-                    <p class="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Thông tin pháp lý mẫu</p>
                     <p class="text-brand-cream">@Model.CompanyLegalName</p>
                     <p>@Model.BusinessRegistrationNumber</p>
                     <p>&copy; @currentYear @Model.BrandName. Tất cả quyền được bảo lưu.</p>

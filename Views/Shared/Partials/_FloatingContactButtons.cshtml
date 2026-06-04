@@ -73,10 +73,15 @@
 
         <button type="button"
                 class="floating-contact-fab__toggle"
-                aria-label="Mở liên hệ nhanh"
+                aria-label="Mở liên hệ nhanh KIG Holding"
                 aria-expanded="false"
                 data-floating-contact-toggle>
-            <span class="floating-contact-fab__brand" aria-hidden="true">KIG</span>
+            <span class="floating-contact-fab__brand" aria-hidden="true">
+                <img src="@Model.BrandLogoUrl"
+                     alt="KIG Holding"
+                     class="h-9 w-9 object-contain"
+                     decoding="async" />
+            </span>
             <span class="floating-contact-fab__close" aria-hidden="true">&times;</span>
         </button>
     </div>
@@ -98,7 +103,7 @@
                 const setOpen = (open) => {
                     root.classList.toggle('is-open', open);
                     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-                    toggle.setAttribute('aria-label', open ? 'Đóng liên hệ nhanh' : 'Mở liên hệ nhanh');
+                    toggle.setAttribute('aria-label', open ? 'Đóng liên hệ nhanh KIG Holding' : 'Mở liên hệ nhanh KIG Holding');
 
                     actions.forEach((action) => {
                         action.tabIndex = open ? 0 : -1;

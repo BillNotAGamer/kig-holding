@@ -4,8 +4,6 @@
     ViewData["Title"] = "Liên hệ";
     ViewData["MetaDescription"] = "Liên hệ Truyền Thuyết Champong để góp ý, đặt tiệc, hợp tác và nhượng quyền.";
 
-    var canEmbedMap = !string.IsNullOrWhiteSpace(Model.GoogleMapUrl)
-        && Model.GoogleMapUrl.Contains("google.com/maps/embed", StringComparison.OrdinalIgnoreCase);
     var hotlineHref = $"tel:{Model.Hotline.Replace(" ", string.Empty)}";
     var hasFacebook = !string.IsNullOrWhiteSpace(Model.FacebookUrl) && !string.Equals(Model.FacebookUrl, "#", StringComparison.Ordinal);
     var hasZalo = !string.IsNullOrWhiteSpace(Model.ZaloUrl) && !string.Equals(Model.ZaloUrl, "#", StringComparison.Ordinal);
@@ -24,7 +22,7 @@
                     </p>
                     <div class="contact-page__actions">
                         <a href="@hotlineHref" class="contact-page__button contact-page__button--primary">Gọi hotline</a>
-                        <a href="#map" class="contact-page__button contact-page__button--secondary">Xem bản đồ</a>
+                        <a href="/chi-nhanh" class="contact-page__button contact-page__button--secondary">Xem chi nhánh</a>
                     </div>
                 </div>
             </div>
@@ -167,51 +165,6 @@
             </div>
         </section>
 
-        <section class="contact-page__section contact-page__section--map" id="map">
-            <div class="container-page contact-page__container">
-                <div class="contact-page__section-head" data-uw-reveal="fade-up" data-uw-delay="80" data-uw-once="true">
-                    <p class="contact-page__eyebrow">BẢN ĐỒ</p>
-                    <h2 class="contact-page__section-title">Tìm đường đến Truyền Thuyết Champong</h2>
-                    <p class="contact-page__section-copy">
-                        Dùng Google Maps để xem tuyến đường thuận tiện nhất hoặc liên hệ hotline nếu cần hỗ trợ.
-                    </p>
-                </div>
-
-                <div class="contact-page__map" data-uw-reveal="fade-up" data-uw-delay="120" data-uw-once="true">
-                    @if (canEmbedMap)
-                    {
-                        <iframe src="@Model.GoogleMapUrl"
-                                title="Bản đồ Truyền Thuyết Champong"
-                                class="contact-page__map-frame"
-                                loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade"
-                                allowfullscreen></iframe>
-                    }
-                    else if (!string.IsNullOrWhiteSpace(Model.GoogleMapUrl))
-                    {
-                        <div class="contact-page__map-fallback">
-                            <p class="contact-page__mini-label">Google Maps</p>
-                            <h3 class="contact-page__map-title">Bản đồ mở bằng liên kết ngoài.</h3>
-                            <p class="contact-page__map-copy">
-                                Đường dẫn hiện tại không phải URL nhúng iframe, nên trang hiển thị nút mở Google Maps để tránh lỗi hiển thị.
-                            </p>
-                            <a href="@Model.GoogleMapUrl" target="_blank" rel="noopener" class="contact-page__button contact-page__button--secondary">Xem bản đồ</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="contact-page__map-fallback">
-                            <p class="contact-page__mini-label">Đang cập nhật</p>
-                            <h3 class="contact-page__map-title">Bản đồ liên hệ chưa có sẵn.</h3>
-                            <p class="contact-page__map-copy">
-                                Vui lòng gọi hotline hoặc xem danh sách chi nhánh để chọn điểm đến phù hợp.
-                            </p>
-                            <a href="/chi-nhanh" class="contact-page__button contact-page__button--secondary">Xem chi nhánh</a>
-                        </div>
-                    }
-                </div>
-            </div>
-        </section>
     </div>
 </main>
 

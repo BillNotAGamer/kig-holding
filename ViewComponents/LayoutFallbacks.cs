@@ -39,7 +39,7 @@ internal static class LayoutFallbacks
                     CreateNavItem("Liên hệ", "/lien-he", path, exact: true)
                 ]),
             // Future route: create page/controller later if needed.
-            CreateNavItem("Liên hệ nhượng quyền", "/lien-he-nhuong-quyen", path, exact: true)
+            CreateNavItem("Nhượng quyền", "/lien-he-nhuong-quyen", path, exact: true)
         ];
     }
 
@@ -65,18 +65,16 @@ internal static class LayoutFallbacks
                 Url = "/chi-nhanh",
                 IsActive = false
             },
-            // Future route placeholder: keep the footer link visible even though the page is not implemented yet.
             new NavItemViewModel
             {
-                Label = "Khuyến mãi",
-                Url = "/khuyen-mai",
+                Label = "Tin tức",
+                Url = "/tin-tuc",
                 IsActive = false
             },
-            // Future route placeholder: keep the footer link visible even though the page is not implemented yet.
             new NavItemViewModel
             {
-                Label = "Tuyển dụng",
-                Url = "/tuyen-dung",
+                Label = "Nhượng quyền",
+                Url = "/lien-he-nhuong-quyen",
                 IsActive = false
             },
             new NavItemViewModel
@@ -156,15 +154,15 @@ internal static class LayoutFallbacks
             Description = string.IsNullOrWhiteSpace(setting?.Slogan) ? "Mì cay Hàn Quốc, BBQ nóng lửa và không gian tối hiện đại cho những bữa ăn đậm vị." : setting!.Slogan,
             LogoUrl = string.IsNullOrWhiteSpace(setting?.LogoUrl) ? string.Empty : setting!.LogoUrl,
             FooterLogoUrl = "/images/general/kig-no-bg-logo.png",
-            Address = string.IsNullOrWhiteSpace(setting?.Address) ? "Địa chỉ đang cập nhật" : setting!.Address,
+            Address = string.IsNullOrWhiteSpace(setting?.Address) ? "366/3 Phạm Hữu Lầu, Nhà Bè, Hồ Chí Minh, Việt Nam" : setting!.Address,
             GoogleMapUrl = string.IsNullOrWhiteSpace(setting?.GoogleMapUrl) ? string.Empty : setting!.GoogleMapUrl,
             Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0909 888 777" : setting!.Hotline,
             Email = string.IsNullOrWhiteSpace(setting?.Email) ? "truyenthuyetchamponghcm@gmail.com" : setting!.Email,
-            FacebookUrl = string.IsNullOrWhiteSpace(setting?.FacebookUrl) ? "#" : setting!.FacebookUrl,
-            ZaloUrl = string.IsNullOrWhiteSpace(setting?.ZaloUrl) ? "#" : setting!.ZaloUrl,
-            TiktokUrl = string.IsNullOrWhiteSpace(setting?.TiktokUrl) ? "#" : setting!.TiktokUrl,
+            FacebookUrl = string.IsNullOrWhiteSpace(setting?.FacebookUrl) ? "https://www.facebook.com/champong.official" : setting!.FacebookUrl,
+            ZaloUrl = string.IsNullOrWhiteSpace(setting?.ZaloUrl) ? "https://oa.zalo.me/3191309080595223416?gidzl=MtBA6_c401bLRSaV-9e465Hlp17lcmGJ6MsP6xMU0ayGEivEvie4I4eucHZccb1FH6sQIZMLn_Wn_OO07W" : setting!.ZaloUrl,
+            TiktokUrl = string.IsNullOrWhiteSpace(setting?.TiktokUrl) ? "https://www.tiktok.com/@truyenthuyetchampong_" : setting!.TiktokUrl,
             CompanyLegalName = "CÔNG TY TNHH KIG HOLDING VIỆT NAM",
-            BusinessRegistrationNumber = "Mã số DN: 0123456789",
+            BusinessRegistrationNumber = "Mã số DN: 0318814931",
             QrPlaceholderText = "QR",
             AppStorePlaceholderText = "App Store",
             GooglePlayPlaceholderText = "Google Play",
@@ -186,8 +184,8 @@ internal static class LayoutFallbacks
         return new FloatingContactButtonsViewModel
         {
             Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0909 888 777" : setting!.Hotline,
-            FacebookUrl = string.IsNullOrWhiteSpace(setting?.FacebookUrl) ? "#" : setting!.FacebookUrl,
-            ZaloUrl = string.IsNullOrWhiteSpace(setting?.ZaloUrl) ? "#" : setting!.ZaloUrl,
+            FacebookUrl = string.IsNullOrWhiteSpace(setting?.FacebookUrl) ? "https://www.facebook.com/champong.official" : setting!.FacebookUrl,
+            ZaloUrl = string.IsNullOrWhiteSpace(setting?.ZaloUrl) ? "https://oa.zalo.me/3191309080595223416" : setting!.ZaloUrl,
             ReservationUrl = "/dat-ban"
         };
     }
