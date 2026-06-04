@@ -1,0 +1,183 @@
+@using KIGHolding.Services
+@inject IConfiguration Configuration
+@inject IBranchService BranchService
+
+@{
+    var branchOptions = new List<(Guid Id, string Name, string OpeningHours)>();
+    var hasConfiguredDatabase = false;
+    var connectionString = Configuration.GetConnectionString("DefaultConnection");
+
+    hasConfiguredDatabase =
+        !string.IsNullOrWhiteSpace(connectionString) &&
+        !connectionString.Contains("your-neon-host", StringComparison.OrdinalIgnoreCase) &&
+        !connectionString.Contains("your_username", StringComparison.OrdinalIgnoreCase) &&
+        !connectionString.Contains("your_password", StringComparison.OrdinalIgnoreCase);
+
+    if (hasConfiguredDatabase)
+    {
+        try
+        {
+            var branches = await BranchService.GetActiveBranchesAsync();
+            branchOptions = branches
+                .Select(branch => (branch.Id, branch.Name, $"{branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm}"))
+                .ToList();
+        }
+        catch
+        {
+            branchOptions = [];
+        }
+    }
+
+    var defaultDate = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
+    var defaultTime = "18:00";
+}
+
+<div class="booking-modal"
+     data-booking-modal
+     aria-hidden="true">
+    <div class="booking-modal__backdrop" data-booking-modal-backdrop></div>
+
+    <div class="booking-modal__panel"
+         data-booking-modal-panel
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="booking-modal-title"
+         aria-describedby="booking-modal-description"
+         tabindex="-1">
+        <div class="booking-modal__header">
+            <div>
+                <p class="booking-modal__eyebrow">Quick Reservation</p>
+                <h2 id="booking-modal-title" class="booking-modal__title">Giữ bàn nhanh trong vài bước</h2>
+                <p id="booking-modal-description" class="booking-modal__description">
+                    Lưu ý: chỉ áp dụng từ Thứ hai đến Thứ sáu trừ lễ tết và các dịp đặc biệt
+                </p>
+            </div>
+
+            <button type="button"
+                    class="booking-modal__close"
+                    aria-label="Đóng đặt bàn nhanh"
+                    data-booking-modal-close>
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <form method="post"
+              action="/dat-ban"
+              novalidate
+              class="booking-modal__form"
+              data-booking-modal-form
+              data-booking-modal-action="/dat-ban/quick">
+            @Html.AntiForgeryToken()
+
+            <div class="booking-modal__summary" data-booking-modal-summary hidden aria-live="polite"></div>
+
+            <div class="booking-modal__form-body" data-booking-modal-form-body>
+                <div class="booking-modal__grid">
+                    <label class="booking-modal__field booking-modal__field--span-2">
+                        <span class="booking-modal__label">Họ tên</span>
+                        <input id="booking-modal-customer-name"
+                               name="CustomerName"
+                               type="text"
+                               autocomplete="name"
+                               class="booking-modal__input"
+                               placeholder="Nguyễn Văn A"
+                               required />
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="CustomerName"></p>
+                    </label>
+
+                    <label class="booking-modal__field booking-modal__field--span-2">
+                        <span class="booking-modal__label">Số điện thoại</span>
+                        <input id="booking-modal-phone-number"
+                               name="PhoneNumber"
+                               type="tel"
+                               autocomplete="tel"
+                               class="booking-modal__input"
+                               placeholder="0909 888 777"
+                               required />
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="PhoneNumber"></p>
+                    </label>
+
+                    <label class="booking-modal__field">
+                        <span class="booking-modal__label">Số khách</span>
+                        <input id="booking-modal-guest-count"
+                               name="GuestCount"
+                               type="number"
+                               min="1"
+                               max="100"
+                               value="2"
+                               class="booking-modal__input"
+                               required />
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="GuestCount"></p>
+                    </label>
+
+                    <label class="booking-modal__field">
+                        <span class="booking-modal__label">Ngày đến</span>
+                        <input id="booking-modal-reservation-date"
+                               name="ReservationDate"
+                               type="date"
+                               value="@defaultDate"
+                               class="booking-modal__input"
+                               required />
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="ReservationDate"></p>
+                    </label>
+
+                    <label class="booking-modal__field">
+                        <span class="booking-modal__label">Giờ đến</span>
+                        <input id="booking-modal-reservation-time"
+                               name="ReservationTime"
+                               type="time"
+                               value="@defaultTime"
+                               class="booking-modal__input"
+                               required />
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="ReservationTime"></p>
+                    </label>
+
+                    <label class="booking-modal__field booking-modal__field--span-3">
+                        <span class="booking-modal__label">Chi nhánh</span>
+                        <select id="booking-modal-branch-id"
+                                name="BranchId"
+                                class="booking-modal__input booking-modal__select"
+                                required>
+                            <option value="">Chọn chi nhánh</option>
+                            @foreach (var branch in branchOptions)
+                            {
+                                <option value="@branch.Id">@branch.Name - @branch.OpeningHours</option>
+                            }
+                            @if (branchOptions.Count == 0)
+                            {
+                                <option value="" disabled>Danh sách chi nhánh sẽ hiển thị lại khi kết nối dữ liệu sẵn sàng.</option>
+                            }
+                        </select>
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="BranchId"></p>
+                    </label>
+
+                    <label class="booking-modal__field booking-modal__field--span-3">
+                        <span class="booking-modal__label">Ghi chú</span>
+                        <textarea id="booking-modal-note"
+                                  name="Note"
+                                  rows="4"
+                                  class="booking-modal__textarea"
+                                  placeholder="Ví dụ: cần ghế trẻ em, sinh nhật, bàn yên tĩnh..."></textarea>
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="Note"></p>
+                    </label>
+                </div>
+
+                <div class="booking-modal__footer">
+                    <p class="booking-modal__footnote">
+                        Để lại thông tin và chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất.
+                    </p>
+                    <button type="submit" class="booking-modal__submit" data-booking-modal-submit>Gửi yêu cầu đặt bàn</button>
+                </div>
+            </div>
+
+            <div class="booking-modal__success" data-booking-modal-success hidden aria-live="polite">
+                <div class="booking-modal__success-body" data-booking-modal-success-body></div>
+                <button type="button"
+                        class="booking-modal__success-close"
+                        data-booking-modal-close>
+                    Đóng
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -6,201 +6,214 @@
 
     var canEmbedMap = !string.IsNullOrWhiteSpace(Model.GoogleMapUrl)
         && Model.GoogleMapUrl.Contains("google.com/maps/embed", StringComparison.OrdinalIgnoreCase);
+    var hotlineHref = $"tel:{Model.Hotline.Replace(" ", string.Empty)}";
+    var hasFacebook = !string.IsNullOrWhiteSpace(Model.FacebookUrl) && !string.Equals(Model.FacebookUrl, "#", StringComparison.Ordinal);
+    var hasZalo = !string.IsNullOrWhiteSpace(Model.ZaloUrl) && !string.Equals(Model.ZaloUrl, "#", StringComparison.Ordinal);
+    var hasTiktok = !string.IsNullOrWhiteSpace(Model.TiktokUrl) && !string.Equals(Model.TiktokUrl, "#", StringComparison.Ordinal);
 }
 
-<section class="hero-frame" data-contact-page="index">
-    <div class="container-page section-shell">
-        <div class="grid gap-8 lg:grid-cols-[1fr_0.45fr] lg:items-end">
-            <div class="hero-card max-w-3xl" data-uw-reveal="fade-up">
-                <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
-                    Contact
-                </span>
-                <h1 class="public-page-title mt-5 text-brand-dark">Liên hệ Truyền Thuyết Champong</h1>
-                <p class="mt-5 text-lead text-brand-gray">
-                    Một trang liên hệ sáng, rõ và dễ quản trị hơn cho các nhu cầu góp ý, đặt tiệc, hợp tác và nhượng quyền.
-                </p>
-            </div>
-            <div class="surface-panel p-5" data-uw-reveal="fade-up">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Hotline</p>
-                <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="mt-3 block text-3xl font-black text-brand-dark">@Model.Hotline</a>
-                <p class="mt-3 text-sm leading-6 text-brand-gray">Liên hệ nhanh để đặt tiệc, hỏi chi nhánh hoặc cần hỗ trợ gấp.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section-shell">
-    <div class="container-page grid gap-8 lg:grid-cols-[0.38fr_0.62fr]">
-        <aside class="space-y-5">
-            <div class="surface-panel p-5">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Thông tin liên hệ</p>
-                <h2 class="mt-3 text-2xl font-black text-brand-dark">@Model.BrandName</h2>
-                <div class="mt-5 space-y-4 text-sm leading-6 text-brand-gray">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Hotline</p>
-                        <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="mt-1 block font-black text-brand-dark transition hover:text-brand-goldDeep">@Model.Hotline</a>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Email</p>
-                        <a href="mailto:@Model.EmailDisplay" class="mt-1 block font-black text-brand-dark transition hover:text-brand-goldDeep">@Model.EmailDisplay</a>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Địa chỉ</p>
-                        <p class="mt-1 text-brand-dark">@Model.Address</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Giờ mở cửa</p>
-                        <p class="mt-1 text-brand-dark">@Model.OpeningHours</p>
+<main class="contact-page contact-page--dark relative isolate overflow-hidden text-white">
+    <div class="contact-page__shell">
+        <section class="contact-page__section contact-page__section--hero">
+            <div class="container-page contact-page__container">
+                <div class="contact-page__hero" data-uw-reveal="fade-up" data-uw-once="true">
+                    <p class="contact-page__eyebrow">LIÊN HỆ</p>
+                    <h1 class="contact-page__title">Kết nối với Truyền Thuyết Champong</h1>
+                    <p class="contact-page__lead">
+                        Gửi thông tin để đội ngũ của chúng tôi hỗ trợ bạn nhanh chóng.
+                    </p>
+                    <div class="contact-page__actions">
+                        <a href="@hotlineHref" class="contact-page__button contact-page__button--primary">Gọi hotline</a>
+                        <a href="#map" class="contact-page__button contact-page__button--secondary">Xem bản đồ</a>
                     </div>
                 </div>
-
-                <div class="mt-6 grid grid-cols-3 gap-3">
-                    <a href="@Model.FacebookUrl" target="_blank" rel="noopener" class="btn-ghost h-11">Facebook</a>
-                    <a href="@Model.ZaloUrl" target="_blank" rel="noopener" class="btn-ghost h-11">Zalo</a>
-                    <a href="@Model.TiktokUrl" target="_blank" rel="noopener" class="btn-ghost h-11">TikTok</a>
-                </div>
             </div>
+        </section>
 
-            <div class="surface-panel p-5">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Chi nhánh</p>
-                @if (Model.Branches.Count > 0)
-                {
-                    <div class="mt-4 space-y-3">
-                        @foreach (var branch in Model.Branches.Take(3))
-                        {
-                            <div class="surface-muted p-4">
-                                <h3 class="font-black text-brand-dark">@branch.Name</h3>
-                                <p class="mt-2 text-sm leading-6 text-brand-gray">@branch.Address</p>
-                                <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm">
-                                    <span class="font-semibold text-brand-goldDeep">@branch.OpeningHours</span>
-                                    <a href="tel:@branch.Hotline.Replace(" ", string.Empty)" class="font-semibold text-brand-dark transition hover:text-brand-goldDeep">@branch.Hotline</a>
+        <section class="contact-page__section">
+            <div class="container-page contact-page__container">
+                <div class="contact-page__columns">
+                    <aside class="contact-page__info" data-uw-reveal="fade-up" data-uw-delay="80" data-uw-once="true">
+                        <p class="contact-page__eyebrow">THÔNG TIN LIÊN HỆ</p>
+                        <h2 class="contact-page__section-title">@Model.BrandName</h2>
+
+                        <div class="contact-page__meta-list" aria-label="Thông tin liên hệ chính">
+                            <div class="contact-page__meta-item">
+                                <p class="contact-page__meta-label">Hotline</p>
+                                <a href="@hotlineHref" class="contact-page__meta-value">@Model.Hotline</a>
+                            </div>
+                            <div class="contact-page__meta-item">
+                                <p class="contact-page__meta-label">Email</p>
+                                <a href="mailto:@Model.EmailDisplay" class="contact-page__meta-value">@Model.EmailDisplay</a>
+                            </div>
+                            <div class="contact-page__meta-item">
+                                <p class="contact-page__meta-label">Địa chỉ</p>
+                                <p class="contact-page__meta-value">@Model.Address</p>
+                            </div>
+                            <div class="contact-page__meta-item">
+                                <p class="contact-page__meta-label">Giờ mở cửa</p>
+                                <p class="contact-page__meta-value">@Model.OpeningHours</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-page__divider"></div>
+
+                        <div class="contact-page__social">
+                            <p class="contact-page__mini-label">Mạng xã hội</p>
+                            <div class="contact-page__links" aria-label="Liên kết mạng xã hội">
+                                @if (hasFacebook)
+                                {
+                                    <a href="@Model.FacebookUrl" target="_blank" rel="noopener" class="contact-page__link">Facebook</a>
+                                }
+                                @if (hasZalo)
+                                {
+                                    <a href="@Model.ZaloUrl" target="_blank" rel="noopener" class="contact-page__link">Zalo</a>
+                                }
+                                @if (hasTiktok)
+                                {
+                                    <a href="@Model.TiktokUrl" target="_blank" rel="noopener" class="contact-page__link">TikTok</a>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="contact-page__divider"></div>
+
+                        <div class="contact-page__branches">
+                            <p class="contact-page__mini-label">Chi nhánh hiển thị</p>
+                            @if (Model.Branches.Count > 0)
+                            {
+                                <div class="contact-page__branch-list">
+                                    @foreach (var branch in Model.Branches.Take(3))
+                                    {
+                                        <article class="contact-page__branch-item">
+                                            <h3 class="contact-page__branch-title">@branch.Name</h3>
+                                            <p class="contact-page__branch-copy">@branch.Address</p>
+                                            <div class="contact-page__branch-foot">
+                                                <span>@branch.OpeningHours</span>
+                                                <a href="tel:@branch.Hotline.Replace(" ", string.Empty)" class="contact-page__branch-phone">@branch.Hotline</a>
+                                            </div>
+                                        </article>
+                                    }
                                 </div>
+                            }
+                            else
+                            {
+                                <p class="contact-page__branch-empty">Thông tin chi nhánh sẽ hiển thị sau khi kết nối cơ sở dữ liệu.</p>
+                            }
+                        </div>
+                    </aside>
+
+                    <div class="contact-page__form" data-uw-reveal="fade-up" data-uw-delay="120" data-uw-once="true">
+                        <div class="contact-page__form-head">
+                            <p class="contact-page__eyebrow">GỬI TIN NHẮN</p>
+                            <h2 class="contact-page__section-title">Gửi thông tin liên hệ</h2>
+                            <p class="contact-page__section-copy">Chúng tôi sẽ phản hồi trong thời gian sớm nhất.</p>
+                        </div>
+
+                        @if (Model.IsSuccess)
+                        {
+                            <div class="contact-page__notice contact-page__notice--success">
+                                <p class="contact-page__notice-title">Cảm ơn bạn đã liên hệ.</p>
+                                <p class="contact-page__notice-copy">Truyền Thuyết Champong sẽ phản hồi sớm nhất có thể.</p>
                             </div>
                         }
+
+                        <form asp-action="Index" asp-controller="Contact" method="post" class="contact-page__form-body" novalidate>
+                            @Html.AntiForgeryToken()
+
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div asp-validation-summary="ModelOnly" class="contact-page__validation contact-page__validation--summary"></div>
+                            }
+
+                            <div class="contact-page__form-grid">
+                                <label class="contact-page__field-group">
+                                    <span class="contact-page__field-label">Họ tên</span>
+                                    <input asp-for="FullName" autocomplete="name" class="contact-page__field" placeholder="Nguyễn Văn A" />
+                                    <span asp-validation-for="FullName" class="contact-page__validation"></span>
+                                </label>
+
+                                <label class="contact-page__field-group">
+                                    <span class="contact-page__field-label">Số điện thoại</span>
+                                    <input asp-for="PhoneNumber" autocomplete="tel" class="contact-page__field" placeholder="0909 888 777" />
+                                    <span asp-validation-for="PhoneNumber" class="contact-page__validation"></span>
+                                </label>
+                            </div>
+
+                            <div class="contact-page__form-grid">
+                                <label class="contact-page__field-group">
+                                    <span class="contact-page__field-label">Email</span>
+                                    <input asp-for="Email" autocomplete="email" class="contact-page__field" placeholder="email@example.com" />
+                                    <span asp-validation-for="Email" class="contact-page__validation"></span>
+                                </label>
+
+                                <label class="contact-page__field-group">
+                                    <span class="contact-page__field-label">Chủ đề</span>
+                                    <input asp-for="Subject" class="contact-page__field" placeholder="Góp ý, đặt tiệc, hợp tác..." />
+                                    <span asp-validation-for="Subject" class="contact-page__validation"></span>
+                                </label>
+                            </div>
+
+                            <label class="contact-page__field-group contact-page__field-group--textarea">
+                                <span class="contact-page__field-label">Nội dung</span>
+                                <textarea asp-for="Message" rows="6" class="contact-page__textarea" placeholder="Nhập nội dung bạn muốn gửi cho nhà hàng..."></textarea>
+                                <span asp-validation-for="Message" class="contact-page__validation"></span>
+                            </label>
+
+                            <button type="submit" class="contact-page__button contact-page__button--primary contact-page__submit">Gửi liên hệ</button>
+                        </form>
                     </div>
-                }
-                else
-                {
-                    <p class="mt-4 text-sm leading-6 text-brand-gray">Thông tin chi nhánh sẽ hiển thị sau khi kết nối cơ sở dữ liệu.</p>
-                }
-            </div>
-        </aside>
-
-        <div class="surface-panel p-5 sm:p-7">
-            <div class="mb-7">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Gửi tin nhắn</p>
-                <h2 class="mt-3 text-3xl font-black text-brand-dark">Cho chúng tôi biết bạn cần gì.</h2>
-                <p class="mt-3 text-sm leading-6 text-brand-gray">Đội ngũ Truyền Thuyết Champong sẽ phản hồi sớm nhất có thể.</p>
-            </div>
-
-            @if (Model.IsSuccess)
-            {
-                <div class="mb-6 rounded-md border border-brand-gold/25 bg-brand-goldSoft/30 p-5">
-                    <p class="font-black text-brand-dark">Cảm ơn bạn đã liên hệ.</p>
-                    <p class="mt-2 text-sm leading-6 text-brand-gray">Truyền Thuyết Champong sẽ phản hồi sớm nhất có thể.</p>
                 </div>
-            }
+            </div>
+        </section>
 
-            <form asp-action="Index" asp-controller="Contact" method="post" class="space-y-5" novalidate>
-                @Html.AntiForgeryToken()
-
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div asp-validation-summary="ModelOnly" class="rounded-md border border-brand-red/30 bg-brand-red/5 p-4 text-sm text-brand-redDark"></div>
-                }
-
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Họ tên</span>
-                        <input asp-for="FullName" autocomplete="name" class="input-field" placeholder="Nguyễn Văn A" />
-                        <span asp-validation-for="FullName" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
-
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Số điện thoại</span>
-                        <input asp-for="PhoneNumber" autocomplete="tel" class="input-field" placeholder="0909 888 777" />
-                        <span asp-validation-for="PhoneNumber" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
+        <section class="contact-page__section contact-page__section--map" id="map">
+            <div class="container-page contact-page__container">
+                <div class="contact-page__section-head" data-uw-reveal="fade-up" data-uw-delay="80" data-uw-once="true">
+                    <p class="contact-page__eyebrow">BẢN ĐỒ</p>
+                    <h2 class="contact-page__section-title">Tìm đường đến Truyền Thuyết Champong</h2>
+                    <p class="contact-page__section-copy">
+                        Dùng Google Maps để xem tuyến đường thuận tiện nhất hoặc liên hệ hotline nếu cần hỗ trợ.
+                    </p>
                 </div>
 
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Email</span>
-                        <input asp-for="Email" autocomplete="email" class="input-field" placeholder="email@example.com" />
-                        <span asp-validation-for="Email" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
-
-                    <label class="block">
-                        <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Chủ đề</span>
-                        <input asp-for="Subject" class="input-field" placeholder="Góp ý, đặt tiệc, hợp tác..." />
-                        <span asp-validation-for="Subject" class="mt-2 block text-sm text-brand-redDark"></span>
-                    </label>
-                </div>
-
-                <label class="block">
-                    <span class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Nội dung</span>
-                    <textarea asp-for="Message" rows="6" class="input-area" placeholder="Nhập nội dung bạn muốn gửi cho nhà hàng..."></textarea>
-                    <span asp-validation-for="Message" class="mt-2 block text-sm text-brand-redDark"></span>
-                </label>
-
-                <button type="submit" class="btn-primary h-12 w-full sm:w-auto">Gửi liên hệ</button>
-            </form>
-        </div>
-    </div>
-</section>
-
-<section class="section-band section-shell">
-    <div class="container-page">
-        <div class="grid gap-8 lg:grid-cols-[0.42fr_0.58fr] lg:items-center">
-            <div>
-                @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-                {
-                    Eyebrow = "Bản đồ",
-                    Title = "Tìm đường đến Truyền Thuyết Champong.",
-                    Description = "Dùng Google Maps để xem tuyến đường thuận tiện nhất hoặc liên hệ hotline nếu cần hỗ trợ."
-                }})
-                @if (!string.IsNullOrWhiteSpace(Model.GoogleMapUrl))
-                {
-                    <a href="@Model.GoogleMapUrl" target="_blank" rel="noopener" class="btn-primary mt-7">Mở Google Maps</a>
-                }
-            </div>
-
-            <div class="surface-panel overflow-hidden p-0">
-                @if (canEmbedMap)
-                {
-                    <iframe src="@Model.GoogleMapUrl"
-                            title="Bản đồ Truyền Thuyết Champong"
-                            class="h-[22rem] w-full border-0 sm:h-[28rem]"
-                            loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade"
-                            allowfullscreen></iframe>
-                }
-                else if (!string.IsNullOrWhiteSpace(Model.GoogleMapUrl))
-                {
-                    <div class="grid min-h-[22rem] place-items-center p-6 text-center sm:min-h-[28rem]">
-                        <div>
-                            <p class="text-kicker font-black uppercase text-brand-goldDeep">Google Maps</p>
-                            <h3 class="mt-3 text-3xl font-black text-brand-dark">Bản đồ mở bằng liên kết ngoài.</h3>
-                            <p class="mx-auto mt-3 max-w-lg text-brand-gray">Đường dẫn hiện tại không phải URL nhúng iframe, nên trang hiển thị nút mở Google Maps để tránh lỗi hiển thị.</p>
-                            <a href="@Model.GoogleMapUrl" target="_blank" rel="noopener" class="btn-secondary mt-6">Xem bản đồ</a>
+                <div class="contact-page__map" data-uw-reveal="fade-up" data-uw-delay="120" data-uw-once="true">
+                    @if (canEmbedMap)
+                    {
+                        <iframe src="@Model.GoogleMapUrl"
+                                title="Bản đồ Truyền Thuyết Champong"
+                                class="contact-page__map-frame"
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"
+                                allowfullscreen></iframe>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(Model.GoogleMapUrl))
+                    {
+                        <div class="contact-page__map-fallback">
+                            <p class="contact-page__mini-label">Google Maps</p>
+                            <h3 class="contact-page__map-title">Bản đồ mở bằng liên kết ngoài.</h3>
+                            <p class="contact-page__map-copy">
+                                Đường dẫn hiện tại không phải URL nhúng iframe, nên trang hiển thị nút mở Google Maps để tránh lỗi hiển thị.
+                            </p>
+                            <a href="@Model.GoogleMapUrl" target="_blank" rel="noopener" class="contact-page__button contact-page__button--secondary">Xem bản đồ</a>
                         </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="grid min-h-[22rem] place-items-center p-6 text-center sm:min-h-[28rem]">
-                        <div>
-                            <p class="text-kicker font-black uppercase text-brand-goldDeep">Đang cập nhật</p>
-                            <h3 class="mt-3 text-3xl font-black text-brand-dark">Bản đồ liên hệ chưa có sẵn.</h3>
-                            <p class="mx-auto mt-3 max-w-lg text-brand-gray">Vui lòng gọi hotline hoặc xem danh sách chi nhánh để chọn điểm đến phù hợp.</p>
-                            <a href="/chi-nhanh" class="btn-primary mt-6">Xem chi nhánh</a>
+                    }
+                    else
+                    {
+                        <div class="contact-page__map-fallback">
+                            <p class="contact-page__mini-label">Đang cập nhật</p>
+                            <h3 class="contact-page__map-title">Bản đồ liên hệ chưa có sẵn.</h3>
+                            <p class="contact-page__map-copy">
+                                Vui lòng gọi hotline hoặc xem danh sách chi nhánh để chọn điểm đến phù hợp.
+                            </p>
+                            <a href="/chi-nhanh" class="contact-page__button contact-page__button--secondary">Xem chi nhánh</a>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
-        </div>
+        </section>
     </div>
-</section>
+</main>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

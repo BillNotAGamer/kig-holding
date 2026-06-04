@@ -1,61 +1,89 @@
 @model AdminDashboardViewModel
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Tổng quan quản trị";
 }
 
-<section class="space-y-6" data-admin-page="dashboard">
-    <div class="surface-panel p-6 sm:p-8">
-        <p class="text-kicker font-black uppercase text-brand-goldDeep">Welcome</p>
-        <h2 class="mt-3 text-3xl font-black text-brand-dark">Xin chào, @Model.AdminUsername.</h2>
-        <p class="mt-3 max-w-3xl text-sm leading-7 text-brand-gray">
-            Đây là nền tảng xác thực đầu tiên cho Admin Area. Dashboard hiện hiển thị các thống kê cơ bản và chuẩn bị cho quản lý Chi nhánh trong phase tiếp theo.
-        </p>
-    </div>
+<section class="admin-page" data-admin-page="dashboard">
+    <header class="admin-page-header">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl">
+                <p class="admin-page-kicker">Bảng điều khiển quản trị</p>
+                <h2 class="admin-page-title">Xin chào, @Model.AdminUsername.</h2>
+                <p class="admin-help mt-3 max-w-3xl">
+                    Bảng này tóm tắt số liệu vận hành hiện tại và giữ lối tắt đến các module quan trọng của khu vực quản trị.
+                </p>
+            </div>
+
+            <div class="admin-actions">
+                <a href="/Admin/Branch" class="btn-primary">Mở module</a>
+                <span class="admin-badge admin-badge--muted">Khu vực quản trị</span>
+            </div>
+        </div>
+    </header>
 
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <article class="surface-panel p-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Tổng chi nhánh</p>
+        <article class="admin-card">
+            <p class="admin-page-kicker">Tổng chi nhánh</p>
             <p class="mt-3 text-3xl font-black text-brand-dark">@Model.TotalBranches</p>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Toàn bộ chi nhánh đang được theo dõi trong hệ thống.</p>
         </article>
-        <article class="surface-panel p-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Chi nhánh hoạt động</p>
+
+        <article class="admin-card">
+            <p class="admin-page-kicker">Chi nhánh hoạt động</p>
             <p class="mt-3 text-3xl font-black text-brand-dark">@Model.ActiveBranches</p>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Số chi nhánh hiện đang bật và hiển thị công khai.</p>
         </article>
-        <article class="surface-panel p-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Bài viết</p>
+
+        <article class="admin-card">
+            <p class="admin-page-kicker">Bài viết</p>
             <p class="mt-3 text-3xl font-black text-brand-dark">@Model.TotalPosts</p>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Nội dung tin tức và thông báo đã tạo trong hệ thống.</p>
         </article>
-        <article class="surface-panel p-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Tin nhắn / Đặt bàn</p>
-            <p class="mt-3 text-3xl font-black text-brand-dark">@(Model.TotalMessages + Model.PendingReservations)</p>
+
+        <article class="admin-card">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="admin-page-kicker">Tin nhắn / Đặt bàn</p>
+                    <p class="mt-3 text-3xl font-black text-brand-dark">@(Model.TotalMessages + Model.PendingReservations)</p>
+                </div>
+                <span class="admin-badge admin-badge--warning">@Model.PendingReservations chờ</span>
+            </div>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">
+                @Model.TotalMessages tin nhắn và @Model.PendingReservations lượt đặt bàn đang chờ xử lý.
+            </p>
         </article>
     </div>
 
     <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div class="surface-panel p-6">
+        <div class="admin-card">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-kicker font-black uppercase text-brand-goldDeep">Tiếp theo</p>
-                    <h3 class="mt-3 text-2xl font-black text-brand-dark">Quản lý Chi nhánh</h3>
+                    <p class="admin-page-kicker">Tiếp theo</p>
+                    <h3 class="admin-card-title mt-3">Quản lý Chi nhánh</h3>
                 </div>
                 <a href="/Admin/Branch" class="btn-primary">Mở module</a>
             </div>
-            <p class="mt-4 text-sm leading-7 text-brand-gray">
-                Module Branch đã có nền tảng CRUD và hiện được bảo vệ bằng cookie authentication. Các module khác có thể bám theo cùng `AdminBaseController`.
+            <p class="admin-help mt-4">
+                Module Chi nhánh đã có nền tảng CRUD và đang được bảo vệ bằng cookie authentication. Các module khác có thể bám theo cùng <code>AdminBaseController</code>.
             </p>
         </div>
 
-        <div class="surface-panel p-6">
-            <p class="text-kicker font-black uppercase text-brand-goldDeep">Trạng thái hệ thống</p>
-            <div class="mt-4 rounded-md border border-brand-border bg-brand-light p-4">
-                <p class="font-semibold text-brand-dark">Kết nối dữ liệu</p>
-                <p class="mt-2 text-sm leading-6 text-brand-gray">
-                    @(Model.DatabaseConnected
-                        ? "Database đã kết nối và dashboard đang đọc số liệu thực tế."
-                        : "Database chưa cấu hình hoặc chưa truy cập được. Dashboard đang hiển thị số liệu placeholder an toàn.")
-                </p>
+        <div class="admin-card admin-card-muted">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="admin-page-kicker">Trạng thái hệ thống</p>
+                    <h3 class="admin-card-title mt-3">Kết nối dữ liệu</h3>
+                </div>
+                <span class="admin-badge @(Model.DatabaseConnected ? "admin-badge--success" : "admin-badge--warning")">
+                    @(Model.DatabaseConnected ? "Sẵn sàng" : "Chưa kết nối")
+                </span>
             </div>
+            <p class="admin-help mt-4">
+                @(Model.DatabaseConnected
+                    ? "Cơ sở dữ liệu đã kết nối và dashboard đang đọc số liệu thực tế."
+                    : "Cơ sở dữ liệu chưa cấu hình hoặc chưa truy cập được. Dashboard đang ở chế độ an toàn.")
+            </p>
         </div>
     </div>
 </section>

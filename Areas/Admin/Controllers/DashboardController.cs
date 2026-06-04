@@ -1,5 +1,6 @@
 using KIGHolding.Areas.Admin.ViewModels;
 using KIGHolding.Data;
+using KIGHolding.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,11 +32,14 @@ public class DashboardController : AdminBaseController
 
         try
         {
-            model.TotalBranches = await _dbContext.Branches.CountAsync();
-            model.ActiveBranches = await _dbContext.Branches.CountAsync(x => x.IsActive);
-            model.TotalPosts = await _dbContext.Posts.CountAsync();
-            model.PendingReservations = await _dbContext.Reservations.CountAsync();
-            model.TotalMessages = await _dbContext.ContactMessages.CountAsync();
+            var cancellationToken = HttpContext.RequestAborted;
+
+            model.TotalBranches = await _dbContext.Branches.CountAsync(cancellationToken);
+            model.ActiveBranches = await _dbContext.Branches.CountAsync(x => x.IsActive, cancellationToken);
+            model.TotalPosts = await _dbContext.Posts.CountAsync(cancellationToken);
+            model.PendingReservations = await _dbContext.Reservations
+                .CountAsync(x => x.Status == ReservationStatus.Pending, cancellationToken);
+            model.TotalMessages = await _dbContext.ContactMessages.CountAsync(cancellationToken);
             model.DatabaseConnected = true;
         }
         catch

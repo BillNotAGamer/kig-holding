@@ -64,7 +64,6 @@ public class ReservationController : AdminBaseController
                 Id = x.Id,
                 CustomerName = x.CustomerName,
                 PhoneNumber = x.PhoneNumber,
-                Email = x.Email,
                 BranchName = x.Branch.Name,
                 BranchAddress = x.Branch.Address,
                 ReservationDate = x.ReservationDate,

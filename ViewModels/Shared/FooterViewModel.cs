@@ -11,7 +11,7 @@ public class FooterViewModel
     public string Hotline { get; set; } = "0909 888 777";
     public string Email { get; set; } = "truyenthuyetchamponghcm@gmail.com";
     public string FacebookUrl { get; set; } = "#";
-    public string ZaloUrl { get; set; } = "#";
+    public string ZaloUrl { get; set; } = "https://oa.zalo.me/3191309080595223416";
     public string TiktokUrl { get; set; } = "#";
     public string CompanyLegalName { get; set; } = "CÔNG TY TNHH KIG HOLDING VIỆT NAM";
     public string BusinessRegistrationNumber { get; set; } = "Mã số DN: 0123456789";

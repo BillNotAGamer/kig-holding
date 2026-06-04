@@ -52,10 +52,9 @@ public class PostCreateViewModel
     [Display(Name = "Tiêu đề")]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Vui lòng nhập slug.")]
     [StringLength(220)]
     [Display(Name = "Slug")]
-    public string Slug { get; set; } = string.Empty;
+    public string? Slug { get; set; }
 
     [Required(ErrorMessage = "Vui lòng chọn danh mục.")]
     [StringLength(80)]
@@ -101,10 +100,9 @@ public class PostEditViewModel
     [Display(Name = "Tiêu đề")]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Vui lòng nhập slug.")]
     [StringLength(220)]
     [Display(Name = "Slug")]
-    public string Slug { get; set; } = string.Empty;
+    public string? Slug { get; set; }
 
     [Required(ErrorMessage = "Vui lòng chọn danh mục.")]
     [StringLength(80)]

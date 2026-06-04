@@ -4,12 +4,14 @@
     ViewData["Title"] = "Chỉnh sửa nhóm thực đơn";
 }
 
-<section class="space-y-6">
-    <div class="surface-panel p-6">
-        <p class="text-kicker font-black uppercase text-brand-goldDeep">Menu Groups</p>
-        <h2 class="mt-2 text-2xl font-black text-brand-dark">Chỉnh sửa nhóm thực đơn</h2>
+<section class="admin-page">
+    <div class="admin-page-header">
+        <p class="admin-page-kicker">Menu Groups</p>
+        <h1 class="admin-page-title">Chỉnh sửa nhóm thực đơn</h1>
+    </div>
 
-        <form asp-action="Edit" method="post" class="mt-6 space-y-6">
+    <div class="admin-card">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" class="space-y-6">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
             <div asp-validation-summary="ModelOnly" class="admin-post-summary"></div>
@@ -43,9 +45,7 @@
                 <div>
                     <label asp-for="CoverImageUrl" class="admin-post-label"></label>
                     <input asp-for="CoverImageUrl" class="admin-post-field" placeholder="/uploads/menu-groups/example.webp hoặc URL CDN" />
-                    <p class="mt-2 text-sm leading-6 text-brand-gray">
-                        Upload ảnh bìa và quản lý ảnh menu sẽ được triển khai ở Phase D. Phase C chỉ hỗ trợ nhập URL ảnh bìa thủ công.
-                    </p>
+                    <p class="mt-2 text-sm leading-6 text-brand-gray">Bạn có thể giữ URL hiện tại, thay bằng URL mới hoặc tải file mới. Nếu có cả hai, ảnh tải lên sẽ được ưu tiên.</p>
                     <span asp-validation-for="CoverImageUrl" class="admin-post-validation"></span>
                 </div>
                 <div>
@@ -55,20 +55,44 @@
                 </div>
             </div>
 
-            @if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl))
-            {
-                <div class="rounded-md border border-brand-border bg-brand-light p-4">
-                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray">Ảnh bìa hiện tại</p>
-                    <img src="@Model.CoverImageUrl" alt="@Model.Name" class="mt-3 h-28 w-44 rounded-md border border-brand-border object-cover" />
+            <div class="admin-upload admin-upload--compact">
+                <label asp-for="CoverImageFile" class="admin-upload__label"></label>
+                @if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl))
+                {
+                    <div class="admin-upload__current">
+                        <img src="@Model.CoverImageUrl" alt="@Model.Name" class="admin-upload__current-image" />
+                        <div class="admin-upload__preview-meta">
+                            <p class="text-sm font-semibold text-brand-dark">Ảnh bìa hiện tại</p>
+                            <p class="text-sm leading-6 text-brand-gray">Tải file mới nếu bạn muốn thay thế ảnh bìa đang dùng. File tải lên sẽ được ưu tiên hơn `CoverImageUrl`.</p>
+                        </div>
+                    </div>
+                }
+                <div class="admin-upload__dropzone">
+                    <p class="admin-upload__dropzone-title">Chọn ảnh bìa mới để thay thế</p>
+                    <p class="admin-upload__dropzone-text">Để trống nếu bạn muốn giữ nguyên ảnh bìa hiện tại hoặc URL thủ công đang dùng.</p>
+                    <input asp-for="CoverImageFile"
+                           type="file"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                           class="admin-upload__input"
+                           data-admin-image-preview
+                           data-admin-image-preview-target="#menu-group-cover-preview"
+                           data-admin-image-preview-meta="#menu-group-cover-preview-meta" />
                 </div>
-            }
-
-            <div>
-                <label class="admin-post-checkbox-shell">
-                    <input asp-for="IsPublished" type="checkbox" class="admin-post-checkbox" />
-                    <span>Hiển thị công khai</span>
-                </label>
+                <p class="admin-upload__hint">Hỗ trợ: jpg, jpeg, png, webp. Kích thước tối đa 10MB. Ảnh tải lên sẽ được ưu tiên hơn `CoverImageUrl`.</p>
+                <div class="admin-upload__preview" hidden>
+                    <img id="menu-group-cover-preview" alt="Xem trước ảnh bìa nhóm thực đơn mới" class="admin-upload__preview-image" hidden />
+                    <div class="admin-upload__preview-meta">
+                        <p class="text-sm font-semibold text-brand-dark">Ảnh bìa mới đã chọn</p>
+                        <p id="menu-group-cover-preview-meta"></p>
+                    </div>
+                </div>
+                <span asp-validation-for="CoverImageFile" class="admin-post-validation"></span>
             </div>
+
+            <label class="admin-post-checkbox-shell">
+                <input asp-for="IsPublished" type="checkbox" class="admin-post-checkbox" />
+                <span>Hiển thị công khai</span>
+            </label>
 
             <div class="flex flex-col gap-3 sm:flex-row">
                 <button type="submit" class="btn-primary">Lưu thay đổi</button>

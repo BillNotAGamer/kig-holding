@@ -4,12 +4,14 @@
     ViewData["Title"] = "Tạo bài viết";
 }
 
-<section class="space-y-6">
-    <div class="surface-panel p-6">
-        <p class="text-kicker font-black uppercase text-brand-goldDeep">Posts</p>
-        <h2 class="mt-2 text-2xl font-black text-brand-dark">Tạo bài viết mới</h2>
+<section class="admin-page">
+    <div class="admin-page-header">
+        <p class="admin-page-kicker">Posts</p>
+        <h1 class="admin-page-title">Tạo bài viết mới</h1>
+    </div>
 
-        <form asp-action="Create" method="post" enctype="multipart/form-data" class="mt-6 space-y-6">
+    <div class="admin-card">
+        <form asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-6">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="admin-post-summary"></div>
 
@@ -21,7 +23,8 @@
                 </div>
                 <div>
                     <label asp-for="Slug" class="admin-post-label"></label>
-                    <input asp-for="Slug" class="admin-post-field" />
+                    <input asp-for="Slug" class="admin-post-field" placeholder="Để trống để tự tạo từ tiêu đề" />
+                    <p class="mt-2 text-sm leading-6 text-brand-gray">Có thể nhập thủ công hoặc để trống để hệ thống tự tạo slug duy nhất từ tiêu đề.</p>
                     <span asp-validation-for="Slug" class="admin-post-validation"></span>
                 </div>
             </div>
@@ -62,19 +65,34 @@
                 </div>
             </div>
 
-            <div class="grid gap-5 lg:grid-cols-3">
-                <div>
-                    <label asp-for="ThumbnailFile" class="admin-post-label"></label>
-                    <input asp-for="ThumbnailFile" type="file" accept=".jpg,.jpeg,.png,.webp" class="admin-post-file" />
-                    <span asp-validation-for="ThumbnailFile" class="admin-post-validation"></span>
+            <div class="admin-upload admin-upload--compact">
+                <label asp-for="ThumbnailFile" class="admin-upload__label"></label>
+                <div class="admin-upload__dropzone">
+                    <p class="admin-upload__dropzone-title">Chọn ảnh thumbnail bài viết</p>
+                    <p class="admin-upload__dropzone-text">Ảnh chọn sẽ được xem trước trước khi lưu. Backend vẫn giữ nguyên kiểm tra định dạng và dung lượng khi submit.</p>
+                    <input asp-for="ThumbnailFile"
+                           type="file"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                           class="admin-upload__input"
+                           data-admin-image-preview
+                           data-admin-image-preview-target="#post-thumbnail-preview"
+                           data-admin-image-preview-meta="#post-thumbnail-preview-meta" />
                 </div>
-                <div class="lg:col-span-2 flex items-end gap-5">
-                    <label class="admin-post-checkbox-shell">
-                        <input asp-for="IsPublished" type="checkbox" class="admin-post-checkbox" />
-                        <span>Đăng công khai</span>
-                    </label>
+                <p class="admin-upload__hint">Hỗ trợ: jpg, jpeg, png, webp. Kích thước tối đa 2MB.</p>
+                <div class="admin-upload__preview" hidden>
+                    <img id="post-thumbnail-preview" alt="Xem trước thumbnail bài viết đã chọn" class="admin-upload__preview-image" hidden />
+                    <div class="admin-upload__preview-meta">
+                        <p class="text-sm font-semibold text-brand-dark">Thumbnail sẽ được tải lên</p>
+                        <p id="post-thumbnail-preview-meta"></p>
+                    </div>
                 </div>
+                <span asp-validation-for="ThumbnailFile" class="admin-post-validation"></span>
             </div>
+
+            <label class="admin-post-checkbox-shell">
+                <input asp-for="IsPublished" type="checkbox" class="admin-post-checkbox" />
+                <span>Đăng công khai</span>
+            </label>
 
             <div class="flex flex-col gap-3 sm:flex-row">
                 <button type="submit" class="btn-primary">Lưu bài viết</button>

@@ -6,7 +6,8 @@
 
     var branchGroups = Model.Branches
         .GroupBy(x => string.IsNullOrWhiteSpace(x.City) ? "Chưa xác định" : x.City)
-        .OrderBy(x => x.Key)
+        .OrderByDescending(group => group.Count())
+        .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
         .ToList();
 
     var hasSelectedCity = !string.IsNullOrWhiteSpace(Model.SelectedCity);

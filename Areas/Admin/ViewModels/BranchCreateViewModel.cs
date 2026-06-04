@@ -11,7 +11,7 @@ public class BranchCreateViewModel
 
     [StringLength(180)]
     [Display(Name = "Slug")]
-    public string Slug { get; set; } = string.Empty;
+    public string? Slug { get; set; }
 
     [Required(ErrorMessage = "Vui lòng nhập địa chỉ chi tiết.")]
     [StringLength(300)]

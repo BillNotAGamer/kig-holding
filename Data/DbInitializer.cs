@@ -62,7 +62,7 @@ public class DbInitializer
             Hotline = "0909 888 777",
             Email = "truyenthuyetchamponghcm@gmail.com",
             FacebookUrl = "https://facebook.com/truyenthuyetchampong",
-            ZaloUrl = "https://zalo.me/0909888777",
+            ZaloUrl = "https://oa.zalo.me/3191309080595223416",
             TiktokUrl = "https://tiktok.com/@truyenthuyetchampong",
             Address = "Trung tâm TP. Hồ Chí Minh",
             GoogleMapUrl = "https://maps.google.com/?q=Truyen+Thuyet+Champong",
@@ -74,7 +74,7 @@ public class DbInitializer
     }
 
     private static AdminUser CreateAdminUser()
-    {
+    {               
         var user = new AdminUser
         {
             Username = "admin",

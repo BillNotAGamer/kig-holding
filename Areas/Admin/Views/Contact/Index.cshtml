@@ -4,82 +4,117 @@
     ViewData["Title"] = "Quản lý Liên hệ";
 }
 
-<section class="space-y-6">
-    <div class="surface-panel flex flex-col gap-4 p-6 lg:flex-row lg:items-end lg:justify-between">
+<section class="admin-page">
+    <div class="admin-page-header flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div class="max-w-3xl">
-            <p class="text-kicker font-black uppercase text-brand-goldDeep">Contact Inbox</p>
-            <h2 class="mt-2 text-2xl font-black text-brand-dark">Quản lý liên hệ</h2>
-            <p class="mt-2 text-sm leading-6 text-brand-gray">Xem nhanh các tin nhắn từ khách hàng và chuyển trạng thái từ mới sang đã đọc hoặc đã xử lý.</p>
+            <p class="admin-page-kicker">Contact Inbox</p>
+            <h1 class="admin-page-title">Hộp thư liên hệ</h1>
+            <p class="admin-help">Theo dõi tin nhắn khách hàng, ưu tiên các liên hệ mới và mở nhanh chi tiết để cập nhật trạng thái xử lý.</p>
         </div>
-
-        <form method="get" class="grid gap-3 md:grid-cols-[minmax(0,16rem)_auto]">
-            <div>
-                <label asp-for="StatusFilter" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                <select asp-for="StatusFilter" asp-items="Model.StatusOptions" class="form-input"></select>
-            </div>
-            <div class="flex items-end gap-3">
-                <button type="submit" class="btn-primary">Lọc dữ liệu</button>
-                <a asp-action="Index" class="btn-secondary">Xóa lọc</a>
-            </div>
-        </form>
     </div>
 
-    <div class="overflow-hidden rounded-md border border-brand-border bg-white shadow-soft">
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-left text-sm text-brand-gray">
-                <thead class="border-b border-brand-border bg-brand-light text-xs uppercase text-brand-dark">
-                    <tr>
-                        <th class="px-6 py-4 font-semibold">Full Name</th>
-                        <th class="px-6 py-4 font-semibold">Phone</th>
-                        <th class="px-6 py-4 font-semibold">Subject</th>
-                        <th class="px-6 py-4 font-semibold">Status</th>
-                        <th class="px-6 py-4 font-semibold">Date</th>
-                        <th class="px-6 py-4 font-semibold">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-brand-border">
-                    @foreach (var message in Model.Messages)
-                    {
-                        var statusClass = message.Status switch
-                        {
-                            ContactMessageStatus.New => "border-amber-200 bg-amber-50 text-amber-700",
-                            ContactMessageStatus.Read => "border-blue-200 bg-blue-50 text-blue-700",
-                            ContactMessageStatus.Handled => "border-emerald-200 bg-emerald-50 text-emerald-700",
-                            ContactMessageStatus.Archived => "border-slate-200 bg-slate-100 text-slate-600",
-                            _ => "border-slate-200 bg-slate-100 text-slate-600"
-                        };
-                        var statusLabel = message.Status switch
-                        {
-                            ContactMessageStatus.New => "Mới",
-                            ContactMessageStatus.Read => "Đã đọc",
-                            ContactMessageStatus.Handled => "Đã xử lý",
-                            ContactMessageStatus.Archived => "Đã lưu trữ",
-                            _ => message.Status.ToString()
-                        };
+    <form method="get" class="admin-card">
+        <div class="grid gap-4 xl:grid-cols-[minmax(0,16rem)_auto_auto] xl:items-end">
+            <div>
+                <label asp-for="StatusFilter" class="admin-label mb-2"></label>
+                <select asp-for="StatusFilter" asp-items="Model.StatusOptions" class="admin-select"></select>
+            </div>
 
-                        <tr class="align-top transition-colors hover:bg-brand-light/50">
-                            <td class="px-6 py-4">
-                                <p class="font-semibold text-brand-dark">@message.FullName</p>
-                            </td>
-                            <td class="px-6 py-4">@message.PhoneNumber</td>
-                            <td class="px-6 py-4">@(string.IsNullOrWhiteSpace(message.Subject) ? "Không có" : message.Subject)</td>
-                            <td class="px-6 py-4">
-                                <span class="rounded-button border px-3 py-1 text-xs font-semibold @statusClass">@statusLabel</span>
-                            </td>
-                            <td class="px-6 py-4">@message.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                            <td class="px-6 py-4">
-                                <a asp-action="Details" asp-route-id="@message.Id" class="font-semibold text-brand-goldDeep transition hover:text-brand-dark">Xem chi tiết</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <button type="submit" class="btn-primary h-12">Lọc dữ liệu</button>
+            <a asp-action="Index" class="btn-secondary h-12">Xóa lọc</a>
         </div>
+    </form>
 
-        @if (!Model.Messages.Any())
+    <div class="admin-table-wrap">
+        @if (Model.Messages.Any())
         {
-            <div class="p-8 text-center text-brand-gray">
-                Chưa có tin nhắn liên hệ nào.
+            <div class="border-b border-brand-border bg-brand-light/60 px-4 py-4 sm:px-6">
+                <p class="text-sm font-semibold text-brand-dark">Hiển thị @Model.Messages.Count tin nhắn theo bộ lọc hiện tại.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Khách hàng</th>
+                            <th>Điện thoại</th>
+                            <th>Nội dung</th>
+                            <th>Trạng thái</th>
+                            <th>Thời gian</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var message in Model.Messages)
+                        {
+                            var statusClass = message.Status switch
+                            {
+                                ContactMessageStatus.New => "admin-badge--warning",
+                                ContactMessageStatus.Handled => "admin-badge--success",
+                                ContactMessageStatus.Read => "admin-badge--muted",
+                                ContactMessageStatus.Archived => "admin-badge--muted",
+                                _ => "admin-badge--muted"
+                            };
+                            var statusDotClass = message.Status switch
+                            {
+                                ContactMessageStatus.New => "admin-status-dot--warning",
+                                ContactMessageStatus.Handled => "admin-status-dot--success",
+                                ContactMessageStatus.Read => "admin-status-dot--muted",
+                                ContactMessageStatus.Archived => "admin-status-dot--muted",
+                                _ => "admin-status-dot--muted"
+                            };
+                            var statusLabel = message.Status switch
+                            {
+                                ContactMessageStatus.New => "Mới",
+                                ContactMessageStatus.Read => "Đã đọc",
+                                ContactMessageStatus.Handled => "Đã xử lý",
+                                ContactMessageStatus.Archived => "Đã lưu trữ",
+                                _ => message.Status.ToString()
+                            };
+                            var rowClass = message.Status == ContactMessageStatus.New
+                                ? "admin-row-highlight admin-row-highlight--warning"
+                                : string.Empty;
+
+                            <tr class="@rowClass">
+                                <td>
+                                    <p class="font-semibold text-brand-dark">@message.FullName</p>
+                                    @if (message.Status == ContactMessageStatus.New)
+                                    {
+                                        <p class="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Tin nhắn mới</p>
+                                    }
+                                </td>
+                                <td class="font-semibold text-brand-dark">@message.PhoneNumber</td>
+                                <td>
+                                    <div class="max-w-sm">
+                                        <p class="font-medium text-brand-dark">@(string.IsNullOrWhiteSpace(message.Subject) ? "Không có tiêu đề" : message.Subject)</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="admin-badge @statusClass">
+                                        <span class="admin-status-dot @statusDotClass"></span>
+                                        @statusLabel
+                                    </span>
+                                </td>
+                                <td>@message.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@message.Id" class="admin-table-action admin-table-action--primary">Xem chi tiết</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="p-6 sm:p-8">
+                <div class="admin-empty">
+                    <div>
+                        <p class="admin-empty__title">Chưa có tin nhắn phù hợp</p>
+                        <p class="admin-empty__text">Không có liên hệ nào khớp với bộ lọc hiện tại. Hãy xóa bộ lọc để xem toàn bộ hộp thư.</p>
+                        <a asp-action="Index" class="btn-secondary mt-6">Xóa lọc</a>
+                    </div>
+                </div>
             </div>
         }
     </div>

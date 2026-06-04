@@ -37,19 +37,20 @@ public class BranchController : Controller
                 "active branches") ?? [];
         }
 
-        var cities = activeBranches
-            .Select(x => x.City)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(x => x)
-            .ToList();
-
         var searchQuery = NormalizeSearchQuery(q);
         var searchMatchedBranches = ApplySearch(activeBranches, searchQuery).ToList();
         var cityCounts = searchMatchedBranches
             .Where(x => !string.IsNullOrWhiteSpace(x.City))
             .GroupBy(x => x.City, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(x => x.Key, x => x.Count(), StringComparer.OrdinalIgnoreCase);
+
+        var cities = activeBranches
+            .Select(x => x.City)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(x => cityCounts.TryGetValue(x, out var count) ? count : 0)
+            .ThenBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
         var selectedCity = ResolveSelectedCity(cities, city);
         var filteredBranches = string.IsNullOrWhiteSpace(selectedCity)

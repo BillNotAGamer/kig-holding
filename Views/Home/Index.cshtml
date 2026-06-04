@@ -36,9 +36,11 @@
 
 <section class="champong-hero relative overflow-hidden bg-brand-black" data-home-section="hero">
     <div data-champong-hero-slider class="champong-hero__slider relative overflow-hidden" aria-roledescription="carousel" aria-label="Champong hero slider">
-        <article data-champong-hero-slide class="champong-hero__slide champong-hero__slide--one is-active absolute inset-0 z-20 opacity-100" aria-hidden="false">
+        <article data-champong-hero-slide
+                 class="champong-hero__slide champong-hero__slide--one is-active absolute inset-0 z-20 opacity-100"
+                 style="--champong-hero-image: url('/images/home/images/banner1.webp'); --champong-hero-image-position: 72% center;"
+                 aria-hidden="false">
             <div class="champong-hero__media" aria-hidden="true"></div>
-            <div class="champong-hero__overlay" aria-hidden="true"></div>
 
             <div class="container-page champong-hero__inner">
                 <div class="champong-hero__content champong-hero__content--left">
@@ -64,9 +66,43 @@
             </div>
         </article>
 
-        <article data-champong-hero-slide hidden class="champong-hero__slide champong-hero__slide--two absolute inset-0 z-10 opacity-0" aria-hidden="true">
+        <article data-champong-hero-slide
+                 hidden
+                 class="champong-hero__slide champong-hero__slide--two absolute inset-0 z-10 opacity-0"
+                 style="--champong-hero-image: url('/images/home/images/banner2.webp'); --champong-hero-image-position: center;"
+                 aria-hidden="true">
             <div class="champong-hero__media" aria-hidden="true"></div>
-            <div class="champong-hero__overlay champong-hero__overlay--right" aria-hidden="true"></div>
+
+            <div class="container-page champong-hero__inner">
+                <div class="champong-hero__content champong-hero__content--center">
+                    <span data-champong-hero-reveal class="champong-hero__eyebrow champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="0">
+                        Signature Korean Taste
+                    </span>
+                    <h2 data-champong-hero-reveal class="champong-hero__title champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="140">
+                        Hương vị Hàn Quốc trong không gian hiện đại
+                    </h2>
+                    <p data-champong-hero-reveal class="champong-hero__description champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="280">
+                        Từ món mì cay nồng đến những set nướng đậm vị, mỗi trải nghiệm đều được chuẩn bị chỉn chu cho bữa ăn đáng nhớ.
+                    </p>
+
+                    <div data-champong-hero-reveal class="champong-hero__actions champong-hero__actions--center champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="420">
+                        <a href="/thuc-don" class="champong-hero__btn champong-hero__btn--primary">
+                            Xem thực đơn
+                        </a>
+                        <a href="/dat-ban" data-uw-reveal="fade-up" class="champong-hero__btn champong-hero__btn--ghost">
+                            Đặt bàn ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article data-champong-hero-slide
+                 hidden
+                 class="champong-hero__slide champong-hero__slide--three absolute inset-0 z-10 opacity-0"
+                 style="--champong-hero-image: url('/images/home/images/banner3.webp'); --champong-hero-image-position: 28% center;"
+                 aria-hidden="true">
+            <div class="champong-hero__media" aria-hidden="true"></div>
 
             <div class="container-page champong-hero__inner">
                 <div class="champong-hero__content champong-hero__content--right">
@@ -109,6 +145,7 @@
         <div class="champong-hero__dots" aria-label="Slide navigation">
             <button type="button" class="champong-hero__dot" aria-label="Go to slide 1" aria-current="true" data-champong-hero-dot="0"></button>
             <button type="button" class="champong-hero__dot" aria-label="Go to slide 2" aria-current="false" data-champong-hero-dot="1"></button>
+            <button type="button" class="champong-hero__dot" aria-label="Go to slide 3" aria-current="false" data-champong-hero-dot="2"></button>
         </div>
     </div>
 </section>
@@ -398,7 +435,7 @@
                      decoding="async"
                      onerror="this.closest('[data-media-parent]')?.classList.add('is-image-missing'); this.remove();" />
 
-                <a href="/thuc-don"
+                <a href="/dat-ban"
                    class="champong-takehome__button inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white transition duration-200 hover:bg-brand-redDark"
                    aria-label="Đặt Champong mang về">
                     Đặt ngay

@@ -36,7 +36,7 @@ public class MenuGroupFormViewModel
 
     [StringLength(180)]
     [Display(Name = "Slug")]
-    public string Slug { get; set; } = string.Empty;
+    public string? Slug { get; set; }
 
     [Required(ErrorMessage = "Vui lòng nhập mô tả ngắn.")]
     [StringLength(300)]

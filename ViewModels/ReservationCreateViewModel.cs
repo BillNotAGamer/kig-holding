@@ -15,11 +15,6 @@ public class ReservationCreateViewModel
     [Display(Name = "Số điện thoại")]
     public string PhoneNumber { get; set; } = string.Empty;
 
-    [EmailAddress(ErrorMessage = "Email chưa đúng định dạng.")]
-    [StringLength(160, ErrorMessage = "Email không được vượt quá 160 ký tự.")]
-    [Display(Name = "Email")]
-    public string? Email { get; set; }
-
     [Required(ErrorMessage = "Vui lòng chọn chi nhánh.")]
     [Display(Name = "Chi nhánh")]
     public Guid? BranchId { get; set; }

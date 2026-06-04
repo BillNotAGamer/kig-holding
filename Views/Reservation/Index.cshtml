@@ -13,15 +13,15 @@
                     <span class="reservation-page__eyebrow">Reservation</span>
                     <h1 class="reservation-page__hero-title">Đặt bàn trước</h1>
                     <p class="reservation-page__hero-copy">
-                        Giữ chỗ trước để đội ngũ Truyền Thuyết Champong chuẩn bị trải nghiệm dùng bữa chỉn chu cho bạn và người thân.
+                        Chỉ áp dụng từ Thứ hai đến Thứ sáu trừ lễ tết và các dịp đặc biệt.
                     </p>
                 </div>
 
                 <div class="reservation-page__support reservation-page__support--hotline" data-uw-reveal="fade-up" data-uw-delay="100" data-uw-once="true">
-                    <p class="reservation-page__support-label">Cần đặt bàn gấp?</p>
+                    <p class="reservation-page__support-label">Hotline hỗ trợ</p>
                     <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="reservation-page__hotline-link">@Model.Hotline</a>
                     <p class="reservation-page__support-copy">
-                        Gọi hotline để được hỗ trợ nhanh cho khung giờ gần hoặc nhóm đông cần sắp bàn linh hoạt.
+                        Cần đặt gấp hoặc đi nhóm đông? Gọi để được hỗ trợ nhanh.
                     </p>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                     <p class="reservation-page__section-label">Thông tin giữ bàn</p>
                     <h2 class="reservation-page__section-title">Hoàn tất đặt bàn</h2>
                     <p class="reservation-page__section-copy">
-                        Điền đầy đủ thông tin để nhà hàng giữ chỗ và liên hệ lại khi cần xác nhận thêm chi tiết.
+                        Điền thông tin để nhà hàng giữ chỗ và xác nhận nhanh khi cần.
                     </p>
                 </div>
 
@@ -60,12 +60,6 @@
                             <span asp-validation-for="PhoneNumber" class="reservation-page__validation"></span>
                         </label>
                     </div>
-
-                    <label class="reservation-page__field-group">
-                        <span class="reservation-page__field-label">Email</span>
-                        <input asp-for="Email" autocomplete="email" class="reservation-page__field" placeholder="email@example.com" />
-                        <span asp-validation-for="Email" class="reservation-page__validation"></span>
-                    </label>
 
                     <label class="reservation-page__field-group">
                         <span class="reservation-page__field-label">Chi nhánh</span>

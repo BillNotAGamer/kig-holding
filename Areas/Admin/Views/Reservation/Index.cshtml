@@ -4,93 +4,126 @@
     ViewData["Title"] = "Quản lý Đặt bàn";
 }
 
-<section class="space-y-6">
-    <div class="surface-panel flex flex-col gap-4 p-6 lg:flex-row lg:items-end lg:justify-between">
+<section class="admin-page">
+    <div class="admin-page-header flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div class="max-w-3xl">
-            <p class="text-kicker font-black uppercase text-brand-goldDeep">Reservation Ops</p>
-            <h2 class="mt-2 text-2xl font-black text-brand-dark">Quản lý đặt bàn</h2>
-            <p class="mt-2 text-sm leading-6 text-brand-gray">Theo dõi yêu cầu đặt bàn, lọc theo trạng thái hoặc chi nhánh và cập nhật tiến độ xử lý ngay trong admin.</p>
+            <p class="admin-page-kicker">Reservation Ops</p>
+            <h1 class="admin-page-title">Quản lý đặt bàn</h1>
+            <p class="admin-help">Theo dõi yêu cầu đặt bàn, lọc theo trạng thái hoặc chi nhánh và mở nhanh chi tiết để cập nhật tiến độ xử lý.</p>
         </div>
-
-        <form method="get" class="grid gap-3 md:grid-cols-[minmax(0,14rem)_minmax(0,18rem)]">
-            <div>
-                <label asp-for="StatusFilter" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                <select asp-for="StatusFilter" asp-items="Model.StatusOptions" class="form-input"></select>
-            </div>
-            <div>
-                <label asp-for="BranchFilter" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-brand-gray"></label>
-                <select asp-for="BranchFilter" asp-items="Model.BranchOptions" class="form-input"></select>
-            </div>
-            <div class="md:col-span-2 flex gap-3">
-                <button type="submit" class="btn-primary">Lọc dữ liệu</button>
-                <a asp-action="Index" class="btn-secondary">Xóa lọc</a>
-            </div>
-        </form>
     </div>
 
-    <div class="overflow-hidden rounded-md border border-brand-border bg-white shadow-soft">
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-left text-sm text-brand-gray">
-                <thead class="border-b border-brand-border bg-brand-light text-xs uppercase text-brand-dark">
-                    <tr>
-                        <th class="px-6 py-4 font-semibold">Customer</th>
-                        <th class="px-6 py-4 font-semibold">Phone</th>
-                        <th class="px-6 py-4 font-semibold">Branch</th>
-                        <th class="px-6 py-4 font-semibold">Date & Time</th>
-                        <th class="px-6 py-4 font-semibold">Guest Count</th>
-                        <th class="px-6 py-4 font-semibold">Status</th>
-                        <th class="px-6 py-4 font-semibold">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-brand-border">
-                    @foreach (var reservation in Model.Reservations)
-                    {
-                        var statusClass = reservation.Status switch
-                        {
-                            ReservationStatus.Pending => "border-amber-200 bg-amber-50 text-amber-700",
-                            ReservationStatus.Confirmed => "border-blue-200 bg-blue-50 text-blue-700",
-                            ReservationStatus.Arrived => "border-emerald-200 bg-emerald-50 text-emerald-700",
-                            ReservationStatus.Cancelled => "border-rose-200 bg-rose-50 text-rose-700",
-                            ReservationStatus.NoShow => "border-slate-200 bg-slate-100 text-slate-600",
-                            _ => "border-slate-200 bg-slate-100 text-slate-600"
-                        };
-                        var statusLabel = reservation.Status switch
-                        {
-                            ReservationStatus.Pending => "Chờ xác nhận",
-                            ReservationStatus.Confirmed => "Đã xác nhận",
-                            ReservationStatus.Arrived => "Đã đến",
-                            ReservationStatus.Cancelled => "Đã hủy",
-                            ReservationStatus.NoShow => "Không đến",
-                            _ => reservation.Status.ToString()
-                        };
+    <form method="get" class="admin-card">
+        <div class="grid gap-4 xl:grid-cols-[minmax(0,14rem)_minmax(0,18rem)_auto_auto] xl:items-end">
+            <div>
+                <label asp-for="StatusFilter" class="admin-label mb-2"></label>
+                <select asp-for="StatusFilter" asp-items="Model.StatusOptions" class="admin-select"></select>
+            </div>
 
-                        <tr class="align-top transition-colors hover:bg-brand-light/50">
-                            <td class="px-6 py-4">
-                                <p class="font-semibold text-brand-dark">@reservation.CustomerName</p>
-                            </td>
-                            <td class="px-6 py-4">@reservation.PhoneNumber</td>
-                            <td class="px-6 py-4">@reservation.BranchName</td>
-                            <td class="px-6 py-4">
-                                <p class="font-semibold text-brand-dark">@reservation.ReservationDate.ToString("dd/MM/yyyy")</p>
-                                <p class="mt-1 text-xs text-brand-gray">@reservation.ReservationTime.ToString("HH:mm")</p>
-                            </td>
-                            <td class="px-6 py-4">@reservation.GuestCount</td>
-                            <td class="px-6 py-4">
-                                <span class="rounded-button border px-3 py-1 text-xs font-semibold @statusClass">@statusLabel</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <a asp-action="Details" asp-route-id="@reservation.Id" class="font-semibold text-brand-goldDeep transition hover:text-brand-dark">Xem chi tiết</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <div>
+                <label asp-for="BranchFilter" class="admin-label mb-2"></label>
+                <select asp-for="BranchFilter" asp-items="Model.BranchOptions" class="admin-select"></select>
+            </div>
+
+            <button type="submit" class="btn-primary h-12">Lọc dữ liệu</button>
+            <a asp-action="Index" class="btn-secondary h-12">Xóa lọc</a>
         </div>
+    </form>
 
-        @if (!Model.Reservations.Any())
+    <div class="admin-table-wrap">
+        @if (Model.Reservations.Any())
         {
-            <div class="p-8 text-center text-brand-gray">
-                Không có đặt bàn nào phù hợp bộ lọc hiện tại.
+            <div class="border-b border-brand-border bg-brand-light/60 px-4 py-4 sm:px-6">
+                <p class="text-sm font-semibold text-brand-dark">Hiển thị @Model.Reservations.Count yêu cầu đặt bàn theo bộ lọc hiện tại.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Khách hàng</th>
+                            <th>Điện thoại</th>
+                            <th>Chi nhánh</th>
+                            <th>Ngày giờ</th>
+                            <th>Số khách</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var reservation in Model.Reservations)
+                        {
+                            var statusClass = reservation.Status switch
+                            {
+                                ReservationStatus.Pending => "admin-badge--warning",
+                                ReservationStatus.Confirmed => "admin-badge--success",
+                                ReservationStatus.Arrived => "admin-badge--success",
+                                ReservationStatus.Cancelled => "admin-badge--danger",
+                                ReservationStatus.NoShow => "admin-badge--muted",
+                                _ => "admin-badge--muted"
+                            };
+                            var statusDotClass = reservation.Status switch
+                            {
+                                ReservationStatus.Pending => "admin-status-dot--warning",
+                                ReservationStatus.Confirmed => "admin-status-dot--success",
+                                ReservationStatus.Arrived => "admin-status-dot--success",
+                                ReservationStatus.Cancelled => "admin-status-dot--danger",
+                                ReservationStatus.NoShow => "admin-status-dot--muted",
+                                _ => "admin-status-dot--muted"
+                            };
+                            var statusLabel = reservation.Status switch
+                            {
+                                ReservationStatus.Pending => "Chờ xác nhận",
+                                ReservationStatus.Confirmed => "Đã xác nhận",
+                                ReservationStatus.Arrived => "Đã đến",
+                                ReservationStatus.Cancelled => "Đã hủy",
+                                ReservationStatus.NoShow => "Không đến",
+                                _ => reservation.Status.ToString()
+                            };
+                            var rowClass = reservation.Status == ReservationStatus.Pending
+                                ? "admin-row-highlight admin-row-highlight--warning"
+                                : string.Empty;
+
+                            <tr class="@rowClass">
+                                <td>
+                                    <p class="font-semibold text-brand-dark">@reservation.CustomerName</p>
+                                    @if (reservation.Status == ReservationStatus.Pending)
+                                    {
+                                        <p class="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Cần xác nhận</p>
+                                    }
+                                </td>
+                                <td class="font-semibold text-brand-dark">@reservation.PhoneNumber</td>
+                                <td>@reservation.BranchName</td>
+                                <td>
+                                    <p class="font-semibold text-brand-dark">@reservation.ReservationDate.ToString("dd/MM/yyyy")</p>
+                                    <p class="mt-1 text-xs text-brand-gray">@reservation.ReservationTime.ToString("HH:mm")</p>
+                                </td>
+                                <td class="font-semibold text-brand-dark">@reservation.GuestCount</td>
+                                <td>
+                                    <span class="admin-badge @statusClass">
+                                        <span class="admin-status-dot @statusDotClass"></span>
+                                        @statusLabel
+                                    </span>
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@reservation.Id" class="admin-table-action admin-table-action--primary">Xem chi tiết</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="p-6 sm:p-8">
+                <div class="admin-empty">
+                    <div>
+                        <p class="admin-empty__title">Không có đặt bàn phù hợp</p>
+                        <p class="admin-empty__text">Không có yêu cầu đặt bàn nào khớp với bộ lọc hiện tại. Hãy điều chỉnh trạng thái hoặc chi nhánh để xem thêm kết quả.</p>
+                        <a asp-action="Index" class="btn-secondary mt-6">Xóa lọc</a>
+                    </div>
+                </div>
             </div>
         }
     </div>

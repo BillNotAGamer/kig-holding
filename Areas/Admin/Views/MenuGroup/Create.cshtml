@@ -4,12 +4,14 @@
     ViewData["Title"] = "Tạo nhóm thực đơn";
 }
 
-<section class="space-y-6">
-    <div class="surface-panel p-6">
-        <p class="text-kicker font-black uppercase text-brand-goldDeep">Menu Groups</p>
-        <h2 class="mt-2 text-2xl font-black text-brand-dark">Tạo nhóm thực đơn</h2>
+<section class="admin-page">
+    <div class="admin-page-header">
+        <p class="admin-page-kicker">Menu Groups</p>
+        <h1 class="admin-page-title">Tạo nhóm thực đơn</h1>
+    </div>
 
-        <form asp-action="Create" method="post" class="mt-6 space-y-6">
+    <div class="admin-card">
+        <form asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-6">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="admin-post-summary"></div>
 
@@ -42,9 +44,7 @@
                 <div>
                     <label asp-for="CoverImageUrl" class="admin-post-label"></label>
                     <input asp-for="CoverImageUrl" class="admin-post-field" placeholder="/uploads/menu-groups/example.webp hoặc URL CDN" />
-                    <p class="mt-2 text-sm leading-6 text-brand-gray">
-                        Phase C dùng URL ảnh bìa thủ công. Upload ảnh bìa và quản lý ảnh menu sẽ được triển khai ở Phase D.
-                    </p>
+                    <p class="mt-2 text-sm leading-6 text-brand-gray">Bạn có thể nhập URL ảnh bìa thủ công hoặc tải file ở khu vực bên dưới. Nếu có cả hai, ảnh tải lên sẽ được ưu tiên.</p>
                     <span asp-validation-for="CoverImageUrl" class="admin-post-validation"></span>
                 </div>
                 <div>
@@ -54,12 +54,34 @@
                 </div>
             </div>
 
-            <div>
-                <label class="admin-post-checkbox-shell">
-                    <input asp-for="IsPublished" type="checkbox" class="admin-post-checkbox" />
-                    <span>Hiển thị công khai</span>
-                </label>
+            <div class="admin-upload admin-upload--compact">
+                <label asp-for="CoverImageFile" class="admin-upload__label"></label>
+                <div class="admin-upload__dropzone">
+                    <p class="admin-upload__dropzone-title">Chọn ảnh bìa nhóm thực đơn</p>
+                    <p class="admin-upload__dropzone-text">Ảnh tải lên hợp lệ sẽ ghi đè giá trị URL thủ công khi lưu. Xem trước sẽ hiển thị ngay sau khi bạn chọn file.</p>
+                    <input asp-for="CoverImageFile"
+                           type="file"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                           class="admin-upload__input"
+                           data-admin-image-preview
+                           data-admin-image-preview-target="#menu-group-cover-preview"
+                           data-admin-image-preview-meta="#menu-group-cover-preview-meta" />
+                </div>
+                <p class="admin-upload__hint">Hỗ trợ: jpg, jpeg, png, webp. Kích thước tối đa 10MB. Ảnh tải lên sẽ được ưu tiên hơn `CoverImageUrl`.</p>
+                <div class="admin-upload__preview" hidden>
+                    <img id="menu-group-cover-preview" alt="Xem trước ảnh bìa nhóm thực đơn đã chọn" class="admin-upload__preview-image" hidden />
+                    <div class="admin-upload__preview-meta">
+                        <p class="text-sm font-semibold text-brand-dark">Ảnh bìa sẽ được tải lên</p>
+                        <p id="menu-group-cover-preview-meta"></p>
+                    </div>
+                </div>
+                <span asp-validation-for="CoverImageFile" class="admin-post-validation"></span>
             </div>
+
+            <label class="admin-post-checkbox-shell">
+                <input asp-for="IsPublished" type="checkbox" class="admin-post-checkbox" />
+                <span>Hiển thị công khai</span>
+            </label>
 
             <div class="flex flex-col gap-3 sm:flex-row">
                 <button type="submit" class="btn-primary">Lưu nhóm thực đơn</button>

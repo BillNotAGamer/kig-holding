@@ -1,16 +1,23 @@
 using KIGHolding.Models.Entities;
+using KIGHolding.Options;
 using KIGHolding.Services;
 using KIGHolding.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Options;
 
 namespace KIGHolding.Controllers;
 
 [Route("dat-ban")]
 public class ReservationController : Controller
 {
+    private const string DefaultBusinessRecipientEmail = "truyenthuyetchamponghcm@gmail.com";
+
     private readonly IReservationService _reservationService;
     private readonly IBranchService _branchService;
     private readonly ISiteSettingService _siteSettingService;
+    private readonly IEmailService _emailService;
+    private readonly ResendSettings _resendSettings;
     private readonly IConfiguration _configuration;
     private readonly ILogger<ReservationController> _logger;
 
@@ -18,12 +25,16 @@ public class ReservationController : Controller
         IReservationService reservationService,
         IBranchService branchService,
         ISiteSettingService siteSettingService,
+        IEmailService emailService,
+        IOptions<ResendSettings> resendSettings,
         IConfiguration configuration,
         ILogger<ReservationController> logger)
     {
         _reservationService = reservationService;
         _branchService = branchService;
         _siteSettingService = siteSettingService;
+        _emailService = emailService;
+        _resendSettings = resendSettings.Value;
         _configuration = configuration;
         _logger = logger;
     }
@@ -34,7 +45,6 @@ public class ReservationController : Controller
         [FromQuery] Guid? branchId,
         [FromQuery] string? customerName,
         [FromQuery] string? phoneNumber,
-        [FromQuery] string? email,
         [FromQuery] int? guests,
         [FromQuery] int? guestCount,
         [FromQuery] DateOnly? date,
@@ -50,7 +60,6 @@ public class ReservationController : Controller
         {
             CustomerName = customerName ?? string.Empty,
             PhoneNumber = phoneNumber ?? string.Empty,
-            Email = email,
             BranchId = selectedBranch?.Id,
             GuestCount = guestCount ?? guests ?? 2,
             ReservationDate = reservationDate ?? date ?? DateOnly.FromDateTime(DateTime.Today),
@@ -67,37 +76,14 @@ public class ReservationController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(ReservationCreateViewModel model, CancellationToken cancellationToken)
     {
-        if (model.ReservationDate.HasValue && model.ReservationDate.Value < DateOnly.FromDateTime(DateTime.Today))
-        {
-            ModelState.AddModelError(nameof(model.ReservationDate), "Ngày đến không được sớm hơn hôm nay.");
-        }
-
-        if (model.BranchId == Guid.Empty)
-        {
-            ModelState.AddModelError(nameof(model.BranchId), "Vui lòng chọn chi nhánh.");
-        }
-
-        if (!HasConfiguredDatabase())
-        {
-            ModelState.AddModelError(string.Empty, "Hệ thống đặt bàn chưa kết nối cơ sở dữ liệu. Vui lòng gọi hotline để được hỗ trợ.");
-        }
+        ApplyControllerValidation(model);
 
         if (ModelState.IsValid)
         {
             ReservationCreateResult result;
             try
             {
-                result = await _reservationService.CreateReservationAsync(new ReservationCreateRequest
-                {
-                    CustomerName = model.CustomerName,
-                    PhoneNumber = model.PhoneNumber,
-                    Email = model.Email,
-                    BranchId = model.BranchId!.Value,
-                    GuestCount = model.GuestCount,
-                    ReservationDate = model.ReservationDate!.Value,
-                    ReservationTime = model.ReservationTime!.Value,
-                    Note = model.Note
-                }, cancellationToken);
+                result = await CreateReservationAsync(model, cancellationToken);
             }
             catch (Exception exception)
             {
@@ -109,17 +95,68 @@ public class ReservationController : Controller
 
             if (result.Succeeded)
             {
+                await TrySendReservationNotificationAsync(result.ReservationId!.Value, model);
                 return RedirectToAction(nameof(Success), new { id = result.ReservationId!.Value });
             }
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(error.FieldName, error.Message);
-            }
+            AddServiceErrorsToModelState(result);
         }
 
         await PopulateFormMetadataAsync(model, cancellationToken);
         return View(model);
+    }
+
+    [HttpPost("quick")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Quick(ReservationCreateViewModel model, CancellationToken cancellationToken)
+    {
+        ApplyControllerValidation(model);
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(CreateValidationErrorPayload());
+        }
+
+        ReservationCreateResult result;
+        try
+        {
+            result = await CreateReservationAsync(model, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Unable to save quick reservation.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                ok = false,
+                message = "Không thể gửi yêu cầu đặt bàn lúc này. Vui lòng thử lại sau hoặc gọi hotline để được hỗ trợ."
+            });
+        }
+
+        if (!result.Succeeded)
+        {
+            AddServiceErrorsToModelState(result);
+            return BadRequest(CreateValidationErrorPayload());
+        }
+
+        var reservation = await TryLoadReservationAsync(result.ReservationId!.Value, cancellationToken);
+        await TrySendReservationNotificationAsync(result.ReservationId!.Value, model, reservation);
+
+        return Ok(new
+        {
+            ok = true,
+            message = "Cảm ơn bạn. Yêu cầu đặt bàn đã được ghi nhận.",
+            reservationId = result.ReservationId,
+            summary = new
+            {
+                customerName = reservation?.CustomerName ?? model.CustomerName.Trim(),
+                phoneNumber = reservation?.PhoneNumber ?? model.PhoneNumber.Trim(),
+                guestCount = reservation?.GuestCount ?? model.GuestCount,
+                reservationDate = (reservation?.ReservationDate ?? model.ReservationDate!.Value).ToString("dd/MM/yyyy"),
+                reservationTime = (reservation?.ReservationTime ?? model.ReservationTime!.Value).ToString("HH:mm"),
+                branchName = reservation?.Branch?.Name,
+                note = string.IsNullOrWhiteSpace(reservation?.Note) ? model.Note?.Trim() : reservation.Note
+            }
+        });
     }
 
     [HttpGet("thanh-cong")]
@@ -166,11 +203,158 @@ public class ReservationController : Controller
         return View(model);
     }
 
+    private async Task TrySendReservationNotificationAsync(
+        Guid reservationId,
+        ReservationCreateViewModel model,
+        Reservation? reservation = null)
+    {
+        try
+        {
+            reservation ??= await TryLoadReservationAsync(reservationId, CancellationToken.None);
+
+            var recipientEmail = await ResolveBusinessRecipientEmailAsync();
+            var notification = BuildReservationNotificationModel(reservationId, model, reservation);
+
+            await _emailService.SendReservationNotificationAsync(
+                recipientEmail,
+                ReservationNotificationEmailBuilder.BuildSubject(),
+                ReservationNotificationEmailBuilder.BuildHtmlBody(notification),
+                ReservationNotificationEmailBuilder.BuildTextBody(notification),
+                CancellationToken.None);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Unable to complete reservation notification workflow for {ReservationId}.", reservationId);
+        }
+    }
+
+    private async Task<string> ResolveBusinessRecipientEmailAsync()
+    {
+        try
+        {
+            var settings = await _siteSettingService.GetSettingsAsync(CancellationToken.None);
+            if (!string.IsNullOrWhiteSpace(settings?.Email))
+            {
+                return settings.Email.Trim();
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Unable to load business email from site settings for reservation notifications.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(_resendSettings.BusinessRecipientEmail))
+        {
+            return _resendSettings.BusinessRecipientEmail.Trim();
+        }
+
+        return DefaultBusinessRecipientEmail;
+    }
+
+    private ReservationNotificationEmailModel BuildReservationNotificationModel(
+        Guid reservationId,
+        ReservationCreateViewModel model,
+        Reservation? reservation)
+    {
+        var branch = reservation?.Branch;
+        var branchAddress = branch is null
+            ? null
+            : string.Join(", ", new[] { branch.Address, branch.District, branch.City }.Where(value => !string.IsNullOrWhiteSpace(value)));
+
+        return new ReservationNotificationEmailModel
+        {
+            ReservationId = reservationId,
+            CustomerName = reservation?.CustomerName ?? model.CustomerName.Trim(),
+            PhoneNumber = reservation?.PhoneNumber ?? model.PhoneNumber.Trim(),
+            GuestCount = reservation?.GuestCount ?? model.GuestCount,
+            ReservationDate = reservation?.ReservationDate ?? model.ReservationDate!.Value,
+            ReservationTime = reservation?.ReservationTime ?? model.ReservationTime!.Value,
+            BranchName = branch?.Name,
+            BranchAddress = branchAddress,
+            Note = string.IsNullOrWhiteSpace(reservation?.Note) ? model.Note?.Trim() : reservation.Note
+        };
+    }
+
+    private void ApplyControllerValidation(ReservationCreateViewModel model)
+    {
+        if (model.ReservationDate.HasValue && model.ReservationDate.Value < DateOnly.FromDateTime(DateTime.Today))
+        {
+            ModelState.AddModelError(nameof(model.ReservationDate), "Ngày đến không được sớm hơn hôm nay.");
+        }
+
+        if (model.BranchId == Guid.Empty)
+        {
+            ModelState.AddModelError(nameof(model.BranchId), "Vui lòng chọn chi nhánh.");
+        }
+
+        if (!HasConfiguredDatabase())
+        {
+            ModelState.AddModelError(string.Empty, "Hệ thống đặt bàn chưa kết nối cơ sở dữ liệu. Vui lòng gọi hotline để được hỗ trợ.");
+        }
+    }
+
+    private async Task<ReservationCreateResult> CreateReservationAsync(ReservationCreateViewModel model, CancellationToken cancellationToken)
+    {
+        return await _reservationService.CreateReservationAsync(new ReservationCreateRequest
+        {
+            CustomerName = model.CustomerName,
+            PhoneNumber = model.PhoneNumber,
+            BranchId = model.BranchId!.Value,
+            GuestCount = model.GuestCount,
+            ReservationDate = model.ReservationDate!.Value,
+            ReservationTime = model.ReservationTime!.Value,
+            Note = model.Note
+        }, cancellationToken);
+    }
+
+    private void AddServiceErrorsToModelState(ReservationCreateResult result)
+    {
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.IsNullOrWhiteSpace(error.FieldName) ? string.Empty : error.FieldName, error.Message);
+        }
+    }
+
+    private object CreateValidationErrorPayload()
+    {
+        return new
+        {
+            ok = false,
+            message = "Vui lòng kiểm tra lại thông tin đặt bàn.",
+            errors = BuildModelStateErrors(ModelState)
+        };
+    }
+
+    private static Dictionary<string, string[]> BuildModelStateErrors(ModelStateDictionary modelState)
+    {
+        return modelState
+            .Where(entry => entry.Value is { Errors.Count: > 0 })
+            .ToDictionary(
+                entry => string.IsNullOrWhiteSpace(entry.Key) ? "_summary" : entry.Key,
+                entry => entry.Value!.Errors
+                    .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage) ? "Dữ liệu không hợp lệ." : error.ErrorMessage)
+                    .Distinct()
+                    .ToArray());
+    }
+
     private async Task PopulateFormMetadataAsync(ReservationCreateViewModel model, CancellationToken cancellationToken)
     {
         var branches = await LoadBranchesAsync(cancellationToken);
         model.Branches = MapBranches(branches);
         model.Hotline = await LoadHotlineAsync(cancellationToken);
+    }
+
+    private async Task<Reservation?> TryLoadReservationAsync(Guid reservationId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _reservationService.GetReservationByIdAsync(reservationId, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Unable to load reservation details for {ReservationId}.", reservationId);
+            return null;
+        }
     }
 
     private async Task<IReadOnlyList<Branch>> LoadBranchesAsync(CancellationToken cancellationToken)

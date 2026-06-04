@@ -1,9 +1,11 @@
 using KIGHolding.Data;
+using KIGHolding.Options;
 using KIGHolding.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
+using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +49,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.Configure<ResendSettings>(builder.Configuration.GetSection("ResendSettings"));
+builder.Services.AddResend(options =>
+{
+    options.ApiToken = builder.Configuration["ResendSettings:ApiKey"] ?? string.Empty;
+});
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddScoped<ISiteSettingService, SiteSettingService>();
 builder.Services.AddScoped<IMenuGroupService, MenuGroupService>();
@@ -54,6 +61,7 @@ builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 

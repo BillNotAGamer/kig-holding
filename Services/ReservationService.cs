@@ -70,7 +70,7 @@ public class ReservationService : IReservationService
             BranchId = request.BranchId,
             CustomerName = request.CustomerName.Trim(),
             PhoneNumber = request.PhoneNumber.Trim(),
-            Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
+            Email = null,
             GuestCount = request.GuestCount,
             ReservationDate = request.ReservationDate,
             ReservationTime = request.ReservationTime,

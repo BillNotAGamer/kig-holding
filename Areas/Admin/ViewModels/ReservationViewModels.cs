@@ -29,7 +29,6 @@ public class ReservationDetailViewModel
     public Guid Id { get; set; }
     public string CustomerName { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
-    public string? Email { get; set; }
     public string BranchName { get; set; } = string.Empty;
     public string BranchAddress { get; set; } = string.Empty;
     public DateOnly ReservationDate { get; set; }
