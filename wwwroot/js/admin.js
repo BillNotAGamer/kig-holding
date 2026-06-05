@@ -17,6 +17,88 @@
         return size.toFixed(precision) + " " + units[unitIndex];
     }
 
+    function initAdminDrawer() {
+        var drawer = document.querySelector("[data-admin-drawer]");
+        var overlay = document.querySelector("[data-admin-menu-overlay]");
+        var openButtons = Array.from(document.querySelectorAll("[data-admin-menu-open]"));
+        var closeButtons = Array.from(document.querySelectorAll("[data-admin-menu-close]"));
+
+        if (!drawer || !openButtons.length) {
+            return;
+        }
+
+        var desktopQuery = window.matchMedia("(min-width: 1024px)");
+        var isOpen = false;
+
+        var setOpen = function (nextOpen, focusDrawer) {
+            isOpen = Boolean(nextOpen);
+            drawer.classList.toggle("-translate-x-full", !isOpen);
+            drawer.classList.toggle("translate-x-0", isOpen);
+
+            if (overlay) {
+                overlay.classList.toggle("hidden", !isOpen);
+            }
+
+            openButtons.forEach(function (button) {
+                button.setAttribute("aria-expanded", isOpen ? "true" : "false");
+            });
+
+            document.body.classList.toggle("admin-drawer-open", isOpen);
+
+            if (isOpen && focusDrawer) {
+                var focusTarget = drawer.querySelector("[data-admin-menu-close], a, button");
+                window.setTimeout(function () {
+                    focusTarget?.focus();
+                }, 40);
+            }
+        };
+
+        openButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                setOpen(true, true);
+            });
+        });
+
+        closeButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                setOpen(false);
+            });
+        });
+
+        overlay?.addEventListener("click", function () {
+            setOpen(false);
+        });
+
+        drawer.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () {
+                if (!desktopQuery.matches) {
+                    setOpen(false);
+                }
+            });
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && isOpen) {
+                setOpen(false);
+                openButtons[0]?.focus();
+            }
+        });
+
+        var closeOnDesktop = function () {
+            if (desktopQuery.matches) {
+                setOpen(false);
+            }
+        };
+
+        if (typeof desktopQuery.addEventListener === "function") {
+            desktopQuery.addEventListener("change", closeOnDesktop);
+        } else if (typeof desktopQuery.addListener === "function") {
+            desktopQuery.addListener(closeOnDesktop);
+        }
+
+        setOpen(false);
+    }
+
     function initImagePreviews() {
         var inputs = document.querySelectorAll("[data-admin-image-preview]");
         if (!inputs.length) {
@@ -135,6 +217,7 @@
         });
     }
 
+    initAdminDrawer();
     initImagePreviews();
     initFileLists();
 })();

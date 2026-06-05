@@ -20,6 +20,7 @@ public class ReservationController : AdminBaseController
     public async Task<IActionResult> Index(ReservationIndexViewModel filter)
     {
         var query = _dbContext.Reservations.AsNoTracking();
+        var search = string.IsNullOrWhiteSpace(filter.SearchQuery) ? null : filter.SearchQuery.Trim();
 
         if (filter.StatusFilter.HasValue)
         {
@@ -29,6 +30,16 @@ public class ReservationController : AdminBaseController
         if (filter.BranchFilter.HasValue)
         {
             query = query.Where(x => x.BranchId == filter.BranchFilter.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var normalizedPhoneSearch = search.Replace(" ", string.Empty, StringComparison.Ordinal);
+
+            query = query.Where(x =>
+                EF.Functions.ILike(x.CustomerName, $"%{search}%") ||
+                EF.Functions.ILike(x.PhoneNumber, $"%{search}%") ||
+                EF.Functions.ILike(x.PhoneNumber.Replace(" ", string.Empty), $"%{normalizedPhoneSearch}%"));
         }
 
         filter.Reservations = await query
@@ -43,11 +54,13 @@ public class ReservationController : AdminBaseController
                 ReservationDate = x.ReservationDate,
                 ReservationTime = x.ReservationTime,
                 GuestCount = x.GuestCount,
-                Status = x.Status
+                Status = x.Status,
+                StatusLabel = GetStatusLabel(x.Status)
             })
             .ToListAsync();
 
-        filter.StatusOptions = BuildStatusOptions(includeAllOption: true);
+        filter.SearchQuery = search;
+        filter.StatusOptions = BuildFilterStatusOptions();
         filter.BranchOptions = await BuildBranchOptionsAsync();
 
         return View(filter);
@@ -55,6 +68,72 @@ public class ReservationController : AdminBaseController
 
     [HttpGet]
     public async Task<IActionResult> Details(Guid id)
+    {
+        var model = await BuildReservationDetailViewModelAsync(id);
+        if (model is null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateStatus(ReservationDetailViewModel model)
+    {
+        var reservation = await _dbContext.Reservations.FirstOrDefaultAsync(x => x.Id == model.Id);
+        if (reservation is null)
+        {
+            return NotFound();
+        }
+
+        if (!model.Status.HasValue)
+        {
+            ModelState.AddModelError(nameof(model.Status), "Vui lòng chọn tình trạng xử lý.");
+        }
+        else if (model.Status.Value == ReservationStatus.Pending)
+        {
+            ModelState.AddModelError(nameof(model.Status), "Không thể chuyển yêu cầu đã xử lý về trạng thái đang chờ duyệt.");
+        }
+        else if (model.Status.Value != reservation.Status && !CanTransition(reservation.Status, model.Status.Value))
+        {
+            var message = IsBackwardTransition(reservation.Status, model.Status.Value)
+                ? "Không thể chuyển về tình trạng xử lý trước đó."
+                : "Không thể cập nhật tình trạng này cho yêu cầu đặt bàn.";
+
+            ModelState.AddModelError(nameof(model.Status), message);
+        }
+
+        if (!ModelState.IsValid)
+        {
+            var detailModel = await BuildReservationDetailViewModelAsync(reservation.Id, model.Status, model.Note);
+            if (detailModel is null)
+            {
+                return NotFound();
+            }
+
+            return View("Details", detailModel);
+        }
+
+        if (model.Status.HasValue && model.Status.Value != reservation.Status)
+        {
+            reservation.Status = model.Status.Value;
+        }
+
+        reservation.Note = string.IsNullOrWhiteSpace(model.Note) ? null : model.Note.Trim();
+        reservation.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Đã cập nhật trạng thái đặt bàn.";
+        return RedirectToAction(nameof(Details), new { id = model.Id });
+    }
+
+    private async Task<ReservationDetailViewModel?> BuildReservationDetailViewModelAsync(
+        Guid id,
+        ReservationStatus? submittedStatus = null,
+        string? noteOverride = null)
     {
         var model = await _dbContext.Reservations
             .AsNoTracking()
@@ -70,7 +149,9 @@ public class ReservationController : AdminBaseController
                 ReservationTime = x.ReservationTime,
                 GuestCount = x.GuestCount,
                 Note = x.Note,
-                Status = x.Status,
+                CurrentStatus = x.Status,
+                StatusLabel = GetStatusLabel(x.Status),
+                Status = GetDefaultSelectedStatus(x.Status),
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt
             })
@@ -78,31 +159,21 @@ public class ReservationController : AdminBaseController
 
         if (model is null)
         {
-            return NotFound();
+            return null;
         }
 
-        model.StatusOptions = BuildStatusOptions(includeAllOption: false);
-        return View(model);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateStatus(ReservationDetailViewModel model)
-    {
-        var reservation = await _dbContext.Reservations.FirstOrDefaultAsync(x => x.Id == model.Id);
-        if (reservation is null)
+        if (noteOverride is not null)
         {
-            return NotFound();
+            model.Note = noteOverride;
         }
 
-        reservation.Status = model.Status;
-        reservation.Note = string.IsNullOrWhiteSpace(model.Note) ? null : model.Note.Trim();
-        reservation.UpdatedAt = DateTimeOffset.UtcNow;
+        if (submittedStatus.HasValue && IsSelectableStatus(model.CurrentStatus, submittedStatus.Value))
+        {
+            model.Status = submittedStatus.Value;
+        }
 
-        await _dbContext.SaveChangesAsync();
-
-        TempData["SuccessMessage"] = "Đã cập nhật trạng thái đặt bàn.";
-        return RedirectToAction(nameof(Details), new { id = model.Id });
+        model.StatusOptions = BuildAllowedStatusOptions(model.CurrentStatus);
+        return model;
     }
 
     private async Task<IReadOnlyList<SelectListItem>> BuildBranchOptionsAsync()
@@ -126,36 +197,121 @@ public class ReservationController : AdminBaseController
         return options;
     }
 
-    private static IReadOnlyList<SelectListItem> BuildStatusOptions(bool includeAllOption)
+    private static IReadOnlyList<SelectListItem> BuildFilterStatusOptions()
     {
-        var options = new List<SelectListItem>();
-
-        if (includeAllOption)
+        var options = new List<SelectListItem>
         {
-            options.Add(new SelectListItem { Value = string.Empty, Text = "Tất cả trạng thái" });
-        }
+            new() { Value = string.Empty, Text = "Tất cả trạng thái" }
+        };
 
         foreach (var status in Enum.GetValues<ReservationStatus>())
         {
-            options.Add(new SelectListItem
-            {
-                Value = status.ToString(),
-                Text = GetStatusLabel(status)
-            });
+            options.Add(CreateStatusOption(status));
         }
 
         return options;
+    }
+
+    private static IReadOnlyList<SelectListItem> BuildAllowedStatusOptions(ReservationStatus currentStatus)
+    {
+        return currentStatus switch
+        {
+            ReservationStatus.Pending =>
+            [
+                new SelectListItem { Value = string.Empty, Text = "Tình trạng" },
+                CreateStatusOption(ReservationStatus.Confirmed),
+                CreateStatusOption(ReservationStatus.Arrived),
+                CreateStatusOption(ReservationStatus.NoShow)
+            ],
+            ReservationStatus.Confirmed =>
+            [
+                CreateStatusOption(ReservationStatus.Confirmed),
+                CreateStatusOption(ReservationStatus.Arrived),
+                CreateStatusOption(ReservationStatus.NoShow)
+            ],
+            ReservationStatus.Arrived =>
+            [
+                CreateStatusOption(ReservationStatus.Arrived),
+                CreateStatusOption(ReservationStatus.NoShow)
+            ],
+            ReservationStatus.NoShow =>
+            [
+                CreateStatusOption(ReservationStatus.NoShow)
+            ],
+            ReservationStatus.Cancelled =>
+            [
+                CreateStatusOption(ReservationStatus.Cancelled)
+            ],
+            _ => []
+        };
+    }
+
+    private static SelectListItem CreateStatusOption(ReservationStatus status)
+    {
+        return new SelectListItem
+        {
+            Value = status.ToString(),
+            Text = GetStatusLabel(status)
+        };
+    }
+
+    private static ReservationStatus? GetDefaultSelectedStatus(ReservationStatus currentStatus)
+    {
+        return currentStatus == ReservationStatus.Pending ? null : currentStatus;
+    }
+
+    private static bool IsSelectableStatus(ReservationStatus currentStatus, ReservationStatus nextStatus)
+    {
+        return BuildAllowedStatusOptions(currentStatus)
+            .Any(option => string.Equals(option.Value, nextStatus.ToString(), StringComparison.Ordinal));
+    }
+
+    private static bool CanTransition(ReservationStatus current, ReservationStatus next)
+    {
+        if (next == ReservationStatus.Pending)
+        {
+            return false;
+        }
+
+        return current switch
+        {
+            ReservationStatus.Pending => next == ReservationStatus.Confirmed
+                || next == ReservationStatus.Arrived
+                || next == ReservationStatus.NoShow,
+            ReservationStatus.Confirmed => next == ReservationStatus.Arrived
+                || next == ReservationStatus.NoShow,
+            ReservationStatus.Arrived => next == ReservationStatus.NoShow,
+            _ => false
+        };
+    }
+
+    private static bool IsBackwardTransition(ReservationStatus current, ReservationStatus next)
+    {
+        return GetWorkflowOrder(next) < GetWorkflowOrder(current);
+    }
+
+    private static int GetWorkflowOrder(ReservationStatus status)
+    {
+        return status switch
+        {
+            ReservationStatus.Pending => 0,
+            ReservationStatus.Confirmed => 1,
+            ReservationStatus.Arrived => 2,
+            ReservationStatus.NoShow => 3,
+            ReservationStatus.Cancelled => 4,
+            _ => int.MaxValue
+        };
     }
 
     private static string GetStatusLabel(ReservationStatus status)
     {
         return status switch
         {
-            ReservationStatus.Pending => "Chờ xác nhận",
-            ReservationStatus.Confirmed => "Đã xác nhận",
-            ReservationStatus.Arrived => "Đã đến",
+            ReservationStatus.Pending => "Đang chờ duyệt",
+            ReservationStatus.Confirmed => "Đã xem",
+            ReservationStatus.Arrived => "Đã liên hệ",
+            ReservationStatus.NoShow => "Đã thông báo",
             ReservationStatus.Cancelled => "Đã hủy",
-            ReservationStatus.NoShow => "Không đến",
             _ => status.ToString()
         };
     }

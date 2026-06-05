@@ -14,7 +14,12 @@
     </div>
 
     <form method="get" class="admin-card">
-        <div class="grid gap-4 xl:grid-cols-[minmax(0,14rem)_minmax(0,18rem)_auto_auto] xl:items-end">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,20rem)_minmax(0,14rem)_minmax(0,18rem)_auto_auto] xl:items-end">
+            <div>
+                <label asp-for="SearchQuery" class="admin-label mb-2"></label>
+                <input asp-for="SearchQuery" class="admin-field h-12" placeholder="Tên khách hoặc số điện thoại..." />
+            </div>
+
             <div>
                 <label asp-for="StatusFilter" class="admin-label mb-2"></label>
                 <select asp-for="StatusFilter" asp-items="Model.StatusOptions" class="admin-select"></select>
@@ -25,8 +30,8 @@
                 <select asp-for="BranchFilter" asp-items="Model.BranchOptions" class="admin-select"></select>
             </div>
 
-            <button type="submit" class="btn-primary h-12">Lọc dữ liệu</button>
-            <a asp-action="Index" class="btn-secondary h-12">Xóa lọc</a>
+            <button type="submit" class="btn-primary h-12 w-full">Lọc dữ liệu</button>
+            <a asp-action="Index" class="btn-secondary h-12 w-full">Xóa lọc</a>
         </div>
     </form>
 
@@ -37,7 +42,7 @@
                 <p class="text-sm font-semibold text-brand-dark">Hiển thị @Model.Reservations.Count yêu cầu đặt bàn theo bộ lọc hiện tại.</p>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="hidden overflow-x-auto md:block">
                 <table class="admin-table">
                     <thead>
                         <tr>
@@ -56,29 +61,20 @@
                             var statusClass = reservation.Status switch
                             {
                                 ReservationStatus.Pending => "admin-badge--warning",
-                                ReservationStatus.Confirmed => "admin-badge--success",
+                                ReservationStatus.Confirmed => "admin-badge--muted",
                                 ReservationStatus.Arrived => "admin-badge--success",
+                                ReservationStatus.NoShow => "admin-badge--success",
                                 ReservationStatus.Cancelled => "admin-badge--danger",
-                                ReservationStatus.NoShow => "admin-badge--muted",
                                 _ => "admin-badge--muted"
                             };
                             var statusDotClass = reservation.Status switch
                             {
                                 ReservationStatus.Pending => "admin-status-dot--warning",
-                                ReservationStatus.Confirmed => "admin-status-dot--success",
+                                ReservationStatus.Confirmed => "admin-status-dot--muted",
                                 ReservationStatus.Arrived => "admin-status-dot--success",
+                                ReservationStatus.NoShow => "admin-status-dot--success",
                                 ReservationStatus.Cancelled => "admin-status-dot--danger",
-                                ReservationStatus.NoShow => "admin-status-dot--muted",
                                 _ => "admin-status-dot--muted"
-                            };
-                            var statusLabel = reservation.Status switch
-                            {
-                                ReservationStatus.Pending => "Chờ xác nhận",
-                                ReservationStatus.Confirmed => "Đã xác nhận",
-                                ReservationStatus.Arrived => "Đã đến",
-                                ReservationStatus.Cancelled => "Đã hủy",
-                                ReservationStatus.NoShow => "Không đến",
-                                _ => reservation.Status.ToString()
                             };
                             var rowClass = reservation.Status == ReservationStatus.Pending
                                 ? "admin-row-highlight admin-row-highlight--warning"
@@ -89,7 +85,7 @@
                                     <p class="font-semibold text-brand-dark">@reservation.CustomerName</p>
                                     @if (reservation.Status == ReservationStatus.Pending)
                                     {
-                                        <p class="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Cần xác nhận</p>
+                                        <p class="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Chờ duyệt</p>
                                     }
                                 </td>
                                 <td class="font-semibold text-brand-dark">@reservation.PhoneNumber</td>
@@ -102,7 +98,7 @@
                                 <td>
                                     <span class="admin-badge @statusClass">
                                         <span class="admin-status-dot @statusDotClass"></span>
-                                        @statusLabel
+                                        @reservation.StatusLabel
                                     </span>
                                 </td>
                                 <td>
@@ -113,6 +109,65 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="grid gap-3 p-3 md:hidden">
+                @foreach (var reservation in Model.Reservations)
+                {
+                    var statusClass = reservation.Status switch
+                    {
+                        ReservationStatus.Pending => "admin-badge--warning",
+                        ReservationStatus.Confirmed => "admin-badge--muted",
+                        ReservationStatus.Arrived => "admin-badge--success",
+                        ReservationStatus.NoShow => "admin-badge--success",
+                        ReservationStatus.Cancelled => "admin-badge--danger",
+                        _ => "admin-badge--muted"
+                    };
+                    var statusDotClass = reservation.Status switch
+                    {
+                        ReservationStatus.Pending => "admin-status-dot--warning",
+                        ReservationStatus.Confirmed => "admin-status-dot--muted",
+                        ReservationStatus.Arrived => "admin-status-dot--success",
+                        ReservationStatus.NoShow => "admin-status-dot--success",
+                        ReservationStatus.Cancelled => "admin-status-dot--danger",
+                        _ => "admin-status-dot--muted"
+                    };
+                    var cardClass = reservation.Status == ReservationStatus.Pending
+                        ? "border-amber-200 bg-amber-50/60"
+                        : "border-brand-border bg-brand-white";
+
+                    <article class="rounded-2xl border @cardClass p-4 shadow-soft">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="break-words text-base font-black text-brand-dark">@reservation.CustomerName</p>
+                                    <p class="mt-1 text-sm font-semibold text-brand-gray">@reservation.BranchName</p>
+                                </div>
+                                <span class="admin-badge @statusClass">
+                                    <span class="admin-status-dot @statusDotClass"></span>
+                                    @reservation.StatusLabel
+                                </span>
+                            </div>
+
+                            <dl class="grid grid-cols-2 gap-3 text-sm">
+                                <div class="rounded-xl bg-brand-light p-3">
+                                    <dt class="text-[11px] font-black uppercase tracking-[0.14em] text-brand-gray">Thời gian</dt>
+                                    <dd class="mt-1 font-semibold text-brand-dark">@reservation.ReservationDate.ToString("dd/MM/yyyy") @reservation.ReservationTime.ToString("HH:mm")</dd>
+                                </div>
+                                <div class="rounded-xl bg-brand-light p-3">
+                                    <dt class="text-[11px] font-black uppercase tracking-[0.14em] text-brand-gray">Số khách</dt>
+                                    <dd class="mt-1 font-semibold text-brand-dark">@reservation.GuestCount</dd>
+                                </div>
+                                <div class="col-span-2 rounded-xl bg-brand-light p-3">
+                                    <dt class="text-[11px] font-black uppercase tracking-[0.14em] text-brand-gray">Điện thoại</dt>
+                                    <dd class="mt-1 break-words font-semibold text-brand-dark">@reservation.PhoneNumber</dd>
+                                </div>
+                            </dl>
+
+                            <a asp-action="Details" asp-route-id="@reservation.Id" class="admin-table-action admin-table-action--primary min-h-11 w-full">Xem chi tiết</a>
+                        </div>
+                    </article>
+                }
+            </div>
         }
         else
         {
@@ -120,7 +175,7 @@
                 <div class="admin-empty">
                     <div>
                         <p class="admin-empty__title">Không có đặt bàn phù hợp</p>
-                        <p class="admin-empty__text">Không có yêu cầu đặt bàn nào khớp với bộ lọc hiện tại. Hãy điều chỉnh trạng thái hoặc chi nhánh để xem thêm kết quả.</p>
+                        <p class="admin-empty__text">Không có yêu cầu đặt bàn nào khớp với bộ lọc hiện tại. Hãy điều chỉnh tìm kiếm, trạng thái hoặc chi nhánh để xem thêm kết quả.</p>
                         <a asp-action="Index" class="btn-secondary mt-6">Xóa lọc</a>
                     </div>
                 </div>

@@ -110,9 +110,19 @@
 
                         @if (Model.IsSuccess)
                         {
-                            <div class="contact-page__notice contact-page__notice--success">
-                                <p class="contact-page__notice-title">Cảm ơn bạn đã liên hệ.</p>
-                                <p class="contact-page__notice-copy">Truyền Thuyết Champong sẽ phản hồi sớm nhất có thể.</p>
+                            <div class="contact-page__notice contact-page__notice--success" data-uw-reveal="fade-up" data-uw-once="true">
+                                <div class="flex items-start gap-3">
+                                    <span class="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-emerald-300/20 bg-emerald-400/10 text-emerald-200" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m5 12 4.2 4.2L19 7.8"></path>
+                                        </svg>
+                                    </span>
+                                    <div>
+                                        <p class="contact-page__notice-title">Cảm ơn bạn đã liên hệ!</p>
+                                        <p class="contact-page__notice-copy">Thông tin của bạn đã được ghi nhận. Đội ngũ Truyền Thuyết Champong sẽ phản hồi trong thời gian sớm nhất.</p>
+                                        <p class="contact-page__notice-copy">Nếu cần hỗ trợ gấp, vui lòng gọi hotline 0909 888 777.</p>
+                                    </div>
+                                </div>
                             </div>
                         }
 

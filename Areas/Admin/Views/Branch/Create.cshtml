@@ -10,7 +10,7 @@
             <p class="admin-page-kicker">Create branch</p>
             <h1 class="admin-page-title">Thêm chi nhánh mới</h1>
         </div>
-        <a href="/Admin/Branch" class="btn-secondary">Quay lại danh sách</a>
+        <a href="/Admin/Branch" class="btn-secondary w-full sm:w-auto">Quay lại danh sách</a>
     </div>
 
     <form asp-action="Create" method="post" enctype="multipart/form-data" class="admin-card space-y-6">
@@ -139,15 +139,15 @@
                     <span asp-validation-for="Description" class="admin-validation"></span>
                 </div>
 
-                <label class="flex items-center gap-3 text-sm font-semibold text-brand-dark">
+                <label class="admin-post-checkbox-shell">
                     <input asp-for="IsActive" type="checkbox" class="admin-checkbox" />
                     <span>@Html.DisplayNameFor(x => x.IsActive)</span>
                 </label>
             </div>
         </div>
 
-        <div class="border-t border-brand-border pt-6 text-right">
-            <button type="submit" class="btn-primary">Lưu chi nhánh</button>
+        <div class="flex flex-col gap-3 border-t border-brand-border pt-6 sm:flex-row sm:justify-end">
+            <button type="submit" class="btn-primary w-full sm:w-auto">Lưu chi nhánh</button>
         </div>
     </form>
 </section>

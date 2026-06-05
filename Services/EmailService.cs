@@ -19,6 +19,16 @@ public sealed class EmailService : IEmailService
         _logger = logger;
     }
 
+    public Task SendEmailAsync(
+        string recipientEmail,
+        string subject,
+        string htmlBody,
+        string textBody,
+        CancellationToken cancellationToken = default)
+    {
+        return SendCoreAsync(recipientEmail, subject, htmlBody, textBody, "generic email", cancellationToken);
+    }
+
     public async Task SendReservationNotificationAsync(
         string recipientEmail,
         string subject,
@@ -26,25 +36,42 @@ public sealed class EmailService : IEmailService
         string textBody,
         CancellationToken cancellationToken = default)
     {
-        if (!TryValidateConfiguration(recipientEmail, out var warning))
+        await SendCoreAsync(recipientEmail, subject, htmlBody, textBody, "reservation notification email", cancellationToken);
+    }
+
+    private async Task SendCoreAsync(
+        string recipientEmail,
+        string subject,
+        string htmlBody,
+        string textBody,
+        string workflowName,
+        CancellationToken cancellationToken)
+    {
+        if (!TryValidateConfiguration(recipientEmail, subject, htmlBody, textBody, out var warning))
         {
-            _logger.LogWarning("Skipping reservation notification email. {Warning}", warning);
+            _logger.LogWarning("Skipping {WorkflowName}. {Warning}", workflowName, warning);
             return;
         }
+
+        var normalizedRecipient = recipientEmail.Trim();
+        var normalizedSubject = subject.Trim();
+        var normalizedHtmlBody = string.IsNullOrWhiteSpace(htmlBody) ? string.Empty : htmlBody.Trim();
+        var normalizedTextBody = string.IsNullOrWhiteSpace(textBody) ? string.Empty : textBody.Trim();
 
         try
         {
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeoutCts.CancelAfter(SendTimeout);
 
-            var message = CreateMessage(recipientEmail, subject, htmlBody, textBody);
+            var message = CreateMessage(normalizedRecipient, normalizedSubject, normalizedHtmlBody, normalizedTextBody);
             var response = await _resend.EmailSendAsync(message, timeoutCts.Token);
 
             if (!response.Success)
             {
                 _logger.LogWarning(
-                    "Reservation notification email via Resend was not accepted for {Recipient}. StatusCode={StatusCode}, ErrorType={ErrorType}, Message={Message}",
-                    recipientEmail,
+                    "{WorkflowName} via Resend was not accepted for {Recipient}. StatusCode={StatusCode}, ErrorType={ErrorType}, Message={Message}",
+                    workflowName,
+                    normalizedRecipient,
                     response.Exception?.StatusCode,
                     response.Exception?.ErrorType,
                     response.Exception?.Message);
@@ -54,25 +81,38 @@ public sealed class EmailService : IEmailService
         {
             _logger.LogWarning(
                 exception,
-                "Reservation notification email via Resend timed out after {TimeoutSeconds}s for {Recipient}.",
+                "{WorkflowName} via Resend timed out after {TimeoutSeconds}s for {Recipient}.",
+                workflowName,
                 SendTimeout.TotalSeconds,
-                recipientEmail);
+                normalizedRecipient);
         }
         catch (ResendException exception)
         {
-            _logger.LogWarning(exception, "Reservation notification email via Resend failed for {Recipient}.", recipientEmail);
+            _logger.LogWarning(exception, "{WorkflowName} via Resend failed for {Recipient}.", workflowName, normalizedRecipient);
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "Reservation notification email via Resend failed unexpectedly for {Recipient}.", recipientEmail);
+            _logger.LogWarning(exception, "{WorkflowName} via Resend failed unexpectedly for {Recipient}.", workflowName, normalizedRecipient);
         }
     }
 
-    private bool TryValidateConfiguration(string recipientEmail, out string warning)
+    private bool TryValidateConfiguration(string recipientEmail, string subject, string htmlBody, string textBody, out string warning)
     {
         if (string.IsNullOrWhiteSpace(recipientEmail))
         {
             warning = "Recipient email is empty.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(subject))
+        {
+            warning = "Email subject is empty.";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(htmlBody) && string.IsNullOrWhiteSpace(textBody))
+        {
+            warning = "Both HTML and text bodies are empty.";
             return false;
         }
 

@@ -13,7 +13,7 @@
             <p class="admin-help">Quản lý địa chỉ, hình ảnh, hotline và trạng thái hiển thị công khai của từng chi nhánh trên website.</p>
         </div>
 
-        <a href="@Url.Action("Create")" class="btn-primary">Tạo chi nhánh mới</a>
+        <a href="@Url.Action("Create")" class="btn-primary w-full sm:w-auto">Tạo chi nhánh mới</a>
     </div>
 
     <div class="admin-table-wrap">
@@ -23,7 +23,7 @@
                 <p class="text-sm font-semibold text-brand-dark">Tổng cộng @branches.Count chi nhánh đang được quản lý.</p>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="hidden overflow-x-auto md:block">
                 <table class="admin-table">
                     <thead>
                         <tr>
@@ -84,6 +84,62 @@
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <div class="grid gap-4 p-3 md:hidden">
+                @foreach (var branch in branches)
+                {
+                    <article class="rounded-2xl border border-brand-border bg-brand-white p-4 shadow-soft">
+                        <div class="flex gap-3">
+                            @if (!string.IsNullOrWhiteSpace(branch.ThumbnailUrl))
+                            {
+                                <img src="@branch.ThumbnailUrl" alt="@branch.Name" class="h-20 w-24 flex-none rounded-2xl border border-brand-border object-cover" />
+                            }
+                            else
+                            {
+                                <div class="grid h-20 w-24 flex-none place-items-center rounded-2xl border border-dashed border-brand-border bg-brand-light text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-gray">
+                                    No image
+                                </div>
+                            }
+
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-start justify-between gap-2">
+                                    <p class="break-words text-base font-black text-brand-dark">@branch.Name</p>
+                                    @if (branch.IsActive)
+                                    {
+                                        <span class="admin-badge admin-badge--success">Đang hiển thị</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="admin-badge admin-badge--muted">Đã ẩn</span>
+                                    }
+                                </div>
+                                <p class="mt-1 break-all text-xs text-brand-gray">/@branch.Slug</p>
+                                <p class="mt-2 text-sm font-semibold text-brand-dark">@branch.City</p>
+                            </div>
+                        </div>
+
+                        <dl class="mt-4 grid gap-2 text-sm">
+                            <div class="rounded-xl bg-brand-light p-3">
+                                <dt class="text-[10px] font-black uppercase tracking-[0.14em] text-brand-gray">Địa chỉ</dt>
+                                <dd class="mt-1 break-words font-semibold text-brand-dark">@branch.Address, @branch.District</dd>
+                            </div>
+                            <div class="rounded-xl bg-brand-light p-3">
+                                <dt class="text-[10px] font-black uppercase tracking-[0.14em] text-brand-gray">Hotline</dt>
+                                <dd class="mt-1 break-words font-semibold text-brand-dark">@branch.Hotline</dd>
+                            </div>
+                        </dl>
+
+                        <div class="mt-4 grid grid-cols-2 gap-2">
+                            <a href="@Url.Action("Edit", new { id = branch.Id })" class="admin-table-action admin-table-action--muted min-h-11 w-full">Sửa</a>
+
+                            <form asp-action="Delete" asp-route-id="@branch.Id" method="post" class="contents" onsubmit="return confirm('Ẩn chi nhánh này khỏi website công khai?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="admin-table-action admin-table-action--danger min-h-11 w-full">Xóa mềm</button>
+                            </form>
+                        </div>
+                    </article>
+                }
             </div>
         }
         else

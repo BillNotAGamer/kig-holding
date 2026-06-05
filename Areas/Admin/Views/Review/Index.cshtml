@@ -12,13 +12,13 @@
             <p class="admin-help">Theo dõi phản hồi khách hàng, thứ tự hiển thị và trạng thái công khai của từng đánh giá.</p>
         </div>
 
-        <a asp-action="Create" class="btn-primary">Tạo đánh giá mới</a>
+        <a asp-action="Create" class="btn-primary w-full sm:w-auto">Tạo đánh giá mới</a>
     </div>
 
     <div class="admin-table-wrap">
         @if (Model.Reviews.Any())
         {
-            <div class="overflow-x-auto">
+            <div class="hidden overflow-x-auto sm:block">
                 <table class="admin-table">
                     <thead>
                         <tr>
@@ -65,6 +65,45 @@
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <div class="grid gap-3 p-3 sm:hidden">
+                @foreach (var review in Model.Reviews)
+                {
+                    <article class="rounded-2xl border border-brand-border bg-brand-white p-4 shadow-soft">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="break-words text-base font-black text-brand-dark">@review.CustomerName</p>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span class="text-sm font-black tracking-[0.14em] text-amber-500">@(string.Concat(Enumerable.Repeat("\u2605", review.Rating)))</span>
+                                    <span class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-gray">@review.Rating/5</span>
+                                </div>
+                            </div>
+                            @if (review.IsVisible)
+                            {
+                                <span class="admin-badge admin-badge--success">Hiển thị</span>
+                            }
+                            else
+                            {
+                                <span class="admin-badge admin-badge--muted">Ẩn</span>
+                            }
+                        </div>
+
+                        <div class="mt-4 rounded-xl bg-brand-light p-3 text-sm">
+                            <p class="text-[11px] font-black uppercase tracking-[0.14em] text-brand-gray">Thứ tự</p>
+                            <p class="mt-1 font-semibold text-brand-dark">#@review.DisplayOrder</p>
+                        </div>
+
+                        <div class="mt-4 grid grid-cols-2 gap-2">
+                            <a asp-action="Edit" asp-route-id="@review.Id" class="admin-table-action admin-table-action--muted min-h-11 w-full">Sửa</a>
+
+                            <form asp-action="Delete" asp-route-id="@review.Id" method="post" class="contents" onsubmit="return confirm('Ẩn đánh giá này khỏi website công khai?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="admin-table-action admin-table-action--danger min-h-11 w-full">Ẩn</button>
+                            </form>
+                        </div>
+                    </article>
+                }
             </div>
         }
         else

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using KIGHolding.Models.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -5,8 +6,15 @@ namespace KIGHolding.Areas.Admin.ViewModels;
 
 public class ReservationIndexViewModel
 {
+    [Display(Name = "Trạng thái")]
     public ReservationStatus? StatusFilter { get; set; }
+
+    [Display(Name = "Chi nhánh")]
     public Guid? BranchFilter { get; set; }
+
+    [Display(Name = "Tìm kiếm")]
+    public string? SearchQuery { get; set; }
+
     public IReadOnlyList<SelectListItem> StatusOptions { get; set; } = [];
     public IReadOnlyList<SelectListItem> BranchOptions { get; set; } = [];
     public IReadOnlyList<ReservationListItemViewModel> Reservations { get; set; } = [];
@@ -22,6 +30,7 @@ public class ReservationListItemViewModel
     public TimeOnly ReservationTime { get; set; }
     public int GuestCount { get; set; }
     public ReservationStatus Status { get; set; }
+    public string StatusLabel { get; set; } = string.Empty;
 }
 
 public class ReservationDetailViewModel
@@ -35,7 +44,12 @@ public class ReservationDetailViewModel
     public TimeOnly ReservationTime { get; set; }
     public int GuestCount { get; set; }
     public string? Note { get; set; }
-    public ReservationStatus Status { get; set; }
+    public ReservationStatus CurrentStatus { get; set; }
+    public string StatusLabel { get; set; } = string.Empty;
+
+    [Display(Name = "Tình trạng")]
+    public ReservationStatus? Status { get; set; }
+
     public IReadOnlyList<SelectListItem> StatusOptions { get; set; } = [];
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
