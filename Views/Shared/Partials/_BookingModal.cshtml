@@ -4,6 +4,7 @@
 
 @{
     var branchOptions = new List<(Guid Id, string Name, string OpeningHours)>();
+    var diningOccasionOptions = ReservationOptionCatalog.DiningOccasionOptions;
     var hasConfiguredDatabase = false;
     var connectionString = Configuration.GetConnectionString("DefaultConnection");
 
@@ -150,6 +151,36 @@
                         </select>
                         <p class="booking-modal__field-error" data-booking-modal-error-for="BranchId"></p>
                     </label>
+
+                    <fieldset class="booking-modal__field booking-modal__field--span-3 booking-modal__option-group">
+                        <legend class="booking-modal__label booking-modal__label--static">Hình thức dùng bữa</legend>
+                        <p class="booking-modal__option-hint">Chọn một hình thức dùng bữa gần nhất với buổi ăn của bạn.</p>
+                        <div class="booking-modal__check-grid">
+                            @foreach (var option in diningOccasionOptions)
+                            {
+                                <label class="booking-modal__check-item">
+                                    <input type="radio"
+                                           name="DiningOccasionCode"
+                                           value="@option.Code"
+                                           class="booking-modal__checkbox" />
+                                    <span class="booking-modal__check-copy">
+                                        <span class="booking-modal__check-title">@option.DisplayLabel</span>
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="DiningOccasionCode"></p>
+                    </fieldset>
+
+                    <div class="booking-modal__field booking-modal__field--span-3" data-booking-modal-other-field="dining-occasion" hidden>
+                        <label for="booking-modal-dining-occasion-other-note" class="booking-modal__label">Ghi chú hình thức khác</label>
+                        <input id="booking-modal-dining-occasion-other-note"
+                               name="DiningOccasionOtherNote"
+                               type="text"
+                               class="booking-modal__input"
+                               placeholder="Nhập thông tin khi chọn Khác" />
+                        <p class="booking-modal__field-error" data-booking-modal-error-for="DiningOccasionOtherNote"></p>
+                    </div>
 
                     <label class="booking-modal__field booking-modal__field--span-3">
                         <span class="booking-modal__label">Ghi chú</span>

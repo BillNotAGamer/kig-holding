@@ -756,6 +756,75 @@
     cursor: pointer;
   }
 
+  .booking-modal__option-group {
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .booking-modal__label--static {
+    margin-bottom: 0;
+  }
+
+  .booking-modal__option-hint {
+    margin-top: 0.45rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.82rem;
+    line-height: 1.65;
+  }
+
+  .booking-modal__check-grid {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .booking-modal__check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.9rem 1rem;
+    transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+  }
+
+  .booking-modal__check-item:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .booking-modal__check-item:has(.booking-modal__checkbox:checked) {
+    border-color: rgba(229, 9, 20, 0.44);
+    background: rgba(229, 9, 20, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .booking-modal__checkbox {
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+    accent-color: #e50914;
+  }
+
+  .booking-modal__check-copy {
+    min-width: 0;
+  }
+
+  .booking-modal__check-title {
+    display: block;
+    color: #fffaf2;
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .booking-modal__field.is-invalid .booking-modal__check-item {
+    border-color: rgba(248, 113, 113, 0.42);
+  }
+
   .booking-modal__footer {
     display: flex;
     flex-direction: column;
@@ -869,6 +938,10 @@
   @media (min-width: 640px) {
     .booking-modal__grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .booking-modal__check-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .booking-modal__field--span-2 {
@@ -1024,8 +1097,8 @@
     height: 3.85rem;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    background: linear-gradient(135deg, #f31621 0%, #7d0a11 100%);
-    color: #fff;
+    background: #fff;
+    color: #0b0b0b;
     box-shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
     transition: transform 240ms ease, box-shadow 240ms ease;
   }
@@ -1072,7 +1145,19 @@
     transform: scale(0.7) rotate(40deg);
   }
 
+  .floating-contact-fab.is-open .floating-contact-fab__toggle {
+    background: #fff;
+    color: #0b0b0b;
+  }
+
+  .floating-contact-fab.is-open .floating-contact-fab__toggle:hover,
+  .floating-contact-fab.is-open .floating-contact-fab__toggle:focus-visible {
+    background: #fff;
+    color: #0b0b0b;
+  }
+
   .floating-contact-fab.is-open .floating-contact-fab__close {
+    color: #0b0b0b;
     opacity: 1;
     transform: scale(1) rotate(0deg);
   }
@@ -1833,6 +1918,141 @@
     text-wrap: balance;
   }
 
+  .franchise-page__contact {
+    display: grid;
+    gap: 1.35rem;
+    align-items: start;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .franchise-page__contact-copy {
+    max-width: 44rem;
+  }
+
+  .franchise-page__contact-form-wrap {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .franchise-page__form {
+    display: grid;
+    gap: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.025);
+    padding: clamp(1rem, 2vw, 1.45rem);
+  }
+
+  .franchise-page__form-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .franchise-page__field-group {
+    display: block;
+  }
+
+  .franchise-page__field-label {
+    display: inline-block;
+    margin-bottom: 0.6rem;
+    color: rgba(252, 165, 165, 0.95);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .franchise-page__field,
+  .franchise-page__textarea {
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.88rem 1rem;
+    color: #fff;
+    font-size: 0.94rem;
+    transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+  }
+
+  .franchise-page__field {
+    min-height: 3.1rem;
+  }
+
+  .franchise-page__textarea {
+    min-height: 7.5rem;
+    resize: vertical;
+  }
+
+  .franchise-page__field::placeholder,
+  .franchise-page__textarea::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .franchise-page__field:hover,
+  .franchise-page__textarea:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  .franchise-page__field:focus,
+  .franchise-page__textarea:focus {
+    outline: none;
+    border-color: rgba(229, 9, 20, 0.65);
+    box-shadow:
+      0 0 0 1px rgba(229, 9, 20, 0.45),
+      0 14px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .franchise-page__form-note {
+    margin-top: 1rem;
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .franchise-page__validation {
+    display: block;
+    margin-top: 0.5rem;
+    min-height: 1.15rem;
+    color: rgb(252 165 165);
+    font-size: 0.85rem;
+  }
+
+  .franchise-page__validation--summary {
+    border: 1px solid rgba(248, 113, 113, 0.32);
+    border-radius: 1rem;
+    background: rgba(127, 29, 29, 0.2);
+    padding: 0.85rem 1rem;
+    color: rgb(254 202 202);
+  }
+
+  .franchise-page__notice {
+    border-radius: 1rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .franchise-page__notice--success {
+    border: 1px solid rgba(52, 211, 153, 0.24);
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  .franchise-page__notice-title {
+    color: #d1fae5;
+    font-weight: 800;
+  }
+
+  .franchise-page__notice-copy {
+    margin-top: 0.25rem;
+    color: rgba(209, 250, 229, 0.78);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .franchise-page__submit {
+    min-height: 3rem;
+    justify-self: start;
+  }
+
   @media (min-width: 1024px) {
     .franchise-page__shell {
       padding-block: clamp(3.25rem, 5.6vw, 5.75rem);
@@ -1875,6 +2095,15 @@
       justify-content: flex-end;
       min-width: max-content;
     }
+
+    .franchise-page__contact {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+      gap: 2rem;
+    }
+
+    .franchise-page__form-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   @media (max-width: 767px) {
@@ -1914,6 +2143,14 @@
 
     .franchise-page__cta-title {
       font-size: clamp(1.65rem, 7vw, 2.25rem);
+    }
+
+    .franchise-page__contact {
+      padding-top: 1rem;
+    }
+
+    .franchise-page__submit {
+      justify-self: stretch;
     }
   }
 
@@ -2261,6 +2498,24 @@
 
   .contact-page__field {
     min-height: 3.15rem;
+  }
+
+  select.contact-page__field {
+    appearance: none;
+    padding-right: 2.75rem;
+    background-image:
+      linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.72) 50%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.72) 50%, transparent 50%);
+    background-position:
+      calc(100% - 1.2rem) 50%,
+      calc(100% - 0.86rem) 50%;
+    background-size: 0.36rem 0.36rem, 0.36rem 0.36rem;
+    background-repeat: no-repeat;
+  }
+
+  .contact-page__field option {
+    background: #111;
+    color: #fff;
   }
 
   .contact-page__textarea {
@@ -2650,6 +2905,70 @@
     cursor: pointer;
   }
 
+  .reservation-page__option-group {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .reservation-page__option-head {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .reservation-page__option-hint {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.86rem;
+    line-height: 1.65;
+  }
+
+  .reservation-page__check-grid {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .reservation-page__check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.95rem 1rem;
+    transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+  }
+
+  .reservation-page__check-item:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-1px);
+  }
+
+  .reservation-page__check-item:has(.reservation-page__checkbox:checked) {
+    border-color: rgba(229, 9, 20, 0.44);
+    background: rgba(229, 9, 20, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .reservation-page__checkbox {
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+    accent-color: #e50914;
+  }
+
+  .reservation-page__check-copy {
+    min-width: 0;
+  }
+
+  .reservation-page__check-title {
+    display: block;
+    color: #fffaf2;
+    font-size: 0.94rem;
+    line-height: 1.65;
+  }
+
   .reservation-page__summary,
   .reservation-page__advisory {
     position: relative;
@@ -2794,6 +3113,12 @@
     }
   }
 
+  @media (min-width: 640px) {
+    .reservation-page__check-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
   .champong-hero {
     min-height: clamp(38rem, calc(100svh - 5rem), 54rem);
   }
@@ -2825,7 +3150,7 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-position: var(--champong-hero-image-position, center);
-    filter: saturate(1.04) contrast(1.03) brightness(0.92);
+    filter: saturate(1.04) contrast(1.03) brightness(0.98);
     transform: scale(1.025);
     transition: transform 7600ms ease;
   }
@@ -2839,7 +3164,7 @@
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.12) 42%, rgba(0, 0, 0, 0.42) 100%);
+      linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.08) 42%, rgba(0, 0, 0, 0.34) 100%);
   }
 
   .champong-hero__media::after {
@@ -2847,20 +3172,20 @@
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(90deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.48) 42%, rgba(0, 0, 0, 0.24) 100%),
-      linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.04) 40%, rgba(0, 0, 0, 0.18) 100%);
+      linear-gradient(90deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.4) 42%, rgba(0, 0, 0, 0.18) 100%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.03) 40%, rgba(0, 0, 0, 0.12) 100%);
   }
 
   .champong-hero__slide--two .champong-hero__media::after {
     background:
-      linear-gradient(90deg, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.34) 24%, rgba(0, 0, 0, 0.22) 50%, rgba(0, 0, 0, 0.34) 76%, rgba(0, 0, 0, 0.58) 100%),
-      linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.04) 40%, rgba(0, 0, 0, 0.24) 100%);
+      linear-gradient(90deg, rgba(0, 0, 0, 0.48) 0%, rgba(0, 0, 0, 0.26) 24%, rgba(0, 0, 0, 0.14) 50%, rgba(0, 0, 0, 0.26) 76%, rgba(0, 0, 0, 0.48) 100%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.03) 40%, rgba(0, 0, 0, 0.16) 100%);
   }
 
   .champong-hero__slide--three .champong-hero__media::after {
     background:
-      linear-gradient(270deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.48) 42%, rgba(0, 0, 0, 0.24) 100%),
-      linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.04) 40%, rgba(0, 0, 0, 0.18) 100%);
+      linear-gradient(270deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.4) 42%, rgba(0, 0, 0, 0.18) 100%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.03) 40%, rgba(0, 0, 0, 0.12) 100%);
   }
 
   .champong-hero__inner {
@@ -2976,7 +3301,7 @@
     .champong-hero__slide--three .champong-hero__media::after,
     .champong-hero__slide--two .champong-hero__media::after {
       background:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.76) 0%, rgba(0, 0, 0, 0.44) 48%, rgba(0, 0, 0, 0.68) 100%);
+        linear-gradient(180deg, rgba(0, 0, 0, 0.66) 0%, rgba(0, 0, 0, 0.34) 48%, rgba(0, 0, 0, 0.56) 100%);
     }
 
     .champong-hero__content,

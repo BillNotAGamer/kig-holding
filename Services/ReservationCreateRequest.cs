@@ -8,5 +8,7 @@ public class ReservationCreateRequest
     public int GuestCount { get; set; }
     public DateOnly ReservationDate { get; set; }
     public TimeOnly ReservationTime { get; set; }
+    public string? DiningOccasionCode { get; set; }
+    public string? DiningOccasionOtherNote { get; set; }
     public string? Note { get; set; }
 }

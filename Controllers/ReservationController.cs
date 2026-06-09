@@ -271,6 +271,11 @@ public class ReservationController : Controller
             ReservationTime = reservation?.ReservationTime ?? model.ReservationTime!.Value,
             BranchName = branch?.Name,
             BranchAddress = branchAddress,
+            DiningOccasionDisplay = reservation is not null
+                ? ReservationOptionCatalog.FormatDiningOccasionCodesForDisplay(reservation.DiningOccasionCodes)
+                : ReservationOptionCatalog.FormatDiningOccasionCode(model.DiningOccasionCode),
+            DiningOccasionOtherNote = reservation?.DiningOccasionOtherNote
+                ?? ResolveConditionalOtherNote(model.DiningOccasionCode, model.DiningOccasionOtherNote),
             Note = string.IsNullOrWhiteSpace(reservation?.Note) ? model.Note?.Trim() : reservation.Note
         };
     }
@@ -286,6 +291,8 @@ public class ReservationController : Controller
         {
             ModelState.AddModelError(nameof(model.BranchId), "Vui lòng chọn chi nhánh.");
         }
+
+        ValidateSingleSelectPost(nameof(model.DiningOccasionCode), "Lựa chọn hình thức dùng bữa không hợp lệ.");
 
         if (!HasConfiguredDatabase())
         {
@@ -303,6 +310,8 @@ public class ReservationController : Controller
             GuestCount = model.GuestCount,
             ReservationDate = model.ReservationDate!.Value,
             ReservationTime = model.ReservationTime!.Value,
+            DiningOccasionCode = model.DiningOccasionCode,
+            DiningOccasionOtherNote = model.DiningOccasionOtherNote,
             Note = model.Note
         }, cancellationToken);
     }
@@ -431,5 +440,31 @@ public class ReservationController : Controller
             Address = $"{branch.Address}, {branch.District}, {branch.City}",
             OpeningHours = $"{branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm}"
         }).ToList();
+    }
+
+    private void ValidateSingleSelectPost(string fieldName, string errorMessage)
+    {
+        if (!Request.HasFormContentType)
+        {
+            return;
+        }
+
+        if (Request.Form[fieldName].Count > 1)
+        {
+            ModelState.AddModelError(fieldName, errorMessage);
+        }
+    }
+
+    private static string? ResolveConditionalOtherNote(string? code, string? note)
+    {
+        if (!string.Equals(
+                ReservationOptionCatalog.NormalizeSingleCode(code),
+                ReservationOptionCatalog.OtherCode,
+                StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        return string.IsNullOrWhiteSpace(note) ? null : note.Trim();
     }
 }

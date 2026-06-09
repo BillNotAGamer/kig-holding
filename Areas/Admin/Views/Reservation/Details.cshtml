@@ -65,6 +65,34 @@
             </div>
 
             <div class="mt-6">
+                <p class="admin-label">Thông tin dùng bữa bổ sung</p>
+                @if (string.IsNullOrWhiteSpace(Model.DiningOccasionDisplay)
+                    && string.IsNullOrWhiteSpace(Model.DiningOccasionOtherNote))
+                {
+                    <div class="mt-2 rounded-md border border-brand-border bg-brand-white p-4 text-sm leading-6 text-brand-gray">
+                        Không có thông tin bổ sung.
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-2 grid gap-4 sm:grid-cols-2">
+                        <div class="rounded-md border border-brand-border bg-brand-white p-4">
+                            <p class="admin-label">Hình thức dùng bữa</p>
+                            <p class="mt-2 text-sm leading-6 text-brand-dark">
+                                @(string.IsNullOrWhiteSpace(Model.DiningOccasionDisplay) ? "Không có thông tin bổ sung." : Model.DiningOccasionDisplay)
+                            </p>
+                        </div>
+                        <div class="rounded-md border border-brand-border bg-brand-white p-4">
+                            <p class="admin-label">Ghi chú hình thức khác</p>
+                            <p class="mt-2 text-sm leading-6 text-brand-dark">
+                                @(string.IsNullOrWhiteSpace(Model.DiningOccasionOtherNote) ? "Không có ghi chú." : Model.DiningOccasionOtherNote)
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="mt-6">
                 <p class="admin-label">Internal Note</p>
                 <div class="mt-2 rounded-md border border-brand-border bg-brand-white p-4 text-sm leading-6 text-brand-dark">
                     @(string.IsNullOrWhiteSpace(Model.Note) ? "Chưa có ghi chú nội bộ." : Model.Note)

@@ -23,6 +23,8 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
         builder.Property(x => x.CustomerName).HasMaxLength(160).IsRequired();
         builder.Property(x => x.PhoneNumber).HasMaxLength(32).IsRequired();
         builder.Property(x => x.Email).HasMaxLength(160);
+        builder.Property(x => x.DiningOccasionCodes).HasMaxLength(256);
+        builder.Property(x => x.DiningOccasionOtherNote).HasMaxLength(200);
         builder.Property(x => x.Note).HasMaxLength(1000);
         builder.Property(x => x.Status)
             .HasConversion<string>()

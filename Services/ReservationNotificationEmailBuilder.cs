@@ -15,6 +15,9 @@ public static class ReservationNotificationEmailBuilder
         var note = string.IsNullOrWhiteSpace(model.Note) ? "Không có" : model.Note.Trim();
         var branchName = string.IsNullOrWhiteSpace(model.BranchName) ? "Chưa cập nhật" : model.BranchName.Trim();
         var branchAddress = string.IsNullOrWhiteSpace(model.BranchAddress) ? "Chưa cập nhật" : model.BranchAddress.Trim();
+        var additionalRows = string.Concat(
+            OptionalRow("Hình thức dùng bữa", model.DiningOccasionDisplay),
+            OptionalRow("Ghi chú hình thức khác", model.DiningOccasionOtherNote));
 
         return $"""
 <!DOCTYPE html>
@@ -44,8 +47,8 @@ public static class ReservationNotificationEmailBuilder
                     {Row("Giờ đến", model.ReservationTime.ToString("HH:mm"))}
                     {Row("Chi nhánh", branchName)}
                     {Row("Địa chỉ chi nhánh", branchAddress)}
+                    {additionalRows}
                     {Row("Ghi chú", note)}
-                    
                 </table>
             </td>
         </tr>
@@ -68,6 +71,8 @@ public static class ReservationNotificationEmailBuilder
         builder.AppendLine($"Giờ đến: {model.ReservationTime:HH\\:mm}");
         builder.AppendLine($"Chi nhánh: {Fallback(model.BranchName)}");
         builder.AppendLine($"Địa chỉ chi nhánh: {Fallback(model.BranchAddress)}");
+        AppendOptionalLine(builder, "Hình thức dùng bữa", model.DiningOccasionDisplay);
+        AppendOptionalLine(builder, "Ghi chú hình thức khác", model.DiningOccasionOtherNote);
         builder.AppendLine($"Ghi chú: {Fallback(model.Note)}");
         return builder.ToString();
     }
@@ -82,16 +87,28 @@ public static class ReservationNotificationEmailBuilder
 """;
     }
 
+    private static string OptionalRow(string label, string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? string.Empty : Row(label, value);
+    }
+
     private static string Html(string? value)
     {
         return WebUtility.HtmlEncode(Fallback(value));
+    }
+
+    private static void AppendOptionalLine(StringBuilder builder, string label, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            builder.AppendLine($"{label}: {value.Trim()}");
+        }
     }
 
     private static string Fallback(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? "Không có" : value.Trim();
     }
-
 }
 
 public sealed class ReservationNotificationEmailModel
@@ -104,5 +121,7 @@ public sealed class ReservationNotificationEmailModel
     public TimeOnly ReservationTime { get; init; }
     public string? BranchName { get; init; }
     public string? BranchAddress { get; init; }
+    public string? DiningOccasionDisplay { get; init; }
+    public string? DiningOccasionOtherNote { get; init; }
     public string? Note { get; init; }
 }

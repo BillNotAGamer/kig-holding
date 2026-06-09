@@ -21,6 +21,7 @@ public class ContactCreateViewModel
     [Display(Name = "Email")]
     public string? Email { get; set; }
 
+    [Required(ErrorMessage = "Vui lòng chọn chủ đề.")]
     [StringLength(220, ErrorMessage = "Chủ đề không được vượt quá 220 ký tự.")]
     [Display(Name = "Chủ đề")]
     public string? Subject { get; set; }

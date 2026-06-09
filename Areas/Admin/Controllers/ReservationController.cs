@@ -1,6 +1,7 @@
 using KIGHolding.Areas.Admin.ViewModels;
 using KIGHolding.Data;
 using KIGHolding.Models.Enums;
+using KIGHolding.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -54,10 +55,16 @@ public class ReservationController : AdminBaseController
                 ReservationDate = x.ReservationDate,
                 ReservationTime = x.ReservationTime,
                 GuestCount = x.GuestCount,
+                DiningOccasionCodes = x.DiningOccasionCodes,
                 Status = x.Status,
                 StatusLabel = GetStatusLabel(x.Status)
             })
             .ToListAsync();
+
+        foreach (var reservation in filter.Reservations)
+        {
+            reservation.DiningOccasionDisplay = ReservationOptionCatalog.FormatDiningOccasionCodesForDisplay(reservation.DiningOccasionCodes);
+        }
 
         filter.SearchQuery = search;
         filter.StatusOptions = BuildFilterStatusOptions();
@@ -148,6 +155,8 @@ public class ReservationController : AdminBaseController
                 ReservationDate = x.ReservationDate,
                 ReservationTime = x.ReservationTime,
                 GuestCount = x.GuestCount,
+                DiningOccasionCodes = x.DiningOccasionCodes,
+                DiningOccasionOtherNote = x.DiningOccasionOtherNote,
                 Note = x.Note,
                 CurrentStatus = x.Status,
                 StatusLabel = GetStatusLabel(x.Status),
@@ -172,6 +181,7 @@ public class ReservationController : AdminBaseController
             model.Status = submittedStatus.Value;
         }
 
+        model.DiningOccasionDisplay = ReservationOptionCatalog.FormatDiningOccasionCodesForDisplay(model.DiningOccasionCodes);
         model.StatusOptions = BuildAllowedStatusOptions(model.CurrentStatus);
         return model;
     }

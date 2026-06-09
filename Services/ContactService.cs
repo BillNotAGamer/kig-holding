@@ -30,7 +30,7 @@ public class ContactService : IContactService
             FullName = request.FullName.Trim(),
             PhoneNumber = request.PhoneNumber.Trim(),
             Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
-            Subject = string.IsNullOrWhiteSpace(request.Subject) ? null : request.Subject.Trim(),
+            Subject = ContactSubjectOptions.NormalizeOrNull(request.Subject),
             Message = request.Message.Trim(),
             Status = ContactMessageStatus.New,
             CreatedAt = now,
@@ -86,6 +86,23 @@ public class ContactService : IContactService
             {
                 FieldName = nameof(request.Message),
                 Message = "Vui lòng nhập nội dung liên hệ."
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Subject))
+        {
+            errors.Add(new ContactServiceError
+            {
+                FieldName = nameof(request.Subject),
+                Message = "Vui lòng chọn chủ đề."
+            });
+        }
+        else if (!ContactSubjectOptions.TryNormalize(request.Subject, out _))
+        {
+            errors.Add(new ContactServiceError
+            {
+                FieldName = nameof(request.Subject),
+                Message = "Chủ đề liên hệ không hợp lệ."
             });
         }
 

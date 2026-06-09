@@ -1,4 +1,5 @@
 @model ContactCreateViewModel
+@using KIGHolding.Services
 
 @{
     ViewData["Title"] = "Liên hệ";
@@ -157,7 +158,13 @@
 
                                 <label class="contact-page__field-group">
                                     <span class="contact-page__field-label">Chủ đề</span>
-                                    <input asp-for="Subject" class="contact-page__field" placeholder="Góp ý, đặt tiệc, hợp tác..." />
+                                    <select asp-for="Subject" class="contact-page__field">
+                                        <option value="">Chọn chủ đề</option>
+                                        @foreach (var subject in ContactSubjectOptions.Values)
+                                        {
+                                            <option value="@subject">@subject</option>
+                                        }
+                                    </select>
                                     <span asp-validation-for="Subject" class="contact-page__validation"></span>
                                 </label>
                             </div>

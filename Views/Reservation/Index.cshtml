@@ -1,8 +1,11 @@
+@using KIGHolding.Services
 @model ReservationCreateViewModel
 
 @{
     ViewData["Title"] = "Đặt bàn";
     ViewData["MetaDescription"] = "Đặt bàn trước tại Truyền Thuyết Champong. Chọn chi nhánh, thời gian và số khách để giữ bàn nhanh chóng.";
+    var selectedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(Model.DiningOccasionCode);
+    var showDiningOccasionOther = string.Equals(selectedDiningOccasionCode, ReservationOptionCatalog.OtherCode, StringComparison.Ordinal);
 }
 
 <main data-reservation-page="index" class="reservation-page--dark">
@@ -93,6 +96,38 @@
                         </label>
                     </div>
 
+                    <div class="reservation-page__option-group">
+                        <div class="reservation-page__option-head">
+                            <span class="reservation-page__field-label">Hình thức dùng bữa</span>
+                            <p class="reservation-page__option-hint">Chọn một hình thức dùng bữa gần nhất với buổi ăn của bạn.</p>
+                        </div>
+                        <div class="reservation-page__check-grid">
+                            @foreach (var option in ReservationOptionCatalog.DiningOccasionOptions)
+                            {
+                                <label class="reservation-page__check-item">
+                                    <input type="radio"
+                                           name="DiningOccasionCode"
+                                           value="@option.Code"
+                                           class="reservation-page__checkbox"
+                                           checked="@string.Equals(selectedDiningOccasionCode, option.Code, StringComparison.Ordinal)" />
+                                    <span class="reservation-page__check-copy">
+                                        <span class="reservation-page__check-title">@option.DisplayLabel</span>
+                                    </span>
+                                </label>
+                            }
+                        </div>
+                        <span asp-validation-for="DiningOccasionCode" class="reservation-page__validation"></span>
+                    </div>
+
+                    <label class="reservation-page__field-group reservation-page__conditional-field @(showDiningOccasionOther ? string.Empty : "hidden")"
+                           data-reservation-other-field="dining-occasion">
+                        <span class="reservation-page__field-label">Ghi chú hình thức khác</span>
+                        <input asp-for="DiningOccasionOtherNote"
+                               class="reservation-page__field"
+                               placeholder="Nhập thông tin khi chọn Khác" />
+                        <span asp-validation-for="DiningOccasionOtherNote" class="reservation-page__validation"></span>
+                    </label>
+
                     @if (Model.ShouldShowLargeGroupNotice)
                     {
                         <div class="reservation-page__advisory">
@@ -161,4 +196,45 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const configs = [
+                { fieldName: 'DiningOccasionCode', fieldKey: 'dining-occasion' }
+            ];
+
+            const syncOtherField = ({ fieldName, fieldKey }) => {
+                const field = document.querySelector(`[data-reservation-other-field="${fieldKey}"]`);
+                if (!field) {
+                    return;
+                }
+
+                const selectedInput = document.querySelector(`input[name="${fieldName}"]:checked`);
+                const shouldShow = selectedInput instanceof HTMLInputElement && selectedInput.value === 'other';
+
+                field.classList.toggle('hidden', !shouldShow);
+
+                if (!shouldShow) {
+                    const textField = field.querySelector('input, textarea');
+                    if (textField instanceof HTMLInputElement || textField instanceof HTMLTextAreaElement) {
+                        textField.value = '';
+                    }
+                }
+            };
+
+            document.addEventListener('change', (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) {
+                    return;
+                }
+
+                configs.forEach((config) => {
+                    if (target.name === config.fieldName) {
+                        syncOtherField(config);
+                    }
+                });
+            });
+
+            configs.forEach(syncOtherField);
+        })();
+    </script>
 }

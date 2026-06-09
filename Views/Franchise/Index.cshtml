@@ -1,6 +1,9 @@
+@model ContactCreateViewModel
+@using KIGHolding.Services
+
 @{
     ViewData["Title"] = "Liên hệ nhượng quyền";
-    ViewData["MetaDescription"] = "Trao đổi cơ hội nhượng quyền cùng Truyền Thuyết Champong - mô hình ẩm thực Hàn Quốc hiện đại, tinh gọn và phù hợp mở rộng.";
+    ViewData["MetaDescription"] = "Trao đổi cơ hội hợp tác phát triển cùng KIG Holding VN: chủ mặt bằng, nhà đầu tư và doanh nghiệp đồng hành cùng hệ thống nhà hàng Hàn Quốc được vận hành bài bản.";
 }
 
 <main class="franchise-page franchise-page--dark relative isolate overflow-hidden text-white">
@@ -8,10 +11,11 @@
         <section class="franchise-page__section franchise-page__section--hero">
             <div class="container-page">
                 <div class="franchise-page__hero" data-uw-reveal="fade-up" data-uw-once="true">
-                    <p class="franchise-page__eyebrow">NHƯỢNG QUYỀN</p>
-                    <h1 class="franchise-page__title">Đồng hành cùng Truyền Thuyết Champong</h1>
+                    <p class="franchise-page__eyebrow">HỢP TÁC PHÁT TRIỂN</p>
+                    <h1 class="franchise-page__title">Cùng KIG Holding mở rộng dấu ấn ẩm thực Hàn Quốc tại Việt Nam</h1>
                     <p class="franchise-page__lead">
-                        Một mô hình ẩm thực Hàn Quốc hiện đại, tối ưu vận hành và phù hợp mở rộng tại các khu vực tiềm năng.
+                        KIG Holding VN tìm kiếm những đối tác cùng chia sẻ tầm nhìn phát triển dài hạn: từ chủ mặt bằng,
+                        nhà đầu tư đến doanh nghiệp mong muốn đồng hành cùng một hệ thống nhà hàng được vận hành bài bản.
                     </p>
                     <div class="franchise-page__actions">
                         <a href="/lien-he" class="franchise-page__button franchise-page__button--primary">Liên hệ tư vấn</a>
@@ -24,32 +28,32 @@
         <section class="franchise-page__section">
             <div class="container-page">
                 <div class="franchise-page__section-head" data-uw-reveal="fade-up" data-uw-delay="80" data-uw-once="true">
-                    <p class="franchise-page__eyebrow">LỢI THẾ HỢP TÁC</p>
-                    <h2 class="franchise-page__section-title">Vì sao chọn Truyền Thuyết Champong?</h2>
+                    <p class="franchise-page__eyebrow">LỢI THẾ HỆ THỐNG</p>
+                    <h2 class="franchise-page__section-title">Không chỉ là một thương hiệu, mà là một nền tảng vận hành</h2>
                 </div>
 
                 <div class="franchise-page__grid franchise-page__grid--benefits">
                     <article class="franchise-page__item" data-uw-reveal="fade-up" data-uw-delay="80" data-uw-once="true">
                         <span class="franchise-page__item-index">01</span>
-                        <h3 class="franchise-page__item-title">Thương hiệu có định vị rõ ràng</h3>
+                        <h3 class="franchise-page__item-title">Kinh nghiệm vận hành 19 chi nhánh</h3>
                         <p class="franchise-page__item-copy">
-                            Tập trung vào trải nghiệm món Hàn hiện đại, dễ nhận diện và phù hợp nhiều nhóm khách hàng.
+                            Từ Truyền Thuyết Champong đến Gogi Maru và KBB COOK, hệ thống được phát triển trên kinh nghiệm vận hành thực tế tại nhiều điểm bán.
                         </p>
                     </article>
 
                     <article class="franchise-page__item" data-uw-reveal="fade-up" data-uw-delay="120" data-uw-once="true">
                         <span class="franchise-page__item-index">02</span>
-                        <h3 class="franchise-page__item-title">Mô hình vận hành tinh gọn</h3>
+                        <h3 class="franchise-page__item-title">Quy trình quản trị chuyên nghiệp</h3>
                         <p class="franchise-page__item-copy">
-                            Quy trình món, phục vụ và trải nghiệm được chuẩn hóa để thuận tiện khi mở rộng.
+                            Đằng sau mỗi chi nhánh là quy trình phục vụ, đào tạo, quản trị và kiểm soát chất lượng được hệ thống hóa để giữ trải nghiệm ổn định.
                         </p>
                     </article>
 
                     <article class="franchise-page__item" data-uw-reveal="fade-up" data-uw-delay="160" data-uw-once="true">
                         <span class="franchise-page__item-index">03</span>
-                        <h3 class="franchise-page__item-title">Đồng hành trong hệ sinh thái KIG</h3>
+                        <h3 class="franchise-page__item-title">Chuỗi cung ứng được tối ưu theo quy mô</h3>
                         <p class="franchise-page__item-copy">
-                            Kết nối định hướng thương hiệu, vận hành và truyền thông trong cùng một hệ thống.
+                            Quy mô hệ thống giúp KIG Holding tiếp cận nguồn nguyên liệu, tiêu chuẩn vận hành và chi phí cạnh tranh hơn trong quá trình mở rộng.
                         </p>
                     </article>
                 </div>
@@ -61,61 +65,62 @@
                 <div class="franchise-page__columns">
                     <div class="franchise-page__column" data-uw-reveal="fade-up" data-uw-delay="80" data-uw-once="true">
                         <p class="franchise-page__eyebrow">ĐỐI TÁC PHÙ HỢP</p>
-                        <h2 class="franchise-page__section-title">Phù hợp với đối tác nào?</h2>
+                        <h2 class="franchise-page__section-title">Dành cho chủ mặt bằng, nhà đầu tư và doanh nghiệp cùng tầm nhìn</h2>
                         <p class="franchise-page__section-copy">
-                            Chúng tôi tìm kiếm đối tác có định hướng đầu tư nghiêm túc trong ngành F&amp;B, ưu tiên khu vực có mật độ khách hàng tốt, mặt bằng phù hợp và mong muốn đồng hành dài hạn cùng thương hiệu.
+                            KIG Holding VN luôn sẵn sàng trao đổi với các đối tác có định hướng phát triển nghiêm túc trong ngành F&amp;B.
+                            Điều chúng tôi tìm kiếm không chỉ là một địa điểm, mà là sự đồng hành dài hạn để đưa trải nghiệm ẩm thực Hàn Quốc đến gần hơn với nhiều khu vực tiềm năng.
                         </p>
 
                         <div class="franchise-page__bullets" aria-label="Tiêu chí phù hợp">
                             <div class="franchise-page__bullet">
                                 <span class="franchise-page__bullet-mark" aria-hidden="true"></span>
-                                <span>Nguồn lực tài chính ổn định</span>
+                                <span>Chủ mặt bằng tại thành phố lớn, trung tâm thương mại hoặc khu vực F&amp;B có tiềm năng.</span>
                             </div>
                             <div class="franchise-page__bullet">
                                 <span class="franchise-page__bullet-mark" aria-hidden="true"></span>
-                                <span>Mặt bằng có tiềm năng khai thác</span>
+                                <span>Nhà đầu tư mong muốn đồng hành cùng mô hình nhà hàng đã có hệ thống vận hành rõ ràng.</span>
                             </div>
                             <div class="franchise-page__bullet">
                                 <span class="franchise-page__bullet-mark" aria-hidden="true"></span>
-                                <span>Tư duy vận hành dài hạn</span>
+                                <span>Doanh nghiệp tìm kiếm cơ hội hợp tác phát triển thương hiệu ẩm thực Hàn Quốc tại Việt Nam.</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="franchise-page__column franchise-page__column--process" data-uw-reveal="fade-up" data-uw-delay="120" data-uw-once="true">
                         <p class="franchise-page__eyebrow">QUY TRÌNH TRAO ĐỔI</p>
-                        <h2 class="franchise-page__section-title">Nhịp trao đổi gọn, rõ, đúng trọng tâm</h2>
+                        <h2 class="franchise-page__section-title">Từ nhu cầu hợp tác đến kế hoạch phát triển có cơ sở</h2>
 
                         <div class="franchise-page__steps">
                             <article class="franchise-page__step">
                                 <span class="franchise-page__step-index">01</span>
                                 <div>
-                                    <h3 class="franchise-page__step-title">Tiếp nhận thông tin</h3>
-                                    <p class="franchise-page__step-copy">Ghi nhận nhu cầu, khu vực và định hướng đầu tư ban đầu.</p>
+                                    <h3 class="franchise-page__step-title">Tiếp nhận thông tin hợp tác</h3>
+                                    <p class="franchise-page__step-copy">Ghi nhận vai trò đối tác, khu vực quan tâm, mặt bằng hoặc định hướng đầu tư ban đầu.</p>
                                 </div>
                             </article>
 
                             <article class="franchise-page__step">
                                 <span class="franchise-page__step-index">02</span>
                                 <div>
-                                    <h3 class="franchise-page__step-title">Trao đổi mô hình hợp tác</h3>
-                                    <p class="franchise-page__step-copy">Làm rõ phạm vi đồng hành, vận hành và kỳ vọng triển khai.</p>
+                                    <h3 class="franchise-page__step-title">Làm rõ mô hình phù hợp</h3>
+                                    <p class="franchise-page__step-copy">Trao đổi về thương hiệu, khả năng vận hành, nhu cầu thị trường và mức độ phù hợp của từng khu vực.</p>
                                 </div>
                             </article>
 
                             <article class="franchise-page__step">
                                 <span class="franchise-page__step-index">03</span>
                                 <div>
-                                    <h3 class="franchise-page__step-title">Khảo sát khu vực phù hợp</h3>
-                                    <p class="franchise-page__step-copy">Đánh giá mặt bằng, lưu lượng khách và điều kiện vận hành.</p>
+                                    <h3 class="franchise-page__step-title">Đánh giá mặt bằng và điều kiện triển khai</h3>
+                                    <p class="franchise-page__step-copy">Xem xét lưu lượng khách, vị trí, khả năng cung ứng và các điều kiện cần cho vận hành nhà hàng.</p>
                                 </div>
                             </article>
 
                             <article class="franchise-page__step">
                                 <span class="franchise-page__step-index">04</span>
                                 <div>
-                                    <h3 class="franchise-page__step-title">Thống nhất kế hoạch triển khai</h3>
-                                    <p class="franchise-page__step-copy">Chốt hướng đi và bước chuẩn bị tiếp theo trước khi mở rộng.</p>
+                                    <h3 class="franchise-page__step-title">Thống nhất kế hoạch phát triển</h3>
+                                    <p class="franchise-page__step-copy">Xác định bước chuẩn bị tiếp theo trên nền tảng quản trị, chuỗi cung ứng và tiêu chuẩn dịch vụ của hệ thống.</p>
                                 </div>
                             </article>
                         </div>
@@ -129,9 +134,10 @@
                 <div class="franchise-page__cta" data-uw-reveal="fade-up" data-uw-delay="160" data-uw-once="true">
                     <div class="franchise-page__cta-copy">
                         <p class="franchise-page__eyebrow">KẾT NỐI</p>
-                        <h2 class="franchise-page__cta-title">Sẵn sàng trao đổi về cơ hội hợp tác?</h2>
+                        <h2 class="franchise-page__cta-title">Sẵn sàng trao đổi về cơ hội phát triển cùng KIG Holding?</h2>
                         <p class="franchise-page__cta-lead">
-                            Để lại thông tin để đội ngũ Truyền Thuyết Champong kết nối và tư vấn bước tiếp theo.
+                            Một thương hiệu không chỉ nằm ở bảng hiệu. Đằng sau mỗi chi nhánh là quy trình vận hành,
+                            nguồn nguyên liệu và tiêu chuẩn dịch vụ được hệ thống hóa để tạo nên trải nghiệm nhất quán.
                         </p>
                     </div>
 
@@ -142,5 +148,72 @@
                 </div>
             </div>
         </section>
+
+        <section class="franchise-page__section franchise-page__section--contact">
+            <div class="container-page">
+                <div class="franchise-page__contact" data-uw-reveal="fade-up" data-uw-delay="180" data-uw-once="true">
+                    <div class="franchise-page__contact-copy">
+                        <p class="franchise-page__eyebrow">FORM NHANH</p>
+                        <h2 class="franchise-page__section-title">Để lại thông tin hợp tác</h2>
+                        <p class="franchise-page__section-copy">
+                            Chia sẻ ngắn gọn vai trò của bạn, khu vực quan tâm hoặc định hướng hợp tác để đội ngũ KIG Holding VN chủ động kết nối và trao đổi bước tiếp theo.
+                        </p>
+                        <p class="franchise-page__form-note">Chủ đề được ghi nhận: @ContactSubjectOptions.Partnership</p>
+                    </div>
+
+                    <div class="franchise-page__contact-form-wrap">
+                        @if (Model.IsSuccess)
+                        {
+                            <div class="franchise-page__notice franchise-page__notice--success">
+                                <p class="franchise-page__notice-title">Thông tin đã được ghi nhận.</p>
+                                <p class="franchise-page__notice-copy">Đội ngũ KIG Holding sẽ liên hệ lại trong thời gian sớm nhất.</p>
+                            </div>
+                        }
+
+                        <form asp-action="Index" asp-controller="Franchise" method="post" class="franchise-page__form" novalidate>
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="Subject" value="@ContactSubjectOptions.Partnership" />
+
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div asp-validation-summary="ModelOnly" class="franchise-page__validation franchise-page__validation--summary"></div>
+                            }
+
+                            <div class="franchise-page__form-grid">
+                                <label class="franchise-page__field-group">
+                                    <span class="franchise-page__field-label">Họ tên</span>
+                                    <input asp-for="FullName" autocomplete="name" class="franchise-page__field" placeholder="Nguyễn Văn A" />
+                                    <span asp-validation-for="FullName" class="franchise-page__validation"></span>
+                                </label>
+
+                                <label class="franchise-page__field-group">
+                                    <span class="franchise-page__field-label">Số điện thoại</span>
+                                    <input asp-for="PhoneNumber" autocomplete="tel" class="franchise-page__field" placeholder="0909 888 777" />
+                                    <span asp-validation-for="PhoneNumber" class="franchise-page__validation"></span>
+                                </label>
+                            </div>
+
+                            <label class="franchise-page__field-group">
+                                <span class="franchise-page__field-label">Email</span>
+                                <input asp-for="Email" autocomplete="email" class="franchise-page__field" placeholder="email@example.com" />
+                                <span asp-validation-for="Email" class="franchise-page__validation"></span>
+                            </label>
+
+                            <label class="franchise-page__field-group franchise-page__field-group--textarea">
+                                <span class="franchise-page__field-label">Nội dung</span>
+                                <textarea asp-for="Message" rows="5" class="franchise-page__textarea" placeholder="Khu vực quan tâm, quy mô dự kiến hoặc nội dung bạn muốn trao đổi..."></textarea>
+                                <span asp-validation-for="Message" class="franchise-page__validation"></span>
+                            </label>
+
+                            <button type="submit" class="franchise-page__button franchise-page__button--primary franchise-page__submit">Gửi thông tin hợp tác</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 </main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

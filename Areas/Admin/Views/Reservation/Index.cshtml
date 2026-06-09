@@ -87,6 +87,15 @@
                                     {
                                         <p class="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Chờ duyệt</p>
                                     }
+                                    @if (!string.IsNullOrWhiteSpace(reservation.DiningOccasionDisplay))
+                                    {
+                                        <div class="mt-2 space-y-1 text-xs leading-5 text-brand-gray">
+                                            @if (!string.IsNullOrWhiteSpace(reservation.DiningOccasionDisplay))
+                                            {
+                                                <p><span class="font-semibold text-brand-dark">Hình thức:</span> @reservation.DiningOccasionDisplay</p>
+                                            }
+                                        </div>
+                                    }
                                 </td>
                                 <td class="font-semibold text-brand-dark">@reservation.PhoneNumber</td>
                                 <td>@reservation.BranchName</td>
@@ -162,6 +171,16 @@
                                     <dd class="mt-1 break-words font-semibold text-brand-dark">@reservation.PhoneNumber</dd>
                                 </div>
                             </dl>
+
+                            @if (!string.IsNullOrWhiteSpace(reservation.DiningOccasionDisplay))
+                            {
+                                <div class="space-y-1 rounded-xl bg-brand-light px-3 py-3 text-sm leading-6 text-brand-gray">
+                                    @if (!string.IsNullOrWhiteSpace(reservation.DiningOccasionDisplay))
+                                    {
+                                        <p><span class="font-semibold text-brand-dark">Hình thức:</span> @reservation.DiningOccasionDisplay</p>
+                                    }
+                                </div>
+                            }
 
                             <a asp-action="Details" asp-route-id="@reservation.Id" class="admin-table-action admin-table-action--primary min-h-11 w-full">Xem chi tiết</a>
                         </div>

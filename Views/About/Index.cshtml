@@ -3,229 +3,507 @@
 @{
     ViewData["Title"] = Model.SeoTitle;
     ViewData["MetaDescription"] = Model.SeoDescription;
-}
 
-<section class="hero-frame" data-about-section="hero">
-    <div class="container-page section-shell">
-        <div class="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-            <div class="hero-card" data-uw-reveal="fade-up">
-                <span class="inline-flex rounded-button border border-brand-gold/25 bg-brand-goldSoft/45 px-4 py-2 text-kicker font-black uppercase text-brand-goldDeep">
-                    Brand story
-                </span>
-                <h1 class="public-page-title mt-5 text-brand-dark">Câu chuyện Truyền Thuyết Champong</h1>
-                <p class="mt-5 text-lead text-brand-gray">Một thương hiệu nhà hàng Hàn Quốc được định vị lại theo hướng sáng, tinh gọn và phù hợp ngôn ngữ corporate hospitality.</p>
-            </div>
-            <div class="food-image-wrap min-h-[22rem] shadow-panel lg:min-h-[32rem]">
-                <img src="/images/placeholders/about-hero.webp"
-                     alt="Không gian và món ăn Truyền Thuyết Champong"
-                     class="food-image absolute inset-0"
-                     onerror="this.remove();" />
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section-shell" data-about-section="origin">
-    <div class="container-page grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-        <div data-uw-reveal="fade-up">
-            <div class="food-image-wrap aspect-[4/5] shadow-panel">
-                <img src="/images/placeholders/korean-street-noodle.webp"
-                     alt="Cảm hứng món ăn Hàn Quốc"
-                     class="food-image"
-                     loading="lazy"
-                     onerror="this.remove();" />
-            </div>
-        </div>
-
-        <div data-uw-reveal="fade-up">
-            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-            {
-                Eyebrow = "Khởi nguồn",
-                Title = "Từ cảm hứng món ăn đến trải nghiệm hệ thống nhà hàng.",
-                Description = "Truyền Thuyết Champong bắt đầu từ món mì và món nướng chuẩn vị Hàn, nhưng hiện tại được kể lại như một thương hiệu hospitality có cấu trúc, có nhịp và có khả năng mở rộng dài hạn."
-            }})
-
-            <div class="mt-7 space-y-5 text-base leading-8 text-brand-gray">
-                <p>
-                    Giao diện mới ưu tiên hình ảnh món ăn, phân lớp nội dung rõ ràng và một tông sáng giúp thương hiệu phù hợp hơn với bối cảnh corporate restaurant group thay vì cảm giác landing page quá tối và nặng.
-                </p>
-                <p>
-                    Điều này hỗ trợ cả trải nghiệm người dùng lẫn hướng phát triển hệ thống nội dung về sau: quản lý chi nhánh, bài viết, thực đơn và media có thể bám theo cùng một khung thiết kế nhất quán.
-                </p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section-band section-shell" data-about-section="values">
-    <div class="container-page">
-        @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
+    var coreValues = new[]
+    {
+        new
         {
-            Eyebrow = "Giá trị cốt lõi",
-            Title = "Điều làm nên một bữa ăn đáng nhớ.",
-            Description = "Bốn nhóm giá trị được chuyển thành card sáng, bóng đổ nhẹ và cấu trúc gọn để đồng bộ với phần còn lại của website."
-        }})
+            Index = "01",
+            Title = "Chất lượng",
+            Copy = "Mỗi món ăn, không gian và điểm chạm phục vụ đều được đặt trên nền tảng nguyên liệu chọn lọc, hương vị rõ nét và tiêu chuẩn vận hành ổn định."
+        },
+        new
+        {
+            Index = "02",
+            Title = "Uy tín",
+            Copy = "KIG Holding VN xây dựng niềm tin bằng sự nhất quán: nói đúng điều mình làm, làm đúng điều đã cam kết và giữ chất lượng qua từng chi nhánh."
+        },
+        new
+        {
+            Index = "03",
+            Title = "Chuyên nghiệp",
+            Copy = "Từ quản trị, đào tạo đến nhịp phục vụ tại bàn, hệ thống được tổ chức để mỗi trải nghiệm diễn ra gọn gàng, thân thiện và có kiểm soát."
+        },
+        new
+        {
+            Index = "04",
+            Title = "Phát triển bền vững",
+            Copy = "Tăng trưởng được đặt cạnh kỷ luật vận hành, chuỗi cung ứng và trải nghiệm khách hàng để hệ thống có thể mở rộng dài hạn tại Việt Nam."
+        }
+    };
 
-        <div class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach (var value in new[]
-            {
-                ("Chuẩn vị", "Giữ tinh thần món ăn Hàn Quốc bằng cấu trúc thực đơn rõ, món signature nổi bật và ngôn ngữ nội dung có kiểm soát."),
-                ("Tươi ngon", "Nguyên liệu, hình ảnh và mô tả món ăn được đặt trong cùng một hệ thống card sáng, dễ tiêu thụ thông tin."),
-                ("Tiếp khách", "Không gian thương hiệu được nhấn theo hướng phù hợp cho gia đình, bạn bè và đối tác thay vì cảm giác quán ăn nhanh."),
-                ("Mở rộng hệ thống", "Thiết kế giữ khoảng trắng lớn và các khối tái sử dụng để phục vụ phát triển dashboard quản trị sau này.")
-            })
-            {
-                <article class="surface-panel card-hover p-6">
-                    <div class="mb-5 h-10 w-10 rounded-md bg-brand-goldSoft"></div>
-                    <h3 class="public-card-title text-brand-dark">@value.Item1</h3>
-                    <p class="mt-3 text-sm leading-6 text-brand-gray">@value.Item2</p>
-                </article>
-            }
-        </div>
-    </div>
-</section>
+    var systemStats = new[]
+    {
+        new
+        {
+            Value = "Từ 2019",
+            Label = "Hành trình phát triển tại thị trường Việt Nam"
+        },
+        new
+        {
+            Value = "19",
+            Label = "Chi nhánh nhà hàng trong hệ thống"
+        },
+        new
+        {
+            Value = "200+",
+            Label = "Nhân sự đồng hành trong vận hành"
+        },
+        new
+        {
+            Value = "1000+",
+            Label = "Khách được phục vụ mỗi ngày"
+        }
+    };
 
-<section class="section-shell" data-about-section="food-philosophy">
-    <div class="container-page grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-        <div>
-            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-            {
-                Eyebrow = "Triết lý món ăn",
-                Title = "Món ăn là lõi, nhưng trải nghiệm là khung nâng giá trị thương hiệu.",
-                Description = "Thực đơn không còn được trình bày như một mảng tối riêng lẻ; thay vào đó, nó nằm trong một cấu trúc editorial liền mạch với chi nhánh, bài viết và booking."
-            }})
-
-            <div class="mt-8 grid gap-4 sm:grid-cols-2">
-                @foreach (var item in new[]
-                {
-                    ("Nước dùng", "Chi tiết món ăn được ưu tiên đọc dễ, dùng màu trung tính và accent mềm để phù hợp cảm giác premium."),
-                    ("Gia vị", "Các badge và nhấn mạnh thị giác chuyển từ đỏ gắt sang gold/neutral để bớt cảm giác aggressive."),
-                    ("Nguyên liệu", "Card món và card chi nhánh được đồng bộ nền trắng, bo góc và bóng đổ nhẹ."),
-                    ("Cùng thưởng thức", "Thông điệp thương hiệu được kéo gần hơn với một restaurant group hiện đại và trưởng thành hơn.")
-                })
-                {
-                    <div class="surface-muted p-5">
-                        <h3 class="font-black text-brand-dark">@item.Item1</h3>
-                        <p class="mt-3 text-sm leading-6 text-brand-gray">@item.Item2</p>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <div class="food-image-wrap aspect-[4/5] shadow-panel">
-            <img src="/images/placeholders/champong-broth.webp"
-                 alt="Nước dùng Champong"
-                 class="food-image"
-                 loading="lazy"
-                 onerror="this.remove();" />
-            <div class="absolute bottom-5 left-5 right-5 rounded-md bg-white/92 p-4 shadow-soft">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Signature taste</p>
-                <p class="mt-2 text-3xl font-black text-brand-dark">Cay nồng, đậm vị, ăn nóng.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="section-band section-shell" data-about-section="signature-menu">
-    <div class="container-page">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-            {
-                Eyebrow = "Thực đơn thương hiệu",
-                Title = "Khám phá thực đơn theo từng trải nghiệm của KIG.",
-                Description = "Thay vì từng món ăn riêng lẻ, phần giới thiệu giờ được chuyển sang các nhóm thực đơn để bạn xem nhanh hướng trải nghiệm và cấu trúc hình ảnh."
-            }})
-            <a href="/thuc-don" class="btn-secondary">Xem thực đơn</a>
-        </div>
-
-        <div class="mt-9 grid gap-5 md:grid-cols-3">
-            @foreach (var group in new[]
-            {
-                new { Name = "Truyền Thuyết Champong", Description = "Nhóm món Hàn đậm vị với Champong, món nóng và các lựa chọn phù hợp cho bữa ăn trọn vẹn.", Url = "/thuc-don/nhom/truyen-thuyet-champong" },
-                new { Name = "Gogimaru", Description = "Thực đơn nướng Hàn Quốc với nhịp dịch vụ rõ ràng cho các buổi ăn theo nhóm.", Url = "/thuc-don/nhom/gogimaru" },
-                new { Name = "KBB Cook", Description = "Hệ thống menu BBQ hiện đại, tập trung vào hình ảnh trang menu có cấu trúc và dễ theo dõi.", Url = "/thuc-don/nhom/kbb-cook" }
-            })
-            {
-                <article class="surface-panel card-hover flex h-full flex-col p-6">
-                    <p class="text-kicker font-black uppercase text-brand-goldDeep">Menu group</p>
-                    <h3 class="public-card-title mt-3 text-brand-dark">@group.Name</h3>
-                    <p class="mt-4 flex-1 text-sm leading-7 text-brand-gray">@group.Description</p>
-                    <a href="@group.Url" class="btn-secondary mt-6 inline-flex w-fit">Xem nhóm thực đơn</a>
-                </article>
-            }
-        </div>
-    </div>
-</section>
-
-<section class="section-shell" data-about-section="restaurant-space">
-    <div class="container-page">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-            {
-                Eyebrow = "Không gian",
-                Title = "Một hệ hình ảnh sáng và giàu khoảng thở hơn.",
-                Description = "Gallery chuyển sang các khối sáng, caption tối giản và hình ảnh lớn để gần hơn với cách KIG Holding tổ chức các section kể chuyện."
-            }})
-            <a href="/chi-nhanh" class="btn-secondary">Xem chi nhánh</a>
-        </div>
-
-        <div class="mt-9 grid gap-4 md:grid-cols-4 md:grid-rows-2">
-            <figure class="food-image-wrap min-h-[18rem] shadow-soft md:col-span-2 md:row-span-2">
-                <img src="/images/placeholders/group-tables.webp" alt="Bàn nhóm tại nhà hàng" class="food-image absolute inset-0" loading="lazy" onerror="this.remove();" />
-                <figcaption class="absolute bottom-4 left-4 right-4 z-20 rounded-md bg-white/90 px-4 py-3 text-lg font-black text-brand-dark">Bàn nhóm linh hoạt</figcaption>
-            </figure>
-            <figure class="food-image-wrap min-h-[13rem] shadow-soft">
-                <img src="/images/placeholders/kitchen-chef.webp" alt="Bếp nhà hàng" class="food-image absolute inset-0" loading="lazy" onerror="this.remove();" />
-                <figcaption class="absolute bottom-4 left-4 right-4 z-20 rounded-md bg-white/90 px-4 py-3 font-black text-brand-dark">Bếp nóng</figcaption>
-            </figure>
-            <figure class="food-image-wrap min-h-[13rem] shadow-soft">
-                <img src="/images/placeholders/food-table.webp" alt="Món ăn trên bàn" class="food-image absolute inset-0" loading="lazy" onerror="this.remove();" />
-                <figcaption class="absolute bottom-4 left-4 right-4 z-20 rounded-md bg-white/90 px-4 py-3 font-black text-brand-dark">Món ăn nóng</figcaption>
-            </figure>
-            <figure class="food-image-wrap min-h-[13rem] shadow-soft md:col-span-2">
-                <img src="/images/placeholders/service-counter.webp" alt="Quầy phục vụ" class="food-image absolute inset-0" loading="lazy" onerror="this.remove();" />
-                <figcaption class="absolute bottom-4 left-4 right-4 z-20 rounded-md bg-white/90 px-4 py-3 font-black text-brand-dark">Quầy phục vụ</figcaption>
-            </figure>
-        </div>
-    </div>
-</section>
-
-@if (Model.FeaturedBranches.Count > 0)
-{
-    <section class="section-band section-shell" data-about-section="featured-branches">
-        <div class="container-page">
-            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                @await Component.InvokeAsync("SectionHeading", new { model = new SectionHeadingViewModel
-                {
-                    Eyebrow = "Điểm hẹn",
-                    Title = "Không gian đang chờ bạn.",
-                    Description = "Một vài chi nhánh đang hoạt động, sẵn sàng cho bữa ăn tiếp theo."
-                }})
-                <a href="/chi-nhanh" class="btn-secondary">Tìm chi nhánh</a>
-            </div>
-
-            <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                @foreach (var branch in Model.FeaturedBranches)
-                {
-                    @await Component.InvokeAsync("BranchCard", new { model = branch })
-                }
-            </div>
-        </div>
-    </section>
+    var brandEcosystem = new[]
+    {
+        new
+        {
+            Index = "01",
+            Title = "Truyền Thuyết Champong",
+            Copy = "Thương hiệu mì Hàn Quốc với champong cay nồng, mì tương đen và các món đặc trưng mang tinh thần ấm nóng, gần gũi của ẩm thực Hàn.",
+            Link = "/thuc-don",
+            LinkLabel = "Khám phá thực đơn"
+        },
+        new
+        {
+            Index = "02",
+            Title = "Gogi Maru",
+            Copy = "Concept BBQ Hàn Quốc tập trung vào thịt nướng chất lượng, không gian hiện đại và trải nghiệm dùng bữa chỉn chu tại bàn.",
+            Link = "/thuc-don",
+            LinkLabel = "Xem món nổi bật"
+        },
+        new
+        {
+            Index = "03",
+            Title = "KBB COOK",
+            Copy = "Mô hình BBQ/buffet Hàn Quốc đa dạng, phù hợp cho nhóm bạn, gia đình và khách hàng văn phòng cần một bữa ăn linh hoạt, đông vui.",
+            Link = "/chi-nhanh",
+            LinkLabel = "Tìm chi nhánh"
+        }
+    };
 }
 
-<section class="section-shell pt-0 lg:pt-0" data-about-section="cta">
-    <div class="container-page">
-        <div class="surface-panel p-6 sm:p-8 lg:p-10">
-            <div class="max-w-3xl">
-                <p class="text-kicker font-black uppercase text-brand-goldDeep">Trải nghiệm tại bàn</p>
-                <h2 class="mt-3 text-3xl font-black text-brand-dark sm:text-4xl">Sẵn sàng thưởng thức Truyền Thuyết Champong?</h2>
-                <p class="mt-4 text-brand-gray">Giữ bàn trước hoặc xem thực đơn để chọn món mì, món nướng và combo phù hợp cho nhóm của bạn.</p>
-                <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-                    <a href="/dat-ban" class="btn-primary">Đặt bàn ngay</a>
-                    <a href="/thuc-don" class="btn-secondary">Xem thực đơn</a>
+<main class="public-editorial-page">
+    <div class="public-editorial-page__shell">
+        <div class="container-page">
+            <section class="public-editorial-page__section public-editorial-page__section--hero">
+                <div class="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+                    <div class="public-editorial-page__hero" data-uw-reveal="fade-up" data-uw-once="true">
+                        <span class="public-editorial-page__eyebrow">Câu chuyện KIG Holding</span>
+                        <h1 class="public-editorial-page__title">
+                            Từ hương vị Hàn Quốc đến một hệ thống nhà hàng được vận hành chỉn chu
+                        </h1>
+                        <p class="public-editorial-page__lead">
+                            CÔNG TY TNHH KIG HOLDING VN phát triển hệ thống nhà hàng ẩm thực Hàn Quốc tại Việt Nam,
+                            nơi mỗi thương hiệu có concept riêng nhưng cùng chia sẻ một tiêu chuẩn: món ăn chuẩn vị,
+                            không gian hiện đại và trải nghiệm dùng bữa đáng nhớ.
+                        </p>
+                        <p class="public-editorial-page__section-copy max-w-3xl">
+                            Từ hành trình bắt đầu tại thị trường Việt Nam năm 2019, KIG Holding VN từng bước xây dựng
+                            hệ sinh thái gồm Truyền Thuyết Champong, Gogi Maru và KBB COOK, hướng đến những trải nghiệm
+                            có thể quay lại: ngon miệng, chỉn chu và nhất quán.
+                        </p>
+                        <div class="public-editorial-page__actions">
+                            <a class="public-editorial-page__button public-editorial-page__button--primary" href="/thuc-don">
+                                Khám phá thực đơn
+                            </a>
+                            <a class="public-editorial-page__button public-editorial-page__button--secondary" href="/chi-nhanh">
+                                Tìm chi nhánh
+                            </a>
+                        </div>
+                    </div>
+
+                    <figure class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03]" data-uw-reveal="fade-left" data-uw-once="true" data-uw-delay="120">
+                        <div class="aspect-[7/4] w-full">
+                            <img src="/images/about/images/about-banner-1.png"
+                                 alt="Các món ăn Hàn Quốc đặc trưng trong hệ sinh thái KIG Holding"
+                                 class="h-full w-full object-cover"
+                                 decoding="async" />
+                        </div>
+                    </figure>
                 </div>
-            </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Quy mô hệ thống</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Những con số được xây từ từng bữa ăn mỗi ngày
+                    </h2>
+                    <p class="public-editorial-page__section-copy">
+                        KIG Holding VN phát triển bằng kỷ luật vận hành và sự hiện diện bền bỉ tại các điểm đến ẩm thực,
+                        từ đội ngũ tuyến đầu đến hệ thống quản trị phía sau mỗi chi nhánh.
+                    </p>
+                </div>
+
+                <div class="public-editorial-page__grid grid-cols-1 gap-y-6 sm:grid-cols-2 xl:grid-cols-4">
+                    @foreach (var stat in systemStats)
+                    {
+                        <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
+                            <span class="public-editorial-page__item-index">@stat.Value</span>
+                            <h3 class="public-editorial-page__item-title">@stat.Label</h3>
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Về KIG Holding</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Cầu nối đưa hương vị Hàn Quốc đến gần hơn với thực khách Việt
+                    </h2>
+                </div>
+
+                <div class="public-editorial-page__columns">
+                    <div class="public-editorial-page__column" data-uw-reveal="fade-right" data-uw-once="true" data-uw-delay="80">
+                        <p class="public-editorial-page__section-copy">
+                            KIG Holding VN phát triển và vận hành các thương hiệu nhà hàng Hàn Quốc tại Việt Nam với
+                            tầm nhìn trở thành một trong những hệ thống ẩm thực Hàn Quốc được yêu thích tại thị trường này.
+                            Mỗi điểm đến được xây dựng để khách hàng cảm nhận rõ hương vị, không gian và sự chăm chút.
+                        </p>
+                        <p class="public-editorial-page__section-copy">
+                            Sứ mệnh của chúng tôi là trở thành cầu nối văn hóa, đưa hương vị truyền thống Hàn Quốc đến
+                            gần hơn với thực khách Việt qua những mô hình nhà hàng hiện đại, thân thiện và được vận hành
+                            nhất quán.
+                        </p>
+                        <p class="public-editorial-page__section-copy">
+                            Trên cùng một chuẩn chất lượng, Truyền Thuyết Champong, Gogi Maru và KBB COOK được phát triển
+                            với những sắc thái riêng, giúp hệ thống phục vụ nhiều hoàn cảnh dùng bữa mà vẫn giữ được bản sắc chung.
+                        </p>
+                    </div>
+
+                    <div class="public-editorial-page__column lg:border-l lg:border-white/10 lg:pl-8" data-uw-reveal="fade-left" data-uw-once="true" data-uw-delay="120">
+                        <div class="grid gap-6">
+                            <div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-[#fca5a5]">Tầm nhìn</p>
+                                <p class="public-editorial-page__section-copy mt-3">
+                                    Hướng đến trở thành một trong những hệ thống nhà hàng ẩm thực Hàn Quốc được yêu thích
+                                    tại Việt Nam, nơi chất lượng và sự ổn định được nhận diện qua từng trải nghiệm.
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-[#fca5a5]">Sứ mệnh</p>
+                                <p class="public-editorial-page__section-copy mt-3">
+                                    Đưa hương vị truyền thống Hàn Quốc đến gần hơn với thực khách Việt bằng món ăn chuẩn vị,
+                                    không gian hiện đại và phong cách phục vụ chuyên nghiệp.
+                                </p>
+                            </div>
+
+                            <ul class="public-editorial-page__bullets" aria-label="Tiêu chuẩn trải nghiệm KIG Holding">
+                                <li class="public-editorial-page__bullet">
+                                    <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                    <span>Nguyên liệu được tuyển chọn kỹ lưỡng</span>
+                                </li>
+                                <li class="public-editorial-page__bullet">
+                                    <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                    <span>Hương vị Hàn Quốc rõ nét</span>
+                                </li>
+                                <li class="public-editorial-page__bullet">
+                                    <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                    <span>Không gian dùng bữa sạch sẽ, hiện đại</span>
+                                </li>
+                                <li class="public-editorial-page__bullet">
+                                    <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                    <span>Dịch vụ thân thiện và chuyên nghiệp</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Giá trị cốt lõi</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Bốn giá trị định hình cách KIG Holding VN phát triển từng thương hiệu
+                    </h2>
+                </div>
+
+                <div class="public-editorial-page__grid grid-cols-1 gap-y-6 sm:grid-cols-2 xl:grid-cols-4">
+                    @foreach (var value in coreValues)
+                    {
+                        <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
+                            <span class="public-editorial-page__item-index">@value.Index</span>
+                            <h3 class="public-editorial-page__item-title">@value.Title</h3>
+                            <p class="public-editorial-page__item-copy">@value.Copy</p>
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="grid gap-8 lg:grid-cols-[0.98fr_0.82fr] lg:items-center">
+                    <div data-uw-reveal="fade-right" data-uw-once="true">
+                        <div class="public-editorial-page__section-head mb-0">
+                            <span class="public-editorial-page__eyebrow">Triết lý ẩm thực</span>
+                            <h2 class="public-editorial-page__section-title">
+                                Từ lát thịt hảo hạng đến quy trình lên men 360 giờ
+                            </h2>
+                        </div>
+
+                        <p class="public-editorial-page__section-copy mt-5">
+                            Chúng tôi tin rằng trải nghiệm BBQ chuẩn Hàn được tạo nên từ nhiều lớp chuẩn mực cùng lúc:
+                            chất lượng thịt, độ chính xác trong sơ chế, hương vị được xây dựng có chiều sâu và khả năng
+                            giữ sự ổn định giữa toàn bộ hệ thống.
+                        </p>
+                        <p class="public-editorial-page__section-copy">
+                            Những phần thịt nhập khẩu cao cấp, các dòng sốt được cân chỉnh kỹ lưỡng và quy trình ủ,
+                            lên men kéo dài đến 360 giờ giúp hương vị trở nên đầy đặn hơn, mềm hơn và giàu bản sắc hơn
+                            trong từng lần phục vụ.
+                        </p>
+
+                        <div class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Điểm mạnh ẩm thực nổi bật">
+                            <div class="public-editorial-page__bullet">
+                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                <span>Thịt nhập khẩu cao cấp</span>
+                            </div>
+                            <div class="public-editorial-page__bullet">
+                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                <span>Quy trình lên men 360 giờ</span>
+                            </div>
+                            <div class="public-editorial-page__bullet">
+                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                <span>Panchan đa dạng</span>
+                            </div>
+                            <div class="public-editorial-page__bullet">
+                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                <span>Hương vị ổn định trong hệ thống</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <figure class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03]" data-uw-reveal="fade-left" data-uw-once="true" data-uw-delay="120">
+                        <div class="aspect-[4/5] w-full">
+                            <img src="/images/about/images/about-bbq-premium-meat.png"
+                                 alt="Thịt nướng Hàn Quốc cao cấp trên bếp nướng"
+                                 class="h-full w-full object-cover"
+                                 loading="lazy"
+                                 decoding="async" />
+                        </div>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="grid gap-8 lg:grid-cols-[0.82fr_0.98fr] lg:items-center">
+                    <figure class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03]" data-uw-reveal="fade-right" data-uw-once="true">
+                        <div class="aspect-[4/5] w-full">
+                            <img src="/images/about/images/about-panchan-detail.png"
+                                 alt="Các món panchan Hàn Quốc được chuẩn bị tỉ mỉ"
+                                 class="h-full w-full object-cover"
+                                 loading="lazy"
+                                 decoding="async" />
+                        </div>
+                    </figure>
+
+                    <div data-uw-reveal="fade-left" data-uw-once="true" data-uw-delay="120">
+                        <div class="public-editorial-page__section-head mb-0">
+                            <span class="public-editorial-page__eyebrow">Chi tiết bàn ăn</span>
+                            <h2 class="public-editorial-page__section-title">
+                                Bữa ăn trọn vị nằm trong từng chi tiết nhỏ
+                            </h2>
+                        </div>
+
+                        <p class="public-editorial-page__section-copy mt-5">
+                            Kimchi, củ cải muối, rau trộn, salad, nước chấm và từng món panchan đi kèm không chỉ làm đầy
+                            bàn ăn. Chúng giữ vai trò cân bằng vị giác, mở rộng lớp hương vị và giúp bữa ăn mang đúng
+                            tinh thần sẻ chia của ẩm thực Hàn Quốc.
+                        </p>
+                        <p class="public-editorial-page__section-copy">
+                            Chính những chi tiết tưởng như nhỏ này tạo nên cảm giác hoàn chỉnh: cay nhưng không gắt,
+                            béo nhưng vẫn thoáng, đậm nhưng không nặng nề. Đó cũng là cách KIG Holding giữ sự tinh tế
+                            cho từng trải nghiệm tại bàn.
+                        </p>
+
+                        <div class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="Các thành phần tạo nên sự trọn vị">
+                            <div class="public-editorial-page__bullet">
+                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                <span>Kimchi, củ cải muối và rau trộn tạo nhịp cân bằng vị.</span>
+                            </div>
+                            <div class="public-editorial-page__bullet">
+                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
+                                <span>Nước chấm và panchan hoàn thiện chiều sâu cho món chính.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Hệ sinh thái thương hiệu</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Ba thương hiệu, ba nhịp trải nghiệm, cùng một chuẩn mực phục vụ
+                    </h2>
+                    <p class="public-editorial-page__section-copy">
+                        KIG Holding VN phát triển Truyền Thuyết Champong, Gogi Maru và KBB COOK với những định vị khác nhau,
+                        nhưng vẫn giữ chung một tiêu chuẩn về chất lượng nguyên liệu, hương vị chuẩn Hàn và sự nhất quán trong vận hành.
+                    </p>
+                </div>
+
+                <div class="public-editorial-page__grid grid-cols-1 gap-y-6 lg:grid-cols-3">
+                    @foreach (var brand in brandEcosystem)
+                    {
+                        <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
+                            <span class="public-editorial-page__item-index">@brand.Index</span>
+                            <h3 class="public-editorial-page__item-title">@brand.Title</h3>
+                            <p class="public-editorial-page__item-copy">@brand.Copy</p>
+                            <a href="@brand.Link"
+                               class="mt-4 inline-flex text-[11px] font-black uppercase tracking-[0.18em] text-[#fca5a5] transition hover:text-white">
+                                @brand.LinkLabel
+                            </a>
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="grid gap-8 lg:grid-cols-[0.98fr_1.02fr] lg:items-center">
+                    <div data-uw-reveal="fade-right" data-uw-once="true">
+                        <div class="public-editorial-page__section-head mb-0">
+                            <span class="public-editorial-page__eyebrow">Lợi thế cạnh tranh</span>
+                            <h2 class="public-editorial-page__section-title">
+                                Hương vị chuẩn Hàn trong một mô hình vận hành chuyên nghiệp
+                            </h2>
+                        </div>
+
+                        <p class="public-editorial-page__section-copy mt-5">
+                            Lợi thế của KIG Holding VN không chỉ nằm ở một món ăn nổi bật. Đó là sự kết hợp giữa hương vị
+                            Hàn Quốc rõ nét, không gian nhà hàng hiện đại, đội ngũ được đào tạo và quy trình vận hành chuỗi
+                            được chuẩn hóa để giữ trải nghiệm ổn định qua từng chi nhánh.
+                        </p>
+
+                        <div class="public-editorial-page__steps mt-6">
+                            <article class="public-editorial-page__step">
+                                <span class="public-editorial-page__step-index">01</span>
+                                <div>
+                                    <h3 class="public-editorial-page__step-title">Thương hiệu phát triển nhanh</h3>
+                                    <p class="public-editorial-page__step-copy">
+                                        Hệ thống được mở rộng từ nền tảng vận hành thực tế, gắn với nhu cầu dùng bữa Hàn Quốc ngày càng rõ tại Việt Nam.
+                                    </p>
+                                </div>
+                            </article>
+                            <article class="public-editorial-page__step">
+                                <span class="public-editorial-page__step-index">02</span>
+                                <div>
+                                    <h3 class="public-editorial-page__step-title">Không gian hiện đại</h3>
+                                    <p class="public-editorial-page__step-copy">
+                                        Bố cục nhà hàng sạch sẽ, thoải mái và phù hợp cho gia đình, nhóm bạn, đồng nghiệp hoặc các buổi gặp gỡ theo nhóm.
+                                    </p>
+                                </div>
+                            </article>
+                            <article class="public-editorial-page__step">
+                                <span class="public-editorial-page__step-index">03</span>
+                                <div>
+                                    <h3 class="public-editorial-page__step-title">Vận hành chuỗi chuyên nghiệp</h3>
+                                    <p class="public-editorial-page__step-copy">
+                                        Quy trình phục vụ, quản trị và đào tạo được hệ thống hóa để mỗi chi nhánh giữ cùng một nhịp trải nghiệm.
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+
+                    <figure class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03]" data-uw-reveal="fade-left" data-uw-once="true" data-uw-delay="120">
+                        <div class="aspect-[16/10] w-full">
+                            <img src="/images/about/images/about-restaurant-interior.png"
+                                 alt="Không gian nhà hàng KIG Holding hiện đại và ấm cúng"
+                                 class="h-full w-full object-cover"
+                                 loading="lazy"
+                                 decoding="async" />
+                        </div>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Dấu mốc ghi nhận</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Một cột mốc khích lệ cho hành trình nâng cao chất lượng
+                    </h2>
+                    <p class="public-editorial-page__section-copy">
+                        KIG Holding VN được ghi nhận với danh hiệu “Thương hiệu ẩm thực Hàn Quốc dẫn đầu xu hướng 2025”.
+                        Đây là dấu mốc khích lệ để hệ thống tiếp tục nâng cao chất lượng món ăn, không gian và trải nghiệm phục vụ.
+                    </p>
+                </div>
+
+                <div class="public-editorial-page__grid grid-cols-1 gap-y-6 md:grid-cols-3">
+                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
+                        <span class="public-editorial-page__item-index">2025</span>
+                        <h3 class="public-editorial-page__item-title">Thương hiệu ẩm thực Hàn Quốc dẫn đầu xu hướng</h3>
+                        <p class="public-editorial-page__item-copy">Ghi nhận định hướng phát triển thương hiệu trong lĩnh vực ẩm thực Hàn Quốc tại Việt Nam.</p>
+                    </article>
+                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="120">
+                        <span class="public-editorial-page__item-index">379</span>
+                        <h3 class="public-editorial-page__item-title">Chứng nhận số 379/VNE-TCDNTM/2025</h3>
+                        <p class="public-editorial-page__item-copy">Thông tin chứng nhận được thể hiện như một dấu mốc uy tín, không phải cam kết vị thế tuyệt đối trên thị trường.</p>
+                    </article>
+                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="160">
+                        <span class="public-editorial-page__item-index">27/09</span>
+                        <h3 class="public-editorial-page__item-title">TP. Hồ Chí Minh, ngày 27/09/2025</h3>
+                        <p class="public-editorial-page__item-copy">Cột mốc tiếp thêm động lực để KIG Holding VN tiếp tục phát triển theo hướng bền vững và chuyên nghiệp.</p>
+                    </article>
+                </div>
+            </section>
+
+            @if (Model.FeaturedBranches.Count > 0)
+            {
+                <section class="public-editorial-page__section">
+                    <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                        <div class="public-editorial-page__section-head mb-0" data-uw-reveal="fade-up" data-uw-once="true">
+                            <span class="public-editorial-page__eyebrow">Hệ thống chi nhánh</span>
+                            <h2 class="public-editorial-page__section-title">
+                                Ghé thăm hệ thống chi nhánh KIG Holding
+                            </h2>
+                            <p class="public-editorial-page__section-copy">
+                                Một vài điểm đến đang đại diện cho nhịp vận hành và trải nghiệm mà KIG Holding VN theo đuổi
+                                trong toàn bộ hệ sinh thái của mình.
+                            </p>
+                        </div>
+
+                        <a class="public-editorial-page__button public-editorial-page__button--secondary w-full sm:w-auto" href="/chi-nhanh">
+                            Xem toàn bộ chi nhánh
+                        </a>
+                    </div>
+
+                    <div class="mt-2 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        @foreach (var branch in Model.FeaturedBranches)
+                        {
+                            @await Component.InvokeAsync("BranchCard", new { model = branch })
+                        }
+                    </div>
+                </section>
+            }
+
+            <section class="public-editorial-page__section public-editorial-page__section--cta">
+                <div class="public-editorial-page__cta" data-uw-reveal="fade-up" data-uw-once="true">
+                    <div class="public-editorial-page__cta-copy">
+                        <span class="public-editorial-page__eyebrow">Trải nghiệm cùng KIG Holding</span>
+                        <h2 class="public-editorial-page__section-title">
+                            Sẵn sàng cho một trải nghiệm Hàn Quốc trọn vị?
+                        </h2>
+                        <p class="public-editorial-page__section-copy">
+                            Khám phá thực đơn, chọn chi nhánh phù hợp hoặc đặt bàn để bắt đầu một bữa ăn được chăm chút
+                            từ hương vị, không gian đến từng chi tiết phục vụ.
+                        </p>
+                    </div>
+
+                    <div class="public-editorial-page__cta-actions">
+                        <a class="public-editorial-page__button public-editorial-page__button--primary" href="/dat-ban">
+                            Đặt bàn ngay
+                        </a>
+                        <a class="public-editorial-page__button public-editorial-page__button--secondary" href="/thuc-don">
+                            Xem thực đơn
+                        </a>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
-</section>
+</main>

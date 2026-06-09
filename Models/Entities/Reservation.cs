@@ -12,6 +12,8 @@ public class Reservation : IUpdatedAtEntity
     public int GuestCount { get; set; }
     public DateOnly ReservationDate { get; set; }
     public TimeOnly ReservationTime { get; set; }
+    public string? DiningOccasionCodes { get; set; }
+    public string? DiningOccasionOtherNote { get; set; }
     public string? Note { get; set; }
     public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
     public ReservationSource Source { get; set; } = ReservationSource.Website;

@@ -47,8 +47,8 @@ public class AboutController : Controller
         {
             SiteSetting = siteSetting,
             FeaturedBranches = branches.Take(3).Select(BranchCardViewModel.FromBranch).ToList(),
-            SeoTitle = "Giới thiệu",
-            SeoDescription = "Khám phá câu chuyện Truyền Thuyết Champong: cảm hứng ẩm thực Hàn Quốc, nước dùng cay nồng, nguyên liệu tươi và không gian dùng bữa ấm cúng."
+            SeoTitle = "Giới thiệu KIG Holding VN",
+            SeoDescription = "Khám phá KIG Holding VN, hệ thống nhà hàng ẩm thực Hàn Quốc tại Việt Nam với Truyền Thuyết Champong, Gogi Maru, KBB COOK và hành trình phát triển từ năm 2019."
         };
 
         return View(model);

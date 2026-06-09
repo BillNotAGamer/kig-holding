@@ -29,6 +29,8 @@ public class ReservationListItemViewModel
     public DateOnly ReservationDate { get; set; }
     public TimeOnly ReservationTime { get; set; }
     public int GuestCount { get; set; }
+    public string? DiningOccasionCodes { get; set; }
+    public string DiningOccasionDisplay { get; set; } = string.Empty;
     public ReservationStatus Status { get; set; }
     public string StatusLabel { get; set; } = string.Empty;
 }
@@ -43,6 +45,9 @@ public class ReservationDetailViewModel
     public DateOnly ReservationDate { get; set; }
     public TimeOnly ReservationTime { get; set; }
     public int GuestCount { get; set; }
+    public string? DiningOccasionCodes { get; set; }
+    public string? DiningOccasionOtherNote { get; set; }
+    public string DiningOccasionDisplay { get; set; } = string.Empty;
     public string? Note { get; set; }
     public ReservationStatus CurrentStatus { get; set; }
     public string StatusLabel { get; set; } = string.Empty;

@@ -24,6 +24,13 @@
         'textarea:not([disabled])',
         '[tabindex]:not([tabindex="-1"])'
     ].join(',');
+    const conditionalFieldConfigs = [
+        {
+            fieldName: 'DiningOccasionCode',
+            fieldKey: 'dining-occasion',
+            noteFieldName: 'DiningOccasionOtherNote'
+        }
+    ];
 
     if (!form || !panel || !summary || !success || !successBody || !submitButton) {
         return;
@@ -58,9 +65,30 @@
         });
     };
 
+    const syncConditionalField = ({ fieldName, fieldKey, noteFieldName }) => {
+        const field = root.querySelector(`[data-booking-modal-other-field="${fieldKey}"]`);
+        if (!(field instanceof HTMLElement)) {
+            return;
+        }
+
+        const shouldShow = Array.from(form.querySelectorAll(`input[name="${fieldName}"]`))
+            .some((input) => input instanceof HTMLInputElement && input.checked && input.value === 'other');
+
+        field.hidden = !shouldShow;
+
+        const noteField = field.querySelector(`[name="${noteFieldName}"]`);
+        if (!shouldShow && (noteField instanceof HTMLInputElement || noteField instanceof HTMLTextAreaElement)) {
+            noteField.value = '';
+        }
+    };
+
+    const syncConditionalFields = () => {
+        conditionalFieldConfigs.forEach(syncConditionalField);
+    };
+
     const clearSuccessState = (resetValues) => {
         success.hidden = true;
-        successBody.innerHTML = '';
+        successBody.replaceChildren();
         form.dataset.completed = 'false';
 
         if (formBody) {
@@ -69,6 +97,7 @@
 
         if (resetValues) {
             form.reset();
+            window.requestAnimationFrame(syncConditionalFields);
         }
     };
 
@@ -126,12 +155,21 @@
         }
 
         summary.hidden = false;
-        summary.innerHTML = [
-            `<p>${messages[0]}</p>`,
-            messages.length > 1
-                ? `<ul>${messages.slice(1).map((message) => `<li>${message}</li>`).join('')}</ul>`
-                : ''
-        ].join('');
+        summary.replaceChildren();
+
+        const lead = document.createElement('p');
+        lead.textContent = messages[0];
+        summary.appendChild(lead);
+
+        if (messages.length > 1) {
+            const list = document.createElement('ul');
+            messages.slice(1).forEach((message) => {
+                const item = document.createElement('li');
+                item.textContent = message;
+                list.appendChild(item);
+            });
+            summary.appendChild(list);
+        }
     };
 
     const showFieldErrors = (errors) => {
@@ -170,7 +208,7 @@
             clearSummary();
         }
 
-        const firstInvalidField = root.querySelector('.booking-modal__field.is-invalid .booking-modal__input, .booking-modal__field.is-invalid .booking-modal__select, .booking-modal__field.is-invalid .booking-modal__textarea');
+        const firstInvalidField = root.querySelector('.booking-modal__field.is-invalid .booking-modal__input, .booking-modal__field.is-invalid .booking-modal__select, .booking-modal__field.is-invalid .booking-modal__textarea, .booking-modal__field.is-invalid .booking-modal__checkbox');
         if (firstInvalidField instanceof HTMLElement) {
             firstInvalidField.focus();
         }
@@ -188,18 +226,33 @@
             ['Ghi chú', summaryData.note]
         ].filter(([, value]) => value !== null && value !== undefined && `${value}`.trim().length > 0);
 
-        successBody.innerHTML = `
-            <p class="booking-modal__success-title">${payload?.message || 'Yêu cầu đặt bàn đã được ghi nhận.'}</p>
-            ${summaryItems.length
-                ? `<div class="booking-modal__success-list">
-                    ${summaryItems.map(([label, value]) => `
-                        <div class="booking-modal__success-item">
-                            <span>${label}</span>
-                            <strong>${value}</strong>
-                        </div>`).join('')}
-                   </div>`
-                : ''}
-        `;
+        successBody.replaceChildren();
+
+        const title = document.createElement('p');
+        title.className = 'booking-modal__success-title';
+        title.textContent = payload?.message || 'Yêu cầu đặt bàn đã được ghi nhận.';
+        successBody.appendChild(title);
+
+        if (summaryItems.length) {
+            const list = document.createElement('div');
+            list.className = 'booking-modal__success-list';
+
+            summaryItems.forEach(([label, value]) => {
+                const item = document.createElement('div');
+                item.className = 'booking-modal__success-item';
+
+                const key = document.createElement('span');
+                key.textContent = label;
+
+                const strong = document.createElement('strong');
+                strong.textContent = `${value}`;
+
+                item.append(key, strong);
+                list.appendChild(item);
+            });
+
+            successBody.appendChild(list);
+        }
 
         clearSummary();
         clearFieldErrors();
@@ -211,6 +264,7 @@
 
         success.hidden = false;
         form.reset();
+        syncConditionalFields();
 
         const successCloseButton = success.querySelector('[data-booking-modal-close]');
         if (successCloseButton instanceof HTMLElement) {
@@ -246,6 +300,19 @@
     if (backdrop) {
         backdrop.addEventListener('click', closeModal);
     }
+
+    root.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) {
+            return;
+        }
+
+        conditionalFieldConfigs.forEach((config) => {
+            if (target.name === config.fieldName) {
+                syncConditionalField(config);
+            }
+        });
+    });
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -334,4 +401,6 @@
             first.focus();
         }
     });
+
+    syncConditionalFields();
 })();

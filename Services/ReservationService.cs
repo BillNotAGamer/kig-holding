@@ -18,6 +18,8 @@ public class ReservationService : IReservationService
     {
         var errors = new List<ReservationServiceError>();
         var today = DateOnly.FromDateTime(DateTime.Today);
+        var normalizedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(request.DiningOccasionCode);
+        var diningOccasionOtherNote = NormalizeOptionalText(request.DiningOccasionOtherNote);
 
         if (request.ReservationDate < today)
         {
@@ -37,6 +39,40 @@ public class ReservationService : IReservationService
             });
         }
 
+        if (!string.IsNullOrWhiteSpace(normalizedDiningOccasionCode)
+            && !ReservationOptionCatalog.IsAllowedDiningOccasionCode(normalizedDiningOccasionCode))
+        {
+            errors.Add(new ReservationServiceError
+            {
+                FieldName = nameof(request.DiningOccasionCode),
+                Message = "Lựa chọn hình thức dùng bữa không hợp lệ."
+            });
+        }
+
+        if (string.Equals(normalizedDiningOccasionCode, ReservationOptionCatalog.OtherCode, StringComparison.Ordinal))
+        {
+            if (string.IsNullOrWhiteSpace(diningOccasionOtherNote))
+            {
+                errors.Add(new ReservationServiceError
+                {
+                    FieldName = nameof(request.DiningOccasionOtherNote),
+                    Message = "Vui lòng nhập nội dung khác cho hình thức dùng bữa."
+                });
+            }
+            else if (diningOccasionOtherNote.Length > 200)
+            {
+                errors.Add(new ReservationServiceError
+                {
+                    FieldName = nameof(request.DiningOccasionOtherNote),
+                    Message = "Nội dung khác không được vượt quá 200 ký tự."
+                });
+            }
+        }
+        else
+        {
+            diningOccasionOtherNote = null;
+        }
+
         var branch = await _dbContext.Branches
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == request.BranchId && x.IsActive, cancellationToken);
@@ -46,7 +82,7 @@ public class ReservationService : IReservationService
             errors.Add(new ReservationServiceError
             {
                 FieldName = nameof(request.BranchId),
-                Message = "Chi nhánh đã chọn không tồn tại hoặc đang tạm ngưng nhận đặt bàn."
+                Message = "Chi nhánh đã chọn không tồn tại hoặc đang tạm ngừng nhận đặt bàn."
             });
         }
         else if (!IsWithinOpeningHours(request.ReservationTime, branch.OpeningTime, branch.ClosingTime))
@@ -74,6 +110,8 @@ public class ReservationService : IReservationService
             GuestCount = request.GuestCount,
             ReservationDate = request.ReservationDate,
             ReservationTime = request.ReservationTime,
+            DiningOccasionCodes = normalizedDiningOccasionCode,
+            DiningOccasionOtherNote = diningOccasionOtherNote,
             Note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim(),
             Status = ReservationStatus.Pending,
             Source = ReservationSource.Website,
@@ -100,5 +138,10 @@ public class ReservationService : IReservationService
         return openingTime <= closingTime
             ? reservationTime >= openingTime && reservationTime <= closingTime
             : reservationTime >= openingTime || reservationTime <= closingTime;
+    }
+
+    private static string? NormalizeOptionalText(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 }

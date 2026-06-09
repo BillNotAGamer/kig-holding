@@ -33,6 +33,13 @@ public class ReservationCreateViewModel
     [Display(Name = "Giờ đến")]
     public TimeOnly? ReservationTime { get; set; }
 
+    [Display(Name = "Hình thức dùng bữa")]
+    public string? DiningOccasionCode { get; set; }
+
+    [StringLength(200, ErrorMessage = "Nội dung khác không được vượt quá 200 ký tự.")]
+    [Display(Name = "Ghi chú hình thức khác")]
+    public string? DiningOccasionOtherNote { get; set; }
+
     [StringLength(1000, ErrorMessage = "Ghi chú không được vượt quá 1000 ký tự.")]
     [Display(Name = "Ghi chú")]
     public string? Note { get; set; }
