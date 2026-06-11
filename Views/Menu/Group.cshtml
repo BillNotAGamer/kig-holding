@@ -1,17 +1,28 @@
 @model MenuGroupDetailViewModel
 
 @{
+    var menuImages = Model.Images ?? Array.Empty<MenuPageImageViewModel>();
+
     ViewData["Title"] = $"{Model.Name} - Thực đơn";
     ViewData["MetaDescription"] = Model.ShortDescription;
 
     var pageCountLabel = Model.TotalPages == 1
         ? "1 trang menu"
         : $"{Model.TotalPages} trang menu";
-}
-
-@section Styles {
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/css/dflip.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/css/themify-icons.min.css" />
+    var initialTotalPages = Model.TotalPages > 0
+        ? Model.TotalPages
+        : menuImages.Count;
+    var flipbookPagesJson = Model.HasImages
+        ? System.Text.Json.JsonSerializer.Serialize(
+            menuImages
+                .OrderBy(img => img.PageNumber)
+                .Select(img => new
+                {
+                    imageUrl = img.ImageUrl,
+                    altText = img.AltText,
+                    pageNumber = img.PageNumber
+                }))
+        : "[]";
 }
 
 <section class="menu-group-viewer menu-group-viewer--dark relative overflow-hidden py-12 text-white sm:py-16 lg:py-20"
@@ -55,15 +66,50 @@
         </header>
 
         <!-- Main Book Section -->
-        <section id="menu-viewer" class="menu-dearflip-section mt-8" data-uw-reveal="fade-up" data-uw-delay="120">
-            <div class="menu-dearflip-shell relative py-4 bg-gradient-to-b from-black/45 to-black/20 rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden">
+        <section id="menu-viewer" class="menu-pageflip-section mt-8" data-uw-reveal="fade-up" data-uw-delay="120">
+            <div class="menu-pageflip-shell relative overflow-hidden rounded-[2rem] border border-white/5 bg-gradient-to-b from-black/45 to-black/20 py-3 sm:py-4 shadow-2xl">
                 <!-- Ambient Backdrop Glow -->
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(229,9,20,0.03),transparent_70%)] pointer-events-none"></div>
 
                 @if (Model.HasImages)
                 {
-                    <!-- DearFlip container -->
-                    <div class="_df_book menu-dearflip-book" id="menu_group_flipbook"></div>
+                    <div class="menu-pageflip-toolbar">
+                        <div class="menu-pageflip-meta">
+                            <span class="menu-pageflip-count">@pageCountLabel</span>
+                            <p class="menu-pageflip-hint">Vuốt, kéo hoặc dùng nút điều hướng để lật trang.</p>
+                        </div>
+
+                        <div class="menu-pageflip-controls" role="group" aria-label="Điều hướng trang thực đơn">
+                            <button id="menu_flipbook_prev"
+                                    type="button"
+                                    class="menu-pageflip-button"
+                                    aria-label="Trang trước">
+                                ‹
+                            </button>
+                            <div class="menu-pageflip-indicator" aria-live="polite">
+                                <span id="menu_flipbook_current">1</span>
+                                <span>/</span>
+                                <span id="menu_flipbook_total">@initialTotalPages</span>
+                            </div>
+                            <button id="menu_flipbook_next"
+                                    type="button"
+                                    class="menu-pageflip-button"
+                                    aria-label="Trang sau">
+                                ›
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="menu-pageflip-frame">
+                        <div id="menu_group_flipbook"
+                             class="menu-pageflip-book"
+                             aria-label="Trình xem thực đơn dạng lật trang">
+                        </div>
+                    </div>
+
+                    <script id="menuFlipbookPages" type="application/json">
+                        @Html.Raw(flipbookPagesJson)
+                    </script>
                 }
                 else
                 {
@@ -125,12 +171,15 @@
             <noscript>
                 <section class="menu-flipbook-noscript py-8 text-center">
                     <h2 class="text-xl font-bold mb-4 text-white">Trang thực đơn</h2>
-                    <ul class="flex flex-col gap-8 max-w-2xl mx-auto">
-                        @foreach (var img in Model.Images)
+                    <ul class="menu-pageflip-fallback">
+                        @foreach (var img in menuImages)
                         {
-                            <li class="border border-white/10 p-2 rounded-lg bg-black/40">
-                                <img src="@img.ImageUrl" alt="@img.AltText" class="w-full h-auto rounded" loading="lazy" />
-                                <p class="mt-2 text-sm text-white/60">Trang @img.PageNumber.ToString("00"): @img.AltText</p>
+                            <li class="menu-pageflip-fallback__item">
+                                <img src="@img.ImageUrl"
+                                     alt="@img.AltText"
+                                     class="menu-pageflip-fallback__image"
+                                     loading="lazy" />
+                                <p class="menu-pageflip-fallback__caption">Trang @img.PageNumber.ToString("00"): @img.AltText</p>
                             </li>
                         }
                     </ul>
@@ -143,14 +192,7 @@
 @section Scripts {
     @if (Model.HasImages)
     {
-        <script>
-            window.option_menu_group_flipbook = {
-                source: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Images.Select(img => img.ImageUrl))),
-                webgl: true,
-                fancybox: false
-            };
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/@@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/js/dflip.min.js"></script>
+        <script src="~/lib/page-flip/page-flip.browser.js" asp-append-version="true"></script>
         <script src="~/js/menu-flipbook.js" asp-append-version="true"></script>
     }
 }

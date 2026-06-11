@@ -1570,6 +1570,28 @@
     max-width: 46rem;
   }
 
+  .about-reward-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 33.75rem;
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+  }
+
+  .about-reward-visual__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 20rem;
+    object-fit: contain;
+  }
+
   @media (min-width: 1024px) {
     .public-editorial-page__shell {
       padding-block: clamp(3.25rem, 5.6vw, 5.75rem);
@@ -2051,6 +2073,48 @@
   .franchise-page__submit {
     min-height: 3rem;
     justify-self: start;
+  }
+
+  .franchise-reward-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 26rem;
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.875rem;
+  }
+
+  .franchise-reward-visual__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 15rem;
+    object-fit: contain;
+  }
+
+  @media (max-width: 640px) {
+    .about-reward-visual {
+      max-width: 100%;
+      padding: 0.75rem;
+    }
+
+    .about-reward-visual__image {
+      max-height: 16rem;
+    }
+
+    .franchise-reward-visual {
+      max-width: 100%;
+      padding: 0.75rem;
+    }
+
+    .franchise-reward-visual__image {
+      max-height: 13.5rem;
+    }
   }
 
   @media (min-width: 1024px) {
@@ -3856,74 +3920,263 @@
     color: #ffffff;
   }
 
-  /* --- DearFlip Premium Dark Theme Integration --- */
-  .menu-dearflip-section {
+  /* --- StPageFlip Premium Dark Theme Integration --- */
+  .menu-pageflip-section {
     position: relative;
     z-index: 10;
   }
 
-  .menu-dearflip-shell {
+  .menu-pageflip-shell {
     width: 100%;
     margin-inline: auto;
+    padding-inline: 0.35rem;
   }
 
-  .menu-dearflip-book {
+  .menu-pageflip-toolbar {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding-inline: 0.85rem;
+    padding-bottom: 0.8rem;
+  }
+
+  .menu-pageflip-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .menu-pageflip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(229, 9, 20, 0.28);
+    background: rgba(229, 9, 20, 0.10);
+    padding: 0.55rem 0.9rem;
+    color: rgba(252, 165, 165, 0.94);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .menu-pageflip-hint {
+    font-size: 0.76rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.58);
+  }
+
+  .menu-pageflip-controls {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    align-self: flex-start;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    background: rgba(15, 15, 15, 0.62);
+    padding: 0.35rem;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.36);
+    backdrop-filter: blur(12px);
+  }
+
+  .menu-pageflip-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1;
+    transition: border-color 240ms ease, background 240ms ease, color 240ms ease, transform 240ms ease;
+  }
+
+  .menu-pageflip-button:hover,
+  .menu-pageflip-button:focus-visible {
+    border-color: rgba(229, 9, 20, 0.5);
+    background: rgba(229, 9, 20, 0.12);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .menu-pageflip-button:disabled,
+  .menu-pageflip-button[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.42;
+    transform: none;
+  }
+
+  .menu-pageflip-indicator {
+    min-width: 4.9rem;
+    padding-inline: 0.4rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .menu-pageflip-frame {
+    position: relative;
+    z-index: 10;
+    width: min(100%, 58rem);
+    margin-inline: auto;
+    padding-inline: 0.2rem;
+  }
+
+  .menu-pageflip-book {
     width: 100%;
-    min-height: min(78svh, 60rem);
+    min-height: clamp(19rem, 58svh, 43rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    background: transparent;
+  }
+
+  .menu-pageflip-book .stf__parent {
+    margin-inline: auto;
+    filter: drop-shadow(0 30px 72px rgba(0, 0, 0, 0.42));
+  }
+
+  .menu-pageflip-book canvas {
     background: transparent !important;
   }
 
-  /* Scope DearFlip style overrides to avoid bleeding */
-  .menu-dearflip-section .df-container {
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
+  .menu-pageflip-book--fallback,
+  .menu-pageflip-book--empty {
+    display: block;
+    min-height: 0;
   }
 
-  .menu-dearflip-section .df-container .df-book {
-    background: transparent !important;
+  .menu-pageflip-fallback {
+    width: min(100%, 54rem);
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
   }
 
-  /* Override default lightbox if any */
-  .df-lightbox {
-    background-color: rgba(11, 11, 11, 0.96) !important;
+  .menu-pageflip-fallback__item {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.5rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+    box-shadow: 0 20px 54px rgba(0, 0, 0, 0.32);
+    padding: 0.85rem;
   }
 
-  /* Custom control bar styling for DearFlip to match KIG Red brand */
-  .menu-dearflip-section .df-ui-controls {
-    background: rgba(31, 41, 55, 0.55) !important; /* Base Charcoal translucent */
-    backdrop-filter: blur(12px) !important;
-    border-radius: 9999px !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    padding: 0.25rem 1.25rem !important;
-    margin-bottom: 1.5rem !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
-    width: fit-content !important;
-    margin-inline: auto !important;
+  .menu-pageflip-fallback__image {
+    width: 100%;
+    height: auto;
+    border-radius: 1rem;
+    background: rgba(8, 8, 8, 0.76);
+    object-fit: contain;
   }
 
-  .menu-dearflip-section .df-ui-btn {
-    color: rgba(255, 255, 255, 0.7) !important;
-    transition: color 200ms ease, transform 200ms ease !important;
+  .menu-pageflip-fallback__caption {
+    margin-top: 0.8rem;
+    font-size: 0.84rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.64);
   }
 
-  .menu-dearflip-section .df-ui-btn:hover {
-    color: #E50914 !important; /* Brand Red accent */
-    transform: scale(1.08) !important;
+  .menu-pageflip-empty {
+    width: min(100%, 42rem);
+    margin-inline: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.75rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+    padding: 2rem 1.25rem;
+    text-align: center;
   }
 
-  .menu-dearflip-section .df-ui-btn.df-active {
-    color: #E50914 !important;
+  .menu-pageflip-empty__kicker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(229, 9, 20, 0.28);
+    background: rgba(229, 9, 20, 0.1);
+    padding: 0.65rem 1rem;
+    color: rgba(252, 165, 165, 0.94);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
   }
 
-  /* Ensure the canvas doesn't render bright flashes */
-  .menu-dearflip-section canvas {
-    background: transparent !important;
+  .menu-pageflip-empty__title {
+    margin-top: 1.15rem;
+    color: #ffffff;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 900;
+    line-height: 1.08;
+  }
+
+  .menu-pageflip-empty__copy {
+    margin-top: 0.9rem;
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+
+  @media (min-width: 640px) {
+    .menu-pageflip-toolbar {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      padding-inline: 1.15rem;
+    }
+
+    .menu-pageflip-controls {
+      align-self: auto;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .menu-pageflip-frame {
+      width: min(100%, 62rem, calc((100svh - 15rem) * 1.42));
+    }
+
+    .menu-pageflip-book {
+      min-height: clamp(24rem, 70svh, 48rem);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .menu-pageflip-book {
+      min-height: clamp(20rem, 64svh, 33rem);
+    }
+
+    .menu-pageflip-button {
+      width: 2.3rem;
+      height: 2.3rem;
+    }
+
+    .menu-pageflip-indicator {
+      min-width: 4.45rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .menu-dearflip-section *,
-    .menu-dearflip-book {
+    .menu-pageflip-section *,
+    .menu-pageflip-book {
       animation: none !important;
       transition: none !important;
     }

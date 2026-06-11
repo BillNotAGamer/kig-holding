@@ -2,52 +2,64 @@
 
 @{
     ViewData["Title"] = "Đặt bàn thành công";
-    ViewData["MetaDescription"] = "Thông tin đặt bàn của bạn đã được ghi nhận tại Truyền Thuyết Champong.";
+    ViewData["MetaDescription"] = "Thông tin đặt bàn của bạn đã được ghi nhận tại Truyền Thuyết Champong và đang chờ xác nhận từ nhà hàng.";
+
+    var hotlineHref = $"tel:{Model.Hotline.Replace(" ", string.Empty)}";
 }
 
-<section class="hero-frame" data-reservation-page="success">
-    <div class="container-page section-shell">
-        <div class="mx-auto w-full max-w-4xl">
-            <div class="surface-panel p-6 text-center sm:p-9" data-uw-reveal="fade-up">
-                <span class="mx-auto grid size-14 place-items-center rounded-md bg-brand-goldSoft text-2xl font-black text-brand-dark">✓</span>
-                <p class="mt-6 text-kicker font-black uppercase text-brand-goldDeep">Đã ghi nhận</p>
-                <h1 class="public-page-title--compact mt-3 text-brand-dark">Cảm ơn bạn đã đặt bàn.</h1>
-                <p class="mx-auto mt-4 max-w-2xl text-brand-gray">
-                    Thông tin đặt bàn đã được lưu với trạng thái chờ xác nhận. Nhà hàng sẽ liên hệ nếu cần bổ sung thông tin.
-                </p>
+<main data-reservation-page="success" class="reservation-page--dark">
+    <section class="reservation-page__shell py-10 sm:py-14 lg:py-16">
+        <div class="container-page">
+            <div class="mx-auto w-full max-w-4xl">
+                <div class="reservation-page__form-card text-center" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="mx-auto inline-flex size-14 items-center justify-center rounded-full border border-brand-red/30 bg-brand-red/12 text-2xl font-black text-white shadow-soft" aria-hidden="true">✓</span>
+                    <p class="mt-6 reservation-page__eyebrow">Đặt bàn thành công</p>
+                    <h1 class="reservation-page__section-title mt-3 text-center">Cảm ơn bạn đã đặt bàn.</h1>
+                    <p class="reservation-page__section-copy mx-auto mt-4">
+                        Thông tin đặt bàn của bạn đã được ghi nhận. Nhà hàng sẽ kiểm tra lịch và liên hệ khi cần xác nhận thêm chi tiết.
+                    </p>
 
-                <div class="mt-8 grid gap-3 text-left sm:grid-cols-2">
-                    <div class="surface-muted p-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Khách hàng</p>
-                        <p class="mt-2 font-black text-brand-dark">@Model.CustomerName</p>
+                    <div class="mt-8 grid gap-3 text-left sm:grid-cols-2">
+                        <div class="reservation-page__support p-4 sm:p-5">
+                            <p class="reservation-page__support-label">Khách hàng</p>
+                            <p class="relative z-10 mt-2 text-base font-black text-white sm:text-lg">@Model.CustomerName</p>
+                        </div>
+                        <div class="reservation-page__support p-4 sm:p-5">
+                            <p class="reservation-page__support-label">Chi nhánh</p>
+                            <p class="relative z-10 mt-2 text-base font-black text-white sm:text-lg">@Model.BranchName</p>
+                        </div>
+                        <div class="reservation-page__support p-4 sm:p-5">
+                            <p class="reservation-page__support-label">Ngày đến</p>
+                            <p class="relative z-10 mt-2 text-base font-black text-white sm:text-lg">@Model.ReservationDate.ToString("dd/MM/yyyy")</p>
+                        </div>
+                        <div class="reservation-page__support p-4 sm:p-5">
+                            <p class="reservation-page__support-label">Giờ đến</p>
+                            <p class="relative z-10 mt-2 text-base font-black text-white sm:text-lg">@Model.ReservationTime.ToString("HH:mm")</p>
+                        </div>
+                        <div class="reservation-page__support p-4 sm:p-5">
+                            <p class="reservation-page__support-label">Số khách</p>
+                            <p class="relative z-10 mt-2 text-base font-black text-white sm:text-lg">@Model.GuestCount khách</p>
+                        </div>
+                        <div class="reservation-page__support p-4 sm:p-5">
+                            <p class="reservation-page__support-label">Hotline</p>
+                            <a href="@hotlineHref" class="relative z-10 mt-2 inline-flex text-base font-black text-brand-red transition hover:text-white sm:text-lg">@Model.Hotline</a>
+                        </div>
                     </div>
-                    <div class="surface-muted p-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Chi nhánh</p>
-                        <p class="mt-2 font-black text-brand-dark">@Model.BranchName</p>
-                    </div>
-                    <div class="surface-muted p-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Ngày đến</p>
-                        <p class="mt-2 font-black text-brand-dark">@Model.ReservationDate.ToString("dd/MM/yyyy")</p>
-                    </div>
-                    <div class="surface-muted p-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Giờ đến</p>
-                        <p class="mt-2 font-black text-brand-dark">@Model.ReservationTime.ToString("HH:mm")</p>
-                    </div>
-                    <div class="surface-muted p-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Số khách</p>
-                        <p class="mt-2 font-black text-brand-dark">@Model.GuestCount khách</p>
-                    </div>
-                    <div class="surface-muted p-4">
-                        <p class="text-xs font-semibold uppercase tracking-[0.16em] text-brand-goldDeep">Hotline</p>
-                        <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="mt-2 block font-black text-brand-goldDeep">@Model.Hotline</a>
-                    </div>
-                </div>
 
-                <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-                    <a href="/" class="btn-primary">Về trang chủ</a>
-                    <a href="/thuc-don" class="btn-secondary">Xem thực đơn</a>
+                    <div class="reservation-page__support mt-6 px-4 py-4 text-left sm:px-5">
+                        <p class="reservation-page__support-label">Hỗ trợ xác nhận</p>
+                        <p class="reservation-page__support-copy mt-2 max-w-none">
+                            Nếu cần hỗ trợ nhanh hơn về thời gian đến hoặc số lượng khách, bạn có thể liên hệ trực tiếp nhà hàng qua hotline
+                            <a href="@hotlineHref" class="font-bold text-brand-red transition hover:text-white">@Model.Hotline</a>.
+                        </p>
+                    </div>
+
+                    <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                        <a href="/" class="public-editorial-page__button public-editorial-page__button--primary">Về trang chủ</a>
+                        <a href="/thuc-don" class="public-editorial-page__button public-editorial-page__button--secondary">Xem thực đơn</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+</main>
