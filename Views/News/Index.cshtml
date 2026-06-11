@@ -64,14 +64,16 @@
 
             @if (Model.Posts.Count > 0)
             {
-                <div class="mt-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between" data-uw-reveal="fade-up" data-uw-delay="150">
+                <div class="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-end" data-uw-reveal="fade-up" data-uw-delay="150">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Tổng quan chuyên mục</p>
                         <h2 class="mt-2 text-[clamp(2rem,3vw,2.8rem)] font-black leading-tight text-white">
                             @(string.IsNullOrWhiteSpace(Model.SelectedCategoryName) ? "Tất cả tin tức" : Model.SelectedCategoryName)
                         </h2>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 text-sm">
+                        <p class="mt-3 max-w-2xl text-sm leading-7 text-white/58">
+                            Theo dõi các cập nhật mới nhất theo chủ đề, từ ưu đãi, sự kiện đến hệ thống chi nhánh và món mới.
+                        </p>
+                        <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
                         <span class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-white/72">
                             @Model.TotalItems bài viết
                         </span>
@@ -84,7 +86,10 @@
                                 Trang @Model.Page / @Model.TotalPages
                             </span>
                         }
+                        </div>
                     </div>
+
+                    @await Component.InvokeAsync("SuggestedPostCategories", new { mode = "News", limit = 6, poolSize = 10, rotateWithinRecentPool = false })
                 </div>
 
                 <section class="mt-10" aria-labelledby="news-featured-heading">

@@ -1,0 +1,39 @@
+@model KIGHolding.ViewModels.SuggestedPostCategoriesViewModel
+
+@{
+    var modifierClass = Model.IsNewsMode ? "suggested-categories--news" : "suggested-categories--home";
+    var headingId = Model.IsNewsMode ? "suggested-news-categories-heading" : "suggested-home-categories-heading";
+}
+
+@if (Model.Items.Count > 0)
+{
+    <section class="suggested-categories @modifierClass"
+             aria-labelledby="@headingId"
+             data-uw-reveal="fade-up"
+             data-uw-once="true"
+             data-uw-delay="120">
+        <div class="suggested-categories__header">
+            <p class="suggested-categories__eyebrow">@Model.Eyebrow</p>
+            <h3 id="@headingId" class="suggested-categories__title">@Model.Heading</h3>
+        </div>
+
+        <div class="suggested-categories__list">
+            @foreach (var category in Model.Items)
+            {
+                var categoryUrl = $"/tin-tuc?category={Uri.EscapeDataString(category.Slug)}";
+                var ariaLabel = $"Xem chủ đề {category.DisplayName}, {category.PostCount} bài viết";
+
+                <a href="@categoryUrl"
+                   class="suggested-category-card"
+                   aria-label="@ariaLabel">
+                    <span class="suggested-category-card__name">@category.DisplayName</span>
+                    <span class="suggested-category-card__meta">
+                        @category.PostCount bài viết
+                        <span aria-hidden="true">•</span>
+                        @category.LatestPostDate.ToString("dd/MM/yyyy")
+                    </span>
+                </a>
+            }
+        </div>
+    </section>
+}

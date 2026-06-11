@@ -459,17 +459,21 @@
                 </p>
             </div>
 
-            <div class="flex flex-wrap items-center gap-4" data-uw-reveal="fade-up" data-uw-delay="100">
-                @if (homeNewsPosts.Count > 0)
-                {
-                    <span class="inline-flex items-center rounded-full border border-white/12 bg-white/[0.06] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_14px_32px_rgba(0,0,0,0.16)] backdrop-blur">
-                        @homeNewsPosts.Count bài viết mới
-                    </span>
-                }
+            <div class="flex flex-col items-start gap-4 lg:items-end" data-uw-reveal="fade-up" data-uw-delay="100">
+                <div class="flex flex-wrap items-center gap-4">
+                    @if (homeNewsPosts.Count > 0)
+                    {
+                        <span class="inline-flex items-center rounded-full border border-white/12 bg-white/[0.06] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_14px_32px_rgba(0,0,0,0.16)] backdrop-blur">
+                            @homeNewsPosts.Count bài viết mới
+                        </span>
+                    }
 
-                <a href="/tin-tuc" class="inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3.5 text-[0.82rem] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_18px_36px_rgba(229,9,20,0.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-brand-redDark">
-                    Xem tất cả tin tức
-                </a>
+                    <a href="/tin-tuc" class="inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3.5 text-[0.82rem] font-semibold uppercase tracking-[0.16em] text-white shadow-[0_18px_36px_rgba(229,9,20,0.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-brand-redDark">
+                        Xem tất cả tin tức
+                    </a>
+                </div>
+
+                @await Component.InvokeAsync("SuggestedPostCategories", new { mode = "Home", limit = 4, poolSize = 8, rotateWithinRecentPool = true })
             </div>
         </div>
 
