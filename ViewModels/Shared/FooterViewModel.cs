@@ -2,7 +2,7 @@
 
 public class FooterViewModel
 {
-    public string BrandName { get; set; } = "Truyền Thuyết Champong";
+    public string BrandName { get; set; } = "KIG Holding";
     public string Description { get; set; } = "Mì cay Hàn Quốc, BBQ nóng lửa và không gian tối hiện đại cho những bữa ăn đậm vị.";
     public string LogoUrl { get; set; } = string.Empty;
     public string FooterLogoUrl { get; set; } = "/images/general/kig-no-bg-logo.png";

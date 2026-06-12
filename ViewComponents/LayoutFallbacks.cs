@@ -138,7 +138,7 @@ internal static class LayoutFallbacks
     {
         return new HeaderViewModel
         {
-            BrandName = string.IsNullOrWhiteSpace(setting?.BrandName) ? "Truyền Thuyết Champong" : setting!.BrandName,
+            BrandName = string.IsNullOrWhiteSpace(setting?.BrandName) ? "KIG Holding" : setting!.BrandName,
             LogoUrl = string.IsNullOrWhiteSpace(setting?.LogoUrl) ? "/images/general/kig-no-bg-logo.png" : setting!.LogoUrl,
             Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0909 888 777" : setting!.Hotline,
             ReservationUrl = "/dat-ban",
@@ -150,7 +150,7 @@ internal static class LayoutFallbacks
     {
         return new FooterViewModel
         {
-            BrandName = string.IsNullOrWhiteSpace(setting?.BrandName) ? "Truyền Thuyết Champong" : setting!.BrandName,
+            BrandName = string.IsNullOrWhiteSpace(setting?.BrandName) ? "KIG Holding" : setting!.BrandName,
             Description = string.IsNullOrWhiteSpace(setting?.Slogan) ? "Mì cay Hàn Quốc, BBQ nóng lửa và không gian tối hiện đại cho những bữa ăn đậm vị." : setting!.Slogan,
             LogoUrl = string.IsNullOrWhiteSpace(setting?.LogoUrl) ? string.Empty : setting!.LogoUrl,
             FooterLogoUrl = "/images/general/kig-no-bg-logo.png",

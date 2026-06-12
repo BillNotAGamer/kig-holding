@@ -45,7 +45,7 @@
             <div class="container-page champong-hero__inner">
                 <div class="champong-hero__content champong-hero__content--left">
                     <span data-champong-hero-reveal class="champong-hero__eyebrow champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="0">
-                        PREMIUM KOREAN DINING EXPERIENCE
+                        Truyền Thuyết Champong - 전설의짬뽕
                     </span>
                     <h1 data-champong-hero-reveal class="champong-hero__title champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="140">
                         Champong cho những bữa ăn có gu.
@@ -76,7 +76,7 @@
             <div class="container-page champong-hero__inner">
                 <div class="champong-hero__content champong-hero__content--center">
                     <span data-champong-hero-reveal class="champong-hero__eyebrow champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="0">
-                        Signature Korean Taste
+                        GOGI MARU - 고기마루
                     </span>
                     <h2 data-champong-hero-reveal class="champong-hero__title champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="140">
                         Hương vị Hàn Quốc trong không gian hiện đại
@@ -107,7 +107,7 @@
             <div class="container-page champong-hero__inner">
                 <div class="champong-hero__content champong-hero__content--right">
                     <span data-champong-hero-reveal class="champong-hero__eyebrow champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="0">
-                        SIGNATURE CHAMPONG FLAVOURS
+                        KBB COOK - BUFFET NƯỚNG HÀN QUỐC 한국식 바비큐 뷔페
                     </span>
                     <h2 data-champong-hero-reveal class="champong-hero__title champong-hero__layer" data-uw-reveal="fade-up" data-champong-hero-delay="140">
                         Hương vị đậm đà, nâng nhịp mọi cuộc gặp.
@@ -317,8 +317,50 @@
             </article>
 
             <article class="home-culinary-essence__block grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:gap-14" data-uw-reveal="fade-up">
-                <div class="home-culinary-essence__image" data-uw-reveal="fade-up" data-uw-delay="0">
-                    <img src="~/images/home/images/kbb-cook-img.webp" asp-append-version="true" alt="Không gian và món nướng KBB Cook" class="h-full w-full object-cover" />
+                <div class="home-culinary-essence__image" data-uw-reveal="fade-up" data-uw-delay="0" data-kbb-cook-slider>
+                    <img src="~/images/home/images/kbb-cook-img.webp"
+                         asp-append-version="true"
+                         alt="Không gian và món nướng KBB Cook"
+                         class="kbb-cook-slider__slide kbb-cook-slider__slide--anchor is-active"
+                         data-kbb-cook-slide
+                         data-kbb-cook-slide-active="true"
+                         draggable="false" />
+                    <img src="~/images/home/images/178k-package.webp"
+                         asp-append-version="true"
+                         alt="Gói buffet KBB Cook 178K"
+                         class="kbb-cook-slider__slide"
+                         data-kbb-cook-slide
+                         aria-hidden="true"
+                         draggable="false"
+                         loading="lazy"
+                         decoding="async" />
+                    <img src="~/images/home/images/278k-package.webp"
+                         asp-append-version="true"
+                         alt="Gói buffet KBB Cook 278K"
+                         class="kbb-cook-slider__slide"
+                         data-kbb-cook-slide
+                         aria-hidden="true"
+                         draggable="false"
+                         loading="lazy"
+                         decoding="async" />
+                    <img src="~/images/home/images/378k-package.webp"
+                         asp-append-version="true"
+                         alt="Gói buffet KBB Cook 378K"
+                         class="kbb-cook-slider__slide"
+                         data-kbb-cook-slide
+                         aria-hidden="true"
+                         draggable="false"
+                         loading="lazy"
+                         decoding="async" />
+                    <img src="~/images/home/images/458k-package.webp"
+                         asp-append-version="true"
+                         alt="Gói buffet KBB Cook 458K"
+                         class="kbb-cook-slider__slide"
+                         data-kbb-cook-slide
+                         aria-hidden="true"
+                         draggable="false"
+                         loading="lazy"
+                         decoding="async" />
                 </div>
 
                 <div>
@@ -329,27 +371,38 @@
                             한국식 바비큐 뷔페
                         </h3>
                     </div>
-
-                    <div class="mt-8 grid gap-5 sm:grid-cols-2">
+                    <div class="mt-7 grid gap-5 sm:grid-cols-2">
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="160">
                             <img src="~/images/home/icons/bbq-grill-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
-                            <h4>Nướng chuẩn vị</h4>
-                            <p>Bàn nướng nóng hổi, hương vị đậm đà và cách thưởng thức đúng tinh thần BBQ Hàn Quốc.</p>
+                            <h4>Gói khởi đầu</h4>
+                            <h4 class="text-4xl font-black leading-none text-brand-red sm:text-6xl xl:text-[4.5rem]">
+                                178K
+                            </h4>
+                            <p>Lựa chọn nhẹ nhàng cho bữa nướng chuẩn vị.</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="220">
                             <img src="~/images/home/icons/fresh-ingredients-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
-                            <h4>Nguyên liệu tươi</h4>
-                            <p>Thịt, hải sản và rau ăn kèm được chọn lọc kỹ để giữ trọn độ ngon khi phục vụ.</p>
+                            <h4>Gói tiêu chuẩn</h4>
+                            <h4 class="text-4xl font-black leading-none text-brand-red sm:text-6xl xl:text-[4.5rem]">
+                                278K
+                            </h4>
+                            <p>Bao gồm tất cả các món tại quầy line.</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="280">
                             <img src="~/images/home/icons/team-table-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
-                            <h4>Bữa ăn sum vầy</h4>
-                            <p>Không gian phù hợp cho nhóm bạn, gia đình và những buổi tụ họp ấm cúng.</p>
+                            <h4>Gói thịnh soạn</h4>
+                            <h4 class="text-4xl font-black leading-none text-brand-red sm:text-6xl xl:text-[4.5rem]">
+                                378K
+                            </h4>
+                            <p>Bao gồm tất cả các món tại quầy line và cả gói 278k.</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="340">
                             <img src="~/images/home/icons/various-side-dish-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
-                            <h4>Món ăn kèm đa dạng</h4>
-                            <p>Các món phụ kiểu Hàn giúp bữa nướng thêm tròn vị và phong phú hơn.</p>
+                            <h4>Gói thượng hạng</h4>
+                            <h4 class="text-4xl font-black leading-none text-brand-red sm:text-6xl xl:text-[4.5rem]">
+                                458K
+                            </h4>
+                            <p>Trọn vẹn lựa chọn tại quầy line cùng các món cao cấp.</p>
                         </div>
                     </div>
                 </div>
@@ -653,4 +706,5 @@
 </section>
 @section Scripts {
     <script src="~/js/home-hero-slider.js" asp-append-version="true"></script>
+    <script src="~/js/kbb-cook-slider.js" asp-append-version="true"></script>
 }

@@ -4497,6 +4497,39 @@
     min-height: inherit;
   }
 
+  [data-kbb-cook-slider] {
+    touch-action: pan-y;
+    user-select: none;
+  }
+
+  .kbb-cook-slider__slide {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 700ms ease;
+  }
+
+  .kbb-cook-slider__slide--anchor {
+    position: relative;
+  }
+
+  .kbb-cook-slider__slide:not(.kbb-cook-slider__slide--anchor) {
+    position: absolute;
+    inset: 0;
+  }
+
+  .kbb-cook-slider__slide.is-active {
+    opacity: 1;
+    z-index: 1;
+  }
+
+  [data-kbb-cook-slider].is-reduced-motion .kbb-cook-slider__slide {
+    transition-duration: 0ms;
+  }
+
   .home-culinary-essence__feature {
     @apply transition duration-300;
     border-left: 0;
