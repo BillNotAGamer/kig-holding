@@ -36,8 +36,8 @@
                 </p>
             </div>
 
-            <div class="mx-auto mt-5 max-w-5xl" data-uw-reveal="fade-up" data-uw-delay="100">
-                <form action="@Url.Action("Index", "Branch")" method="get" class="branch-locator__search rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-2 shadow-panel backdrop-blur" data-branch-search-form>
+            <div class="mx-auto mt-5 max-w-5xl relative z-40" data-uw-reveal="fade-up" data-uw-delay="100">
+                <form action="@Url.Action("Index", "Branch")" method="get" class="branch-locator__search relative z-40 rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-2 shadow-panel backdrop-blur" data-branch-search-form>
                     @if (hasSelectedCity)
                     {
                         <input type="hidden" name="city" value="@Model.SelectedCity" />
