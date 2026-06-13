@@ -1,8 +1,10 @@
 using KIGHolding.Data;
+using KIGHolding.Models.Entities;
 using KIGHolding.Options;
 using KIGHolding.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
 using Resend;
@@ -23,6 +25,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Admin/Auth/Logout";
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.EventsType = typeof(AdminCookieAuthenticationEvents);
     });
 builder.Services.AddAuthorization();
 builder.Services.AddMemoryCache();
@@ -49,11 +52,15 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.Configure<ResendSettings>(builder.Configuration.GetSection("ResendSettings"));
+builder.Services.Configure<AdminBootstrapSettings>(builder.Configuration.GetSection("AdminBootstrap"));
 builder.Services.AddResend(options =>
 {
     options.ApiToken = builder.Configuration["ResendSettings:ApiKey"] ?? string.Empty;
 });
+builder.Services.AddScoped<AdminBootstrapConfigurationResolver>();
+builder.Services.AddScoped<IAdminLegacyCredentialGuard, AdminLegacyCredentialGuard>();
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddScoped<ISiteSettingService, SiteSettingService>();
 builder.Services.AddScoped<IMenuGroupService, MenuGroupService>();
@@ -62,8 +69,17 @@ builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
+builder.Services.AddScoped<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
+builder.Services.AddScoped<AdminCookieAuthenticationEvents>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var adminLegacyCredentialGuard = scope.ServiceProvider.GetRequiredService<IAdminLegacyCredentialGuard>();
+    await adminLegacyCredentialGuard.EnsureSecureAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {

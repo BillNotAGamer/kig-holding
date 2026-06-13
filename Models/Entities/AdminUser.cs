@@ -5,6 +5,10 @@ public class AdminUser : IUpdatedAtEntity
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Username { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? NormalizedEmail { get; set; }
+    public bool EmailConfirmed { get; set; }
+    public string SecurityStamp { get; set; } = string.Empty;
     public string Role { get; set; } = "SuperAdmin";
     public bool IsActive { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

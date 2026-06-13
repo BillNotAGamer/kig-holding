@@ -2,6 +2,7 @@ using System.Security.Claims;
 using KIGHolding.Areas.Admin.ViewModels;
 using KIGHolding.Data;
 using KIGHolding.Models.Entities;
+using KIGHolding.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -15,11 +16,14 @@ namespace KIGHolding.Areas.Admin.Controllers;
 public class AuthController : AdminBaseController
 {
     private readonly AppDbContext _dbContext;
-    private readonly PasswordHasher<AdminUser> _passwordHasher = new();
+    private readonly IPasswordHasher<AdminUser> _passwordHasher;
 
-    public AuthController(AppDbContext dbContext)
+    public AuthController(
+        AppDbContext dbContext,
+        IPasswordHasher<AdminUser> passwordHasher)
     {
         _dbContext = dbContext;
+        _passwordHasher = passwordHasher;
     }
 
     [HttpGet]
@@ -49,7 +53,6 @@ public class AuthController : AdminBaseController
         }
 
         var user = await _dbContext.AdminUsers
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Username == model.Username.Trim());
 
         if (user is null || !user.IsActive)
@@ -67,11 +70,19 @@ public class AuthController : AdminBaseController
             return View(model);
         }
 
+        if (string.IsNullOrWhiteSpace(user.SecurityStamp))
+        {
+            user.SecurityStamp = AdminSecurityStampGenerator.Create();
+            user.UpdatedAt = DateTimeOffset.UtcNow;
+            await _dbContext.SaveChangesAsync(HttpContext.RequestAborted);
+        }
+
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.Username),
-            new(ClaimTypes.Role, user.Role)
+            new(ClaimTypes.Role, user.Role),
+            new(AdminClaimTypes.SecurityStamp, user.SecurityStamp)
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

@@ -5,6 +5,7 @@ using KIGHolding.Areas.Admin.ViewModels;
 using KIGHolding.Data;
 using KIGHolding.Models.Content;
 using KIGHolding.Models.Entities;
+using KIGHolding.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ public class PostController : AdminBaseController
     private const string DraftStatus = "draft";
 
     private readonly AppDbContext _dbContext;
-    private readonly IWebHostEnvironment _env;
+    private readonly IImageStorageService _imageStorageService;
 
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -29,10 +30,11 @@ public class PostController : AdminBaseController
     };
 
     private const int MaxFileSize = 2 * 1024 * 1024;
-    public PostController(AppDbContext dbContext, IWebHostEnvironment env)
+
+    public PostController(AppDbContext dbContext, IImageStorageService imageStorageService)
     {
         _dbContext = dbContext;
-        _env = env;
+        _imageStorageService = imageStorageService;
     }
 
     [HttpGet]
@@ -167,12 +169,23 @@ public class PostController : AdminBaseController
         }
 
         var slug = await BuildUniqueSlugAsync(model.Slug, model.Title);
-        var thumbnailUrl = await SaveUploadedFileAsync(model.ThumbnailFile, "posts");
-        if (model.ThumbnailFile is not null && model.ThumbnailFile.Length > 0 && string.IsNullOrWhiteSpace(thumbnailUrl))
+        var thumbnailUrl = string.Empty;
+
+        if (model.ThumbnailFile is not null && model.ThumbnailFile.Length > 0)
         {
-            ModelState.AddModelError(nameof(model.ThumbnailFile), "Ảnh tải lên không hợp lệ hoặc vượt quá 2MB.");
-            model.CategoryOptions = BuildCategoryOptions();
-            return View(model);
+            try
+            {
+                thumbnailUrl = await _imageStorageService.UploadAsync(
+                    model.ThumbnailFile,
+                    ImageCategory.Posts,
+                    HttpContext.RequestAborted);
+            }
+            catch
+            {
+                ModelState.AddModelError(nameof(model.ThumbnailFile), "Không thể tải ảnh lên. Vui lòng thử lại.");
+                model.CategoryOptions = BuildCategoryOptions();
+                return View(model);
+            }
         }
 
         var post = new Post
@@ -194,7 +207,15 @@ public class PostController : AdminBaseController
         };
 
         _dbContext.Posts.Add(post);
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch
+        {
+            await _imageStorageService.DeleteAsync(thumbnailUrl, ImageCategory.Posts, HttpContext.RequestAborted);
+            throw;
+        }
 
         return RedirectToAction(nameof(Index));
     }
@@ -266,20 +287,25 @@ public class PostController : AdminBaseController
         }
 
         var slug = await BuildUniqueSlugAsync(model.Slug, model.Title, post.Id);
+        var previousThumbnailUrl = post.ThumbnailUrl;
+        string? uploadedThumbnailUrl = null;
 
         if (model.ThumbnailFile is not null && model.ThumbnailFile.Length > 0)
         {
-            var newThumbnailUrl = await SaveUploadedFileAsync(model.ThumbnailFile, "posts");
-            if (string.IsNullOrWhiteSpace(newThumbnailUrl))
+            try
             {
-                ModelState.AddModelError(nameof(model.ThumbnailFile), "Ảnh tải lên không hợp lệ hoặc vượt quá 2MB.");
+                uploadedThumbnailUrl = await _imageStorageService.UploadAsync(
+                    model.ThumbnailFile,
+                    ImageCategory.Posts,
+                    HttpContext.RequestAborted);
+            }
+            catch
+            {
+                ModelState.AddModelError(nameof(model.ThumbnailFile), "Không thể tải ảnh lên. Vui lòng thử lại.");
                 model.ExistingThumbnailUrl = post.ThumbnailUrl;
                 model.CategoryOptions = BuildCategoryOptions();
                 return View(model);
             }
-
-            DeleteUploadedFile(post.ThumbnailUrl, "posts");
-            post.ThumbnailUrl = newThumbnailUrl;
         }
 
         post.Title = model.Title.Trim();
@@ -287,6 +313,11 @@ public class PostController : AdminBaseController
         post.Category = normalizedCategory;
         post.Excerpt = model.Excerpt.Trim();
         post.Content = model.Content.Trim();
+        if (!string.IsNullOrWhiteSpace(uploadedThumbnailUrl))
+        {
+            post.ThumbnailUrl = uploadedThumbnailUrl;
+        }
+
         post.IsPublished = model.IsPublished;
         post.PublishedAt = model.IsPublished
             ? NormalizeLocalInputToUtc(model.PublishedAt) ?? DateTimeOffset.UtcNow
@@ -295,7 +326,20 @@ public class PostController : AdminBaseController
         post.SeoDescription = string.IsNullOrWhiteSpace(model.SeoDescription) ? model.Excerpt.Trim() : model.SeoDescription.Trim();
         post.UpdatedAt = DateTimeOffset.UtcNow;
 
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch
+        {
+            await _imageStorageService.DeleteAsync(uploadedThumbnailUrl, ImageCategory.Posts, HttpContext.RequestAborted);
+            throw;
+        }
+
+        if (!string.IsNullOrWhiteSpace(uploadedThumbnailUrl))
+        {
+            await _imageStorageService.DeleteAsync(previousThumbnailUrl, ImageCategory.Posts, HttpContext.RequestAborted);
+        }
 
         return RedirectToAction(nameof(Index));
     }
@@ -314,13 +358,34 @@ public class PostController : AdminBaseController
         post.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _dbContext.SaveChangesAsync();
-        return RedirectToAction(nameof(Index), new
+        SetSuccessMessage("Bài viết đã được ẩn khỏi website công khai.");
+
+        return RedirectToAction(nameof(Index), BuildIndexRouteValues(q, category, status, page));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PermanentDelete(Guid id, string? q, string? category, string? status, int page = 1)
+    {
+        var post = await _dbContext.Posts.FirstOrDefaultAsync(x => x.Id == id);
+        if (post is null)
         {
-            q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
-            category = NewsCategories.NormalizeCategory(category),
-            status = NormalizeStatus(status),
-            page = Math.Max(page, 1)
-        });
+            return NotFound();
+        }
+
+        var thumbnailUrl = post.ThumbnailUrl;
+
+        _dbContext.Posts.Remove(post);
+        await _dbContext.SaveChangesAsync();
+
+        if (!string.IsNullOrWhiteSpace(thumbnailUrl))
+        {
+            await _imageStorageService.DeleteAsync(thumbnailUrl, ImageCategory.Posts, HttpContext.RequestAborted);
+        }
+
+        SetSuccessMessage("Bài viết đã được xóa vĩnh viễn.");
+
+        return RedirectToAction(nameof(Index), BuildIndexRouteValues(q, category, status, page));
     }
 
     private static DateTimeOffset? NormalizeLocalInputToUtc(DateTime? value)
@@ -362,39 +427,6 @@ public class PostController : AdminBaseController
         }
 
         return slug;
-    }
-
-    private async Task<string> SaveUploadedFileAsync(IFormFile? file, string subFolder)
-    {
-        if (file is null || file.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!AllowedExtensions.Contains(extension) ||
-            (!string.IsNullOrWhiteSpace(file.ContentType) && !AllowedContentTypes.Contains(file.ContentType)) ||
-            file.Length > MaxFileSize)
-        {
-            return string.Empty;
-        }
-
-        var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", subFolder);
-        Directory.CreateDirectory(uploadsFolder);
-
-        var safeBaseName = NormalizeSlugInput(Path.GetFileNameWithoutExtension(file.FileName));
-        if (string.IsNullOrWhiteSpace(safeBaseName))
-        {
-            safeBaseName = subFolder;
-        }
-
-        var uniqueFileName = $"{safeBaseName}-{Guid.NewGuid():N}{extension}";
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-        await using var fileStream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        await file.CopyToAsync(fileStream);
-
-        return $"/uploads/{subFolder}/{uniqueFileName}";
     }
 
     private static IReadOnlyList<SelectListItem> BuildCategoryOptions()
@@ -442,6 +474,17 @@ public class PostController : AdminBaseController
             : null;
     }
 
+    private static object BuildIndexRouteValues(string? q, string? category, string? status, int page)
+    {
+        return new
+        {
+            q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
+            category = NewsCategories.NormalizeCategory(category),
+            status = NormalizeStatus(status),
+            page = Math.Max(page, 1)
+        };
+    }
+
     private string? ValidateAndNormalizeCategory(string? category)
     {
         var normalizedCategory = NewsCategories.NormalizeCategory(category);
@@ -452,28 +495,6 @@ public class PostController : AdminBaseController
 
         ModelState.AddModelError(nameof(PostCreateViewModel.Category), "Vui lòng chọn danh mục hợp lệ.");
         return null;
-    }
-
-    private void DeleteUploadedFile(string? relativePath, string subFolder)
-    {
-        if (string.IsNullOrWhiteSpace(relativePath) || !relativePath.StartsWith($"/uploads/{subFolder}/", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        var trimmedPath = relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-        var fullPath = Path.GetFullPath(Path.Combine(_env.WebRootPath, trimmedPath));
-        var uploadsRoot = Path.GetFullPath(Path.Combine(_env.WebRootPath, "uploads", subFolder));
-
-        if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        if (System.IO.File.Exists(fullPath))
-        {
-            System.IO.File.Delete(fullPath);
-        }
     }
 
     private static string NormalizeSlugInput(string? value)

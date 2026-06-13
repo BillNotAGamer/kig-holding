@@ -13,8 +13,9 @@ namespace KIGHolding.Areas.Admin.Controllers;
 public class BranchController : AdminBaseController
 {
     private readonly AppDbContext _dbContext;
-    private readonly IWebHostEnvironment _env;
     private readonly IBranchService _branchService;
+    private readonly IImageStorageService _imageStorageService;
+    private readonly ILogger<BranchController> _logger;
 
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -26,11 +27,16 @@ public class BranchController : AdminBaseController
 
     private const int MaxFileSize = 2 * 1024 * 1024;
 
-    public BranchController(AppDbContext dbContext, IWebHostEnvironment env, IBranchService branchService)
+    public BranchController(
+        AppDbContext dbContext,
+        IBranchService branchService,
+        IImageStorageService imageStorageService,
+        ILogger<BranchController> logger)
     {
         _dbContext = dbContext;
-        _env = env;
         _branchService = branchService;
+        _imageStorageService = imageStorageService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -65,7 +71,18 @@ public class BranchController : AdminBaseController
         var thumbnailUrl = string.Empty;
         if (model.ThumbnailFile is not null && model.ThumbnailFile.Length > 0)
         {
-            thumbnailUrl = await SaveUploadedFileAsync(model.ThumbnailFile);
+            try
+            {
+                thumbnailUrl = await _imageStorageService.UploadAsync(
+                    model.ThumbnailFile,
+                    ImageCategory.Branches,
+                    HttpContext.RequestAborted);
+            }
+            catch
+            {
+                ModelState.AddModelError(nameof(model.ThumbnailFile), "Không thể tải ảnh lên. Vui lòng thử lại.");
+                return View(model);
+            }
         }
 
         var branch = new Branch
@@ -92,10 +109,19 @@ public class BranchController : AdminBaseController
         };
 
         _dbContext.Branches.Add(branch);
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch
+        {
+            await _imageStorageService.DeleteAsync(thumbnailUrl, ImageCategory.Branches, HttpContext.RequestAborted);
+            throw;
+        }
+
         _branchService.InvalidateActiveBranchesCache();
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAdminIndex();
     }
 
     [HttpGet]
@@ -155,11 +181,23 @@ public class BranchController : AdminBaseController
             return View(model);
         }
 
+        var previousThumbnailUrl = branch.ThumbnailUrl;
+        string? uploadedThumbnailUrl = null;
         if (model.ThumbnailFile is not null && model.ThumbnailFile.Length > 0)
         {
-            var newThumbnailUrl = await SaveUploadedFileAsync(model.ThumbnailFile);
-            DeleteUploadedFile(branch.ThumbnailUrl);
-            branch.ThumbnailUrl = newThumbnailUrl;
+            try
+            {
+                uploadedThumbnailUrl = await _imageStorageService.UploadAsync(
+                    model.ThumbnailFile,
+                    ImageCategory.Branches,
+                    HttpContext.RequestAborted);
+            }
+            catch
+            {
+                ModelState.AddModelError(nameof(model.ThumbnailFile), "Không thể tải ảnh lên. Vui lòng thử lại.");
+                model.ExistingThumbnailUrl = branch.ThumbnailUrl;
+                return View(model);
+            }
         }
 
         branch.Name = model.Name.Trim();
@@ -176,14 +214,33 @@ public class BranchController : AdminBaseController
         branch.NumberOfFloors = model.NumberOfFloors;
         branch.Description = model.Description.Trim();
         branch.GoogleMapUrl = model.GoogleMapUrl.Trim();
+        if (!string.IsNullOrWhiteSpace(uploadedThumbnailUrl))
+        {
+            branch.ThumbnailUrl = uploadedThumbnailUrl;
+        }
+
         branch.IsActive = model.IsActive;
         branch.DisplayOrder = model.DisplayOrder;
         branch.UpdatedAt = DateTimeOffset.UtcNow;
 
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch
+        {
+            await _imageStorageService.DeleteAsync(uploadedThumbnailUrl, ImageCategory.Branches, HttpContext.RequestAborted);
+            throw;
+        }
+
+        if (!string.IsNullOrWhiteSpace(uploadedThumbnailUrl))
+        {
+            await _imageStorageService.DeleteAsync(previousThumbnailUrl, ImageCategory.Branches, HttpContext.RequestAborted);
+        }
+
         _branchService.InvalidateActiveBranchesCache();
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAdminIndex();
     }
 
     [HttpPost]
@@ -201,8 +258,57 @@ public class BranchController : AdminBaseController
 
         await _dbContext.SaveChangesAsync();
         _branchService.InvalidateActiveBranchesCache();
+        SetSuccessMessage("Chi nhánh đã được ẩn khỏi website công khai.");
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAdminIndex();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PermanentDelete(Guid id, CancellationToken cancellationToken)
+    {
+        var branch = await _dbContext.Branches.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (branch is null)
+        {
+            return NotFound();
+        }
+
+        var hasReservations = await _dbContext.Reservations
+            .AsNoTracking()
+            .AnyAsync(x => x.BranchId == id, cancellationToken);
+
+        if (hasReservations)
+        {
+            SetErrorMessage("Không thể xóa vĩnh viễn chi nhánh vì đang có dữ liệu đặt bàn liên quan. Hãy sử dụng Xóa mềm để bảo toàn lịch sử vận hành.");
+            return RedirectToAdminIndex();
+        }
+
+        var branchName = branch.Name;
+        var thumbnailUrl = branch.ThumbnailUrl;
+
+        _dbContext.Branches.Remove(branch);
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception)
+        {
+            _logger.LogWarning(exception, "Permanent delete failed for branch {BranchId}.", id);
+            SetErrorMessage("Không thể xóa vĩnh viễn chi nhánh vì vẫn còn dữ liệu liên quan. Hãy sử dụng Xóa mềm.");
+            return RedirectToAdminIndex();
+        }
+
+        _branchService.InvalidateActiveBranchesCache();
+
+        if (!string.IsNullOrWhiteSpace(thumbnailUrl))
+        {
+            await _imageStorageService.DeleteAsync(thumbnailUrl, ImageCategory.Branches, CancellationToken.None);
+        }
+
+        SetSuccessMessage($"Chi nhánh '{branchName}' đã được xóa vĩnh viễn.");
+
+        return RedirectToAdminIndex();
     }
 
     private async Task ValidateBranchModelAsync(BranchCreateViewModel model, Guid? currentBranchId = null)
@@ -253,49 +359,6 @@ public class BranchController : AdminBaseController
         }
     }
 
-    private async Task<string> SaveUploadedFileAsync(IFormFile file)
-    {
-        var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "branches");
-        Directory.CreateDirectory(uploadsFolder);
-
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        var safeBaseName = NormalizeSlugInput(Path.GetFileNameWithoutExtension(file.FileName));
-        if (string.IsNullOrWhiteSpace(safeBaseName))
-        {
-            safeBaseName = "branch";
-        }
-
-        var uniqueFileName = $"{safeBaseName}-{Guid.NewGuid():N}{extension}";
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-        await using var fileStream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        await file.CopyToAsync(fileStream);
-
-        return $"/uploads/branches/{uniqueFileName}";
-    }
-
-    private void DeleteUploadedFile(string? relativePath)
-    {
-        if (string.IsNullOrWhiteSpace(relativePath) || !relativePath.StartsWith("/uploads/branches/", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        var trimmedPath = relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-        var fullPath = Path.GetFullPath(Path.Combine(_env.WebRootPath, trimmedPath));
-        var uploadsRoot = Path.GetFullPath(Path.Combine(_env.WebRootPath, "uploads", "branches"));
-
-        if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        if (System.IO.File.Exists(fullPath))
-        {
-            System.IO.File.Delete(fullPath);
-        }
-    }
-
     private async Task<string> BuildUniqueSlugAsync(string? requestedSlug, string fallbackName, Guid? currentBranchId = null)
     {
         var baseSlug = NormalizeSlugInput(string.IsNullOrWhiteSpace(requestedSlug) ? fallbackName : requestedSlug);
@@ -316,6 +379,14 @@ public class BranchController : AdminBaseController
         }
 
         return slug;
+    }
+
+    private RedirectToActionResult RedirectToAdminIndex()
+    {
+        return RedirectToAction(
+            nameof(Index),
+            "Branch",
+            new { area = "Admin" })!;
     }
 
     private static string NormalizeSlugInput(string? value)

@@ -1,0 +1,88 @@
+@model KIGHolding.Areas.Admin.ViewModels.Account.ChangePasswordViewModel
+
+@{
+    ViewData["Title"] = "Bảo mật tài khoản";
+}
+
+<section class="admin-page">
+    <div class="admin-page-header flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+            <p class="admin-page-kicker">Account Security</p>
+            <h1 class="admin-page-title">Đổi mật khẩu quản trị</h1>
+            <p class="admin-help mt-3">
+                Cập nhật mật khẩu sẽ giữ phiên hiện tại sau khi xác thực lại và làm mất hiệu lực các phiên đăng nhập cũ trên thiết bị khác.
+            </p>
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <aside class="admin-card admin-card-muted">
+            <h2 class="admin-card-title">Tài khoản hiện tại</h2>
+
+            <dl class="mt-5 space-y-4 text-sm">
+                <div>
+                    <dt class="admin-label">Tên đăng nhập</dt>
+                    <dd class="mt-2 font-semibold text-brand-dark">@Model.Username</dd>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Email))
+                {
+                    <div>
+                        <dt class="admin-label">Email</dt>
+                        <dd class="mt-2 font-semibold text-brand-dark">@Model.Email</dd>
+                    </div>
+                }
+
+                <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+                    Sau khi đổi mật khẩu, các phiên đăng nhập khác sẽ cần đăng nhập lại.
+                </div>
+            </dl>
+        </aside>
+
+        <div class="admin-card">
+            <h2 class="admin-card-title">Cập nhật mật khẩu</h2>
+
+            <form asp-action="ChangePassword" method="post" class="mt-6 space-y-5">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="admin-validation rounded-md border border-brand-red/30 bg-brand-red/5 p-4"></div>
+
+                <div>
+                    <label asp-for="CurrentPassword" class="admin-label mb-2"></label>
+                    <input asp-for="CurrentPassword"
+                           class="admin-field"
+                           autocomplete="current-password"
+                           value="" />
+                    <span asp-validation-for="CurrentPassword" class="admin-validation"></span>
+                </div>
+
+                <div>
+                    <label asp-for="NewPassword" class="admin-label mb-2"></label>
+                    <input asp-for="NewPassword"
+                           class="admin-field"
+                           autocomplete="new-password"
+                           value="" />
+                    <p class="admin-help mt-2">Tối thiểu 12 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
+                    <span asp-validation-for="NewPassword" class="admin-validation"></span>
+                </div>
+
+                <div>
+                    <label asp-for="ConfirmPassword" class="admin-label mb-2"></label>
+                    <input asp-for="ConfirmPassword"
+                           class="admin-field"
+                           autocomplete="new-password"
+                           value="" />
+                    <span asp-validation-for="ConfirmPassword" class="admin-validation"></span>
+                </div>
+
+                <div class="flex flex-col gap-3 border-t border-brand-border pt-6 sm:flex-row sm:justify-end">
+                    <button type="submit" class="btn-primary w-full sm:w-auto">Cập nhật mật khẩu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

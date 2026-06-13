@@ -10,7 +10,6 @@ appsettings.Local.json
 App_Data/
 appsettings.Development.json
 appsettings.json
-Migrations/
 backups/
 .dotnet-home/
 .github/

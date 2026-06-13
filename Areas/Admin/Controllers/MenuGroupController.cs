@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using KIGHolding.Areas.Admin.ViewModels;
 using KIGHolding.Data;
 using KIGHolding.Models.Entities;
+using KIGHolding.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,10 +18,11 @@ public class MenuGroupController : AdminBaseController
     private const int MaxMenuPageUploadFileCount = 10;
     private const long MaxMenuPageFileSize = 50L * 1024 * 1024;
     private const long MaxMenuGroupCoverFileSize = 10L * 1024 * 1024;
-    private const string MenuGroupCoverUploadFolder = "uploads/menu-groups/covers";
 
     private readonly AppDbContext _dbContext;
-    private readonly IWebHostEnvironment _env;
+    private readonly IImageStorageService _imageStorageService;
+    private readonly ILogger<MenuGroupController> _logger;
+
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -29,10 +31,14 @@ public class MenuGroupController : AdminBaseController
         "image/webp"
     };
 
-    public MenuGroupController(AppDbContext dbContext, IWebHostEnvironment env)
+    public MenuGroupController(
+        AppDbContext dbContext,
+        IImageStorageService imageStorageService,
+        ILogger<MenuGroupController> logger)
     {
         _dbContext = dbContext;
-        _env = env;
+        _imageStorageService = imageStorageService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -41,8 +47,7 @@ public class MenuGroupController : AdminBaseController
         var searchQuery = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
         var normalizedStatus = NormalizeStatus(status);
 
-        IQueryable<MenuGroup> query = _dbContext.MenuGroups
-            .AsNoTracking();
+        IQueryable<MenuGroup> query = _dbContext.MenuGroups.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(searchQuery))
         {
@@ -132,10 +137,21 @@ public class MenuGroupController : AdminBaseController
         string? uploadedCoverImageUrl = null;
         if (model.CoverImageFile is not null && model.CoverImageFile.Length > 0)
         {
-            uploadedCoverImageUrl = await SaveMenuGroupCoverImageAsync(model.CoverImageFile, cancellationToken);
-            if (string.IsNullOrWhiteSpace(uploadedCoverImageUrl))
+            try
             {
-                ModelState.AddModelError(nameof(model.CoverImageFile), "Ảnh bìa tải lên không hợp lệ hoặc vượt quá 10MB.");
+                uploadedCoverImageUrl = await _imageStorageService.UploadAsync(
+                    model.CoverImageFile,
+                    ImageCategory.MenuGroupCovers,
+                    cancellationToken);
+            }
+            catch (InvalidOperationException exception)
+            {
+                ModelState.AddModelError(nameof(model.CoverImageFile), exception.Message);
+                return View(model);
+            }
+            catch
+            {
+                ModelState.AddModelError(nameof(model.CoverImageFile), "Không thể tải ảnh lên. Vui lòng thử lại.");
                 return View(model);
             }
         }
@@ -163,10 +179,9 @@ public class MenuGroupController : AdminBaseController
         }
         catch
         {
-            TryDeleteMenuGroupCoverImage(uploadedCoverImageUrl);
+            await _imageStorageService.DeleteAsync(uploadedCoverImageUrl, ImageCategory.MenuGroupCovers, cancellationToken);
             throw;
         }
-
 
         SetSuccessMessage("Nhóm thực đơn đã được tạo.");
         return RedirectToAction(nameof(Index));
@@ -239,10 +254,21 @@ public class MenuGroupController : AdminBaseController
         string? uploadedCoverImageUrl = null;
         if (model.CoverImageFile is not null && model.CoverImageFile.Length > 0)
         {
-            uploadedCoverImageUrl = await SaveMenuGroupCoverImageAsync(model.CoverImageFile, cancellationToken);
-            if (string.IsNullOrWhiteSpace(uploadedCoverImageUrl))
+            try
             {
-                ModelState.AddModelError(nameof(model.CoverImageFile), "Ảnh bìa tải lên không hợp lệ hoặc vượt quá 10MB.");
+                uploadedCoverImageUrl = await _imageStorageService.UploadAsync(
+                    model.CoverImageFile,
+                    ImageCategory.MenuGroupCovers,
+                    cancellationToken);
+            }
+            catch (InvalidOperationException exception)
+            {
+                ModelState.AddModelError(nameof(model.CoverImageFile), exception.Message);
+                return View(model);
+            }
+            catch
+            {
+                ModelState.AddModelError(nameof(model.CoverImageFile), "Không thể tải ảnh lên. Vui lòng thử lại.");
                 return View(model);
             }
         }
@@ -264,13 +290,13 @@ public class MenuGroupController : AdminBaseController
         }
         catch
         {
-            TryDeleteMenuGroupCoverImage(uploadedCoverImageUrl);
+            await _imageStorageService.DeleteAsync(uploadedCoverImageUrl, ImageCategory.MenuGroupCovers, cancellationToken);
             throw;
         }
 
         if (!string.IsNullOrWhiteSpace(uploadedCoverImageUrl))
         {
-            TryDeleteMenuGroupCoverImage(previousCoverImageUrl);
+            await _imageStorageService.DeleteAsync(previousCoverImageUrl, ImageCategory.MenuGroupCovers, cancellationToken);
         }
 
         SetSuccessMessage("Nhóm thực đơn đã được cập nhật.");
@@ -293,11 +319,62 @@ public class MenuGroupController : AdminBaseController
         await _dbContext.SaveChangesAsync();
 
         SetSuccessMessage("Nhóm thực đơn đã được ẩn khỏi trạng thái công khai.");
-        return RedirectToAction(nameof(Index), new
+        return RedirectToAction(nameof(Index), BuildIndexRouteValues(q, status));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PermanentDelete(Guid id, string? q, string? status, CancellationToken cancellationToken)
+    {
+        var group = await _dbContext.MenuGroups
+            .Include(x => x.PageImages)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (group is null)
         {
-            q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
-            status = NormalizeStatus(status)
-        });
+            return NotFound();
+        }
+
+        if (group.IsPublished)
+        {
+            SetErrorMessage("Không thể xóa vĩnh viễn nhóm thực đơn đang hiển thị. Hãy ẩn nhóm trước, sau đó thực hiện xóa vĩnh viễn.");
+            return RedirectToAction(nameof(Index), BuildIndexRouteValues(q, status));
+        }
+
+        var groupName = group.Name;
+        var coverImageUrl = group.CoverImageUrl;
+        var pageCount = group.PageImages.Count;
+        var pageImageUrls = group.PageImages
+            .Select(x => x.ImageUrl)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        _dbContext.MenuGroups.Remove(group);
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception)
+        {
+            _logger.LogWarning(exception, "Permanent delete failed for menu group {MenuGroupId}.", id);
+            SetErrorMessage("Không thể xóa vĩnh viễn nhóm thực đơn. Vui lòng thử lại hoặc kiểm tra dữ liệu liên quan.");
+            return RedirectToAction(nameof(Index), BuildIndexRouteValues(q, status));
+        }
+
+        if (!string.IsNullOrWhiteSpace(coverImageUrl))
+        {
+            await _imageStorageService.DeleteAsync(coverImageUrl, ImageCategory.MenuGroupCovers, CancellationToken.None);
+        }
+
+        foreach (var pageImageUrl in pageImageUrls)
+        {
+            await _imageStorageService.DeleteAsync(pageImageUrl, ImageCategory.MenuPages, CancellationToken.None);
+        }
+
+        SetSuccessMessage($"Nhóm thực đơn '{groupName}' và {pageCount} trang menu liên quan đã được xóa vĩnh viễn.");
+        return RedirectToAction(nameof(Index), BuildIndexRouteValues(q, status));
     }
 
     [HttpGet("~/Admin/MenuGroup/Images/{menuGroupId:guid}", Name = "AdminMenuGroupImages")]
@@ -357,21 +434,41 @@ public class MenuGroupController : AdminBaseController
         var nextPageNumber = existingCount + 1;
         var now = DateTimeOffset.UtcNow;
         var imageEntities = new List<MenuPageImage>(files.Count);
+        var uploadedImageUrls = new List<string>(files.Count);
 
         foreach (var file in files)
         {
-            var imageUrl = await SaveMenuPageImageAsync(file);
-            if (string.IsNullOrWhiteSpace(imageUrl))
+            string imageUrl;
+
+            try
+            {
+                imageUrl = await _imageStorageService.UploadAsync(
+                    file,
+                    ImageCategory.MenuPages,
+                    HttpContext.RequestAborted);
+            }
+            catch (InvalidOperationException exception)
+            {
+                SetErrorMessage(exception.Message);
+                foreach (var uploadedImageUrl in uploadedImageUrls)
+                {
+                    await _imageStorageService.DeleteAsync(uploadedImageUrl, ImageCategory.MenuPages, HttpContext.RequestAborted);
+                }
+
+                return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
+            }
+            catch
             {
                 SetErrorMessage("Không thể lưu một hoặc nhiều ảnh đã chọn. Vui lòng thử lại.");
-                foreach (var createdImage in imageEntities)
+                foreach (var uploadedImageUrl in uploadedImageUrls)
                 {
-                    TryDeleteMenuPageImageFile(createdImage.ImageUrl);
+                    await _imageStorageService.DeleteAsync(uploadedImageUrl, ImageCategory.MenuPages, HttpContext.RequestAborted);
                 }
 
                 return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
             }
 
+            uploadedImageUrls.Add(imageUrl);
             imageEntities.Add(new MenuPageImage
             {
                 MenuGroupId = menuGroupId,
@@ -388,7 +485,19 @@ public class MenuGroupController : AdminBaseController
         }
 
         _dbContext.MenuPageImages.AddRange(imageEntities);
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch
+        {
+            foreach (var uploadedImageUrl in uploadedImageUrls)
+            {
+                await _imageStorageService.DeleteAsync(uploadedImageUrl, ImageCategory.MenuPages, HttpContext.RequestAborted);
+            }
+
+            throw;
+        }
 
         SetSuccessMessage($"Đã tải lên {imageEntities.Count} ảnh thực đơn.");
         return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
@@ -453,7 +562,7 @@ public class MenuGroupController : AdminBaseController
         _dbContext.MenuPageImages.Remove(image);
         await _dbContext.SaveChangesAsync();
 
-        TryDeleteMenuPageImageFile(imageUrl);
+        await _imageStorageService.DeleteAsync(imageUrl, ImageCategory.MenuPages, HttpContext.RequestAborted);
 
         SetSuccessMessage("Ảnh thực đơn đã được xóa.");
         return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
@@ -495,7 +604,7 @@ public class MenuGroupController : AdminBaseController
 
         foreach (var imageUrl in imageUrls)
         {
-            TryDeleteMenuPageImageFile(imageUrl);
+            await _imageStorageService.DeleteAsync(imageUrl, ImageCategory.MenuPages, HttpContext.RequestAborted);
         }
 
         SetSuccessMessage($"Đã xóa {images.Count} ảnh thực đơn đã chọn.");
@@ -521,11 +630,7 @@ public class MenuGroupController : AdminBaseController
             ? "Nhóm thực đơn đã được hiển thị công khai."
             : "Nhóm thực đơn đã được chuyển sang trạng thái ẩn.");
 
-        return RedirectToAction(nameof(Index), new
-        {
-            q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
-            status = NormalizeStatus(status)
-        });
+        return RedirectToAction(nameof(Index), BuildIndexRouteValues(q, status));
     }
 
     private static void NormalizeForm(MenuGroupFormViewModel model)
@@ -574,6 +679,15 @@ public class MenuGroupController : AdminBaseController
         return normalizedStatus is PublishedStatus or HiddenStatus
             ? normalizedStatus
             : null;
+    }
+
+    private static object BuildIndexRouteValues(string? q, string? status)
+    {
+        return new
+        {
+            q = string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
+            status = NormalizeStatus(status)
+        };
     }
 
     private static IReadOnlyList<SelectListItem> BuildStatusOptions()
@@ -673,121 +787,6 @@ public class MenuGroupController : AdminBaseController
         {
             ModelState.AddModelError(nameof(MenuGroupFormViewModel.CoverImageFile), "Định dạng ảnh tải lên không hợp lệ.");
         }
-    }
-
-    private async Task<string> SaveMenuGroupCoverImageAsync(IFormFile file, CancellationToken cancellationToken)
-    {
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (file.Length <= 0 ||
-            file.Length > MaxMenuGroupCoverFileSize ||
-            !AllowedExtensions.Contains(extension) ||
-            string.IsNullOrWhiteSpace(file.ContentType) ||
-            !AllowedContentTypes.Contains(file.ContentType))
-        {
-            return string.Empty;
-        }
-
-        var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "menu-groups", "covers");
-        Directory.CreateDirectory(uploadsFolder);
-
-        var uniqueFileName = CreateSafeFileName(file.FileName, "menu-group-cover", extension);
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-        await using var fileStream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        await file.CopyToAsync(fileStream, cancellationToken);
-
-        return $"/{MenuGroupCoverUploadFolder}/{uniqueFileName}";
-    }
-
-    private void TryDeleteMenuGroupCoverImage(string? coverImageUrl)
-    {
-        if (string.IsNullOrWhiteSpace(coverImageUrl) ||
-            !coverImageUrl.StartsWith($"/{MenuGroupCoverUploadFolder}/", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        try
-        {
-            var trimmedPath = coverImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-            var fullPath = Path.GetFullPath(Path.Combine(_env.WebRootPath, trimmedPath));
-            var uploadsRoot = Path.GetFullPath(Path.Combine(_env.WebRootPath, "uploads", "menu-groups", "covers"));
-
-            if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            if (System.IO.File.Exists(fullPath))
-            {
-                System.IO.File.Delete(fullPath);
-            }
-        }
-        catch
-        {
-            // Physical file cleanup is best-effort only.
-        }
-    }
-
-    private async Task<string> SaveMenuPageImageAsync(IFormFile file)
-    {
-        if (!ValidateMenuPageImageFile(file))
-        {
-            return string.Empty;
-        }
-
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "menu-pages");
-        Directory.CreateDirectory(uploadsFolder);
-
-        var uniqueFileName = CreateSafeFileName(file.FileName, "menu-page", extension);
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-        await using var fileStream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        await file.CopyToAsync(fileStream);
-
-        return $"/uploads/menu-pages/{uniqueFileName}";
-    }
-
-    private void TryDeleteMenuPageImageFile(string? relativePath)
-    {
-        if (string.IsNullOrWhiteSpace(relativePath) ||
-            !relativePath.StartsWith("/uploads/menu-pages/", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        try
-        {
-            var trimmedPath = relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-            var fullPath = Path.GetFullPath(Path.Combine(_env.WebRootPath, trimmedPath));
-            var uploadsRoot = Path.GetFullPath(Path.Combine(_env.WebRootPath, "uploads", "menu-pages"));
-
-            if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            if (System.IO.File.Exists(fullPath))
-            {
-                System.IO.File.Delete(fullPath);
-            }
-        }
-        catch
-        {
-            // Physical file cleanup is best-effort only.
-        }
-    }
-
-    private static string CreateSafeFileName(string originalFileName, string fallbackBaseName, string extension)
-    {
-        var safeBaseName = NormalizeSlugInput(Path.GetFileNameWithoutExtension(originalFileName));
-        if (string.IsNullOrWhiteSpace(safeBaseName))
-        {
-            safeBaseName = fallbackBaseName;
-        }
-
-        return $"{safeBaseName}-{Guid.NewGuid():N}{extension}";
     }
 
     private static string BuildMenuPageAltText(string groupName, string? commonAltText, int fileCount, int? pageNumber)

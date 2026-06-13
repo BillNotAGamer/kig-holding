@@ -37,21 +37,33 @@
         new
         {
             Value = "Từ 2019",
+            Target = 2019,
+            Prefix = "Từ ",
+            Suffix = string.Empty,
             Label = "Hành trình phát triển tại thị trường Việt Nam"
         },
         new
         {
-            Value = "19",
+            Value = "19+",
+            Target = 19,
+            Prefix = string.Empty,
+            Suffix = "+",
             Label = "Chi nhánh nhà hàng trong hệ thống"
         },
         new
         {
             Value = "200+",
+            Target = 200,
+            Prefix = string.Empty,
+            Suffix = "+",
             Label = "Nhân sự đồng hành trong vận hành"
         },
         new
         {
             Value = "1000+",
+            Target = 1000,
+            Prefix = string.Empty,
+            Suffix = "+",
             Label = "Khách được phục vụ mỗi ngày"
         }
     };
@@ -142,7 +154,11 @@
                     @foreach (var stat in systemStats)
                     {
                         <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
-                            <span class="public-editorial-page__item-index">@stat.Value</span>
+                            <span class="public-editorial-page__item-index"
+                                  data-count-up
+                                  data-count-to="@stat.Target"
+                                  data-count-prefix="@stat.Prefix"
+                                  data-count-suffix="@stat.Suffix">@stat.Value</span>
                             <h3 class="public-editorial-page__item-title">@stat.Label</h3>
                         </article>
                     }
@@ -524,3 +540,7 @@
         </div>
     </div>
 </main>
+
+@section Scripts {
+    <script src="~/js/about-stats-counter.js" asp-append-version="true"></script>
+}

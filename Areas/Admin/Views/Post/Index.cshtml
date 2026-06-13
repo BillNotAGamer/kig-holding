@@ -172,9 +172,22 @@
                                               asp-route-page="@Model.Page"
                                               method="post"
                                               class="inline"
-                                              onsubmit="return confirm('Ẩn bài viết này khỏi website công khai?');">
+                                              onsubmit="return confirm('Ẩn bài viết này khỏi trang tin tức công khai? Bài viết vẫn được lưu trong hệ thống.');">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="admin-table-action admin-table-action--danger">Ẩn bài</button>
+                                            <button type="submit" class="admin-table-action admin-table-action--muted">Ẩn bài</button>
+                                        </form>
+
+                                        <form asp-action="PermanentDelete"
+                                              asp-route-id="@post.Id"
+                                              asp-route-q="@Model.SearchQuery"
+                                              asp-route-category="@Model.SelectedCategory"
+                                              asp-route-status="@Model.SelectedStatus"
+                                              asp-route-page="@Model.Page"
+                                              method="post"
+                                              class="inline"
+                                              onsubmit="return confirm('XÓA VĨNH VIỄN bài viết này? Hành động này sẽ xóa dữ liệu khỏi hệ thống và cố gắng gỡ ảnh đại diện liên quan. Không thể hoàn tác!');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="admin-table-action admin-table-action--danger">Xóa vĩnh viễn</button>
                                         </form>
                                     </div>
                                 </td>
@@ -237,7 +250,7 @@
                             </div>
                         </dl>
 
-                        <div class="mt-4 grid grid-cols-2 gap-2">
+                        <div class="mt-4 grid gap-2 sm:grid-cols-2">
                             @if (post.IsPublished && !string.IsNullOrWhiteSpace(post.PublicUrl))
                             {
                                 <a href="@post.PublicUrl"
@@ -253,9 +266,7 @@
                                class="admin-table-action admin-table-action--muted min-h-11 w-full">
                                 Sửa
                             </a>
-                        </div>
 
-                        <div class="mt-3 border-t border-brand-border pt-3">
                             <form asp-action="Delete"
                                   asp-route-id="@post.Id"
                                   asp-route-q="@Model.SearchQuery"
@@ -263,9 +274,23 @@
                                   asp-route-status="@Model.SelectedStatus"
                                   asp-route-page="@Model.Page"
                                   method="post"
-                                  onsubmit="return confirm('Ẩn bài viết này khỏi website công khai?');">
+                                  class="w-full"
+                                  onsubmit="return confirm('Ẩn bài viết này khỏi trang tin tức công khai? Bài viết vẫn được lưu trong hệ thống.');">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="admin-table-action admin-table-action--danger min-h-11 w-full">Ẩn bài</button>
+                                <button type="submit" class="admin-table-action admin-table-action--muted min-h-11 w-full">Ẩn bài</button>
+                            </form>
+
+                            <form asp-action="PermanentDelete"
+                                  asp-route-id="@post.Id"
+                                  asp-route-q="@Model.SearchQuery"
+                                  asp-route-category="@Model.SelectedCategory"
+                                  asp-route-status="@Model.SelectedStatus"
+                                  asp-route-page="@Model.Page"
+                                  method="post"
+                                  class="w-full"
+                                  onsubmit="return confirm('XÓA VĨNH VIỄN bài viết này? Hành động này sẽ xóa dữ liệu khỏi hệ thống và cố gắng gỡ ảnh đại diện liên quan. Không thể hoàn tác!');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="admin-table-action admin-table-action--danger min-h-11 w-full">Xóa vĩnh viễn</button>
                             </form>
                         </div>
                     </article>

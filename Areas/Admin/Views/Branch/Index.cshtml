@@ -74,9 +74,18 @@
                                     <div class="admin-actions gap-2">
                                         <a href="@Url.Action("Edit", new { id = branch.Id })" class="admin-table-action admin-table-action--muted">Sửa</a>
 
-                                        <form asp-action="Delete" asp-route-id="@branch.Id" method="post" class="inline" onsubmit="return confirm('Ẩn chi nhánh này khỏi website công khai?');">
+                                        <form asp-action="Delete" asp-route-id="@branch.Id" method="post" class="inline" onsubmit="return confirm('Xóa mềm chi nhánh này? Chi nhánh sẽ được ẩn khỏi website công khai nhưng vẫn giữ dữ liệu đặt bàn và đánh giá trong hệ thống.');">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="admin-table-action admin-table-action--danger">Xóa mềm</button>
+                                            <button type="submit" class="admin-table-action admin-table-action--muted">Xóa mềm</button>
+                                        </form>
+
+                                        <form asp-action="PermanentDelete"
+                                              asp-route-id="@branch.Id"
+                                              method="post"
+                                              class="inline"
+                                              onsubmit="return confirm('XÓA VĨNH VIỄN chi nhánh này? Chỉ có thể xóa khi chi nhánh không có dữ liệu đặt bàn. Dữ liệu chi nhánh và ảnh đại diện sẽ bị gỡ khỏi hệ thống. Không thể hoàn tác.');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="admin-table-action admin-table-action--danger">Xóa vĩnh viễn</button>
                                         </form>
                                     </div>
                                 </td>
@@ -130,12 +139,25 @@
                             </div>
                         </dl>
 
-                        <div class="mt-4 grid grid-cols-2 gap-2">
+                        <div class="mt-4 grid gap-2 sm:grid-cols-2">
                             <a href="@Url.Action("Edit", new { id = branch.Id })" class="admin-table-action admin-table-action--muted min-h-11 w-full">Sửa</a>
 
-                            <form asp-action="Delete" asp-route-id="@branch.Id" method="post" class="contents" onsubmit="return confirm('Ẩn chi nhánh này khỏi website công khai?');">
+                            <form asp-action="Delete"
+                                  asp-route-id="@branch.Id"
+                                  method="post"
+                                  class="w-full"
+                                  onsubmit="return confirm('Xóa mềm chi nhánh này? Chi nhánh sẽ được ẩn khỏi website công khai nhưng vẫn giữ dữ liệu đặt bàn và đánh giá trong hệ thống.');">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="admin-table-action admin-table-action--danger min-h-11 w-full">Xóa mềm</button>
+                                <button type="submit" class="admin-table-action admin-table-action--muted min-h-11 w-full">Xóa mềm</button>
+                            </form>
+
+                            <form asp-action="PermanentDelete"
+                                  asp-route-id="@branch.Id"
+                                  method="post"
+                                  class="w-full"
+                                  onsubmit="return confirm('XÓA VĨNH VIỄN chi nhánh này? Chỉ có thể xóa khi chi nhánh không có dữ liệu đặt bàn. Dữ liệu chi nhánh và ảnh đại diện sẽ bị gỡ khỏi hệ thống. Không thể hoàn tác.');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="admin-table-action admin-table-action--danger min-h-11 w-full">Xóa vĩnh viễn</button>
                             </form>
                         </div>
                     </article>

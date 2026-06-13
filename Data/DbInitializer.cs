@@ -1,4 +1,5 @@
 using KIGHolding.Models.Entities;
+using KIGHolding.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,10 +20,20 @@ public class DbInitializer
     private static readonly Guid KbbCookMenuGroupId = Guid.Parse("569b5831-f436-4438-882c-5123c65f9957");
 
     private readonly AppDbContext _dbContext;
+    private readonly AdminBootstrapConfigurationResolver _bootstrapConfigurationResolver;
+    private readonly IPasswordHasher<AdminUser> _passwordHasher;
+    private readonly ILogger<DbInitializer> _logger;
 
-    public DbInitializer(AppDbContext dbContext)
+    public DbInitializer(
+        AppDbContext dbContext,
+        AdminBootstrapConfigurationResolver bootstrapConfigurationResolver,
+        IPasswordHasher<AdminUser> passwordHasher,
+        ILogger<DbInitializer> logger)
     {
         _dbContext = dbContext;
+        _bootstrapConfigurationResolver = bootstrapConfigurationResolver;
+        _passwordHasher = passwordHasher;
+        _logger = logger;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -38,10 +49,7 @@ public class DbInitializer
             _dbContext.SiteSettings.Add(CreateSiteSetting());
         }
 
-        if (!await _dbContext.AdminUsers.AnyAsync(cancellationToken))
-        {
-            _dbContext.AdminUsers.Add(CreateAdminUser());
-        }
+        await EnsureAdminBootstrapAsync(cancellationToken);
 
         await AddMissingBySlugAsync(_dbContext.Branches, CreateBranches(), cancellationToken);
         await AddMissingBySlugAsync(_dbContext.MenuGroups, CreateMenuGroups(), cancellationToken);
@@ -73,19 +81,53 @@ public class DbInitializer
         };
     }
 
-    private static AdminUser CreateAdminUser()
-    {               
+    private async Task EnsureAdminBootstrapAsync(CancellationToken cancellationToken)
+    {
+        if (!await _dbContext.AdminUsers.AnyAsync(cancellationToken))
+        {
+            var adminUser = CreateBootstrapAdminUser();
+            if (adminUser is null)
+            {
+                _logger.LogWarning("No AdminUser exists and AdminBootstrap credentials are not fully configured. No insecure fallback admin was created.");
+                return;
+            }
+
+            _dbContext.AdminUsers.Add(adminUser);
+            return;
+        }
+
+        var usersMissingStamp = await _dbContext.AdminUsers
+            .Where(x => x.SecurityStamp == null || x.SecurityStamp == string.Empty)
+            .ToListAsync(cancellationToken);
+
+        foreach (var user in usersMissingStamp)
+        {
+            user.SecurityStamp = AdminSecurityStampGenerator.Create();
+        }
+    }
+
+    private AdminUser? CreateBootstrapAdminUser()
+    {
+        var bootstrapConfig = _bootstrapConfigurationResolver.TryGetConfiguration();
+        if (bootstrapConfig is null)
+        {
+            return null;
+        }
+
         var user = new AdminUser
         {
-            Username = "admin",
+            Username = bootstrapConfig.Username,
+            Email = bootstrapConfig.Email,
+            NormalizedEmail = bootstrapConfig.NormalizedEmail,
+            EmailConfirmed = false,
+            SecurityStamp = AdminSecurityStampGenerator.Create(),
             Role = "SuperAdmin",
             IsActive = true,
             CreatedAt = SeedTime,
             UpdatedAt = SeedTime
         };
 
-        var passwordHasher = new PasswordHasher<AdminUser>();
-        user.PasswordHash = passwordHasher.HashPassword(user, "Password123!");
+        user.PasswordHash = _passwordHasher.HashPassword(user, bootstrapConfig.Password);
 
         return user;
     }
