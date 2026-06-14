@@ -8,6 +8,14 @@ public class ContactIndexViewModel
     public ContactMessageStatus? StatusFilter { get; set; }
     public IReadOnlyList<SelectListItem> StatusOptions { get; set; } = [];
     public IReadOnlyList<ContactListItemViewModel> Messages { get; set; } = [];
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public int TotalItems { get; set; }
+    public int TotalPages { get; set; } = 1;
+    public bool HasPreviousPage => Page > 1;
+    public bool HasNextPage => Page < TotalPages;
+    public int FirstItemIndex => TotalItems == 0 ? 0 : ((Page - 1) * PageSize) + 1;
+    public int LastItemIndex => TotalItems == 0 ? 0 : Math.Min(Page * PageSize, TotalItems);
 }
 
 public class ContactListItemViewModel

@@ -10,6 +10,8 @@ namespace KIGHolding.Areas.Admin.Controllers;
 
 public class ReservationController : AdminBaseController
 {
+    private const int PageSize = 10;
+
     private readonly AppDbContext _dbContext;
 
     public ReservationController(AppDbContext dbContext)
@@ -20,6 +22,7 @@ public class ReservationController : AdminBaseController
     [HttpGet]
     public async Task<IActionResult> Index(ReservationIndexViewModel filter)
     {
+        var requestedPage = Math.Max(filter.Page, 1);
         var query = _dbContext.Reservations.AsNoTracking();
         var search = string.IsNullOrWhiteSpace(filter.SearchQuery) ? null : filter.SearchQuery.Trim();
 
@@ -43,9 +46,16 @@ public class ReservationController : AdminBaseController
                 EF.Functions.ILike(x.PhoneNumber.Replace(" ", string.Empty), $"%{normalizedPhoneSearch}%"));
         }
 
+        var totalItems = await query.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(totalItems / (double)PageSize));
+        var currentPage = Math.Min(requestedPage, totalPages);
+
         filter.Reservations = await query
             .OrderByDescending(x => x.ReservationDate)
             .ThenByDescending(x => x.ReservationTime)
+            .ThenByDescending(x => x.Id)
+            .Skip((currentPage - 1) * PageSize)
+            .Take(PageSize)
             .Select(x => new ReservationListItemViewModel
             {
                 Id = x.Id,
@@ -66,6 +76,10 @@ public class ReservationController : AdminBaseController
             reservation.DiningOccasionDisplay = ReservationOptionCatalog.FormatDiningOccasionCodesForDisplay(reservation.DiningOccasionCodes);
         }
 
+        filter.Page = currentPage;
+        filter.PageSize = PageSize;
+        filter.TotalItems = totalItems;
+        filter.TotalPages = totalPages;
         filter.SearchQuery = search;
         filter.StatusOptions = BuildFilterStatusOptions();
         filter.BranchOptions = await BuildBranchOptionsAsync();

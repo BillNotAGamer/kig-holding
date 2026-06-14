@@ -12,6 +12,8 @@ namespace KIGHolding.Areas.Admin.Controllers;
 
 public class BranchController : AdminBaseController
 {
+    private const int PageSize = 10;
+
     private readonly AppDbContext _dbContext;
     private readonly IBranchService _branchService;
     private readonly IImageStorageService _imageStorageService;
@@ -40,15 +42,31 @@ public class BranchController : AdminBaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1)
     {
-        var branches = await _dbContext.Branches
-            .AsNoTracking()
+        var requestedPage = Math.Max(page, 1);
+
+        var query = _dbContext.Branches.AsNoTracking();
+        var totalItems = await query.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(totalItems / (double)PageSize));
+        var currentPage = Math.Min(requestedPage, totalPages);
+
+        var branches = await query
             .OrderBy(x => x.DisplayOrder)
             .ThenBy(x => x.Name)
+            .ThenBy(x => x.Id)
+            .Skip((currentPage - 1) * PageSize)
+            .Take(PageSize)
             .ToListAsync();
 
-        return View(branches);
+        return View(new BranchIndexViewModel
+        {
+            Branches = branches,
+            Page = currentPage,
+            PageSize = PageSize,
+            TotalItems = totalItems,
+            TotalPages = totalPages
+        });
     }
 
     [HttpGet]
@@ -245,7 +263,7 @@ public class BranchController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, int page = 1)
     {
         var branch = await _dbContext.Branches.FindAsync(id);
         if (branch is null)
@@ -260,12 +278,12 @@ public class BranchController : AdminBaseController
         _branchService.InvalidateActiveBranchesCache();
         SetSuccessMessage("Chi nhánh đã được ẩn khỏi website công khai.");
 
-        return RedirectToAdminIndex();
+        return RedirectToAdminIndex(page);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> PermanentDelete(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> PermanentDelete(Guid id, int page = 1, CancellationToken cancellationToken = default)
     {
         var branch = await _dbContext.Branches.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (branch is null)
@@ -280,7 +298,7 @@ public class BranchController : AdminBaseController
         if (hasReservations)
         {
             SetErrorMessage("Không thể xóa vĩnh viễn chi nhánh vì đang có dữ liệu đặt bàn liên quan. Hãy sử dụng Xóa mềm để bảo toàn lịch sử vận hành.");
-            return RedirectToAdminIndex();
+            return RedirectToAdminIndex(page);
         }
 
         var branchName = branch.Name;
@@ -296,7 +314,7 @@ public class BranchController : AdminBaseController
         {
             _logger.LogWarning(exception, "Permanent delete failed for branch {BranchId}.", id);
             SetErrorMessage("Không thể xóa vĩnh viễn chi nhánh vì vẫn còn dữ liệu liên quan. Hãy sử dụng Xóa mềm.");
-            return RedirectToAdminIndex();
+            return RedirectToAdminIndex(page);
         }
 
         _branchService.InvalidateActiveBranchesCache();
@@ -308,7 +326,7 @@ public class BranchController : AdminBaseController
 
         SetSuccessMessage($"Chi nhánh '{branchName}' đã được xóa vĩnh viễn.");
 
-        return RedirectToAdminIndex();
+        return RedirectToAdminIndex(page);
     }
 
     private async Task ValidateBranchModelAsync(BranchCreateViewModel model, Guid? currentBranchId = null)
@@ -381,12 +399,12 @@ public class BranchController : AdminBaseController
         return slug;
     }
 
-    private RedirectToActionResult RedirectToAdminIndex()
+    private RedirectToActionResult RedirectToAdminIndex(int page = 1)
     {
         return RedirectToAction(
             nameof(Index),
             "Branch",
-            new { area = "Admin" })!;
+            new { area = "Admin", page = Math.Max(page, 1) })!;
     }
 
     private static string NormalizeSlugInput(string? value)

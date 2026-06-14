@@ -2,6 +2,24 @@
 
 @{
     ViewData["Title"] = "Quản lý Đặt bàn";
+
+    var paginationStart = Math.Max(1, Model.Page - 2);
+    var paginationEnd = Math.Min(Model.TotalPages, Model.Page + 2);
+
+    if (Model.TotalPages > 1 && paginationEnd - paginationStart < 4)
+    {
+        if (paginationStart == 1)
+        {
+            paginationEnd = Math.Min(Model.TotalPages, paginationStart + 4);
+        }
+        else if (paginationEnd == Model.TotalPages)
+        {
+            paginationStart = Math.Max(1, paginationEnd - 4);
+        }
+    }
+
+    var mobilePaginationStart = Math.Max(1, Model.Page - 1);
+    var mobilePaginationEnd = Math.Min(Model.TotalPages, Model.Page + 1);
 }
 
 <section class="admin-page">
@@ -13,7 +31,11 @@
         </div>
     </div>
 
-    <form method="get" class="admin-card">
+    <form method="get"
+          asp-area="Admin"
+          asp-controller="Reservation"
+          asp-action="Index"
+          class="admin-card">
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,20rem)_minmax(0,14rem)_minmax(0,18rem)_auto_auto] xl:items-end">
             <div>
                 <label asp-for="SearchQuery" class="admin-label mb-2"></label>
@@ -31,7 +53,7 @@
             </div>
 
             <button type="submit" class="btn-primary h-12 w-full">Lọc dữ liệu</button>
-            <a asp-action="Index" class="btn-secondary h-12 w-full">Xóa lọc</a>
+            <a asp-area="Admin" asp-controller="Reservation" asp-action="Index" class="btn-secondary h-12 w-full">Xóa lọc</a>
         </div>
     </form>
 
@@ -39,7 +61,10 @@
         @if (Model.Reservations.Any())
         {
             <div class="border-b border-brand-border bg-brand-light/60 px-4 py-4 sm:px-6">
-                <p class="text-sm font-semibold text-brand-dark">Hiển thị @Model.Reservations.Count yêu cầu đặt bàn theo bộ lọc hiện tại.</p>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm font-semibold text-brand-dark">Hiển thị @Model.FirstItemIndex-@Model.LastItemIndex trong @Model.TotalItems yêu cầu đặt bàn.</p>
+                    <p class="text-sm text-brand-gray">Trang @Model.Page / @Model.TotalPages</p>
+                </div>
             </div>
 
             <div class="hidden overflow-x-auto md:block">
@@ -90,10 +115,7 @@
                                     @if (!string.IsNullOrWhiteSpace(reservation.DiningOccasionDisplay))
                                     {
                                         <div class="mt-2 space-y-1 text-xs leading-5 text-brand-gray">
-                                            @if (!string.IsNullOrWhiteSpace(reservation.DiningOccasionDisplay))
-                                            {
-                                                <p><span class="font-semibold text-brand-dark">Hình thức:</span> @reservation.DiningOccasionDisplay</p>
-                                            }
+                                            <p><span class="font-semibold text-brand-dark">Hình thức:</span> @reservation.DiningOccasionDisplay</p>
                                         </div>
                                     }
                                 </td>
@@ -175,10 +197,7 @@
                             @if (!string.IsNullOrWhiteSpace(reservation.DiningOccasionDisplay))
                             {
                                 <div class="space-y-1 rounded-xl bg-brand-light px-3 py-3 text-sm leading-6 text-brand-gray">
-                                    @if (!string.IsNullOrWhiteSpace(reservation.DiningOccasionDisplay))
-                                    {
-                                        <p><span class="font-semibold text-brand-dark">Hình thức:</span> @reservation.DiningOccasionDisplay</p>
-                                    }
+                                    <p><span class="font-semibold text-brand-dark">Hình thức:</span> @reservation.DiningOccasionDisplay</p>
                                 </div>
                             }
 
@@ -195,8 +214,90 @@
                     <div>
                         <p class="admin-empty__title">Không có đặt bàn phù hợp</p>
                         <p class="admin-empty__text">Không có yêu cầu đặt bàn nào khớp với bộ lọc hiện tại. Hãy điều chỉnh tìm kiếm, trạng thái hoặc chi nhánh để xem thêm kết quả.</p>
-                        <a asp-action="Index" class="btn-secondary mt-6">Xóa lọc</a>
+                        <a asp-area="Admin" asp-controller="Reservation" asp-action="Index" class="btn-secondary mt-6">Xóa lọc</a>
                     </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="border-t border-brand-border px-4 py-4 sm:px-6">
+                <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Reservation"
+                           asp-action="Index"
+                           asp-route-SearchQuery="@Model.SearchQuery"
+                           asp-route-StatusFilter="@Model.StatusFilter"
+                           asp-route-BranchFilter="@Model.BranchFilter"
+                           asp-route-page="@(Model.Page - 1)"
+                           class="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                            <span class="sm:hidden">←</span>
+                            <span class="hidden sm:inline">Trang trước</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border/70 bg-brand-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-gray/60" aria-disabled="true">
+                            <span class="sm:hidden">←</span>
+                            <span class="hidden sm:inline">Trang trước</span>
+                        </span>
+                    }
+
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        @for (var currentPage = paginationStart; currentPage <= paginationEnd; currentPage++)
+                        {
+                            var isActive = currentPage == Model.Page;
+                            var mobileVisibilityClass = currentPage >= mobilePaginationStart && currentPage <= mobilePaginationEnd
+                                ? "inline-flex"
+                                : "hidden sm:inline-flex";
+
+                            if (isActive)
+                            {
+                                <span aria-current="page"
+                                      class="@mobileVisibilityClass h-11 min-w-11 items-center justify-center rounded-full border border-brand-red bg-brand-red px-3 text-sm font-semibold text-white shadow-soft">
+                                    @currentPage
+                                </span>
+                            }
+                            else
+                            {
+                                <a asp-area="Admin"
+                                   asp-controller="Reservation"
+                                   asp-action="Index"
+                                   asp-route-SearchQuery="@Model.SearchQuery"
+                                   asp-route-StatusFilter="@Model.StatusFilter"
+                                   asp-route-BranchFilter="@Model.BranchFilter"
+                                   asp-route-page="@currentPage"
+                                   class="@mobileVisibilityClass h-11 min-w-11 items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-semibold text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                                    @currentPage
+                                </a>
+                            }
+                        }
+                    </div>
+
+                    @if (Model.HasNextPage)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Reservation"
+                           asp-action="Index"
+                           asp-route-SearchQuery="@Model.SearchQuery"
+                           asp-route-StatusFilter="@Model.StatusFilter"
+                           asp-route-BranchFilter="@Model.BranchFilter"
+                           asp-route-page="@(Model.Page + 1)"
+                           class="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                            <span class="sm:hidden">→</span>
+                            <span class="hidden sm:inline">Trang sau</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border/70 bg-brand-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-gray/60" aria-disabled="true">
+                            <span class="sm:hidden">→</span>
+                            <span class="hidden sm:inline">Trang sau</span>
+                        </span>
+                    }
                 </div>
             </div>
         }

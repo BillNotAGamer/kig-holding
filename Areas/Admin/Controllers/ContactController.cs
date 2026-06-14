@@ -9,6 +9,8 @@ namespace KIGHolding.Areas.Admin.Controllers;
 
 public class ContactController : AdminBaseController
 {
+    private const int PageSize = 10;
+
     private readonly AppDbContext _dbContext;
 
     public ContactController(AppDbContext dbContext)
@@ -19,6 +21,7 @@ public class ContactController : AdminBaseController
     [HttpGet]
     public async Task<IActionResult> Index(ContactIndexViewModel filter)
     {
+        var requestedPage = Math.Max(filter.Page, 1);
         var query = _dbContext.ContactMessages.AsNoTracking();
 
         if (filter.StatusFilter.HasValue)
@@ -26,8 +29,15 @@ public class ContactController : AdminBaseController
             query = query.Where(x => x.Status == filter.StatusFilter.Value);
         }
 
+        var totalItems = await query.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(totalItems / (double)PageSize));
+        var currentPage = Math.Min(requestedPage, totalPages);
+
         filter.Messages = await query
             .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
+            .Skip((currentPage - 1) * PageSize)
+            .Take(PageSize)
             .Select(x => new ContactListItemViewModel
             {
                 Id = x.Id,
@@ -39,6 +49,10 @@ public class ContactController : AdminBaseController
             })
             .ToListAsync();
 
+        filter.Page = currentPage;
+        filter.PageSize = PageSize;
+        filter.TotalItems = totalItems;
+        filter.TotalPages = totalPages;
         filter.StatusOptions = BuildStatusOptions(includeAllOption: true);
 
         return View(filter);

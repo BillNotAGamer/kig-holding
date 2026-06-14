@@ -40,7 +40,7 @@ public class PostController : AdminBaseController
     [HttpGet]
     public async Task<IActionResult> Index(string? q, string? category, string? status, int page = 1)
     {
-        page = Math.Max(page, 1);
+        var requestedPage = Math.Max(page, 1);
 
         var searchQuery = string.IsNullOrWhiteSpace(q) ? null : q.Trim();
         var normalizedCategory = NewsCategories.NormalizeCategory(category);
@@ -82,19 +82,17 @@ public class PostController : AdminBaseController
             _ => query
         };
 
-        query = query
-            .OrderByDescending(x => x.PublishedAt)
-            .ThenByDescending(x => x.CreatedAt);
-
         var totalItems = await query.CountAsync();
-        var totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)DefaultPageSize);
-        if (totalPages > 0 && page > totalPages)
-        {
-            page = totalPages;
-        }
+        var totalPages = Math.Max(1, (int)Math.Ceiling(totalItems / (double)DefaultPageSize));
+        var currentPage = Math.Min(requestedPage, totalPages);
 
-        var posts = await query
-            .Skip((page - 1) * DefaultPageSize)
+        var orderedQuery = query
+            .OrderByDescending(x => x.PublishedAt)
+            .ThenByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id);
+
+        var posts = await orderedQuery
+            .Skip((currentPage - 1) * DefaultPageSize)
             .Take(DefaultPageSize)
             .Select(x => new PostListItemViewModel
             {
@@ -124,7 +122,7 @@ public class PostController : AdminBaseController
             SearchQuery = searchQuery,
             SelectedCategory = normalizedCategory,
             SelectedStatus = normalizedStatus,
-            Page = page,
+            Page = currentPage,
             PageSize = DefaultPageSize,
             TotalItems = totalItems,
             TotalPages = totalPages

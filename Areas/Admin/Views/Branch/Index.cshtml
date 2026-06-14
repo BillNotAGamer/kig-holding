@@ -1,8 +1,26 @@
-@model IEnumerable<KIGHolding.Models.Entities.Branch>
+@model KIGHolding.Areas.Admin.ViewModels.BranchIndexViewModel
 
 @{
     ViewData["Title"] = "Quản lý Chi nhánh";
-    var branches = Model.ToList();
+
+    var branches = Model.Branches;
+    var paginationStart = Math.Max(1, Model.Page - 2);
+    var paginationEnd = Math.Min(Model.TotalPages, Model.Page + 2);
+
+    if (Model.TotalPages > 1 && paginationEnd - paginationStart < 4)
+    {
+        if (paginationStart == 1)
+        {
+            paginationEnd = Math.Min(Model.TotalPages, paginationStart + 4);
+        }
+        else if (paginationEnd == Model.TotalPages)
+        {
+            paginationStart = Math.Max(1, paginationEnd - 4);
+        }
+    }
+
+    var mobilePaginationStart = Math.Max(1, Model.Page - 1);
+    var mobilePaginationEnd = Math.Min(Model.TotalPages, Model.Page + 1);
 }
 
 <section class="admin-page">
@@ -20,7 +38,10 @@
         @if (branches.Any())
         {
             <div class="border-b border-brand-border bg-brand-light/60 px-4 py-4 sm:px-6">
-                <p class="text-sm font-semibold text-brand-dark">Tổng cộng @branches.Count chi nhánh đang được quản lý.</p>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm font-semibold text-brand-dark">Hiển thị @Model.FirstItemIndex-@Model.LastItemIndex trong @Model.TotalItems chi nhánh.</p>
+                    <p class="text-sm text-brand-gray">Trang @Model.Page / @Model.TotalPages</p>
+                </div>
             </div>
 
             <div class="hidden overflow-x-auto md:block">
@@ -74,13 +95,14 @@
                                     <div class="admin-actions gap-2">
                                         <a href="@Url.Action("Edit", new { id = branch.Id })" class="admin-table-action admin-table-action--muted">Sửa</a>
 
-                                        <form asp-action="Delete" asp-route-id="@branch.Id" method="post" class="inline" onsubmit="return confirm('Xóa mềm chi nhánh này? Chi nhánh sẽ được ẩn khỏi website công khai nhưng vẫn giữ dữ liệu đặt bàn và đánh giá trong hệ thống.');">
+                                        <form asp-action="Delete" asp-route-id="@branch.Id" asp-route-page="@Model.Page" method="post" class="inline" onsubmit="return confirm('Xóa mềm chi nhánh này? Chi nhánh sẽ được ẩn khỏi website công khai nhưng vẫn giữ dữ liệu đặt bàn và đánh giá trong hệ thống.');">
                                             @Html.AntiForgeryToken()
                                             <button type="submit" class="admin-table-action admin-table-action--muted">Xóa mềm</button>
                                         </form>
 
                                         <form asp-action="PermanentDelete"
                                               asp-route-id="@branch.Id"
+                                              asp-route-page="@Model.Page"
                                               method="post"
                                               class="inline"
                                               onsubmit="return confirm('XÓA VĨNH VIỄN chi nhánh này? Chỉ có thể xóa khi chi nhánh không có dữ liệu đặt bàn. Dữ liệu chi nhánh và ảnh đại diện sẽ bị gỡ khỏi hệ thống. Không thể hoàn tác.');">
@@ -144,6 +166,7 @@
 
                             <form asp-action="Delete"
                                   asp-route-id="@branch.Id"
+                                  asp-route-page="@Model.Page"
                                   method="post"
                                   class="w-full"
                                   onsubmit="return confirm('Xóa mềm chi nhánh này? Chi nhánh sẽ được ẩn khỏi website công khai nhưng vẫn giữ dữ liệu đặt bàn và đánh giá trong hệ thống.');">
@@ -153,6 +176,7 @@
 
                             <form asp-action="PermanentDelete"
                                   asp-route-id="@branch.Id"
+                                  asp-route-page="@Model.Page"
                                   method="post"
                                   class="w-full"
                                   onsubmit="return confirm('XÓA VĨNH VIỄN chi nhánh này? Chỉ có thể xóa khi chi nhánh không có dữ liệu đặt bàn. Dữ liệu chi nhánh và ảnh đại diện sẽ bị gỡ khỏi hệ thống. Không thể hoàn tác.');">
@@ -173,6 +197,79 @@
                         <p class="admin-empty__text">Tạo chi nhánh đầu tiên để quản lý thông tin địa chỉ, hotline và trạng thái hiển thị công khai.</p>
                         <a href="@Url.Action("Create")" class="btn-primary mt-6">Tạo chi nhánh mới</a>
                     </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="border-t border-brand-border px-4 py-4 sm:px-6">
+                <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Branch"
+                           asp-action="Index"
+                           asp-route-page="@(Model.Page - 1)"
+                           class="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                            <span class="sm:hidden">←</span>
+                            <span class="hidden sm:inline">Trang trước</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border/70 bg-brand-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-gray/60" aria-disabled="true">
+                            <span class="sm:hidden">←</span>
+                            <span class="hidden sm:inline">Trang trước</span>
+                        </span>
+                    }
+
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        @for (var currentPage = paginationStart; currentPage <= paginationEnd; currentPage++)
+                        {
+                            var isActive = currentPage == Model.Page;
+                            var mobileVisibilityClass = currentPage >= mobilePaginationStart && currentPage <= mobilePaginationEnd
+                                ? "inline-flex"
+                                : "hidden sm:inline-flex";
+
+                            if (isActive)
+                            {
+                                <span aria-current="page"
+                                      class="@mobileVisibilityClass h-11 min-w-11 items-center justify-center rounded-full border border-brand-red bg-brand-red px-3 text-sm font-semibold text-white shadow-soft">
+                                    @currentPage
+                                </span>
+                            }
+                            else
+                            {
+                                <a asp-area="Admin"
+                                   asp-controller="Branch"
+                                   asp-action="Index"
+                                   asp-route-page="@currentPage"
+                                   class="@mobileVisibilityClass h-11 min-w-11 items-center justify-center rounded-full border border-brand-border bg-white px-3 text-sm font-semibold text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                                    @currentPage
+                                </a>
+                            }
+                        }
+                    </div>
+
+                    @if (Model.HasNextPage)
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Branch"
+                           asp-action="Index"
+                           asp-route-page="@(Model.Page + 1)"
+                           class="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+                            <span class="sm:hidden">→</span>
+                            <span class="hidden sm:inline">Trang sau</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="inline-flex min-h-11 items-center justify-center rounded-full border border-brand-border/70 bg-brand-light px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-gray/60" aria-disabled="true">
+                            <span class="sm:hidden">→</span>
+                            <span class="hidden sm:inline">Trang sau</span>
+                        </span>
+                    }
                 </div>
             </div>
         }
