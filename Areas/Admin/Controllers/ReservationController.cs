@@ -73,7 +73,8 @@ public class ReservationController : AdminBaseController
 
         foreach (var reservation in filter.Reservations)
         {
-            reservation.DiningOccasionDisplay = ReservationOptionCatalog.FormatDiningOccasionCodesForDisplay(reservation.DiningOccasionCodes);
+            reservation.DiningOccasionDisplay =
+                ReservationOptionCatalog.FormatDiningOccasionCodesForDisplay(reservation.DiningOccasionCodes);
         }
 
         filter.Page = currentPage;
@@ -88,8 +89,16 @@ public class ReservationController : AdminBaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Details(Guid id)
+    public async Task<IActionResult> Details(
+        Guid id,
+        int page = 1,
+        string? searchQuery = null,
+        ReservationStatus? statusFilter = null,
+        Guid? branchFilter = null)
     {
+        var (normalizedPage, normalizedSearchQuery) = NormalizeReservationListState(page, searchQuery);
+        SetReservationListState(normalizedPage, normalizedSearchQuery, statusFilter, branchFilter);
+
         var model = await BuildReservationDetailViewModelAsync(id);
         if (model is null)
         {
@@ -101,8 +110,14 @@ public class ReservationController : AdminBaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateStatus(ReservationDetailViewModel model)
+    public async Task<IActionResult> UpdateStatus(
+        ReservationDetailViewModel model,
+        int page = 1,
+        string? searchQuery = null,
+        ReservationStatus? statusFilter = null,
+        Guid? branchFilter = null)
     {
+        var (normalizedPage, normalizedSearchQuery) = NormalizeReservationListState(page, searchQuery);
         var reservation = await _dbContext.Reservations.FirstOrDefaultAsync(x => x.Id == model.Id);
         if (reservation is null)
         {
@@ -134,6 +149,7 @@ public class ReservationController : AdminBaseController
                 return NotFound();
             }
 
+            SetReservationListState(normalizedPage, normalizedSearchQuery, statusFilter, branchFilter);
             return View("Details", detailModel);
         }
 
@@ -147,8 +163,18 @@ public class ReservationController : AdminBaseController
 
         await _dbContext.SaveChangesAsync();
 
-        TempData["SuccessMessage"] = "Đã cập nhật trạng thái đặt bàn.";
-        return RedirectToAction(nameof(Details), new { id = model.Id });
+        TempData["SuccessMessage"] = "Cập nhật trạng thái đặt bàn thành công.";
+        return RedirectToAction(
+            nameof(Index),
+            "Reservation",
+            new
+            {
+                area = "Admin",
+                page = normalizedPage,
+                SearchQuery = normalizedSearchQuery,
+                StatusFilter = statusFilter,
+                BranchFilter = branchFilter
+            });
     }
 
     private async Task<ReservationDetailViewModel?> BuildReservationDetailViewModelAsync(
@@ -338,5 +364,24 @@ public class ReservationController : AdminBaseController
             ReservationStatus.Cancelled => "Đã hủy",
             _ => status.ToString()
         };
+    }
+
+    private void SetReservationListState(
+        int page,
+        string? searchQuery,
+        ReservationStatus? statusFilter,
+        Guid? branchFilter)
+    {
+        ViewData["ReservationListPage"] = page;
+        ViewData["ReservationListSearchQuery"] = searchQuery;
+        ViewData["ReservationListStatusFilter"] = statusFilter;
+        ViewData["ReservationListBranchFilter"] = branchFilter;
+    }
+
+    private static (int Page, string? SearchQuery) NormalizeReservationListState(int page, string? searchQuery)
+    {
+        return (
+            Math.Max(page, 1),
+            string.IsNullOrWhiteSpace(searchQuery) ? null : searchQuery.Trim());
     }
 }

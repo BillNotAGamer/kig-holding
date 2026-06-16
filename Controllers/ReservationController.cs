@@ -217,7 +217,7 @@ public class ReservationController : Controller
 
             await _emailService.SendReservationNotificationAsync(
                 recipientEmail,
-                ReservationNotificationEmailBuilder.BuildSubject(),
+                ReservationNotificationEmailBuilder.BuildSubject(notification),
                 ReservationNotificationEmailBuilder.BuildHtmlBody(notification),
                 ReservationNotificationEmailBuilder.BuildTextBody(notification),
                 CancellationToken.None);
@@ -276,7 +276,8 @@ public class ReservationController : Controller
                 : ReservationOptionCatalog.FormatDiningOccasionCode(model.DiningOccasionCode),
             DiningOccasionOtherNote = reservation?.DiningOccasionOtherNote
                 ?? ResolveConditionalOtherNote(model.DiningOccasionCode, model.DiningOccasionOtherNote),
-            Note = string.IsNullOrWhiteSpace(reservation?.Note) ? model.Note?.Trim() : reservation.Note
+            Note = string.IsNullOrWhiteSpace(reservation?.Note) ? model.Note?.Trim() : reservation.Note,
+            SubmittedAt = reservation?.CreatedAt
         };
     }
 

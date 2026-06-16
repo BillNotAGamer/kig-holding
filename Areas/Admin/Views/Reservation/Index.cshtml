@@ -133,7 +133,15 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a asp-action="Details" asp-route-id="@reservation.Id" class="admin-table-action admin-table-action--primary">Xem chi tiết</a>
+                                    <a asp-area="Admin"
+                                       asp-controller="Reservation"
+                                       asp-action="Details"
+                                       asp-route-id="@reservation.Id"
+                                       asp-route-page="@Model.Page"
+                                       asp-route-SearchQuery="@Model.SearchQuery"
+                                       asp-route-StatusFilter="@Model.StatusFilter"
+                                       asp-route-BranchFilter="@Model.BranchFilter"
+                                       class="admin-table-action admin-table-action--primary">Xem chi tiết</a>
                                 </td>
                             </tr>
                         }
@@ -201,7 +209,15 @@
                                 </div>
                             }
 
-                            <a asp-action="Details" asp-route-id="@reservation.Id" class="admin-table-action admin-table-action--primary min-h-11 w-full">Xem chi tiết</a>
+                            <a asp-area="Admin"
+                               asp-controller="Reservation"
+                               asp-action="Details"
+                               asp-route-id="@reservation.Id"
+                               asp-route-page="@Model.Page"
+                               asp-route-SearchQuery="@Model.SearchQuery"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-BranchFilter="@Model.BranchFilter"
+                               class="admin-table-action admin-table-action--primary min-h-11 w-full">Xem chi tiết</a>
                         </div>
                     </article>
                 }
