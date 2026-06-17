@@ -92,7 +92,7 @@
                                    placeholder="HH:mm"
                                    pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]"
                                    title="Nhập giờ theo định dạng 24 giờ, ví dụ 14:30"
-                                   class="admin-field" />
+                                   class="admin-field js-admin-branch-time-picker" />
                             <span asp-validation-for="OpeningTimeText" class="admin-validation"></span>
                         </div>
                         <div>
@@ -105,7 +105,7 @@
                                    placeholder="HH:mm"
                                    pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]"
                                    title="Nhập giờ theo định dạng 24 giờ, ví dụ 22:00"
-                                   class="admin-field" />
+                                   class="admin-field js-admin-branch-time-picker" />
                             <span asp-validation-for="ClosingTimeText" class="admin-validation"></span>
                         </div>
                     </div>
@@ -123,7 +123,7 @@
                                        placeholder="HH:mm"
                                        pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]"
                                        title="Nhập giờ theo định dạng 24 giờ, ví dụ 14:00"
-                                       class="admin-field" />
+                                       class="admin-field js-admin-branch-time-picker" />
                                 <span asp-validation-for="LunchBreakStartText" class="admin-validation"></span>
                             </div>
                             <div>
@@ -136,7 +136,7 @@
                                        placeholder="HH:mm"
                                        pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]"
                                        title="Nhập giờ theo định dạng 24 giờ, ví dụ 16:00"
-                                       class="admin-field" />
+                                       class="admin-field js-admin-branch-time-picker" />
                                 <span asp-validation-for="LunchBreakEndText" class="admin-validation"></span>
                             </div>
                         </div>
@@ -220,6 +220,16 @@
     </form>
 </section>
 
+@section Styles {
+    <link rel="stylesheet"
+          href="~/lib/flatpickr/flatpickr.min.css"
+          asp-append-version="true" />
+}
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/flatpickr/flatpickr.min.js"
+            asp-append-version="true"></script>
+    <script src="~/js/admin-branch-time-picker.js"
+            asp-append-version="true"></script>
 }

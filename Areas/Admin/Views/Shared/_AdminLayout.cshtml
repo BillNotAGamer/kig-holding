@@ -22,6 +22,7 @@
     <partial name="~/Views/Shared/Partials/_Favicons.cshtml" />
     <title>@resolvedPageTitle</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="min-h-screen bg-brand-light text-brand-dark antialiased">
     <header class="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-brand-black px-4 text-white shadow-panel lg:hidden">
