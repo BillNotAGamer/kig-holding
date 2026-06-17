@@ -70,7 +70,10 @@
                             <option value="">Chọn chi nhánh</option>
                             @foreach (var branch in Model.Branches)
                             {
-                                <option value="@branch.Id">@branch.Name - @branch.OpeningHours</option>
+                                var lunchBreakSuffix = string.IsNullOrWhiteSpace(branch.LunchBreakHours)
+                                    ? string.Empty
+                                    : $" • Nghỉ trưa {branch.LunchBreakHours.Replace(" - ", "-", StringComparison.Ordinal)}";
+                                <option value="@branch.Id">@branch.Name - @branch.OpeningHours@lunchBreakSuffix</option>
                             }
                         </select>
                         <span asp-validation-for="BranchId" class="reservation-page__validation"></span>
@@ -180,6 +183,10 @@
                                     <h3>@branch.Name</h3>
                                     <p>@branch.Address</p>
                                     <span>@branch.OpeningHours</span>
+                                    @if (!string.IsNullOrWhiteSpace(branch.LunchBreakHours))
+                                    {
+                                        <span>Nghỉ trưa: @branch.LunchBreakHours</span>
+                                    }
                                 </div>
                             }
                         </div>

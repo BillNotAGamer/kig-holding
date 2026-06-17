@@ -1,9 +1,10 @@
 @using KIGHolding.Services
+@using System.Globalization
 @inject IConfiguration Configuration
 @inject IBranchService BranchService
 
 @{
-    var branchOptions = new List<(Guid Id, string Name, string OpeningHours)>();
+    var branchOptions = new List<(Guid Id, string Name, string OpeningHours, string? LunchBreakHours)>();
     var diningOccasionOptions = ReservationOptionCatalog.DiningOccasionOptions;
     var hasConfiguredDatabase = false;
     var connectionString = Configuration.GetConnectionString("DefaultConnection");
@@ -20,7 +21,13 @@
         {
             var branches = await BranchService.GetActiveBranchesAsync();
             branchOptions = branches
-                .Select(branch => (branch.Id, branch.Name, $"{branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm}"))
+                .Select(branch => (
+                    branch.Id,
+                    branch.Name,
+                    $"{branch.OpeningTime.ToString("HH:mm", CultureInfo.InvariantCulture)} - {branch.ClosingTime.ToString("HH:mm", CultureInfo.InvariantCulture)}",
+                    branch.LunchBreakStart.HasValue && branch.LunchBreakEnd.HasValue
+                        ? $"{branch.LunchBreakStart.Value.ToString("HH:mm", CultureInfo.InvariantCulture)} - {branch.LunchBreakEnd.Value.ToString("HH:mm", CultureInfo.InvariantCulture)}"
+                        : null))
                 .ToList();
         }
         catch
@@ -142,7 +149,10 @@
                             <option value="">Chọn chi nhánh</option>
                             @foreach (var branch in branchOptions)
                             {
-                                <option value="@branch.Id">@branch.Name - @branch.OpeningHours</option>
+                                var lunchBreakSuffix = string.IsNullOrWhiteSpace(branch.LunchBreakHours)
+                                    ? string.Empty
+                                    : $" • Nghỉ trưa {branch.LunchBreakHours.Replace(" - ", "-", StringComparison.Ordinal)}";
+                                <option value="@branch.Id">@branch.Name - @branch.OpeningHours@lunchBreakSuffix</option>
                             }
                             @if (branchOptions.Count == 0)
                             {

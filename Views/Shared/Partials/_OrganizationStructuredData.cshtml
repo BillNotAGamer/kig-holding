@@ -1,0 +1,24 @@
+@using System.Text.Json
+@{
+    var organization = new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Organization",
+        ["@id"] = "https://kigholding.vn/#organization",
+        ["name"] = "KIG Holding",
+        ["legalName"] = "CÔNG TY TNHH KIG HOLDING",
+        ["alternateName"] = "Truyền Thuyết Champong",
+        ["url"] = "https://kigholding.vn/",
+        ["logo"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "ImageObject",
+            ["url"] = "https://kigholding.vn/images/general/kig-no-bg-logo.png",
+            ["contentUrl"] = "https://kigholding.vn/images/general/kig-no-bg-logo.png",
+            ["width"] = 1080,
+            ["height"] = 1080
+        }
+    };
+
+    var organizationJson = JsonSerializer.Serialize(organization);
+}
+<script type="application/ld+json">@Html.Raw(organizationJson)</script>

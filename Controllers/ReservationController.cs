@@ -1,3 +1,4 @@
+using System.Globalization;
 using KIGHolding.Models.Entities;
 using KIGHolding.Options;
 using KIGHolding.Services;
@@ -439,7 +440,10 @@ public class ReservationController : Controller
             Name = branch.Name,
             Slug = branch.Slug,
             Address = $"{branch.Address}, {branch.District}, {branch.City}",
-            OpeningHours = $"{branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm}"
+            OpeningHours = FormatTimeRange(branch.OpeningTime, branch.ClosingTime),
+            LunchBreakHours = branch.LunchBreakStart.HasValue && branch.LunchBreakEnd.HasValue
+                ? FormatTimeRange(branch.LunchBreakStart.Value, branch.LunchBreakEnd.Value)
+                : null
         }).ToList();
     }
 
@@ -467,5 +471,10 @@ public class ReservationController : Controller
         }
 
         return string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+    }
+
+    private static string FormatTimeRange(TimeOnly start, TimeOnly end)
+    {
+        return $"{start.ToString("HH:mm", CultureInfo.InvariantCulture)} - {end.ToString("HH:mm", CultureInfo.InvariantCulture)}";
     }
 }

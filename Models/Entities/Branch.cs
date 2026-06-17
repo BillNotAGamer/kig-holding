@@ -12,6 +12,8 @@ public class Branch : IUpdatedAtEntity
     public string Email { get; set; } = string.Empty;
     public TimeOnly OpeningTime { get; set; }
     public TimeOnly ClosingTime { get; set; }
+    public TimeOnly? LunchBreakStart { get; set; }
+    public TimeOnly? LunchBreakEnd { get; set; }
     public int Capacity { get; set; }
     public decimal? AreaSquareMeters { get; set; }
     public int? NumberOfFloors { get; set; }

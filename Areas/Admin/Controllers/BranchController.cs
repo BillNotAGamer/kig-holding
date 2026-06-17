@@ -13,6 +13,8 @@ namespace KIGHolding.Areas.Admin.Controllers;
 public class BranchController : AdminBaseController
 {
     private const int PageSize = 10;
+    private static readonly TimeOnly DefaultOpeningTime = new(10, 0);
+    private static readonly TimeOnly DefaultClosingTime = new(22, 0);
 
     private readonly AppDbContext _dbContext;
     private readonly IBranchService _branchService;
@@ -72,14 +74,18 @@ public class BranchController : AdminBaseController
     [HttpGet]
     public IActionResult Create()
     {
-        return View(new BranchCreateViewModel());
+        return View(new BranchCreateViewModel
+        {
+            OpeningTimeText = FormatTime(DefaultOpeningTime),
+            ClosingTimeText = FormatTime(DefaultClosingTime)
+        });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(BranchCreateViewModel model)
     {
-        await ValidateBranchModelAsync(model);
+        var parsedTimes = await ValidateBranchModelAsync(model);
 
         if (!ModelState.IsValid)
         {
@@ -112,8 +118,10 @@ public class BranchController : AdminBaseController
             City = model.City.Trim(),
             Hotline = model.Hotline.Trim(),
             Email = model.Email.Trim(),
-            OpeningTime = model.OpeningTime,
-            ClosingTime = model.ClosingTime,
+            OpeningTime = parsedTimes.OpeningTime!.Value,
+            ClosingTime = parsedTimes.ClosingTime!.Value,
+            LunchBreakStart = parsedTimes.LunchBreakStart,
+            LunchBreakEnd = parsedTimes.LunchBreakEnd,
             Capacity = model.Capacity,
             AreaSquareMeters = model.AreaSquareMeters,
             NumberOfFloors = model.NumberOfFloors,
@@ -161,8 +169,10 @@ public class BranchController : AdminBaseController
             City = branch.City,
             Hotline = branch.Hotline,
             Email = branch.Email,
-            OpeningTime = branch.OpeningTime,
-            ClosingTime = branch.ClosingTime,
+            OpeningTimeText = FormatTime(branch.OpeningTime),
+            ClosingTimeText = FormatTime(branch.ClosingTime),
+            LunchBreakStartText = branch.LunchBreakStart.HasValue ? FormatTime(branch.LunchBreakStart.Value) : null,
+            LunchBreakEndText = branch.LunchBreakEnd.HasValue ? FormatTime(branch.LunchBreakEnd.Value) : null,
             Capacity = branch.Capacity,
             AreaSquareMeters = branch.AreaSquareMeters,
             NumberOfFloors = branch.NumberOfFloors,
@@ -191,7 +201,7 @@ public class BranchController : AdminBaseController
             return NotFound();
         }
 
-        await ValidateBranchModelAsync(model, branch.Id);
+        var parsedTimes = await ValidateBranchModelAsync(model, branch.Id);
 
         if (!ModelState.IsValid)
         {
@@ -225,8 +235,10 @@ public class BranchController : AdminBaseController
         branch.City = model.City.Trim();
         branch.Hotline = model.Hotline.Trim();
         branch.Email = model.Email.Trim();
-        branch.OpeningTime = model.OpeningTime;
-        branch.ClosingTime = model.ClosingTime;
+        branch.OpeningTime = parsedTimes.OpeningTime!.Value;
+        branch.ClosingTime = parsedTimes.ClosingTime!.Value;
+        branch.LunchBreakStart = parsedTimes.LunchBreakStart;
+        branch.LunchBreakEnd = parsedTimes.LunchBreakEnd;
         branch.Capacity = model.Capacity;
         branch.AreaSquareMeters = model.AreaSquareMeters;
         branch.NumberOfFloors = model.NumberOfFloors;
@@ -329,12 +341,9 @@ public class BranchController : AdminBaseController
         return RedirectToAdminIndex(page);
     }
 
-    private async Task ValidateBranchModelAsync(BranchCreateViewModel model, Guid? currentBranchId = null)
+    private async Task<BranchTimeParseResult> ValidateBranchModelAsync(BranchCreateViewModel model, Guid? currentBranchId = null)
     {
-        if (model.OpeningTime >= model.ClosingTime)
-        {
-            ModelState.AddModelError(nameof(model.ClosingTime), "Giờ đóng cửa phải sau giờ mở cửa.");
-        }
+        var parsedTimes = ParseAndValidateTimeInputs(model);
 
         if (model.ThumbnailFile is not null && model.ThumbnailFile.Length > 0)
         {
@@ -361,7 +370,7 @@ public class BranchController : AdminBaseController
         if (string.IsNullOrWhiteSpace(normalizedSlug))
         {
             ModelState.AddModelError(nameof(model.Slug), "Không thể tạo slug hợp lệ. Vui lòng nhập lại tên hoặc slug.");
-            return;
+            return parsedTimes;
         }
 
         if (isManualSlug)
@@ -375,6 +384,8 @@ public class BranchController : AdminBaseController
                 ModelState.AddModelError(nameof(model.Slug), "Slug này đã tồn tại. Vui lòng chọn slug khác.");
             }
         }
+
+        return parsedTimes;
     }
 
     private async Task<string> BuildUniqueSlugAsync(string? requestedSlug, string fallbackName, Guid? currentBranchId = null)
@@ -433,4 +444,119 @@ public class BranchController : AdminBaseController
 
         return normalized;
     }
+
+    private BranchTimeParseResult ParseAndValidateTimeInputs(BranchCreateViewModel model)
+    {
+        var openingTime = ParseRequiredTime(
+            model.OpeningTimeText,
+            nameof(model.OpeningTimeText),
+            "Giờ mở cửa là bắt buộc.",
+            "Giờ mở cửa không hợp lệ. Vui lòng nhập theo định dạng HH:mm.");
+
+        var closingTime = ParseRequiredTime(
+            model.ClosingTimeText,
+            nameof(model.ClosingTimeText),
+            "Giờ đóng cửa là bắt buộc.",
+            "Giờ đóng cửa không hợp lệ. Vui lòng nhập theo định dạng HH:mm.");
+
+        if (openingTime.HasValue && closingTime.HasValue && openingTime.Value >= closingTime.Value)
+        {
+            ModelState.AddModelError(nameof(model.ClosingTimeText), "Giờ đóng cửa phải sau giờ mở cửa.");
+        }
+
+        var hasLunchBreakStart = !string.IsNullOrWhiteSpace(model.LunchBreakStartText);
+        var hasLunchBreakEnd = !string.IsNullOrWhiteSpace(model.LunchBreakEndText);
+
+        if (hasLunchBreakStart != hasLunchBreakEnd)
+        {
+            ModelState.AddModelError(nameof(model.LunchBreakStartText), "Vui lòng nhập cả giờ bắt đầu và giờ kết thúc nghỉ trưa.");
+        }
+
+        var lunchBreakStart = ParseOptionalTime(
+            model.LunchBreakStartText,
+            nameof(model.LunchBreakStartText),
+            "Giờ bắt đầu nghỉ trưa không hợp lệ. Vui lòng nhập theo định dạng HH:mm.");
+
+        var lunchBreakEnd = ParseOptionalTime(
+            model.LunchBreakEndText,
+            nameof(model.LunchBreakEndText),
+            "Giờ kết thúc nghỉ trưa không hợp lệ. Vui lòng nhập theo định dạng HH:mm.");
+
+        if (lunchBreakStart.HasValue && lunchBreakEnd.HasValue)
+        {
+            if (lunchBreakStart.Value >= lunchBreakEnd.Value)
+            {
+                ModelState.AddModelError(nameof(model.LunchBreakStartText), "Giờ bắt đầu nghỉ trưa phải trước giờ kết thúc nghỉ trưa.");
+            }
+            else if (openingTime.HasValue &&
+                     closingTime.HasValue &&
+                     (lunchBreakStart.Value < openingTime.Value || lunchBreakEnd.Value > closingTime.Value))
+            {
+                ModelState.AddModelError(nameof(model.LunchBreakStartText), "Giờ nghỉ trưa phải nằm trong khung giờ mở cửa của chi nhánh.");
+            }
+        }
+
+        return new BranchTimeParseResult(openingTime, closingTime, lunchBreakStart, lunchBreakEnd);
+    }
+
+    private TimeOnly? ParseRequiredTime(string? value, string fieldName, string requiredMessage, string invalidMessage)
+    {
+        var normalizedValue = NormalizeTimeInput(value);
+        if (string.IsNullOrWhiteSpace(normalizedValue))
+        {
+            ModelState.AddModelError(fieldName, requiredMessage);
+            return null;
+        }
+
+        if (TryParseTimeInput(normalizedValue, out var parsedTime))
+        {
+            return parsedTime;
+        }
+
+        ModelState.AddModelError(fieldName, invalidMessage);
+        return null;
+    }
+
+    private TimeOnly? ParseOptionalTime(string? value, string fieldName, string invalidMessage)
+    {
+        var normalizedValue = NormalizeTimeInput(value);
+        if (string.IsNullOrWhiteSpace(normalizedValue))
+        {
+            return null;
+        }
+
+        if (TryParseTimeInput(normalizedValue, out var parsedTime))
+        {
+            return parsedTime;
+        }
+
+        ModelState.AddModelError(fieldName, invalidMessage);
+        return null;
+    }
+
+    private static string? NormalizeTimeInput(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static bool TryParseTimeInput(string value, out TimeOnly parsedTime)
+    {
+        return TimeOnly.TryParseExact(
+            value,
+            "HH:mm",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out parsedTime);
+    }
+
+    private static string FormatTime(TimeOnly value)
+    {
+        return value.ToString("HH:mm", CultureInfo.InvariantCulture);
+    }
+
+    private readonly record struct BranchTimeParseResult(
+        TimeOnly? OpeningTime,
+        TimeOnly? ClosingTime,
+        TimeOnly? LunchBreakStart,
+        TimeOnly? LunchBreakEnd);
 }

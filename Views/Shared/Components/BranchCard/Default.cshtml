@@ -71,6 +71,17 @@
                 </div>
             </div>
 
+            @if (!string.IsNullOrWhiteSpace(Model.LunchBreakHours))
+            {
+                <div class="flex gap-3">
+                    <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-red" aria-hidden="true"></span>
+                    <div>
+                        <p class="branch-card__label text-[11px] font-black uppercase tracking-[0.16em] text-brand-red">GIỜ NGHỈ TRƯA</p>
+                        <p class="branch-card__value mt-1 font-semibold text-white">@Model.LunchBreakHours</p>
+                    </div>
+                </div>
+            }
+
             <div class="flex gap-3">
                 <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-red" aria-hidden="true"></span>
                 <div>

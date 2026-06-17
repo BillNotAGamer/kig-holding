@@ -40,10 +40,16 @@ public class BranchCreateViewModel
     public string Email { get; set; } = string.Empty;
 
     [Display(Name = "Giờ mở cửa")]
-    public TimeOnly OpeningTime { get; set; } = new TimeOnly(10, 0);
+    public string OpeningTimeText { get; set; } = string.Empty;
 
     [Display(Name = "Giờ đóng cửa")]
-    public TimeOnly ClosingTime { get; set; } = new TimeOnly(22, 0);
+    public string ClosingTimeText { get; set; } = string.Empty;
+
+    [Display(Name = "Bắt đầu nghỉ trưa")]
+    public string? LunchBreakStartText { get; set; }
+
+    [Display(Name = "Kết thúc nghỉ trưa")]
+    public string? LunchBreakEndText { get; set; }
 
     [Range(0, int.MaxValue, ErrorMessage = "Sức chứa không hợp lệ.")]
     [Display(Name = "Sức chứa")]

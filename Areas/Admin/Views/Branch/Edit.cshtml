@@ -75,16 +75,71 @@
             </div>
 
             <div class="space-y-5">
-                <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-4 rounded-2xl border border-brand-border bg-brand-light/40 p-4 sm:p-5">
                     <div>
-                        <label asp-for="OpeningTime" class="admin-label mb-2"></label>
-                        <input asp-for="OpeningTime" type="time" class="admin-field" />
-                        <span asp-validation-for="OpeningTime" class="admin-validation"></span>
+                        <p class="text-xs font-black uppercase tracking-[0.16em] text-brand-gray">THỜI GIAN HOẠT ĐỘNG</p>
+                        <p class="mt-2 text-xs text-brand-gray">Nhập theo định dạng 24 giờ HH:mm. Để trống cả hai ô nếu chi nhánh không nghỉ trưa.</p>
                     </div>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label asp-for="OpeningTimeText" class="admin-label mb-2"></label>
+                            <input asp-for="OpeningTimeText"
+                                   type="text"
+                                   inputmode="numeric"
+                                   autocomplete="off"
+                                   maxlength="5"
+                                   placeholder="HH:mm"
+                                   pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]"
+                                   title="Nhập giờ theo định dạng 24 giờ, ví dụ 14:30"
+                                   class="admin-field" />
+                            <span asp-validation-for="OpeningTimeText" class="admin-validation"></span>
+                        </div>
+                        <div>
+                            <label asp-for="ClosingTimeText" class="admin-label mb-2"></label>
+                            <input asp-for="ClosingTimeText"
+                                   type="text"
+                                   inputmode="numeric"
+                                   autocomplete="off"
+                                   maxlength="5"
+                                   placeholder="HH:mm"
+                                   pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]"
+                                   title="Nhập giờ theo định dạng 24 giờ, ví dụ 22:00"
+                                   class="admin-field" />
+                            <span asp-validation-for="ClosingTimeText" class="admin-validation"></span>
+                        </div>
+                    </div>
+
                     <div>
-                        <label asp-for="ClosingTime" class="admin-label mb-2"></label>
-                        <input asp-for="ClosingTime" type="time" class="admin-field" />
-                        <span asp-validation-for="ClosingTime" class="admin-validation"></span>
+                        <p class="text-xs font-black uppercase tracking-[0.16em] text-brand-gray">Nghỉ trưa</p>
+                        <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label asp-for="LunchBreakStartText" class="admin-label mb-2"></label>
+                                <input asp-for="LunchBreakStartText"
+                                       type="text"
+                                       inputmode="numeric"
+                                       autocomplete="off"
+                                       maxlength="5"
+                                       placeholder="HH:mm"
+                                       pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]"
+                                       title="Nhập giờ theo định dạng 24 giờ, ví dụ 14:00"
+                                       class="admin-field" />
+                                <span asp-validation-for="LunchBreakStartText" class="admin-validation"></span>
+                            </div>
+                            <div>
+                                <label asp-for="LunchBreakEndText" class="admin-label mb-2"></label>
+                                <input asp-for="LunchBreakEndText"
+                                       type="text"
+                                       inputmode="numeric"
+                                       autocomplete="off"
+                                       maxlength="5"
+                                       placeholder="HH:mm"
+                                       pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]"
+                                       title="Nhập giờ theo định dạng 24 giờ, ví dụ 16:00"
+                                       class="admin-field" />
+                                <span asp-validation-for="LunchBreakEndText" class="admin-validation"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

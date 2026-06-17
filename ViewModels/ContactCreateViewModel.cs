@@ -44,4 +44,5 @@ public class ContactCreateViewModel
     public string ZaloUrl => string.IsNullOrWhiteSpace(SiteSetting?.ZaloUrl) ? "#" : SiteSetting!.ZaloUrl;
     public string TiktokUrl => string.IsNullOrWhiteSpace(SiteSetting?.TiktokUrl) ? "#" : SiteSetting!.TiktokUrl;
     public string OpeningHours => Branches.FirstOrDefault()?.OpeningHours ?? "10:00 - 22:30";
+    public string? LunchBreakHours => Branches.FirstOrDefault()?.LunchBreakHours;
 }

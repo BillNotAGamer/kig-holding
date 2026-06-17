@@ -155,6 +155,12 @@ namespace KIGHolding.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
+                    b.Property<TimeOnly?>("LunchBreakEnd")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly?>("LunchBreakStart")
+                        .HasColumnType("time without time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(180)

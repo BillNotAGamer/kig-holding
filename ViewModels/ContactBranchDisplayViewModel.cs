@@ -6,4 +6,5 @@ public class ContactBranchDisplayViewModel
     public string Address { get; set; } = string.Empty;
     public string Hotline { get; set; } = string.Empty;
     public string OpeningHours { get; set; } = string.Empty;
+    public string? LunchBreakHours { get; set; }
 }

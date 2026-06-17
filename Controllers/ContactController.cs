@@ -1,3 +1,4 @@
+using System.Globalization;
 using KIGHolding.Models.Entities;
 using KIGHolding.Options;
 using KIGHolding.Services;
@@ -206,7 +207,15 @@ public class ContactController : Controller
             Name = branch.Name,
             Address = $"{branch.Address}, {branch.District}, {branch.City}",
             Hotline = branch.Hotline,
-            OpeningHours = $"{branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm}"
+            OpeningHours = FormatTimeRange(branch.OpeningTime, branch.ClosingTime),
+            LunchBreakHours = branch.LunchBreakStart.HasValue && branch.LunchBreakEnd.HasValue
+                ? FormatTimeRange(branch.LunchBreakStart.Value, branch.LunchBreakEnd.Value)
+                : null
         };
+    }
+
+    private static string FormatTimeRange(TimeOnly start, TimeOnly end)
+    {
+        return $"{start.ToString("HH:mm", CultureInfo.InvariantCulture)} - {end.ToString("HH:mm", CultureInfo.InvariantCulture)}";
     }
 }

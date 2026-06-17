@@ -7,32 +7,34 @@
     var menuBrandCards = new[]
     {
         (
-            Title: "Truyền Thuyết Champong",
-            Description: "Mì hải sản cay nồng, nước dùng đậm vị Hàn Quốc và tinh thần signature của hệ thống.",
+            Title: "Truyền Thuyết Champong - 전설의짬뽕",
+            Description: "Khám phá hương vị Hàn Quốc nguyên bản qua mì tương đen chuẩn vị trứ danh và những món ăn làm nên tên tuổi thương hiệu.",
             Href: "/thuc-don/nhom/truyen-thuyet-champong",
             ImageUrl: "/images/home/images/truyen-thuyet-champong.webp",
             Alt: "Món Truyền Thuyết Champong",
             Delay: 0
         ),
         (
-            Title: "GOGI MARU",
-            Description: "Thịt nướng chuẩn vị, nổi bật với tinh thần dry-aged và trải nghiệm BBQ cao cấp.",
+            Title: "GOGI MARU - 고기마루",
+            Description: "Thưởng thức thịt nướng cao cấp theo phong cách Hàn Quốc, nổi bật với kỹ thuật dry-aged và hương vị được chăm chút trong từng lát cắt.",
             Href: "/thuc-don/nhom/gogimaru",
             ImageUrl: "/images/home/images/gogimaru-img.webp",
             Alt: "Bàn tiệc GOGI MARU",
             Delay: 120
         ),
         (
-            Title: "KBB COOK",
-            Description: "Bàn nướng hiện đại, món ăn chia sẻ và không khí tụ họp trẻ trung.",
+            Title: "KBB COOK - BUFFET NƯỚNG HÀN QUỐC 한국식 바비큐 뷔페",
+            Description: "Buffet nướng Hàn Quốc đa dạng với thực đơn phong phú, không gian trẻ trung và những khoảnh khắc sum vầy trọn vẹn bên bàn tiệc.",
             Href: "/thuc-don/nhom/kbb-cook",
             ImageUrl: "/images/home/images/kbb-cook-img.webp",
-            Alt: "Không gian và món nướng KBB COOK",
+            Alt: "Không gian và buffet nướng Hàn Quốc",
             Delay: 240
         )
     };
     var homeNewsPosts = Model.LatestPosts.Take(3).ToList();
 }
+
+<partial name="~/Views/Shared/Partials/_OrganizationStructuredData.cshtml" />
 
 <section class="champong-hero relative overflow-hidden bg-brand-black" data-home-section="hero">
     <div data-champong-hero-slider class="champong-hero__slider relative overflow-hidden" aria-roledescription="carousel" aria-label="Champong hero slider">
@@ -474,7 +476,7 @@
                     Mang <span class="text-brand-red">Champong</span><br />về nhà
                 </h2>
                 <p class="mt-6 max-w-xl text-base leading-8 text-white">
-                    Một khoảng dừng nhẹ, sạch và đủ ấm để gợi mở cảm giác thưởng thức Champong ở nhà, trong những bữa sum vầy nhỏ hoặc các dịp muốn giữ nhịp ăn ngon thật gọn gàng.
+                    Thưởng thức hương vị Champong chuẩn Hàn ngay tại nhà. Từ những tô mì nóng hổi đến các món ăn đặc trưng của thương hiệu, tất cả đều được chuẩn bị chỉn chu để bạn dễ dàng chia sẻ cùng gia đình và bạn bè trong mọi dịp.
                 </p>
             </div>
 

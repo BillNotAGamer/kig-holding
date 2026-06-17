@@ -53,6 +53,13 @@
                                 <p class="contact-page__meta-label">Giờ mở cửa</p>
                                 <p class="contact-page__meta-value">@Model.OpeningHours</p>
                             </div>
+                            @if (!string.IsNullOrWhiteSpace(Model.LunchBreakHours))
+                            {
+                                <div class="contact-page__meta-item">
+                                    <p class="contact-page__meta-label">Giờ nghỉ trưa</p>
+                                    <p class="contact-page__meta-value">@Model.LunchBreakHours</p>
+                                </div>
+                            }
                         </div>
 
                         <div class="contact-page__divider"></div>
@@ -88,7 +95,13 @@
                                             <h3 class="contact-page__branch-title">@branch.Name</h3>
                                             <p class="contact-page__branch-copy">@branch.Address</p>
                                             <div class="contact-page__branch-foot">
-                                                <span>@branch.OpeningHours</span>
+                                                <div class="flex min-w-0 flex-col">
+                                                    <span>@branch.OpeningHours</span>
+                                                    @if (!string.IsNullOrWhiteSpace(branch.LunchBreakHours))
+                                                    {
+                                                        <span>Nghỉ trưa: @branch.LunchBreakHours</span>
+                                                    }
+                                                </div>
                                                 <a href="tel:@branch.Hotline.Replace(" ", string.Empty)" class="contact-page__branch-phone">@branch.Hotline</a>
                                             </div>
                                         </article>
