@@ -1,20 +1,107 @@
-# Coding Rules
+# Project Coding Rules & Standards
 
-## Strict Coding Standards
+This document establishes the non-negotiable coding rules, visual tokens, and security boundaries that must be followed when contributing to the **Truyền Thuyết Champong** project.
 
-All future development must adhere to the following hard constraints:
+---
 
-### Frontend Standards
-* **Light Theme**: The interface must strictly adhere to the Light Theme foundation (`bg-brand-light`, `text-brand-dark`). Do not introduce dark mode classes.
-* **Typography**: The `Quicksand` font must be used universally. Do not overwrite font families.
-* **Brand Colors**: Adhere to the defined KIG color palette. Specifically, "KIG Red" must be accessed via Tailwind tokens (e.g., `text-brand-red` which maps to `#E50914`).
+## 1. Visual Design Tokens & UI Architecture
 
-### Backend Standards
-* **Validation**: You MUST use `System.ComponentModel.DataAnnotations` (e.g., `[Required]`, `[StringLength]`) for ALL ViewModels. Manual form validation logic in controllers should be avoided.
+All public and administrative views must strictly adhere to the unified Light Theme system. Do not introduce custom dark surfaces, custom primary buttons, or unmapped colors.
 
-### Security Standards
-* **CSRF Protection**: Every `[HttpPost]` action within Admin Controllers MUST be decorated with the `[ValidateAntiForgeryToken]` attribute.
-* **Passwords**: Any user authentication must utilize ASP.NET Core's `PasswordHasher`. Never store plaintext or use weak hashes.
+### Base Color System
+Theme tokens are managed inside [tailwind.config.js](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/tailwind.config.js) and mapped to global styles in [input.css](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/wwwroot/css/input.css):
 
-### JavaScript Standards
-* **Execution**: All DOM-manipulating vanilla JavaScript logic MUST be wrapped inside a `DOMContentLoaded` event listener to ensure safe execution.
+*   **HTML root setting**: `:root { color-scheme: light; }`
+*   **Base Background**: `@apply bg-brand-light` (Warm off-white `#FAF8F3` with secondary background gradients).
+*   **Typography**: Default font family is `sans: ['Quicksand', ...]` for a highly legible, premium editorial look.
+*   **Main Text**: `text-brand-dark` (`#111827`) for body content; `text-brand-gray` (`#6B7280`) for helper texts.
+*   **Selection Highlight**: `::selection { @apply bg-brand-red text-white; }`
+*   **Primary Brand Red**: `#E50914` (`brand.red`) for focus highlights, selections, active indicators.
+*   **Danger Accent**: `#B91C1C` (`brand.redDark`) for error notifications, invalid inputs, and action alerts.
+
+### Hover and Focus States
+Interactive buttons or fields must implement smooth transitions (`transition duration-200`) and clear visual feedback:
+*   **Focus Ring**: Use `focus-visible:ring-2 focus-visible:ring-brand-red focus-visible:ring-offset-2`.
+*   **Hover Styles**: Buttons must shift styles cleanly (e.g. `.btn-primary` transitions to `.hover:bg-brand-charcoal`; `.btn-secondary` transitions to `.hover:border-brand-red hover:text-brand-red`).
+
+---
+
+## 2. Mandatory DataAnnotations & Model Validation
+
+All incoming form payloads must be validated on both the client and server sides.
+
+### C# ViewModels
+All ViewModels inside `ViewModels/` and `Areas/Admin/ViewModels/` directories must contain standard `System.ComponentModel.DataAnnotations` boundaries. Never pass bare entity classes straight from forms to database context:
+
+```csharp
+public class ReservationEditViewModel
+{
+    [Required(ErrorMessage = "Vui lòng nhập họ tên của bạn.")]
+    [StringLength(100, ErrorMessage = "Họ tên không được vượt quá {1} ký tự.")]
+    public string FullName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Vui lòng cung cấp số điện thoại liên hệ.")]
+    [Phone(ErrorMessage = "Số điện thoại không đúng định dạng.")]
+    [RegularExpression(@"^(0[3|5|7|8|9])+([0-9]{8})$", ErrorMessage = "Số điện thoại Việt Nam không hợp lệ.")]
+    public string Phone { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Vui lòng nhập số lượng khách.")]
+    [Range(1, 100, ErrorMessage = "Số lượng khách phải từ {1} đến {2} người.")]
+    public int GuestCount { get; set; }
+}
+```
+
+### Server Validation Blocks
+Controllers must check model validity immediately prior to executing business logic. Return the view with validation feedback if the state is flawed:
+
+```csharp
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Edit(int id, ReservationEditViewModel model)
+{
+    if (!ModelState.IsValid)
+    {
+        // Re-populate layout caches or select lists if necessary
+        return View(model);
+    }
+    
+    await _reservationService.UpdateAsync(id, model);
+    TempData["SuccessMessage"] = "Cập nhật đặt bàn thành công.";
+    return RedirectToAction(nameof(Index));
+}
+```
+
+---
+
+## 3. Dynamic File Upload Architecture
+
+Images uploaded through the administration back-office must be routed via [IImageStorageService](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/IImageStorageService.cs) to ensure filename sanitization, size checks, and location rules are consistently applied.
+
+### Filename Formatting Standard
+To avoid filename collisions and sanitize incoming vectors, all filenames are rewritten via `CreateSafeFileName`:
+1.  **Normalize Slug**: Remove special characters, spaces, and accents. Replace spaces or consecutive hyphens with a single hyphen (e.g. `Món Ăn Ngon! 2026.png` becomes `mon-an-ngon-2026`).
+2.  **Append Entropy**: Append a shortened GUID string format (`-Guid.NewGuid():N`).
+3.  **Final Pattern**: Resulting path matches: `{sanitized-slug}-{guid-hex}.{extension}`.
+
+### Storage Locations
+*   **Menu Group Covers**: Restricted locally to WebRoot (`/uploads/menu-groups/covers/`) to ensure fast cached loading of menu categories.
+*   **Branches, Posts, Menu Flipbook Pages**: Transferred to the **Cloudinary** media library configuration (or localized fallback structures if keys are absent) matching the folder prefix `kig-holding/`.
+*   **Format Constraints**: Implement WebP format standardizations for user-facing layouts (`champong-hero.webp` and `post-card.webp`) to optimize visual loading.
+
+---
+
+## 4. Server-Side Safety Boundaries
+
+Security checks are enforced to safeguard the site against manipulation, request forgery, and data leaks.
+
+### Request Forgery Protection
+*   **Rule**: Every action method handling `POST`, `PUT`, or `DELETE` requests **must** be marked with the `[ValidateAntiForgeryToken]` attribute.
+*   **Razor Forms**: Always wrap actions inside `<form asp-action="..." method="post">` (which automatically injects hidden anti-forgery tokens) or explicitly write `@Html.AntiForgeryToken()` inside custom JavaScript fetch setups.
+
+### Session Security & Authorizations
+*   **Admin Base Controller**: All backend controllers (except Auth controllers) must inherit from `AdminBaseController` to automatically bind:
+    *   `[Area("Admin")]` routing rules.
+    *   `[Authorize]` filters requiring authenticated credentials.
+*   **Session Validity Verification**: Standard logins utilize sliding expiration cookie setups. Session integrity is reinforced by `AdminCookieAuthenticationEvents`, checking security stamps on page transitions to disconnect revoked admin accounts instantly.
+*   **Robots Limit**: Header responses inside admin portals must emit `<meta name="robots" content="noindex, nofollow" />` to block automated indexes from crawling internal routes.
+*   **Anti-XSS Validation**: All outputs inside Razor files are HTML-encoded by default. Avoid `@Html.Raw` statements unless rendering trust-verified rich-text post bodies originating from sanitized admin editor fields.

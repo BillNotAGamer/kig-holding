@@ -27,8 +27,6 @@ module.exports = {
           goldSoft: '#E7D9BD',
           red: '#E50914',
           redDark: '#B91C1C',
-          orange: '#C9A66B',
-          amber: '#D8B982',
         },
       },
       fontSize: {
@@ -48,8 +46,6 @@ module.exports = {
         button: '999px',
       },
       boxShadow: {
-        ember: '0 16px 44px rgba(184, 154, 98, 0.2)',
-        glow: '0 0 0 1px rgba(184, 154, 98, 0.22), 0 18px 52px rgba(17, 24, 39, 0.12)',
         panel: '0 24px 70px rgba(15, 23, 42, 0.08)',
         soft: '0 12px 36px rgba(15, 23, 42, 0.06)',
       },
@@ -66,14 +62,7 @@ module.exports = {
           '0%': { transform: 'scale(1)' },
           '100%': { transform: 'scale(1.06)' },
         },
-        buttonGlow: {
-          '0%, 100%': { boxShadow: '0 0 0 rgba(229, 9, 20, 0)' },
-          '50%': { boxShadow: '0 0 28px rgba(249, 115, 22, 0.42)' },
-        },
-        drawerIn: {
-          '0%': { transform: 'translateX(100%)' },
-          '100%': { transform: 'translateX(0)' },
-        },
+
         headerDrop: {
           '0%': { transform: 'translateY(-100%)' },
           '100%': { transform: 'translateY(0)' },
@@ -83,8 +72,6 @@ module.exports = {
         'fade-up': 'fadeUp 640ms ease-out both',
         'fade-in': 'fadeIn 420ms ease-out both',
         'image-zoom': 'imageZoom 7s ease-out both',
-        'button-glow': 'buttonGlow 2.4s ease-in-out infinite',
-        'drawer-in': 'drawerIn 280ms ease-out both',
         'header-drop': 'headerDrop 260ms ease-out both',
       },
     },

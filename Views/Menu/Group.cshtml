@@ -2,6 +2,10 @@
 
 @{
     var menuImages = Model.Images ?? Array.Empty<MenuPageImageViewModel>();
+    var orderedMenuImages = menuImages
+        .OrderBy(img => img.PageNumber)
+        .ThenBy(img => img.DisplayOrder)
+        .ToArray();
 
     ViewData["Title"] = $"{Model.Name} - Thực đơn";
     ViewData["MetaDescription"] = Model.ShortDescription;
@@ -11,38 +15,37 @@
         : $"{Model.TotalPages} trang menu";
     var initialTotalPages = Model.TotalPages > 0
         ? Model.TotalPages
-        : menuImages.Count;
+        : orderedMenuImages.Length;
     var flipbookPagesJson = Model.HasImages
         ? System.Text.Json.JsonSerializer.Serialize(
-            menuImages
-                .OrderBy(img => img.PageNumber)
-                .Select(img => new
-                {
-                    imageUrl = img.ImageUrl,
-                    altText = img.AltText,
-                    pageNumber = img.PageNumber
-                }))
+            orderedMenuImages.Select((img, index) => new
+            {
+                imageUrl = img.ImageUrl,
+                altText = img.AltText,
+                pageNumber = img.PageNumber,
+                pageIndex = index
+            }))
         : "[]";
 }
 
 <section class="menu-group-viewer menu-group-viewer--dark relative overflow-hidden py-12 text-white sm:py-16 lg:py-20"
          data-menu-group-viewer>
     <div class="container-page relative z-10">
-        <!-- Back Link & CTA Reservation -->
         <div class="flex items-center justify-between border-b border-white/10 pb-4" data-uw-reveal="fade-up">
             <a href="@Model.BackUrl"
                class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/70 transition duration-300 hover:border-brand-red/50 hover:text-white">
                 ← Quay lại thực đơn
             </a>
-            
+
             <a href="/dat-ban"
                class="inline-flex items-center justify-center rounded-full bg-brand-red px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-[0_12px_28px_rgba(229,9,20,0.2)] transition duration-300 hover:bg-brand-redDark">
                 Đặt bàn ngay
             </a>
         </div>
 
-        <!-- Premium Compact Intro Bar -->
-        <header class="mt-6 flex flex-col justify-between gap-4 md:flex-row md:items-end border-b border-white/5 pb-6" data-uw-reveal="fade-up" data-uw-delay="80">
+        <header class="mt-6 flex flex-col justify-between gap-4 border-b border-white/5 pb-6 md:flex-row md:items-end"
+                data-uw-reveal="fade-up"
+                data-uw-delay="80">
             <div>
                 <span class="inline-flex rounded-full border border-brand-red/30 bg-brand-red/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-red-300">
                     Thực đơn
@@ -65,45 +68,91 @@
             }
         </header>
 
-        <!-- Main Book Section -->
         <section id="menu-viewer" class="menu-pageflip-section mt-8" data-uw-reveal="fade-up" data-uw-delay="120">
             <div class="menu-pageflip-shell relative overflow-hidden rounded-[2rem] border border-white/5 bg-gradient-to-b from-black/45 to-black/20 py-3 sm:py-4 shadow-2xl">
-                <!-- Ambient Backdrop Glow -->
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(229,9,20,0.03),transparent_70%)] pointer-events-none"></div>
+                <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(229,9,20,0.03),transparent_70%)]"></div>
 
                 @if (Model.HasImages)
                 {
                     <div class="menu-pageflip-toolbar">
                         <div class="menu-pageflip-meta">
                             <span class="menu-pageflip-count">@pageCountLabel</span>
-                            <p class="menu-pageflip-hint">Vuốt, kéo hoặc dùng nút điều hướng để lật trang.</p>
+                            <p id="menu_viewer_hint" class="menu-pageflip-hint">
+                                Vuốt ngang hoặc dùng nút điều hướng để xem từng trang.
+                            </p>
                         </div>
 
-                        <div class="menu-pageflip-controls" role="group" aria-label="Điều hướng trang thực đơn">
-                            <button id="menu_flipbook_prev"
+                        <div class="menu-pageflip-actions">
+                            <button id="menu_viewer_zoom_toggle"
                                     type="button"
-                                    class="menu-pageflip-button"
-                                    aria-label="Trang trước">
-                                ‹
+                                    class="menu-pageflip-button menu-pageflip-button--text"
+                                    aria-label="Phóng to trang thực đơn hiện tại"
+                                    hidden>
+                                Phóng to
                             </button>
-                            <div class="menu-pageflip-indicator" aria-live="polite">
-                                <span id="menu_flipbook_current">1</span>
-                                <span>/</span>
-                                <span id="menu_flipbook_total">@initialTotalPages</span>
+
+                            <div class="menu-pageflip-controls" role="group" aria-label="Điều hướng trang thực đơn">
+                                <button id="menu_flipbook_prev"
+                                        type="button"
+                                        class="menu-pageflip-button"
+                                        aria-label="Trang thực đơn trước">
+                                    ‹
+                                </button>
+                                <div class="menu-pageflip-indicator" aria-live="polite">
+                                    <span id="menu_flipbook_current">1</span>
+                                    <span>/</span>
+                                    <span id="menu_flipbook_total">@initialTotalPages</span>
+                                </div>
+                                <button id="menu_flipbook_next"
+                                        type="button"
+                                        class="menu-pageflip-button"
+                                        aria-label="Trang thực đơn sau">
+                                    ›
+                                </button>
                             </div>
-                            <button id="menu_flipbook_next"
-                                    type="button"
-                                    class="menu-pageflip-button"
-                                    aria-label="Trang sau">
-                                ›
-                            </button>
                         </div>
                     </div>
 
-                    <div class="menu-pageflip-frame">
-                        <div id="menu_group_flipbook"
-                             class="menu-pageflip-book"
-                             aria-label="Trình xem thực đơn dạng lật trang">
+                    <div class="menu-pageflip-frame menu-viewer" data-menu-viewer-frame>
+                        <div id="menu_mobile_viewer"
+                             class="menu-viewer__surface menu-viewer__surface--mobile"
+                             hidden
+                             aria-label="Trình xem thực đơn trên điện thoại và máy tính bảng">
+                        </div>
+
+                        <div id="menu_desktop_viewer"
+                             class="menu-viewer__surface menu-viewer__surface--desktop"
+                             hidden
+                             aria-label="Trình xem thực đơn dạng lật trang trên máy tính">
+                        </div>
+                    </div>
+
+                    <div id="menu_viewer_zoom_overlay"
+                         class="menu-viewer-overlay"
+                         hidden
+                         aria-hidden="true">
+                        <div class="menu-viewer-overlay__backdrop" data-menu-viewer-overlay-close></div>
+                        <div class="menu-viewer-overlay__panel" role="dialog" aria-modal="true" aria-labelledby="menu_viewer_overlay_title">
+                            <div class="menu-viewer-overlay__toolbar">
+                                <p id="menu_viewer_overlay_title" class="menu-viewer-overlay__title">
+                                    Phóng to trang thực đơn
+                                </p>
+                                <button id="menu_viewer_overlay_close"
+                                        type="button"
+                                        class="menu-viewer-overlay__close"
+                                        aria-label="Đóng ảnh thực đơn phóng to">
+                                    ×
+                                </button>
+                            </div>
+
+                            <div class="menu-viewer-overlay__viewport">
+                                <img id="menu_viewer_overlay_image"
+                                     class="menu-viewer-overlay__image"
+                                     alt=""
+                                     width="1270"
+                                     height="2048"
+                                     decoding="async" />
+                            </div>
                         </div>
                     </div>
 
@@ -138,7 +187,6 @@
             </div>
         </section>
 
-        <!-- CTA Reservation Bottom -->
         <section class="mt-12 lg:mt-16" data-uw-reveal="fade-up" data-uw-delay="160">
             <div class="rounded-[2rem] border border-white/10 bg-white/[0.05] p-7 shadow-[0_28px_80px_rgba(0,0,0,0.28)] backdrop-blur sm:p-8 lg:p-10">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -170,15 +218,20 @@
         {
             <noscript>
                 <section class="menu-flipbook-noscript py-8 text-center">
-                    <h2 class="text-xl font-bold mb-4 text-white">Trang thực đơn</h2>
+                    <h2 class="mb-4 text-xl font-bold text-white">Trang thực đơn</h2>
                     <ul class="menu-pageflip-fallback">
-                        @foreach (var img in menuImages)
+                        @for (var i = 0; i < orderedMenuImages.Length; i++)
                         {
+                            var img = orderedMenuImages[i];
+
                             <li class="menu-pageflip-fallback__item">
                                 <img src="@img.ImageUrl"
                                      alt="@img.AltText"
                                      class="menu-pageflip-fallback__image"
-                                     loading="lazy" />
+                                     width="1270"
+                                     height="2048"
+                                     decoding="async"
+                                     loading="@(i == 0 ? "eager" : "lazy")" />
                                 <p class="menu-pageflip-fallback__caption">Trang @img.PageNumber.ToString("00"): @img.AltText</p>
                             </li>
                         }

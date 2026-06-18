@@ -1245,10 +1245,6 @@
     animation: fadeIn 420ms ease-out both;
   }
 
-  .button-glow {
-    animation: buttonGlow 2.4s ease-in-out infinite;
-  }
-
   .site-header {
     @apply fixed inset-x-0 top-0 z-50 border-b border-white/10 text-white backdrop-blur transition duration-300;
     background-color: rgba(11, 11, 11, 0.82);
@@ -4074,7 +4070,7 @@
     color: #ffffff;
   }
 
-  /* --- StPageFlip Premium Dark Theme Integration --- */
+  /* --- Public menu viewer --- */
   .menu-pageflip-section {
     position: relative;
     z-index: 10;
@@ -4083,7 +4079,7 @@
   .menu-pageflip-shell {
     width: 100%;
     margin-inline: auto;
-    padding-inline: 0.35rem;
+    padding-inline: 0.2rem;
   }
 
   .menu-pageflip-toolbar {
@@ -4091,9 +4087,9 @@
     z-index: 10;
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
-    padding-inline: 0.85rem;
-    padding-bottom: 0.8rem;
+    gap: 0.85rem;
+    padding-inline: 0.75rem;
+    padding-bottom: 0.85rem;
   }
 
   .menu-pageflip-meta {
@@ -4109,7 +4105,7 @@
     justify-content: center;
     border-radius: 9999px;
     border: 1px solid rgba(229, 9, 20, 0.28);
-    background: rgba(229, 9, 20, 0.10);
+    background: rgba(229, 9, 20, 0.1);
     padding: 0.55rem 0.9rem;
     color: rgba(252, 165, 165, 0.94);
     font-size: 0.72rem;
@@ -4119,9 +4115,17 @@
   }
 
   .menu-pageflip-hint {
-    font-size: 0.76rem;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.58);
+    max-width: 44rem;
+    font-size: 0.78rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .menu-pageflip-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
   }
 
   .menu-pageflip-controls {
@@ -4154,6 +4158,16 @@
     transition: border-color 240ms ease, background 240ms ease, color 240ms ease, transform 240ms ease;
   }
 
+  .menu-pageflip-button--text {
+    width: auto;
+    min-width: 0;
+    padding-inline: 1rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
   .menu-pageflip-button:hover,
   .menu-pageflip-button:focus-visible {
     border-color: rgba(229, 9, 20, 0.5);
@@ -4183,34 +4197,264 @@
   .menu-pageflip-frame {
     position: relative;
     z-index: 10;
-    width: min(100%, 58rem);
+    width: min(100%, 72rem);
     margin-inline: auto;
-    padding-inline: 0.2rem;
+    padding-inline: 0.5rem;
+  }
+
+  .menu-viewer {
+    position: relative;
+  }
+
+  .menu-viewer__surface {
+    width: 100%;
+  }
+
+  .menu-viewer__surface[hidden] {
+    display: none !important;
+  }
+
+  .menu-viewer__surface--desktop,
+  .menu-viewer__surface--pageflip {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .menu-viewer-fallback {
+    width: 100%;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .menu-viewer-fallback__page {
+    overflow: hidden;
+    border-radius: 1.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+    box-shadow: 0 22px 58px rgba(0, 0, 0, 0.3);
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .menu-viewer__page-media {
+    position: relative;
+    width: 100%;
+    background: rgba(8, 8, 8, 0.78);
+  }
+
+  .menu-viewer__image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    background: rgba(8, 8, 8, 0.78);
+    color: transparent;
+    transition: opacity 180ms ease;
+  }
+
+  .menu-viewer-fallback__image {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .menu-pageflip-controls,
+  .menu-pageflip-button {
+    pointer-events: auto;
+  }
+
+  .menu-viewer__page-media.is-loading .menu-viewer__image {
+    opacity: 0.06;
+  }
+
+  .menu-viewer__page-media.is-ready .menu-viewer__image {
+    opacity: 1;
+  }
+
+  .menu-viewer__page-media.is-error .menu-viewer__image {
+    display: none;
+  }
+
+  .menu-viewer__image-placeholder {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 1.5rem 1.15rem;
+    min-height: 12rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  }
+
+  .menu-viewer__page-media.is-error .menu-viewer__image-placeholder {
+    display: flex;
+  }
+
+  .menu-viewer__image-placeholder-title {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+
+  .menu-viewer__image-placeholder-copy {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.6);
   }
 
   .menu-pageflip-book {
     width: 100%;
-    min-height: clamp(19rem, 58svh, 43rem);
+    max-width: min(100%, 70rem);
+    margin-inline: auto;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     overflow: visible;
     background: transparent;
+    touch-action: pan-y pinch-zoom;
   }
 
-  .menu-pageflip-book .stf__parent {
+  .menu-pageflip-book.stf__parent {
     margin-inline: auto;
     filter: drop-shadow(0 30px 72px rgba(0, 0, 0, 0.42));
   }
 
-  .menu-pageflip-book canvas {
-    background: transparent !important;
+  .menu-pageflip-book .stf__wrapper,
+  .menu-pageflip-book .stf__block {
+    overflow: visible;
+    background: transparent;
   }
 
-  .menu-pageflip-book--fallback,
-  .menu-pageflip-book--empty {
+  .menu-pageflip-book .stf__item {
+    background: transparent;
+  }
+
+  .menu-flipbook-page,
+  .menu-flipbook-page__surface {
+    width: 100%;
+    height: 100%;
+  }
+
+  .menu-flipbook-page__surface {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .menu-flipbook-page .menu-viewer__page-media {
+    height: 100%;
+  }
+
+  .menu-flipbook-page__image {
     display: block;
-    min-height: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  body.menu-viewer-overlay-open {
+    overflow: hidden;
+  }
+
+  .menu-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+  }
+
+  .menu-viewer-overlay[hidden] {
+    display: none !important;
+  }
+
+  .menu-viewer-overlay__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.86);
+  }
+
+  .menu-viewer-overlay__panel {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 68rem);
+    max-height: calc(100svh - 1.5rem);
+    overflow: hidden;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(10, 10, 10, 0.96);
+    box-shadow: 0 32px 90px rgba(0, 0, 0, 0.42);
+  }
+
+  .menu-viewer-overlay__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .menu-viewer-overlay__title {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .menu-viewer-overlay__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    font-size: 1.4rem;
+    line-height: 1;
+    transition: border-color 200ms ease, background 200ms ease;
+  }
+
+  .menu-viewer-overlay__close:hover,
+  .menu-viewer-overlay__close:focus-visible {
+    border-color: rgba(229, 9, 20, 0.5);
+    background: rgba(229, 9, 20, 0.12);
+  }
+
+  .menu-viewer-overlay__viewport {
+    overflow: auto;
+    padding: 0.75rem;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .menu-viewer-overlay__image {
+    display: block;
+    width: min(100%, 72rem);
+    height: auto;
+    max-width: 100%;
+    margin-inline: auto;
+    object-fit: contain;
+    background: rgba(8, 8, 8, 0.95);
   }
 
   .menu-pageflip-fallback {
@@ -4226,15 +4470,16 @@
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1.5rem;
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
     box-shadow: 0 20px 54px rgba(0, 0, 0, 0.32);
     padding: 0.85rem;
   }
 
   .menu-pageflip-fallback__image {
+    display: block;
     width: 100%;
     height: auto;
+    max-width: 100%;
     border-radius: 1rem;
     background: rgba(8, 8, 8, 0.76);
     object-fit: contain;
@@ -4252,8 +4497,7 @@
     margin-inline: auto;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1.75rem;
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
     padding: 2rem 1.25rem;
     text-align: center;
@@ -4295,7 +4539,13 @@
       align-items: center;
       justify-content: space-between;
       gap: 0.85rem;
-      padding-inline: 1.15rem;
+      padding-inline: 1rem;
+    }
+
+    .menu-pageflip-actions {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
     }
 
     .menu-pageflip-controls {
@@ -4305,17 +4555,17 @@
 
   @media (min-width: 1024px) {
     .menu-pageflip-frame {
-      width: min(100%, 62rem, calc((100svh - 15rem) * 1.42));
-    }
-
-    .menu-pageflip-book {
-      min-height: clamp(24rem, 70svh, 48rem);
+      padding-inline: 0.75rem;
     }
   }
 
   @media (max-width: 639px) {
-    .menu-pageflip-book {
-      min-height: clamp(20rem, 64svh, 33rem);
+    .menu-pageflip-section {
+      margin-inline: -0.5rem;
+    }
+
+    .menu-pageflip-shell {
+      padding-inline: 0.1rem;
     }
 
     .menu-pageflip-button {
@@ -4323,14 +4573,33 @@
       height: 2.3rem;
     }
 
+    .menu-pageflip-button--text {
+      width: auto;
+      min-height: 2.3rem;
+      padding-inline: 0.8rem;
+    }
+
     .menu-pageflip-indicator {
       min-width: 4.45rem;
+    }
+
+    .menu-viewer-overlay {
+      padding: 0.5rem;
+    }
+
+    .menu-viewer-overlay__toolbar {
+      padding-inline: 0.8rem;
+    }
+
+    .menu-viewer-overlay__viewport {
+      padding: 0.5rem;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .menu-pageflip-section *,
-    .menu-pageflip-book {
+    .menu-pageflip-book,
+    .menu-viewer-overlay {
       animation: none !important;
       transition: none !important;
     }

@@ -124,16 +124,6 @@ internal static class LayoutFallbacks
         ];
     }
 
-    public static IReadOnlyList<BookingBranchOptionViewModel> CreateFallbackBranchOptions()
-    {
-        return
-        [
-            new BookingBranchOptionViewModel { Id = Guid.Empty, Name = "Champong Quáº­n 1" },
-            new BookingBranchOptionViewModel { Id = Guid.Empty, Name = "Champong GÃ² Váº¥p" },
-            new BookingBranchOptionViewModel { Id = Guid.Empty, Name = "Champong Cáº§u Giáº¥y" }
-        ];
-    }
-
     public static HeaderViewModel CreateHeader(SiteSetting? setting, string? requestPath)
     {
         return new HeaderViewModel

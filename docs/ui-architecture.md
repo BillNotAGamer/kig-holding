@@ -1,27 +1,127 @@
-# UI Architecture
+# UI Architecture & Layout Patterns
 
-## Structural Logic
+This document details the frontend visual design systems, custom layout grids, and interactive animation scripts of the **Truyền Thuyết Champong** website.
 
-The user interface relies on strict, repeatable CSS patterns to maintain visual hierarchy.
+---
 
-### "Checkerboard" Brand Story Pattern
-The Brand Story section (`Views/Home/Index.cshtml`) implements an alternating "Checkerboard" layout:
-* Utilizing CSS Grid (`lg:grid-cols-2`).
-* **Row 1**: Displays the Image on the left (`order-1 lg:order-1`) and Text on the right (`order-2 lg:order-2`).
-* **Row 2**: Alternates the layout via Tailwind order utilities, putting Text on the left (`order-2 lg:order-1`) and the Image on the right (`order-1 lg:order-2`).
+## 1. Alternating Checkerboard Grid Pattern
 
-### "Menu Ecosystem Showcase" Pattern
-The old menu grid was refactored into three massive horizontal cards:
-* Each card acts as a standalone block for distinct categories (Champong, BBQ, Combo).
-* The layout relies on `flex-col lg:flex-row`, stacking vertically on mobile and horizontally on desktop with 50/50 image and text split panes.
+To keep readers engaged, the website uses an alternating layout pattern (image-left/text-right alternating with text-left/image-right) for storytelling and menu showcases.
 
-## Animations and Interactions
+### Layout Implementation
+We implement this cleanly using Tailwind's CSS Grid and flex ordering. This ensures the logical DOM structure remains sequential for screen readers, while large screens display the alternating grid:
 
-### Scroll Reveal Animations
-* **Trigger Classes**: HTML nodes are marked with classes such as `.reveal-up`, `.reveal-left`, and `.reveal-right`.
-* **Execution**: An `IntersectionObserver` in `site.js` monitors these elements. Upon intersecting the viewport, it appends an `.is-visible` class which fires CSS transition rules (transform and opacity) stored in `input.css`.
+```html
+<!-- Row 1: Image Left, Text Right (Default DOM Flow) -->
+<article class="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-center">
+    <div class="media-container">
+        <img src="image1.jpg" alt="Description" />
+    </div>
+    <div class="text-container">
+        <h2>Concept Title One</h2>
+        <p>Description text here...</p>
+    </div>
+</article>
 
-### Image Hover Zoom
-To achieve dynamic visual engagement without JavaScript overhead:
-* Images are wrapped in a container possessing specific group utility classes (`group`, `overflow-hidden`).
-* A custom CSS rule (`.food-image-wrap:hover .food-image, .group:hover .food-image`) gracefully applies a `transform: scale(1.08)` to the child image, creating an editorial-style zoom effect.
+<!-- Row 2: Text Left, Image Right (Reordered visually using lg:order) -->
+<article class="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-center">
+    <!-- Displays on the left in large viewports, but remains second in mobile flows -->
+    <div class="text-container lg:order-1">
+        <h2>Concept Title Two</h2>
+        <p>Description text here...</p>
+    </div>
+    <!-- Displays on the right in large viewports, but remains first in mobile flows -->
+    <div class="media-container lg:order-2">
+        <img src="image2.jpg" alt="Description" />
+    </div>
+</article>
+```
+
+### Visual Adaptations
+*   **Menu Hub (`/Menu`)**: Uses dynamic grid sizing `lg:grid-cols-[0.48fr_0.52fr]` with alternating orders resolved via Razor loops:
+    ```cshtml
+    var isReversed = index % 2 == 1;
+    var mediaOrderClass = isReversed ? "lg:order-2" : string.Empty;
+    var contentOrderClass = isReversed ? "lg:order-1" : string.Empty;
+    ```
+*   **Brand Story**: Alternates sections to separate historical text columns from culinary display illustrations.
+
+---
+
+## 2. 3-Concept Culinary Essence Showcase
+
+The core home page layout centers on the three main dining concepts under KIG Holding, styled with distinct sub-grids and interactive behaviors:
+
+1.  **Truyền Thuyết Champong**:
+    *   Features a large display image paired with a **4-column feature sub-grid** (`sm:grid-cols-2`) mapping signature credentials (group sizes, raw materials, fresh handmade noodles, authentic Korean spices).
+2.  **Gogi Maru (Dry Aged BBQ)**:
+    *   Visual text details Gogi Maru's 15-day meat fermentation processes alongside a **3-column feature grid** (`sm:grid-cols-3`) detailing banchan tables and outdoor sky bar options.
+3.  **KBB Cook (Buffet & Hotpot)**:
+    *   Integrates an interactive, lightweight custom slider driven by [kbb-cook-slider.js](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/wwwroot/js/kbb-cook-slider.js), showcasing promotional dining price packages (e.g. 178K, 278K, 378K packages).
+
+---
+
+## 3. Scroll-Reveal System (IntersectionObserver)
+
+Animations are driven by a high-performance native JavaScript engine [uw-reveal.js](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/wwwroot/js/uw-reveal.js) rather than heavy external libraries. This guarantees 60fps transitions and zero layout shifting (CLS).
+
+### Configuration Attributes
+HTML elements configure their animation type, delays, and repeat limits using HTML5 `data-*` attributes:
+
+```html
+<div data-uw-reveal="fade-up" 
+     data-uw-delay="150" 
+     data-uw-duration="800" 
+     data-uw-distance="40" 
+     data-uw-once="true">
+    <h3>Animate me on scroll!</h3>
+</div>
+```
+
+| Attribute | Options / Format | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `data-uw-reveal` | `fade-up`, `fade-down`, `fade-left`, `fade-right`, `zoom-up`, `fade-in` | `fade-up` | Direction or type of entrance transition |
+| `data-uw-delay` | Integer (milliseconds) | `0` | Delay before animation triggers |
+| `data-uw-duration`| Integer (milliseconds) | `850` | Transition duration |
+| `data-uw-distance`| Integer (pixels) | `56` | Starting offset translation |
+| `data-uw-once` | `true`, `false` | `false` | If true, stops observer tracking after first entrance |
+
+### JavaScript Engine Implementation
+The script initializes by applying starting translation offsets and setting `opacity = '0'` to hidden targets. It then tracks elements using a viewport observer:
+
+```javascript
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        const element = entry.target;
+        const state = getState(element);
+        const config = state.config;
+
+        if (entry.isIntersecting) {
+            if (state.phase === 'visible' || state.phase === 'entering') return;
+            animateIn(element, state, config, observer);
+            return;
+        }
+
+        if (config.once || state.phase === 'hidden' || state.phase === 'exiting') return;
+        animateOut(element, state, config);
+    });
+}, {
+    root: null,
+    threshold: [0, 0.15, 0.35],
+    rootMargin: '0px 0px -10% 0px' // Triggers early just before entering viewport
+});
+```
+
+### Accessibility & Fallbacks (Reduced Motion)
+The engine respects system accessibility choices. If the browser or operating system has reduced motion flags enabled, or does not support modern Web Animation APIs, the script automatically returns, bypassing observer logic and revealing all components instantly:
+
+```javascript
+const supportsReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const supportsObserver = 'IntersectionObserver' in window;
+const supportsAnimate = typeof Element.prototype.animate === 'function';
+
+if (shouldReduceMotion || !supportsObserver || !supportsAnimate) {
+    revealAllImmediately(); // Strips inline styles, restoring default CSS layout
+    return;
+}
+```

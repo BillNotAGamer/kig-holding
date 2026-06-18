@@ -93,6 +93,16 @@ public class ReservationService : IReservationService
                 Message = $"Giờ đến phải nằm trong khung {branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm} của chi nhánh này."
             });
         }
+        else if (IsWeekday(request.ReservationDate)
+            && TryGetValidLunchBreak(branch, out var lunchBreakStart, out var lunchBreakEnd)
+            && IsWithinLunchBreak(request.ReservationTime, lunchBreakStart, lunchBreakEnd))
+        {
+            errors.Add(new ReservationServiceError
+            {
+                FieldName = nameof(request.ReservationTime),
+                Message = "Chi nhánh tạm nghỉ trưa trong khung giờ này từ Thứ Hai đến Thứ Sáu. Vui lòng chọn thời gian khác."
+            });
+        }
 
         if (errors.Count > 0)
         {
@@ -138,6 +148,32 @@ public class ReservationService : IReservationService
         return openingTime <= closingTime
             ? reservationTime >= openingTime && reservationTime <= closingTime
             : reservationTime >= openingTime || reservationTime <= closingTime;
+    }
+
+    private static bool IsWeekday(DateOnly reservationDate)
+    {
+        return reservationDate.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday;
+    }
+
+    private static bool TryGetValidLunchBreak(Branch branch, out TimeOnly start, out TimeOnly end)
+    {
+        start = default;
+        end = default;
+
+        if (!branch.LunchBreakStart.HasValue || !branch.LunchBreakEnd.HasValue)
+        {
+            return false;
+        }
+
+        start = branch.LunchBreakStart.Value;
+        end = branch.LunchBreakEnd.Value;
+
+        return start < end;
+    }
+
+    private static bool IsWithinLunchBreak(TimeOnly reservationTime, TimeOnly start, TimeOnly end)
+    {
+        return reservationTime >= start && reservationTime < end;
     }
 
     private static string? NormalizeOptionalText(string? value)
