@@ -6,6 +6,10 @@
     var DEFAULT_PAGE_RATIO = DEFAULT_PAGE_WIDTH / DEFAULT_PAGE_HEIGHT;
     var PAGE_PRELOAD_RADIUS = 2;
     var FALLBACK_PRELOAD_RADIUS = 1;
+    var LANDSCAPE_SPREAD_SIZE = 2;
+    var LANDSCAPE_FORWARD_BUFFER_SPREADS = 1;
+    var INITIAL_INTERACTION_READY_TIMEOUT = 3500;
+    var NAVIGATION_READY_TIMEOUT = 300;
     var preloadedImageSources = Object.create(null);
 
     var VIEWER_HINTS = {
@@ -81,6 +85,142 @@
                 warmImageSource(pages[pointer].imageUrl);
             }
         }
+    }
+
+    function getPredictedPageFlipOrientation(host) {
+        return getHostContentWidth(host) < 900 ? "portrait" : "landscape";
+    }
+
+    function getLandscapeSpreadStart(index) {
+        return Math.floor(Math.max(index, 0) / LANDSCAPE_SPREAD_SIZE) * LANDSCAPE_SPREAD_SIZE;
+    }
+
+    function pushPageIndex(target, pageCount, index) {
+        if (index < 0 || index >= pageCount || target.indexOf(index) >= 0) {
+            return;
+        }
+
+        target.push(index);
+    }
+
+    function pushLandscapeSpread(target, pageCount, spreadStart) {
+        var normalizedStart = getLandscapeSpreadStart(spreadStart);
+
+        pushPageIndex(target, pageCount, normalizedStart);
+        pushPageIndex(target, pageCount, normalizedStart + 1);
+    }
+
+    function collectPortraitIndexes(pageCount, centerIndex, radius) {
+        var indexes = [];
+        var start = clamp(centerIndex - radius, 0, pageCount - 1);
+        var end = clamp(centerIndex + radius, 0, pageCount - 1);
+        var pointer;
+
+        for (pointer = start; pointer <= end; pointer += 1) {
+            pushPageIndex(indexes, pageCount, pointer);
+        }
+
+        return indexes;
+    }
+
+    function collectLandscapeIndexes(pageCount, centerIndex, includeForwardBuffer) {
+        var indexes = [];
+        var spreadStart = getLandscapeSpreadStart(centerIndex);
+
+        pushLandscapeSpread(indexes, pageCount, spreadStart - LANDSCAPE_SPREAD_SIZE);
+        pushLandscapeSpread(indexes, pageCount, spreadStart);
+        pushLandscapeSpread(indexes, pageCount, spreadStart + LANDSCAPE_SPREAD_SIZE);
+
+        if (includeForwardBuffer) {
+            pushLandscapeSpread(
+                indexes,
+                pageCount,
+                spreadStart + (LANDSCAPE_SPREAD_SIZE * (LANDSCAPE_FORWARD_BUFFER_SPREADS + 1)));
+        }
+
+        return indexes;
+    }
+
+    function excludeIndexes(indexes, excludedIndexes) {
+        return indexes.filter(function (index) {
+            return excludedIndexes.indexOf(index) < 0;
+        });
+    }
+
+    function getHydrationPlan(pageCount, centerIndex, orientation) {
+        if (orientation === "landscape") {
+            var requiredLandscapeIndexes = collectLandscapeIndexes(pageCount, centerIndex, false);
+
+            return {
+                requiredIndexes: requiredLandscapeIndexes,
+                bufferIndexes: excludeIndexes(
+                    collectLandscapeIndexes(pageCount, centerIndex, true),
+                    requiredLandscapeIndexes),
+                priorityIndexes: requiredLandscapeIndexes.slice(),
+                decodeIndexes: requiredLandscapeIndexes.slice(),
+                readyIndexes: requiredLandscapeIndexes.slice()
+            };
+        }
+
+        var requiredPortraitIndexes = collectPortraitIndexes(pageCount, centerIndex, PAGE_PRELOAD_RADIUS);
+        var priorityPortraitIndexes = collectPortraitIndexes(pageCount, centerIndex, 1);
+
+        return {
+            requiredIndexes: requiredPortraitIndexes,
+            bufferIndexes: [],
+            priorityIndexes: priorityPortraitIndexes,
+            decodeIndexes: priorityPortraitIndexes.slice(),
+            readyIndexes: priorityPortraitIndexes.slice()
+        };
+    }
+
+    function getNavigationReadyIndexes(pageCount, currentIndex, targetIndex, orientation) {
+        if (orientation === "landscape") {
+            var landscapeIndexes = [];
+
+            pushLandscapeSpread(landscapeIndexes, pageCount, currentIndex);
+            pushLandscapeSpread(landscapeIndexes, pageCount, targetIndex);
+
+            return landscapeIndexes;
+        }
+
+        var portraitIndexes = [];
+
+        pushPageIndex(portraitIndexes, pageCount, currentIndex);
+        pushPageIndex(portraitIndexes, pageCount, targetIndex);
+
+        return portraitIndexes;
+    }
+
+    function waitForAllSettled(promises, timeoutMs) {
+        if (!promises || promises.length === 0) {
+            return Promise.resolve();
+        }
+
+        return new Promise(function (resolve) {
+            var isResolved = false;
+            var timerId = 0;
+
+            function finish() {
+                if (isResolved) {
+                    return;
+                }
+
+                isResolved = true;
+
+                if (timerId) {
+                    window.clearTimeout(timerId);
+                }
+
+                resolve();
+            }
+
+            if (timeoutMs > 0) {
+                timerId = window.setTimeout(finish, timeoutMs);
+            }
+
+            Promise.allSettled(promises).then(finish, finish);
+        });
     }
 
     function normalizePage(page, index) {
@@ -209,20 +349,6 @@
             event.preventDefault();
         });
 
-        image.addEventListener("load", function () {
-            updateImageState(media, "ready");
-
-            if (typeof image.decode === "function") {
-                image.decode().catch(function () {
-                    return null;
-                });
-            }
-        });
-
-        image.addEventListener("error", function () {
-            updateImageState(media, "error");
-        });
-
         placeholder.appendChild(placeholderTitle);
         placeholder.appendChild(placeholderCopy);
         media.appendChild(image);
@@ -234,11 +360,76 @@
             root: media,
             image: image,
             page: page,
-            index: index
+            index: index,
+            loadPromise: null,
+            decodePromise: null,
+            hasDecodeSettled: false
         };
     }
 
-    function activateManagedImage(record) {
+    function markManagedImageError(record) {
+        if (!record || !record.image) {
+            return;
+        }
+
+        record.image.dataset.error = "true";
+        updateImageState(record.root, "error");
+    }
+
+    function ensureManagedImagePriority(record, options) {
+        if (!record || !record.image) {
+            return;
+        }
+
+        var image = record.image;
+        var shouldPrioritize = !!(options && options.prioritize);
+
+        if (shouldPrioritize) {
+            image.loading = "eager";
+            image.setAttribute("fetchpriority", "high");
+        } else if (!image.getAttribute("src")) {
+            image.loading = "lazy";
+        }
+    }
+
+    function ensureManagedImageDecode(record) {
+        if (!record || !record.image || record.hasDecodeSettled) {
+            return Promise.resolve();
+        }
+
+        var image = record.image;
+
+        if (image.dataset.error === "true") {
+            record.hasDecodeSettled = true;
+            return Promise.resolve();
+        }
+
+        if (typeof image.decode !== "function") {
+            record.hasDecodeSettled = true;
+            return Promise.resolve();
+        }
+
+        if (!image.complete || image.naturalWidth <= 0) {
+            return Promise.resolve();
+        }
+
+        if (record.decodePromise) {
+            return record.decodePromise;
+        }
+
+        record.decodePromise = image.decode()
+            .catch(function () {
+                return null;
+            })
+            .finally(function () {
+                record.hasDecodeSettled = true;
+                record.decodePromise = null;
+            });
+
+        return record.decodePromise;
+    }
+
+    function waitForManagedImageLoad(record) {
         if (!record || !record.image) {
             return Promise.resolve();
         }
@@ -251,10 +442,67 @@
             return Promise.resolve();
         }
 
+        if (image.complete) {
+            if (image.naturalWidth > 0) {
+                updateImageState(media, "ready");
+                return Promise.resolve();
+            }
+
+            markManagedImageError(record);
+            return Promise.resolve();
+        }
+
+        if (record.loadPromise) {
+            return record.loadPromise;
+        }
+
+        record.loadPromise = new Promise(function (resolve) {
+            var handleLoad = function () {
+                cleanup();
+                updateImageState(media, "ready");
+                resolve();
+            };
+
+            var handleError = function () {
+                cleanup();
+                markManagedImageError(record);
+                resolve();
+            };
+
+            var cleanup = function () {
+                image.removeEventListener("load", handleLoad);
+                image.removeEventListener("error", handleError);
+                record.loadPromise = null;
+            };
+
+            image.addEventListener("load", handleLoad, { once: true });
+            image.addEventListener("error", handleError, { once: true });
+        });
+
+        return record.loadPromise;
+    }
+
+    function activateManagedImage(record, options) {
+        if (!record || !record.image) {
+            return Promise.resolve();
+        }
+
+        var image = record.image;
+        var media = record.root;
+        var shouldDecode = !!(options && options.decode);
+        var shouldWaitForReady = !!(options && options.waitForReady);
+
+        ensureManagedImagePriority(record, options);
+
+        if (image.dataset.error === "true") {
+            updateImageState(media, "error");
+            return Promise.resolve();
+        }
+
         if (!image.getAttribute("src")) {
             var source = getManagedImageSource(image);
             if (!source) {
-                updateImageState(media, "error");
+                markManagedImageError(record);
                 return Promise.resolve();
             }
 
@@ -266,63 +514,30 @@
             if (image.naturalWidth > 0) {
                 updateImageState(media, "ready");
 
-                if (typeof image.decode === "function") {
-                    return image.decode().catch(function () {
-                        return null;
-                    });
-                }
-
-                return Promise.resolve();
+                return shouldDecode
+                    ? ensureManagedImageDecode(record)
+                    : Promise.resolve();
             }
 
-            image.dataset.error = "true";
-            updateImageState(media, "error");
+            markManagedImageError(record);
             return Promise.resolve();
         }
 
-        return new Promise(function (resolve) {
-            var handleLoad = function () {
-                cleanup();
-                updateImageState(media, "ready");
+        if (shouldDecode) {
+            var decodePromise = waitForManagedImageLoad(record)
+                .then(function () {
+                    return ensureManagedImageDecode(record);
+                })
+                .catch(function () {
+                    return null;
+                });
 
-                if (typeof image.decode === "function") {
-                    image.decode().catch(function () {
-                        return null;
-                    }).finally(resolve);
-                    return;
-                }
-
-                resolve();
-            };
-
-            var handleError = function () {
-                cleanup();
-                image.dataset.error = "true";
-                updateImageState(media, "error");
-                resolve();
-            };
-
-            var cleanup = function () {
-                image.removeEventListener("load", handleLoad);
-                image.removeEventListener("error", handleError);
-            };
-
-            image.addEventListener("load", handleLoad, { once: true });
-            image.addEventListener("error", handleError, { once: true });
-        });
-    }
-
-    function hydrateAround(records, centerIndex, radius) {
-        var promises = [];
-        var start = clamp(centerIndex - radius, 0, records.length - 1);
-        var end = clamp(centerIndex + radius, 0, records.length - 1);
-        var pointer;
-
-        for (pointer = start; pointer <= end; pointer += 1) {
-            promises.push(activateManagedImage(records[pointer]));
+            return shouldWaitForReady ? decodePromise : Promise.resolve();
         }
 
-        return Promise.all(promises);
+        return shouldWaitForReady
+            ? waitForManagedImageLoad(record)
+            : Promise.resolve();
     }
 
     function createStaticFallbackViewer(options) {
@@ -504,14 +719,74 @@
         var records = [];
         var pageElements = [];
         var stage = createElement("div", "menu-pageflip-book");
+        var isInteractionLocked = false;
+        var isAnimating = false;
+        var isPreparingNavigation = false;
 
         clearNode(host);
         host.appendChild(stage);
 
+        function notifyViewerStateChange() {
+            if (typeof options.onViewerStateChange === "function") {
+                options.onViewerStateChange();
+            }
+        }
+
+        function setInteractionLock(nextState) {
+            isInteractionLocked = !!nextState;
+            stage.style.pointerEvents = isInteractionLocked ? "none" : "";
+            notifyViewerStateChange();
+        }
+
+        function getViewerOrientation() {
+            if (pageFlip && typeof pageFlip.getOrientation === "function") {
+                return pageFlip.getOrientation();
+            }
+
+            return getPredictedPageFlipOrientation(host);
+        }
+
+        function prepareHydrationForIndex(index, settings) {
+            var safeIndex = clamp(index, 0, records.length - 1);
+            var plan = getHydrationPlan(
+                records.length,
+                safeIndex,
+                (settings && settings.orientation) || getViewerOrientation());
+            var readyIndexes = settings && settings.readyIndexes
+                ? settings.readyIndexes
+                : plan.readyIndexes;
+            var readyPromises = [];
+
+            plan.requiredIndexes.forEach(function (requiredIndex) {
+                var activationPromise = activateManagedImage(records[requiredIndex], {
+                    prioritize: plan.priorityIndexes.indexOf(requiredIndex) >= 0,
+                    decode: plan.decodeIndexes.indexOf(requiredIndex) >= 0,
+                    waitForReady: !!(settings
+                        && settings.waitForReady
+                        && readyIndexes.indexOf(requiredIndex) >= 0)
+                });
+
+                if (settings
+                    && settings.waitForReady
+                    && readyIndexes.indexOf(requiredIndex) >= 0) {
+                    readyPromises.push(activationPromise);
+                }
+            });
+
+            plan.bufferIndexes.forEach(function (bufferIndex) {
+                if (pages[bufferIndex] && pages[bufferIndex].imageUrl) {
+                    warmImageSource(pages[bufferIndex].imageUrl);
+                }
+            });
+
+            return waitForAllSettled(readyPromises, settings && settings.readyTimeout
+                ? settings.readyTimeout
+                : 0);
+        }
+
         function emitIndexChange(nextIndex) {
             currentIndex = clamp(nextIndex, 0, pages.length - 1);
-            hydrateAround(records, currentIndex, PAGE_PRELOAD_RADIUS);
-            preloadAdjacentPages(pages, currentIndex, PAGE_PRELOAD_RADIUS);
+            prepareHydrationForIndex(currentIndex);
 
             if (typeof options.onIndexChange === "function") {
                 options.onIndexChange(currentIndex);
@@ -526,6 +801,70 @@
             return currentIndex;
         }
 
+        function canFlip(direction) {
+            var resolvedIndex = getCurrentPageIndex();
+
+            return direction === "next"
+                ? resolvedIndex < pages.length - 1
+                : resolvedIndex > 0;
+        }
+
+        function getNavigationTargetIndex(direction) {
+            var resolvedIndex = getCurrentPageIndex();
+            var orientation = getViewerOrientation();
+
+            if (orientation === "landscape") {
+                return clamp(
+                    getLandscapeSpreadStart(resolvedIndex)
+                    + (direction === "next" ? LANDSCAPE_SPREAD_SIZE : -LANDSCAPE_SPREAD_SIZE),
+                    0,
+                    pages.length - 1);
+            }
+
+            return clamp(
+                resolvedIndex + (direction === "next" ? 1 : -1),
+                0,
+                pages.length - 1);
+        }
+
+        function prepareAndFlip(direction) {
+            if (!pageFlip || isInteractionLocked || isPreparingNavigation || isAnimating || !canFlip(direction)) {
+                return;
+            }
+
+            isPreparingNavigation = true;
+            setInteractionLock(true);
+
+            var sourceIndex = getCurrentPageIndex();
+            var targetIndex = getNavigationTargetIndex(direction);
+            var orientation = getViewerOrientation();
+
+            prepareHydrationForIndex(targetIndex, {
+                waitForReady: true,
+                readyTimeout: NAVIGATION_READY_TIMEOUT,
+                readyIndexes: getNavigationReadyIndexes(
+                    records.length,
+                    sourceIndex,
+                    targetIndex,
+                    orientation)
+            }).then(function () {
+                if (!pageFlip || !canFlip(direction)) {
+                    return;
+                }
+
+                if (direction === "next") {
+                    pageFlip.flipNext();
+                    return;
+                }
+
+                pageFlip.flipPrev();
+            }).finally(function () {
+                isPreparingNavigation = false;
+                setInteractionLock(false);
+                notifyViewerStateChange();
+            });
+        }
+
         return resolveReferenceDimensions(pages).then(function (dimensions) {
             var ratio = dimensions.width > 0 && dimensions.height > 0
                 ? dimensions.width / dimensions.height
@@ -538,8 +877,8 @@
                 var pageElement = createElement("div", "menu-flipbook-page");
                 var surface = createElement("div", "menu-flipbook-page__surface");
                 var managed = createManagedImage(page, index, {
-                    immediate: Math.abs(index - currentIndex) <= PAGE_PRELOAD_RADIUS,
-                    prioritize: index === currentIndex,
+                    immediate: false,
+                    prioritize: false,
                     imageClassName: "menu-viewer__image menu-flipbook-page__image"
                 });
 
@@ -547,6 +886,10 @@
                 pageElement.appendChild(surface);
                 pageElements.push(pageElement);
                 records.push(managed);
+            });
+
+            prepareHydrationForIndex(currentIndex, {
+                orientation: getPredictedPageFlipOrientation(host)
             });
 
             try {
@@ -572,12 +915,27 @@
                     disableFlipByClick: false
                 });
 
-                pageFlip.on("init", function (event) {
-                    var initialIndex = event && event.data && typeof event.data.page === "number"
-                        ? event.data.page
-                        : getCurrentPageIndex();
+                var initializationPromise = new Promise(function (resolve) {
+                    pageFlip.on("init", function (event) {
+                        var initialIndex = event && event.data && typeof event.data.page === "number"
+                            ? event.data.page
+                            : getCurrentPageIndex();
 
-                    emitIndexChange(initialIndex);
+                        emitIndexChange(initialIndex);
+                        resolve(prepareHydrationForIndex(initialIndex, {
+                            waitForReady: true,
+                            readyTimeout: INITIAL_INTERACTION_READY_TIMEOUT
+                        }));
+                    });
+                });
+
+                pageFlip.on("changeState", function (event) {
+                    var nextState = event && typeof event.data === "string"
+                        ? event.data
+                        : "read";
+
+                    isAnimating = nextState !== "read";
+                    notifyViewerStateChange();
                 });
 
                 pageFlip.on("flip", function (event) {
@@ -596,7 +954,70 @@
                     emitIndexChange(getCurrentPageIndex());
                 });
 
+                setInteractionLock(true);
                 pageFlip.loadFromHTML(pageElements);
+                return initializationPromise.then(function () {
+                    setInteractionLock(false);
+
+                    return {
+                        mount: function () {
+                            if (pageFlip && typeof pageFlip.update === "function") {
+                                pageFlip.update();
+                            }
+
+                            emitIndexChange(getCurrentPageIndex());
+                            return Promise.resolve();
+                        },
+                        destroy: function () {
+                            if (pageFlip && typeof pageFlip.destroy === "function") {
+                                pageFlip.destroy();
+                            }
+
+                            clearNode(host);
+                        },
+                        update: function () {
+                            if (pageFlip && typeof pageFlip.update === "function") {
+                                pageFlip.update();
+                            }
+
+                            emitIndexChange(getCurrentPageIndex());
+                        },
+                        prev: function () {
+                            prepareAndFlip("prev");
+                        },
+                        next: function () {
+                            prepareAndFlip("next");
+                        },
+                        goTo: function (index) {
+                            currentIndex = clamp(index, 0, pages.length - 1);
+                            prepareHydrationForIndex(currentIndex);
+
+                            if (pageFlip && typeof pageFlip.turnToPage === "function") {
+                                pageFlip.turnToPage(currentIndex);
+                            }
+
+                            emitIndexChange(currentIndex);
+                        },
+                        getIndex: function () {
+                            return getCurrentPageIndex();
+                        },
+                        getHint: function () {
+                            return VIEWER_HINTS.pageFlip;
+                        },
+                        canOpenZoom: function () {
+                            return true;
+                        },
+                        openZoom: function () {
+                            if (typeof options.openZoom === "function") {
+                                var resolvedIndex = getCurrentPageIndex();
+                                options.openZoom(pages[resolvedIndex], resolvedIndex);
+                            }
+                        },
+                        isBusy: function () {
+                            return isInteractionLocked || isPreparingNavigation || isAnimating;
+                        }
+                    };
+                });
             } catch (error) {
                 if (pageFlip && typeof pageFlip.destroy === "function") {
                     try {
@@ -614,67 +1035,6 @@
 
                 return createStaticFallbackViewer(options);
             }
-
-            emitIndexChange(currentIndex);
-
-            return {
-                mount: function () {
-                    if (pageFlip && typeof pageFlip.update === "function") {
-                        pageFlip.update();
-                    }
-
-                    emitIndexChange(getCurrentPageIndex());
-                    return Promise.resolve();
-                },
-                destroy: function () {
-                    if (pageFlip && typeof pageFlip.destroy === "function") {
-                        pageFlip.destroy();
-                    }
-
-                    clearNode(host);
-                },
-                update: function () {
-                    if (pageFlip && typeof pageFlip.update === "function") {
-                        pageFlip.update();
-                    }
-
-                    emitIndexChange(getCurrentPageIndex());
-                },
-                prev: function () {
-                    if (pageFlip && currentIndex > 0) {
-                        pageFlip.flipPrev();
-                    }
-                },
-                next: function () {
-                    if (pageFlip && currentIndex < pages.length - 1) {
-                        pageFlip.flipNext();
-                    }
-                },
-                goTo: function (index) {
-                    currentIndex = clamp(index, 0, pages.length - 1);
-
-                    if (pageFlip && typeof pageFlip.turnToPage === "function") {
-                        pageFlip.turnToPage(currentIndex);
-                    }
-
-                    emitIndexChange(currentIndex);
-                },
-                getIndex: function () {
-                    return getCurrentPageIndex();
-                },
-                getHint: function () {
-                    return VIEWER_HINTS.pageFlip;
-                },
-                canOpenZoom: function () {
-                    return true;
-                },
-                openZoom: function () {
-                    if (typeof options.openZoom === "function") {
-                        var resolvedIndex = getCurrentPageIndex();
-                        options.openZoom(pages[resolvedIndex], resolvedIndex);
-                    }
-                }
-            };
         });
     }
 
@@ -737,10 +1097,13 @@
             var displayIndex = totalPages > 0
                 ? clamp(currentIndex, 0, totalPages - 1) + 1
                 : 0;
+            var isViewerBusy = !!(activeViewer
+                && typeof activeViewer.isBusy === "function"
+                && activeViewer.isBusy());
 
             updateIndicators(currentIndicator, totalIndicator, displayIndex, totalPages);
-            setButtonState(previousButton, totalPages === 0 || currentIndex <= 0);
-            setButtonState(nextButton, totalPages === 0 || currentIndex >= totalPages - 1);
+            setButtonState(previousButton, isViewerBusy || totalPages === 0 || currentIndex <= 0);
+            setButtonState(nextButton, isViewerBusy || totalPages === 0 || currentIndex >= totalPages - 1);
 
             if (hintNode && activeViewer && typeof activeViewer.getHint === "function") {
                 hintNode.textContent = activeViewer.getHint();
@@ -823,6 +1186,7 @@
                 pages: pages,
                 startIndex: startIndex,
                 openZoom: openOverlay,
+                onViewerStateChange: updateUi,
                 onIndexChange: function (index) {
                     currentIndex = clamp(index, 0, totalPages - 1);
                     updateUi();
@@ -865,6 +1229,8 @@
             var token = switchToken;
 
             frame.setAttribute("aria-busy", "true");
+            setButtonState(previousButton, true);
+            setButtonState(nextButton, true);
 
             return createViewer(currentIndex)
                 .then(function (viewer) {
