@@ -6874,7 +6874,7 @@
     .home-booking-cta {
         isolation: isolate;
         background-color: #0000;
-        background-image: radial-gradient(circle at 50% 16%,#e5091429,#0000 30%),linear-gradient(#08080833,#080808b8),url(/images/home/images/place-an-order.webp);
+        background-image: radial-gradient(circle at 50% 16%,#e5091429,#0000 30%),linear-gradient(#08080833,#080808b8),url(/images/home/images/place-an-order.jpg);
         background-position: 50%;
         background-repeat: no-repeat;
         background-size: cover;
