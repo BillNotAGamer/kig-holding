@@ -17,7 +17,7 @@ public class ReservationService : IReservationService
     public async Task<ReservationCreateResult> CreateReservationAsync(ReservationCreateRequest request, CancellationToken cancellationToken = default)
     {
         var errors = new List<ReservationServiceError>();
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = VietnamHolidayEvaluator.GetVietnamToday();
         var normalizedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(request.DiningOccasionCode);
         var diningOccasionOtherNote = NormalizeOptionalText(request.DiningOccasionOtherNote);
 
@@ -27,6 +27,15 @@ public class ReservationService : IReservationService
             {
                 FieldName = nameof(request.ReservationDate),
                 Message = "Ngày đến không được sớm hơn hôm nay."
+            });
+        }
+
+        if (VietnamHolidayEvaluator.IsRestrictedDate(request.ReservationDate))
+        {
+            errors.Add(new ReservationServiceError
+            {
+                FieldName = nameof(request.ReservationDate),
+                Message = "Hệ thống không nhận đặt bàn vào Thứ Bảy, Chủ Nhật và các ngày Lễ Tết."
             });
         }
 
