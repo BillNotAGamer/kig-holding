@@ -8,7 +8,7 @@ public class FooterViewModel
     public string FooterLogoUrl { get; set; } = "/images/general/kig-no-bg-logo.png";
     public string Address { get; set; } = string.Empty;
     public string GoogleMapUrl { get; set; } = string.Empty;
-    public string Hotline { get; set; } = "0909 888 777";
+    public string Hotline { get; set; } = "0922 055 755";
     public string Email { get; set; } = "truyenthuyetchamponghcm@gmail.com";
     public string FacebookUrl { get; set; } = "#";
     public string ZaloUrl { get; set; } = "https://oa.zalo.me/3191309080595223416";

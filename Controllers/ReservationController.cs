@@ -390,18 +390,18 @@ public class ReservationController : Controller
     {
         if (!HasConfiguredDatabase())
         {
-            return "0909 888 777";
+            return "0922 055 755";
         }
 
         try
         {
             var settings = await _siteSettingService.GetSettingsAsync(cancellationToken);
-            return string.IsNullOrWhiteSpace(settings?.Hotline) ? "0909 888 777" : settings.Hotline;
+            return string.IsNullOrWhiteSpace(settings?.Hotline) ? "0922 055 755" : settings.Hotline;
         }
         catch (Exception exception)
         {
             _logger.LogWarning(exception, "Unable to load site hotline for reservation form.");
-            return "0909 888 777";
+            return "0922 055 755";
         }
     }
 

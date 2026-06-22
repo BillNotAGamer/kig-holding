@@ -67,7 +67,7 @@ public class DbInitializer
             SiteName = "Truyền Thuyết Champong",
             BrandName = "Truyền Thuyết Champong",
             Slogan = "Mì cay Hàn Quốc, nước dùng đậm vị, không gian tối hiện đại.",
-            Hotline = "0909 888 777",
+            Hotline = "0922 055 755",
             Email = "truyenthuyetchamponghcm@gmail.com",
             FacebookUrl = "https://facebook.com/truyenthuyetchampong",
             ZaloUrl = "https://oa.zalo.me/3191309080595223416",

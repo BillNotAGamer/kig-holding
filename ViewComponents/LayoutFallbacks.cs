@@ -130,7 +130,7 @@ internal static class LayoutFallbacks
         {
             BrandName = string.IsNullOrWhiteSpace(setting?.BrandName) ? "KIG Holding" : setting!.BrandName,
             LogoUrl = string.IsNullOrWhiteSpace(setting?.LogoUrl) ? "/images/general/kig-no-bg-logo.png" : setting!.LogoUrl,
-            Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0909 888 777" : setting!.Hotline,
+            Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0922 055 755" : setting!.Hotline,
             ReservationUrl = "/dat-ban",
             NavItems = CreateNavItems(requestPath)
         };
@@ -146,7 +146,7 @@ internal static class LayoutFallbacks
             FooterLogoUrl = "/images/general/kig-no-bg-logo.png",
             Address = string.IsNullOrWhiteSpace(setting?.Address) ? "366/3 Phạm Hữu Lầu, Nhà Bè, Hồ Chí Minh, Việt Nam" : setting!.Address,
             GoogleMapUrl = string.IsNullOrWhiteSpace(setting?.GoogleMapUrl) ? string.Empty : setting!.GoogleMapUrl,
-            Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0909 888 777" : setting!.Hotline,
+            Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0922 055 755" : setting!.Hotline,
             Email = string.IsNullOrWhiteSpace(setting?.Email) ? "truyenthuyetchamponghcm@gmail.com" : setting!.Email,
             FacebookUrl = string.IsNullOrWhiteSpace(setting?.FacebookUrl) ? "https://www.facebook.com/champong.official" : setting!.FacebookUrl,
             ZaloUrl = string.IsNullOrWhiteSpace(setting?.ZaloUrl) ? "https://oa.zalo.me/3191309080595223416?gidzl=MtBA6_c401bLRSaV-9e465Hlp17lcmGJ6MsP6xMU0ayGEivEvie4I4eucHZccb1FH6sQIZMLn_Wn_OO07W" : setting!.ZaloUrl,
@@ -173,7 +173,7 @@ internal static class LayoutFallbacks
     {
         return new FloatingContactButtonsViewModel
         {
-            Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0909 888 777" : setting!.Hotline,
+            Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0922 055 755" : setting!.Hotline,
             FacebookUrl = string.IsNullOrWhiteSpace(setting?.FacebookUrl) ? "https://www.facebook.com/champong.official" : setting!.FacebookUrl,
             ZaloUrl = string.IsNullOrWhiteSpace(setting?.ZaloUrl) ? "https://oa.zalo.me/3191309080595223416" : setting!.ZaloUrl,
             ReservationUrl = "/dat-ban"

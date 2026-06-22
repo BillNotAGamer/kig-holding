@@ -59,7 +59,7 @@
 
                         <label class="reservation-page__field-group">
                             <span class="reservation-page__field-label">Số điện thoại</span>
-                            <input asp-for="PhoneNumber" autocomplete="tel" class="reservation-page__field" placeholder="0909 888 777" />
+                            <input asp-for="PhoneNumber" autocomplete="tel" class="reservation-page__field" placeholder="0922 055 755" />
                             <span asp-validation-for="PhoneNumber" class="reservation-page__validation"></span>
                         </label>
                     </div>
@@ -242,6 +242,29 @@
             });
 
             configs.forEach(syncOtherField);
+
+            // Weekend & Holiday Frontend validation
+            const holidays = new Set([
+                "2026-01-01", "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20",
+                "2026-04-27", "2026-04-30", "2026-05-01", "2026-09-02", "2026-09-03",
+                "2027-01-01", "2027-02-05", "2027-02-08", "2027-02-09", "2027-02-10", "2027-02-11",
+                "2027-04-16", "2027-04-30", "2027-05-03", "2027-09-02", "2027-09-03",
+                "2028-01-03", "2028-01-25", "2028-01-26", "2028-01-27", "2028-01-28", "2028-01-31",
+                "2028-04-04", "2028-05-01", "2028-05-02", "2028-09-04"
+            ]);
+
+            $(document).on('change', '#ReservationDate', function () {
+                const val = $(this).val();
+                if (!val) return;
+
+                const dateObj = new Date(val);
+                const dayOfWeek = dateObj.getUTCDay(); // 0 is Sunday, 6 is Saturday
+
+                if (dayOfWeek === 0 || dayOfWeek === 6 || holidays.has(val)) {
+                    alert("Hệ thống không nhận đặt bàn vào Thứ Bảy, Chủ Nhật và các ngày Lễ Tết.");
+                    $(this).val('');
+                }
+            });
         })();
     </script>
 }

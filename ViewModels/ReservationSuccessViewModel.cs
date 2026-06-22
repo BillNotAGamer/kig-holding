@@ -8,5 +8,5 @@ public class ReservationSuccessViewModel
     public DateOnly ReservationDate { get; set; }
     public TimeOnly ReservationTime { get; set; }
     public int GuestCount { get; set; }
-    public string Hotline { get; set; } = "0909 888 777";
+    public string Hotline { get; set; } = "0922 055 755";
 }

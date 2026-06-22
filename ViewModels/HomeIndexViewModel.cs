@@ -9,5 +9,5 @@ public class HomeIndexViewModel
     public IReadOnlyList<PostCardViewModel> LatestPosts { get; set; } = [];
 
     public string BrandName => string.IsNullOrWhiteSpace(SiteSetting?.BrandName) ? "Truyền Thuyết Champong" : SiteSetting!.BrandName;
-    public string Hotline => string.IsNullOrWhiteSpace(SiteSetting?.Hotline) ? "0909 888 777" : SiteSetting!.Hotline;
+    public string Hotline => string.IsNullOrWhiteSpace(SiteSetting?.Hotline) ? "0922 055 755" : SiteSetting!.Hotline;
 }

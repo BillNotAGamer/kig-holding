@@ -45,7 +45,7 @@ public class ReservationCreateViewModel
     public string? Note { get; set; }
 
     public string? SelectedBranchSlug { get; set; }
-    public string Hotline { get; set; } = "0909 888 777";
+    public string Hotline { get; set; } = "0922 055 755";
     public IReadOnlyList<ReservationBranchOptionViewModel> Branches { get; set; } = [];
 
     public bool ShouldShowLargeGroupNotice => GuestCount > 12;
