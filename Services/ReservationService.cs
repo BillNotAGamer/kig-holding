@@ -2,16 +2,21 @@ using KIGHolding.Data;
 using KIGHolding.Models.Entities;
 using KIGHolding.Models.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace KIGHolding.Services;
 
 public class ReservationService : IReservationService
 {
-    private readonly AppDbContext _dbContext;
+    private static readonly TimeSpan RateLimitWindow = TimeSpan.FromMinutes(10);
 
-    public ReservationService(AppDbContext dbContext)
+    private readonly AppDbContext _dbContext;
+    private readonly IMemoryCache _cache;
+
+    public ReservationService(AppDbContext dbContext, IMemoryCache cache)
     {
         _dbContext = dbContext;
+        _cache = cache;
     }
 
     public async Task<ReservationCreateResult> CreateReservationAsync(ReservationCreateRequest request, CancellationToken cancellationToken = default)
@@ -37,6 +42,21 @@ public class ReservationService : IReservationService
                 FieldName = nameof(request.ReservationDate),
                 Message = "Hệ thống không nhận đặt bàn vào Thứ Bảy, Chủ Nhật và các ngày Lễ Tết."
             });
+        }
+
+        // ── Gate 1: IMemoryCache fail-fast rate-limit ─────────────────────────────
+        var normalizedPhone = IdentityNormalizer.NormalizePhone(request.PhoneNumber);
+        var phoneLockKey    = IdentityNormalizer.PhoneLockKey(normalizedPhone);
+
+        if (!string.IsNullOrEmpty(normalizedPhone) && _cache.TryGetValue(phoneLockKey, out _))
+        {
+            errors.Add(new ReservationServiceError
+            {
+                FieldName = nameof(request.PhoneNumber),
+                Message   = "Bạn đã thực hiện đặt bàn trong vòng 10 phút qua. Vui lòng đợi và thử lại sau."
+            });
+
+            return ReservationCreateResult.Failed(errors);
         }
 
         if (request.GuestCount is < 1 or > 100)
@@ -138,8 +158,31 @@ public class ReservationService : IReservationService
             UpdatedAt = now
         };
 
+        // ── Gate 2: PostgreSQL advisory transaction lock ───────────────────────────
+        // pg_advisory_xact_lock serialises concurrent DB sessions for the same phone
+        // hash, making AnyAsync-level races impossible within the transaction scope.
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        await _dbContext.Database.ExecuteSqlRawAsync(
+            "SELECT pg_advisory_xact_lock(hashtext({0}))",
+            [normalizedPhone],
+            cancellationToken);
+
         _dbContext.Reservations.Add(reservation);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        // ── Stamp IMemoryCache keys after successful commit ────────────────────────
+        var cacheOptions = new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = RateLimitWindow,
+            Size = 1
+        };
+
+        if (!string.IsNullOrEmpty(normalizedPhone))
+        {
+            _cache.Set(phoneLockKey, true, cacheOptions);
+        }
 
         return ReservationCreateResult.Success(reservation.Id);
     }

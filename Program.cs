@@ -28,7 +28,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.EventsType = typeof(AdminCookieAuthenticationEvents);
     });
 builder.Services.AddAuthorization();
-builder.Services.AddMemoryCache();
+builder.Services.AddMemoryCache(options =>
+{
+    // Each rate-limit entry declares Size = 1; cap at 50 000 concurrent tracked identities.
+    options.SizeLimit = 50_000;
+});
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
