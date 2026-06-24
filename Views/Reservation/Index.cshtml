@@ -253,18 +253,22 @@
                 "2028-04-04", "2028-05-01", "2028-05-02", "2028-09-04"
             ]);
 
-            $(document).on('change', '#ReservationDate', function () {
-                const val = $(this).val();
-                if (!val) return;
+            const reservationDateInput = document.querySelector('#ReservationDate');
+            if (reservationDateInput instanceof HTMLInputElement) {
+                reservationDateInput.addEventListener('change', () => {
+                    const val = reservationDateInput.value;
+                    if (!val) return;
 
-                const dateObj = new Date(val);
-                const dayOfWeek = dateObj.getUTCDay(); // 0 is Sunday, 6 is Saturday
+                    const [year, month, day] = val.split('-').map(Number);
+                    const dateObj = new Date(Date.UTC(year, month - 1, day));
+                    const dayOfWeek = dateObj.getUTCDay(); // 0 is Sunday, 6 is Saturday
 
-                if (dayOfWeek === 0 || dayOfWeek === 6 || holidays.has(val)) {
-                    alert("Hệ thống không nhận đặt bàn vào Thứ Bảy, Chủ Nhật và các ngày Lễ Tết.");
-                    $(this).val('');
-                }
-            });
+                    if (dayOfWeek === 0 || dayOfWeek === 6 || holidays.has(val)) {
+                        alert("Hệ thống không nhận đặt bàn vào Thứ Bảy, Chủ Nhật và các ngày Lễ Tết.");
+                        reservationDateInput.value = '';
+                    }
+                });
+            }
         })();
     </script>
 }

@@ -1,4 +1,4 @@
-﻿@model HomeIndexViewModel
+@model HomeIndexViewModel
 
 @{
     ViewData["Title"] = "Truyền Thuyết Champong - Trải nghiệm ẩm thực Hàn Quốc đậm vị và hiện đại";
@@ -555,10 +555,11 @@
 
                             @if (!string.IsNullOrWhiteSpace(leadPost.ImageUrl))
                             {
-                                <img src="@leadPost.ImageUrl"
+                                <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(leadPost.ImageUrl)"
                                      alt="@leadPost.Title"
                                      class="home-news-card__image"
                                      loading="lazy"
+                                     decoding="async"
                                      onerror="this.closest('[data-home-news-media]')?.classList.add('is-image-missing'); this.remove();" />
                             }
                         </div>
@@ -612,10 +613,11 @@
 
                                         @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
                                         {
-                                            <img src="@post.ImageUrl"
+                                            <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
                                                  alt="@post.Title"
                                                  class="home-news-card__image"
                                                  loading="lazy"
+                                                 decoding="async"
                                                  onerror="this.closest('[data-home-news-media]')?.classList.add('is-image-missing'); this.remove();" />
                                         }
                                     </div>

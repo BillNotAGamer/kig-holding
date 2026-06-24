@@ -60,7 +60,7 @@ public class SeoController : Controller
                 "0.8")));
 
             var posts = await TryLoadAsync(
-                () => _newsService.GetPublishedPostsAsync(null, cancellationToken),
+                () => _newsService.GetPublishedPostCardsAsync(null, cancellationToken),
                 "sitemap posts") ?? [];
 
             urls.AddRange(posts.Select(post => new SitemapUrl(

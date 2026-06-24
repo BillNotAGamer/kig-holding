@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Net.Http.Headers;
 using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -97,7 +98,34 @@ else
 
 app.UseResponseCompression();
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        var path = context.Context.Request.Path;
+        var headers = context.Context.Response.Headers;
+
+        if (path.StartsWithSegments("/uploads"))
+        {
+            headers[HeaderNames.CacheControl] = "public,max-age=86400";
+            return;
+        }
+
+        if (context.Context.Request.Query.ContainsKey("v"))
+        {
+            headers[HeaderNames.CacheControl] = "public,max-age=31536000,immutable";
+            return;
+        }
+
+        if (path.StartsWithSegments("/css") ||
+            path.StartsWithSegments("/js") ||
+            path.StartsWithSegments("/images") ||
+            path.StartsWithSegments("/lib"))
+        {
+            headers[HeaderNames.CacheControl] = "public,max-age=3600";
+        }
+    }
+});
 app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 app.UseRouting();

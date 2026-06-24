@@ -5,6 +5,7 @@ namespace KIGHolding.ViewModels.Shared;
 
 public class PostCardViewModel
 {
+    public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
     public string Url { get; set; } = "#";
@@ -12,18 +13,21 @@ public class PostCardViewModel
     public string Excerpt { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public DateTimeOffset? PublishedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
 
     public static PostCardViewModel FromPost(Post post)
     {
         return new PostCardViewModel
         {
+            Id = post.Id,
             Title = post.Title,
             Slug = post.Slug,
             Url = $"/tin-tuc/{post.Slug}",
             ImageUrl = string.IsNullOrWhiteSpace(post.ThumbnailUrl) ? "/images/placeholders/post-card.webp" : post.ThumbnailUrl,
             Excerpt = post.Excerpt,
             Category = NewsCategories.GetDisplayName(post.Category),
-            PublishedAt = post.PublishedAt
+            PublishedAt = post.PublishedAt,
+            UpdatedAt = post.UpdatedAt
         };
     }
 }

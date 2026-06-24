@@ -30,7 +30,7 @@ public class HomeController : Controller
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         SiteSetting? siteSetting = null;
-        IReadOnlyList<Post> latestPosts = [];
+        IReadOnlyList<PostCardViewModel> latestPosts = [];
 
         if (HasConfiguredDatabase())
         {
@@ -39,14 +39,14 @@ public class HomeController : Controller
                 "site settings");
 
             latestPosts = await TryLoadAsync(
-                () => _newsService.GetPublishedPostsAsync(3, cancellationToken),
+                () => _newsService.GetPublishedPostCardsAsync(3, cancellationToken),
                 "latest posts") ?? [];
         }
 
         var model = new HomeIndexViewModel
         {
             SiteSetting = siteSetting,
-            LatestPosts = latestPosts.Select(PostCardViewModel.FromPost).ToList()
+            LatestPosts = latestPosts
         };
 
         return View(model);

@@ -1,4 +1,3 @@
-using KIGHolding.Models.Entities;
 using KIGHolding.Models;
 using KIGHolding.Models.Content;
 using KIGHolding.Services;
@@ -31,7 +30,7 @@ public class NewsController : Controller
     public async Task<IActionResult> Index([FromQuery] string? category, [FromQuery] int page = 1, CancellationToken cancellationToken = default)
     {
         var selectedCategorySlug = NewsCategories.NormalizeCategory(category);
-        var postsPage = new PagedResult<Post>
+        var postsPage = new PagedResult<PostCardViewModel>
         {
             Page = Math.Max(1, page),
             PageSize = DefaultPageSize
@@ -40,7 +39,7 @@ public class NewsController : Controller
         if (HasConfiguredDatabase())
         {
             postsPage = await TryLoadAsync(
-                () => _newsService.GetPublishedPostsPageAsync(selectedCategorySlug, page, DefaultPageSize, cancellationToken),
+                () => _newsService.GetPublishedPostCardsPageAsync(selectedCategorySlug, page, DefaultPageSize, cancellationToken),
                 "published posts") ?? postsPage;
         }
 
@@ -59,8 +58,8 @@ public class NewsController : Controller
             SelectedCategory = selectedCategorySlug,
             SelectedCategorySlug = selectedCategorySlug,
             SelectedCategoryName = string.IsNullOrWhiteSpace(selectedCategorySlug) ? null : selectedCategoryName,
-            FeaturedPost = featuredPost is null ? null : PostCardViewModel.FromPost(featuredPost),
-            Posts = postsPage.Items.Select(PostCardViewModel.FromPost).ToList(),
+            FeaturedPost = featuredPost,
+            Posts = postsPage.Items,
             Page = postsPage.Page,
             PageSize = postsPage.PageSize,
             TotalItems = postsPage.TotalItems,
@@ -100,13 +99,13 @@ public class NewsController : Controller
         }
 
         var relatedPosts = await TryLoadAsync(
-            () => _newsService.GetRelatedPostsAsync(post.Category, post.Id, 3, cancellationToken),
+            () => _newsService.GetRelatedPostCardsAsync(post.Category, post.Id, 3, cancellationToken),
             "related posts") ?? [];
 
         if (relatedPosts.Count < 3)
         {
             var latestPosts = await TryLoadAsync(
-                () => _newsService.GetPublishedPostsAsync(6, cancellationToken),
+                () => _newsService.GetPublishedPostCardsAsync(6, cancellationToken),
                 "latest fallback posts") ?? [];
 
             relatedPosts = relatedPosts
@@ -121,7 +120,7 @@ public class NewsController : Controller
             CategorySlug = NewsCategories.NormalizeCategory(post.Category) ?? string.Empty,
             CategoryDisplayName = NewsCategories.GetDisplayName(post.Category),
             IsPromotion = string.Equals(NewsCategories.NormalizeCategory(post.Category), NewsCategories.KhuyenMaiUuDai, StringComparison.OrdinalIgnoreCase),
-            RelatedPosts = relatedPosts.Select(PostCardViewModel.FromPost).ToList(),
+            RelatedPosts = relatedPosts,
             SeoTitle = string.IsNullOrWhiteSpace(post.SeoTitle) ? post.Title : post.SeoTitle,
             SeoDescription = string.IsNullOrWhiteSpace(post.SeoDescription) ? post.Excerpt : post.SeoDescription
         };

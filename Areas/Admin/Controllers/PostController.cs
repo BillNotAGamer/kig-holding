@@ -20,6 +20,7 @@ public class PostController : AdminBaseController
 
     private readonly AppDbContext _dbContext;
     private readonly IImageStorageService _imageStorageService;
+    private readonly INewsService _newsService;
 
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -31,10 +32,14 @@ public class PostController : AdminBaseController
 
     private const int MaxFileSize = 2 * 1024 * 1024;
 
-    public PostController(AppDbContext dbContext, IImageStorageService imageStorageService)
+    public PostController(
+        AppDbContext dbContext,
+        IImageStorageService imageStorageService,
+        INewsService newsService)
     {
         _dbContext = dbContext;
         _imageStorageService = imageStorageService;
+        _newsService = newsService;
     }
 
     [HttpGet]
@@ -215,6 +220,7 @@ public class PostController : AdminBaseController
             throw;
         }
 
+        _newsService.InvalidateNewsCache();
         return RedirectToAction(nameof(Index));
     }
 
@@ -334,6 +340,7 @@ public class PostController : AdminBaseController
             throw;
         }
 
+        _newsService.InvalidateNewsCache();
         if (!string.IsNullOrWhiteSpace(uploadedThumbnailUrl))
         {
             await _imageStorageService.DeleteAsync(previousThumbnailUrl, ImageCategory.Posts, HttpContext.RequestAborted);
@@ -356,6 +363,7 @@ public class PostController : AdminBaseController
         post.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _dbContext.SaveChangesAsync();
+        _newsService.InvalidateNewsCache();
         SetSuccessMessage("Bài viết đã được ẩn khỏi website công khai.");
 
         return RedirectToAction(nameof(Index), BuildIndexRouteValues(q, category, status, page));
@@ -375,6 +383,7 @@ public class PostController : AdminBaseController
 
         _dbContext.Posts.Remove(post);
         await _dbContext.SaveChangesAsync();
+        _newsService.InvalidateNewsCache();
 
         if (!string.IsNullOrWhiteSpace(thumbnailUrl))
         {

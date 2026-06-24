@@ -109,10 +109,12 @@
 
                 @if (hasThumbnail)
                 {
-                    <img src="@imageUrl"
+                    <img src="@MediaUrlHelper.GetNewsHeroImageUrl(imageUrl)"
                          alt="@post.Title"
                          class="news-detail-media__image"
-                         loading="lazy"
+                         loading="eager"
+                         fetchpriority="high"
+                         decoding="async"
                          onerror="this.closest('[data-news-detail-media]')?.classList.add('is-image-missing'); this.remove();" />
                 }
             </div>
@@ -196,10 +198,11 @@
 
                                         @if (hasRelatedImage)
                                         {
-                                            <img src="@relatedPost.ImageUrl"
+                                            <img src="@MediaUrlHelper.GetNewsCardImageUrl(relatedPost.ImageUrl)"
                                                  alt="@relatedPost.Title"
                                                  class="news-detail-media__image"
                                                  loading="lazy"
+                                                 decoding="async"
                                                  onerror="this.closest('[data-news-detail-media]')?.classList.add('is-image-missing'); this.remove();" />
                                         }
 

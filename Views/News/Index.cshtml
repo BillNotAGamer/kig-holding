@@ -113,10 +113,12 @@
                             <article class="news-card news-feature-lead group lg:col-span-7 xl:col-span-8" data-uw-reveal="fade-up" data-uw-delay="220">
                                 <a href="@post.Url" class="block h-full" aria-label="@post.Title">
                                     <div class="news-card__media news-feature-lead__media">
-                                        <img src="@post.ImageUrl"
+                                        <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(post.ImageUrl)"
                                              alt="@post.Title"
                                              class="news-card__image"
-                                             loading="lazy"
+                                             loading="eager"
+                                             fetchpriority="high"
+                                             decoding="async"
                                              onerror="this.remove();" />
                                         <div class="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 p-5 sm:p-6">
                                             <span class="inline-flex rounded-full bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
@@ -160,10 +162,11 @@
                                     <article class="news-card news-feature-secondary group" data-uw-reveal="fade-up" data-uw-delay="@delay">
                                         <a href="@post.Url" class="block h-full" aria-label="@post.Title">
                                             <div class="news-card__media news-feature-secondary__media">
-                                                <img src="@post.ImageUrl"
+                                                <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
                                                      alt="@post.Title"
                                                      class="news-card__image"
                                                      loading="lazy"
+                                                     decoding="async"
                                                      onerror="this.remove();" />
                                                 <div class="absolute left-4 top-4 z-10 rounded-full bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
                                                     @post.Category
@@ -205,10 +208,11 @@
                                     <article class="news-card news-feature-compact group" data-uw-reveal="fade-up" data-uw-delay="@delay">
                                         <a href="@post.Url" class="block h-full sm:grid sm:grid-cols-[12rem_minmax(0,1fr)]" aria-label="@post.Title">
                                             <div class="news-card__media news-feature-compact__media">
-                                                <img src="@post.ImageUrl"
+                                                <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
                                                      alt="@post.Title"
                                                      class="news-card__image"
                                                      loading="lazy"
+                                                     decoding="async"
                                                      onerror="this.remove();" />
                                             </div>
 
@@ -267,10 +271,11 @@
                                 <article class="news-card news-card-standard group" data-uw-reveal="fade-up" data-uw-delay="@delay">
                                     <a href="@post.Url" class="block h-full" aria-label="@post.Title">
                                         <div class="news-card__media news-card-standard__media">
-                                            <img src="@post.ImageUrl"
+                                            <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
                                                  alt="@post.Title"
                                                  class="news-card__image"
                                                  loading="lazy"
+                                                 decoding="async"
                                                  onerror="this.remove();" />
                                             <div class="absolute left-4 top-4 z-10 rounded-full bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
                                                 @post.Category

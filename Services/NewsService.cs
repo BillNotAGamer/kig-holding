@@ -1,8 +1,10 @@
+using System.Threading;
 using KIGHolding.Data;
 using KIGHolding.Models;
 using KIGHolding.Models.Content;
 using KIGHolding.Models.Entities;
 using KIGHolding.ViewModels;
+using KIGHolding.ViewModels.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -11,6 +13,9 @@ namespace KIGHolding.Services;
 public class NewsService : INewsService
 {
     private const int SuggestedCategoriesCacheMinutes = 15;
+    private static readonly TimeSpan PublicNewsAbsoluteExpiration = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan PublicNewsSlidingExpiration = TimeSpan.FromMinutes(2);
+    private static long _cacheVersion = 1;
 
     private readonly AppDbContext _dbContext;
     private readonly IMemoryCache _cache;
@@ -21,76 +26,129 @@ public class NewsService : INewsService
         _cache = cache;
     }
 
-    public async Task<IReadOnlyList<Post>> GetPublishedPostsAsync(int? take = null, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PostCardViewModel>> GetPublishedPostCardsAsync(int? take = null, CancellationToken cancellationToken = default)
     {
-        var query = CreatePublishedPostsQuery();
+        int? resolvedTake = take.HasValue && take.Value > 0 ? take.Value : null;
+        var cacheKey = BuildCacheKey("list", $"take:{resolvedTake?.ToString() ?? "all"}");
 
-        if (take.HasValue)
+        var items = await _cache.GetOrCreateAsync(cacheKey, async entry =>
         {
-            query = query.Take(take.Value);
-        }
+            ApplyPublicNewsCacheOptions(entry);
 
-        return await query.ToListAsync(cancellationToken);
+            var query = CreatePublishedPostCardProjection(CreatePublishedPostsQuery());
+            if (resolvedTake.HasValue)
+            {
+                query = query.Take(resolvedTake.Value);
+            }
+
+            var posts = await query.ToListAsync(cancellationToken);
+            return posts.Select(MapToPostCard).ToList();
+        });
+
+        return items ?? [];
     }
 
-    public async Task<IReadOnlyList<Post>> GetPublishedPostsByCategoryAsync(string? category, int? take = null, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<PostCardViewModel>> GetPublishedPostCardsPageAsync(string? category, int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        var query = ApplyCategoryFilter(CreatePublishedPostsQuery(), category);
-
-        if (take.HasValue)
-        {
-            query = query.Take(take.Value);
-        }
-
-        return await query.ToListAsync(cancellationToken);
-    }
-
-    public async Task<PagedResult<Post>> GetPublishedPostsPageAsync(string? category, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
+        var normalizedCategory = NewsCategories.NormalizeCategory(category);
         var resolvedPage = Math.Max(1, page);
         var resolvedPageSize = pageSize > 0 ? pageSize : 9;
-        var query = ApplyCategoryFilter(CreatePublishedPostsQuery(), category);
+        var cacheKey = BuildCacheKey(
+            "page",
+            $"category:{BuildCategoryCacheToken(normalizedCategory)}",
+            $"page:{resolvedPage}",
+            $"page-size:{resolvedPageSize}");
 
-        var totalItems = await query.CountAsync(cancellationToken);
-        var totalPages = totalItems == 0
-            ? 0
-            : (int)Math.Ceiling(totalItems / (double)resolvedPageSize);
-
-        if (totalPages > 0 && resolvedPage > totalPages)
+        var pagedResult = await _cache.GetOrCreateAsync(cacheKey, async entry =>
         {
-            resolvedPage = totalPages;
-        }
+            ApplyPublicNewsCacheOptions(entry);
 
-        var items = totalItems == 0
-            ? []
-            : await query
-                .Skip((resolvedPage - 1) * resolvedPageSize)
-                .Take(resolvedPageSize)
-                .ToListAsync(cancellationToken);
+            var query = ApplyCategoryFilter(CreatePublishedPostsQuery(), normalizedCategory);
+            var totalItems = await query.CountAsync(cancellationToken);
+            var totalPages = totalItems == 0
+                ? 0
+                : (int)Math.Ceiling(totalItems / (double)resolvedPageSize);
 
-        return new PagedResult<Post>
+            var currentPage = resolvedPage;
+            if (totalPages > 0 && currentPage > totalPages)
+            {
+                currentPage = totalPages;
+            }
+
+            var items = totalItems == 0
+                ? []
+                : await CreatePublishedPostCardProjection(query)
+                    .Skip((currentPage - 1) * resolvedPageSize)
+                    .Take(resolvedPageSize)
+                    .ToListAsync(cancellationToken);
+
+            return new PagedResult<PostCardViewModel>
+            {
+                Items = items.Select(MapToPostCard).ToList(),
+                Page = currentPage,
+                PageSize = resolvedPageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
+        });
+
+        return pagedResult ?? new PagedResult<PostCardViewModel>
         {
-            Items = items,
             Page = resolvedPage,
-            PageSize = resolvedPageSize,
-            TotalItems = totalItems,
-            TotalPages = totalPages
+            PageSize = resolvedPageSize
         };
     }
 
-    public Task<Post?> GetPostBySlugAsync(string slug, CancellationToken cancellationToken = default)
+    public async Task<Post?> GetPostBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
-        return _dbContext.Posts
+        var normalizedSlug = NormalizeSlug(slug);
+        if (string.IsNullOrWhiteSpace(normalizedSlug))
+        {
+            return null;
+        }
+
+        var cacheKey = BuildCacheKey("detail", $"slug:{normalizedSlug}");
+        if (_cache.TryGetValue(cacheKey, out Post? cachedPost))
+        {
+            return cachedPost;
+        }
+
+        var post = await _dbContext.Posts
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Slug == slug && x.IsPublished, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Slug == normalizedSlug && x.IsPublished, cancellationToken);
+
+        if (post is not null)
+        {
+            _cache.Set(cacheKey, post, CreatePublicNewsCacheOptions());
+        }
+
+        return post;
     }
 
-    public async Task<IReadOnlyList<Post>> GetRelatedPostsAsync(string category, Guid excludePostId, int take = 3, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PostCardViewModel>> GetRelatedPostCardsAsync(string category, Guid excludePostId, int take = 3, CancellationToken cancellationToken = default)
     {
-        return await ApplyCategoryFilter(CreatePublishedPostsQuery(), category)
-            .Where(x => x.Id != excludePostId)
-            .Take(take)
-            .ToListAsync(cancellationToken);
+        var resolvedTake = take > 0 ? take : 3;
+        var normalizedCategory = NewsCategories.NormalizeCategory(category);
+        var cacheKey = BuildCacheKey(
+            "related",
+            $"category:{BuildCategoryCacheToken(normalizedCategory)}",
+            $"exclude:{excludePostId:N}",
+            $"take:{resolvedTake}");
+
+        var items = await _cache.GetOrCreateAsync(cacheKey, async entry =>
+        {
+            ApplyPublicNewsCacheOptions(entry);
+
+            var posts = await CreatePublishedPostCardProjection(
+                    ApplyCategoryFilter(CreatePublishedPostsQuery(), normalizedCategory)
+                        .Where(x => x.Id != excludePostId))
+                .Take(resolvedTake)
+                .ToListAsync(cancellationToken);
+
+            return posts.Select(MapToPostCard).ToList();
+        });
+
+        return items ?? [];
     }
 
     public async Task<IReadOnlyList<SuggestedPostCategoryViewModel>> GetSuggestedCategoriesAsync(
@@ -104,12 +162,17 @@ public class NewsService : INewsService
         var dailyRotationKey = rotateWithinRecentPool
             ? DateOnly.FromDateTime(DateTime.UtcNow).DayNumber
             : 0;
-        var cacheKey = $"news:suggested-categories:{resolvedLimit}:{resolvedPoolSize}:{rotateWithinRecentPool}:{dailyRotationKey}";
+        var cacheKey = BuildCacheKey(
+            "suggested-categories",
+            $"limit:{resolvedLimit}",
+            $"pool:{resolvedPoolSize}",
+            $"rotate:{rotateWithinRecentPool}",
+            $"day:{dailyRotationKey}");
 
-        return await _cache.GetOrCreateAsync(cacheKey, async entry =>
+        var categories = await _cache.GetOrCreateAsync(cacheKey, async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(SuggestedCategoriesCacheMinutes);
-            entry.Size = 1;
+            entry.SetSize(1);
 
             return await BuildSuggestedCategoriesAsync(
                 resolvedLimit,
@@ -117,7 +180,14 @@ public class NewsService : INewsService
                 rotateWithinRecentPool,
                 dailyRotationKey,
                 cancellationToken);
-        }) ?? [];
+        });
+
+        return categories ?? [];
+    }
+
+    public void InvalidateNewsCache()
+    {
+        Interlocked.Increment(ref _cacheVersion);
     }
 
     private async Task<IReadOnlyList<SuggestedPostCategoryViewModel>> BuildSuggestedCategoriesAsync(
@@ -215,6 +285,82 @@ public class NewsService : INewsService
         }
 
         return query.Where(x => categoryAliases.Contains(x.Category));
+    }
+
+    private static IQueryable<PublicPostListItem> CreatePublishedPostCardProjection(IQueryable<Post> query)
+    {
+        return query.Select(x => new PublicPostListItem
+        {
+            Id = x.Id,
+            Title = x.Title,
+            Slug = x.Slug,
+            ThumbnailUrl = x.ThumbnailUrl,
+            Excerpt = x.Excerpt,
+            Category = x.Category,
+            PublishedAt = x.PublishedAt,
+            UpdatedAt = x.UpdatedAt
+        });
+    }
+
+    private static PostCardViewModel MapToPostCard(PublicPostListItem post)
+    {
+        return new PostCardViewModel
+        {
+            Id = post.Id,
+            Title = post.Title,
+            Slug = post.Slug,
+            Url = $"/tin-tuc/{post.Slug}",
+            ImageUrl = string.IsNullOrWhiteSpace(post.ThumbnailUrl) ? "/images/placeholders/post-card.webp" : post.ThumbnailUrl,
+            Excerpt = post.Excerpt,
+            Category = NewsCategories.GetDisplayName(post.Category),
+            PublishedAt = post.PublishedAt,
+            UpdatedAt = post.UpdatedAt
+        };
+    }
+
+    private static MemoryCacheEntryOptions CreatePublicNewsCacheOptions()
+    {
+        return new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(PublicNewsAbsoluteExpiration)
+            .SetSlidingExpiration(PublicNewsSlidingExpiration)
+            .SetSize(1);
+    }
+
+    private static void ApplyPublicNewsCacheOptions(ICacheEntry entry)
+    {
+        entry.AbsoluteExpirationRelativeToNow = PublicNewsAbsoluteExpiration;
+        entry.SlidingExpiration = PublicNewsSlidingExpiration;
+        entry.SetSize(1);
+    }
+
+    private static string BuildCacheKey(string scope, params string[] segments)
+    {
+        var version = Volatile.Read(ref _cacheVersion);
+        return string.Join(":", new[] { "news", scope, $"v{version}" }.Concat(segments));
+    }
+
+    private static string BuildCategoryCacheToken(string? category)
+    {
+        return string.IsNullOrWhiteSpace(category) ? "all" : category.Trim().ToLowerInvariant();
+    }
+
+    private static string NormalizeSlug(string slug)
+    {
+        return string.IsNullOrWhiteSpace(slug)
+            ? string.Empty
+            : slug.Trim().ToLowerInvariant();
+    }
+
+    private sealed class PublicPostListItem
+    {
+        public Guid Id { get; init; }
+        public string Title { get; init; } = string.Empty;
+        public string Slug { get; init; } = string.Empty;
+        public string? ThumbnailUrl { get; init; }
+        public string Excerpt { get; init; } = string.Empty;
+        public string Category { get; init; } = string.Empty;
+        public DateTimeOffset? PublishedAt { get; init; }
+        public DateTimeOffset UpdatedAt { get; init; }
     }
 
     private sealed record SuggestedPostCategoryPost(
