@@ -69,6 +69,10 @@ public async Task<IActionResult> Edit(int id, ReservationEditViewModel model)
     TempData["SuccessMessage"] = "Cập nhật đặt bàn thành công.";
     return RedirectToAction(nameof(Index));
 }
+
+### Localized Timezone Validation
+*   **Clock Localizing Rule**: Developers are strictly prohibited from using raw `DateTime.Today`, `DateTime.Now`, or `DateTime.UtcNow` to assess localized Vietnamese calendar boundaries in business logic layers. Because hosting environments (AWS/Azure/Neon DB) operate on UTC clocks, direct server clock references cause shifting window mismatches.
+*   **Required Provider**: Use [VietnamHolidayEvaluator.GetVietnamToday()](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/VietnamHolidayEvaluator.cs) to resolve the active calendar day under the local `Asia/Ho_Chi_Minh` timezone (GMT+7).
 ```
 
 ---
@@ -105,3 +109,6 @@ Security checks are enforced to safeguard the site against manipulation, request
 *   **Session Validity Verification**: Standard logins utilize sliding expiration cookie setups. Session integrity is reinforced by `AdminCookieAuthenticationEvents`, checking security stamps on page transitions to disconnect revoked admin accounts instantly.
 *   **Robots Limit**: Header responses inside admin portals must emit `<meta name="robots" content="noindex, nofollow" />` to block automated indexes from crawling internal routes.
 *   **Anti-XSS Validation**: All outputs inside Razor files are HTML-encoded by default. Avoid `@Html.Raw` statements unless rendering trust-verified rich-text post bodies originating from sanitized admin editor fields.
+
+### Input Normalization Rule
+*   **Identity Normalization**: Raw customer inputs (such as phone numbers) must be normalized prior to executing in-memory cache lockups, database checks, or identity comparisons. Sanitization must run through [IdentityNormalizer.NormalizePhone()](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/IdentityNormalizer.cs) to strip whitespace, drop non-numeric characters, and unify country calling prefixes (e.g. converting `+84` and `84` to local `0` formatting) to prevent rate limit bypasses.

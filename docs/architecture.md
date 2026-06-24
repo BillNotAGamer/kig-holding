@@ -36,7 +36,7 @@ KIGHolding/
 │   └── PagedResult.cs        # Generic pagination helper
 ├── Options/                  # Options pattern settings classes (ResendSettings, CloudinarySettings, etc.)
 ├── Properties/               # launchSettings.json configurations
-├── Services/                 # Business logic interfaces & cached implementations (MenuGroupService, BranchService, etc.)
+├── Services/                 # Business logic interfaces, evaluations (VietnamHolidayEvaluator.cs, IdentityNormalizer.cs) & cached implementations (MenuGroupService, BranchService, etc.)
 ├── ViewComponents/           # ViewComponents for reusable components (SiteHeader, SiteFooter, LayoutFallbacks, etc.)
 ├── ViewModels/               # ViewModels for public-facing forms and detail views
 ├── Views/                    # Razor Views for public routes (Home, Menu, News, Reservation, Branch, Contact, Shared)
@@ -65,6 +65,7 @@ The services configured in `Program.cs` isolate database access and external API
 | `IImageStorageService` | Scoped | Handles uploads to Cloudinary or falls back to local storage |
 | `IPasswordHasher<AdminUser>` | Scoped | Secure hashing using PBKDF2 for admin credentials |
 | `AdminCookieAuthenticationEvents`| Scoped | Validates admin session cookie and security stamp consistency |
+| `IMemoryCache` | Singleton | Bounded memory cache (`SizeLimit = 50_000` in `Program.cs`) for rate limit gating |
 
 ---
 

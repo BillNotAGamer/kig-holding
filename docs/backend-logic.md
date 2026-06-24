@@ -72,6 +72,13 @@ public async Task<IActionResult> Create(ReservationCreateRequest request)
 *   **Resource Protection**: Prevents resource-intensive database queries or third-party email API calls on inputs that are fundamentally flawed.
 *   **Consistent Client Feedback**: Generates predictable error feedback using standard Razor helper tags `<span asp-validation-for="...">`.
 
+### Multi-Tier Server-Side Validation Chain
+Once a request passes the initial `ModelState` gateway, the business service layer ([ReservationService.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/ReservationService.cs)) processes it through a strict sequential validation pipeline:
+1. **Past Date Check**: Validates that the requested reservation date is not in the past relative to Vietnam Standard Time (GMT+7).
+2. **Weekend & Holiday Check**: Evaluates if the reservation date falls on a restricted weekend (Saturday/Sunday) or a statutory/lunar holiday (using [VietnamHolidayEvaluator.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/VietnamHolidayEvaluator.cs)).
+3. **In-Memory Rate Limiting Gate**: Checks the memory cache for active locks on the normalized phone number to block spam submissions within a 10-minute window.
+4. **Database Parameter Validation**: Assures validity of branch IDs, capacity bounds, and session slots prior to storage execution.
+
 ---
 
 ## 3. Cached Service Implementations
@@ -107,6 +114,11 @@ public async Task<IReadOnlyList<Branch>> GetActiveBranchesAsync(CancellationToke
 *   **Key patterns**: `news:categories:active` and list filters.
 *   **Duration**: 5 minutes sliding expiration.
 
+### 4. Reservation Rate Limiting ([ReservationService](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/ReservationService.cs))
+*   **Key Pattern**: `res_lock:phone:{NormalizedPhone}` where `{NormalizedPhone}` is normalized by [IdentityNormalizer.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/IdentityNormalizer.cs).
+*   **Duration**: 10 minutes absolute expiration.
+*   **Memory Defense**: Configured via `options.SizeLimit = 50_000` in `Program.cs` to prevent memory exhaustion, with each cache lock entry registered with a size of `1`.
+
 ---
 
 ## 4. Cache Invalidation Patterns
@@ -130,3 +142,20 @@ public void InvalidateActiveBranchesCache()
 ```
 
 This guarantees that subsequent client requests bypass the cache, query PostgreSQL for fresh records, and re-cache the updated data.
+
+---
+
+## 5. PostgreSQL Advisory Lock Concurrency Control
+
+To prevent race conditions where a client submits multiple overlapping reservations simultaneously at the exact same millisecond, the application employs a transaction-bound, write-exclusive locking mechanism:
+
+### Advisory Locking Workflow
+1. **Active Transaction Begin**: A database transaction is opened with an isolation level of `ReadCommitted`.
+2. **Transaction-Scope Lock Acquisition**: The service executes a raw SQL command:
+   ```sql
+   SELECT pg_advisory_xact_lock(hashtext(@NormalizedPhone))
+   ```
+   This locks a virtual resource identifier derived from the hash of the normalized phone number.
+3. **Serialized Evaluation**: If another request for the same phone number attempts to run concurrently, it is blocked at the database level and must wait until the current transaction commits or rolls back.
+4. **Safe Verification**: Inside the locked window, the service executes `AnyAsync` checks to ensure the database doesn't already contain a reservation for the client on that day.
+5. **Commit and Auto-Release**: On transaction completion, PostgreSQL automatically releases the advisory lock, ensuring zero residual locking overhead on the server.

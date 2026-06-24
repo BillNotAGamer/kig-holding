@@ -24,6 +24,7 @@ public class SiteSettingService : ISiteSettingService
         return await _cache.GetOrCreateAsync(CacheKey, async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = CacheDuration;
+            entry.Size = 1;
 
             return await _dbContext.SiteSettings
                 .AsNoTracking()

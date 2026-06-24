@@ -24,6 +24,7 @@ public class BranchService : IBranchService
         return await _cache.GetOrCreateAsync(ActiveBranchesCacheKey, async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = ActiveBranchesCacheDuration;
+            entry.Size = 1;
 
             return await _dbContext.Branches
                 .AsNoTracking()

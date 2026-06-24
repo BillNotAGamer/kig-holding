@@ -109,6 +109,7 @@ public class NewsService : INewsService
         return await _cache.GetOrCreateAsync(cacheKey, async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(SuggestedCategoriesCacheMinutes);
+            entry.Size = 1;
 
             return await BuildSuggestedCategoriesAsync(
                 resolvedLimit,
