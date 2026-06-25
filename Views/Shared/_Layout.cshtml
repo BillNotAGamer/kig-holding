@@ -41,6 +41,7 @@
             ?? "/images/placeholders/champong-hero.webp",
         baseUrl);
     var ogType = ViewData["OgType"]?.ToString() ?? "website";
+    var autoOpenBookingModal = ViewData["AutoOpenBookingModal"] as bool? ?? false;
 }
 
 <!DOCTYPE html>
@@ -87,7 +88,10 @@
         gtag('config', 'AW-17917718766');
     </script>
 </head>
-<body class="min-h-screen bg-brand-light text-brand-dark antialiased">
+<body class="min-h-screen bg-brand-light text-brand-dark antialiased"
+      data-booking-modal-auto-open="@(autoOpenBookingModal ? "true" : null)"
+      data-booking-modal-auto-open-delay="@(autoOpenBookingModal ? "1000" : null)"
+      data-booking-modal-auto-close-delay="@(autoOpenBookingModal ? "5000" : null)">
     @await Component.InvokeAsync("SiteHeader")
 
     <main id="main-content" class="min-h-screen pt-20 lg:pt-[5.5rem]">

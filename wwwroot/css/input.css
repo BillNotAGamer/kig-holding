@@ -486,7 +486,7 @@
     }
   }
 
-  .floating-contact-fab {
+  .floating-contact-wrapper {
     position: fixed;
     right: clamp(1rem, 2vw, 1.75rem);
     bottom: max(1.25rem, calc(env(safe-area-inset-bottom) + 0.5rem));
@@ -494,6 +494,15 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    gap: 0.85rem;
+  }
+
+  .floating-contact-fab {
+    position: relative;
+    display: flex;
+    min-height: 3.85rem;
+    align-items: center;
+    justify-content: flex-end;
   }
 
   body.booking-modal-open {
@@ -983,19 +992,25 @@
   }
 
   .floating-contact-fab__actions {
+    position: absolute;
+    right: calc(100% + 0.75rem);
+    top: 50%;
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.75rem;
-    margin-bottom: 0.85rem;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    transform: translateY(-50%);
+    max-width: min(calc(100vw - 6.5rem), 15rem);
   }
 
   .floating-contact-fab__action {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    flex-shrink: 0;
     opacity: 0;
-    transform: translateY(1rem) scale(0.92);
+    transform: translateX(0.75rem) scale(0.96);
     pointer-events: none;
     transition: opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
     will-change: opacity, transform;
@@ -1003,7 +1018,7 @@
 
   .floating-contact-fab.is-open .floating-contact-fab__action {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(0) scale(1);
     pointer-events: auto;
   }
 
@@ -1020,8 +1035,9 @@
   }
 
   .floating-contact-fab__label {
-    max-width: 0;
-    overflow: hidden;
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.45rem);
     white-space: nowrap;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1029,23 +1045,20 @@
     color: rgba(255, 255, 255, 0.94);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
     opacity: 0;
-    padding: 0;
-    transform: translateX(0.6rem);
+    padding: 0.65rem 0.85rem;
+    transform: translate(-50%, 0.35rem);
     transition:
-      max-width 220ms ease,
       opacity 220ms ease,
-      transform 220ms ease,
-      padding 220ms ease;
+      transform 220ms ease;
     pointer-events: none;
+    z-index: 2;
   }
 
   .floating-contact-fab__action:hover .floating-contact-fab__label,
   .floating-contact-fab__action:focus-visible .floating-contact-fab__label,
   .floating-contact-fab__action:focus-within .floating-contact-fab__label {
-    max-width: 14rem;
     opacity: 1;
-    padding: 0.7rem 0.9rem;
-    transform: translateX(0);
+    transform: translate(-50%, 0);
   }
 
   .floating-contact-fab__icon {
@@ -1070,7 +1083,7 @@
 
   .floating-contact-fab__action:hover .floating-contact-fab__icon,
   .floating-contact-fab__action:focus-visible .floating-contact-fab__icon {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: 0 26px 55px rgba(0, 0, 0, 0.32);
   }
@@ -1097,8 +1110,8 @@
     height: 3.85rem;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    background: #fff;
-    color: #0b0b0b;
+    background: #111827;
+    color: #fff;
     box-shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
     transition: transform 240ms ease, box-shadow 240ms ease;
   }
@@ -1128,9 +1141,7 @@
   }
 
   .floating-contact-fab__brand {
-    font-size: 0.74rem;
-    font-weight: 900;
-    letter-spacing: 0.26em;
+    padding: 0.4rem;
   }
 
   .floating-contact-fab__close {
@@ -1145,36 +1156,55 @@
     transform: scale(0.7) rotate(40deg);
   }
 
-  .floating-contact-fab.is-open .floating-contact-fab__toggle {
-    background: #fff;
-    color: #0b0b0b;
-  }
-
-  .floating-contact-fab.is-open .floating-contact-fab__toggle:hover,
-  .floating-contact-fab.is-open .floating-contact-fab__toggle:focus-visible {
-    background: #fff;
-    color: #0b0b0b;
-  }
-
   .floating-contact-fab.is-open .floating-contact-fab__close {
-    color: #0b0b0b;
+    color: #fff;
     opacity: 1;
     transform: scale(1) rotate(0deg);
   }
 
-  @media (hover: none) {
-    .floating-contact-fab.is-open .floating-contact-fab__label {
-      max-width: 14rem;
-      opacity: 1;
-      padding: 0.7rem 0.9rem;
-      transform: translateX(0);
+  .floating-contact-fab__logo {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+  }
+
+  .floating-contact-fab__logo--kbb {
+    width: 76%;
+    height: 76%;
+  }
+
+  .floating-contact-fab__logo--gogi {
+    width: 72%;
+    height: 72%;
+  }
+
+  .floating-contact-fab__logo--kig {
+    width: 68%;
+    height: 68%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-contact-fab__action,
+    .floating-contact-fab__label,
+    .floating-contact-fab__icon,
+    .floating-contact-fab__toggle,
+    .floating-contact-fab__brand,
+    .floating-contact-fab__close {
+      transition: none;
     }
   }
 
   @media (max-width: 639px) {
-    .floating-contact-fab {
+    .floating-contact-wrapper {
       right: 0.9rem;
       bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.45rem));
+      gap: 0.75rem;
+    }
+
+    .floating-contact-fab__actions {
+      right: calc(100% + 0.55rem);
+      gap: 0.5rem;
+      max-width: min(calc(100vw - 5.65rem), 13rem);
     }
 
     .floating-contact-fab__icon {
@@ -1189,6 +1219,7 @@
 
     .floating-contact-fab__label {
       font-size: 0.82rem;
+      bottom: calc(100% + 0.35rem);
     }
   }
 

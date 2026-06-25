@@ -4,8 +4,9 @@
         return;
     }
 
+    const body = document.body;
     const panel = root.querySelector('[data-booking-modal-panel]');
-    const closeButtons = root.querySelectorAll('[data-booking-modal-close]');
+    const closeButtons = Array.from(root.querySelectorAll('[data-booking-modal-close]'));
     const triggers = document.querySelectorAll('[data-booking-modal-trigger]');
     const backdrop = root.querySelector('[data-booking-modal-backdrop]');
     const form = root.querySelector('[data-booking-modal-form]');
@@ -16,6 +17,7 @@
     const submitButton = root.querySelector('[data-booking-modal-submit]');
     const firstField = root.querySelector('#booking-modal-customer-name');
     const antiForgeryField = form?.querySelector('input[name="__RequestVerificationToken"]');
+    const firstCloseButton = closeButtons.find((button) => button instanceof HTMLElement) ?? null;
     const focusableSelector = [
         'a[href]',
         'button:not([disabled])',
@@ -31,14 +33,104 @@
             noteFieldName: 'DiningOccasionOtherNote'
         }
     ];
+    const autoOpenSessionKey = 'kig:booking-modal:auto-shown';
 
     if (!form || !panel || !summary || !success || !successBody || !submitButton) {
         return;
     }
 
+    const parseDelay = (value, fallback) => {
+        const parsedValue = Number.parseInt(value ?? '', 10);
+        return Number.isFinite(parsedValue) && parsedValue >= 0 ? parsedValue : fallback;
+    };
+
+    const autoOpenEnabled = body?.dataset.bookingModalAutoOpen === 'true';
+    const autoOpenDelay = parseDelay(body?.dataset.bookingModalAutoOpenDelay, 1000);
+    const autoCloseDelay = parseDelay(body?.dataset.bookingModalAutoCloseDelay, 5000);
     const initialSubmitText = submitButton.textContent?.trim() || 'Gửi yêu cầu đặt bàn';
+
     let lastTrigger = null;
     let isSubmitting = false;
+    let openSource = null;
+    let autoOpenTimer = null;
+    let autoCloseTimer = null;
+    let autoUserInteracted = false;
+    let autoOpenHasRun = false;
+    let autoInteractionTrackingArmed = false;
+    let sessionStorageAvailable = null;
+
+    const isModalOpen = () => root.classList.contains('is-open');
+
+    const canUseSessionStorage = () => {
+        if (sessionStorageAvailable !== null) {
+            return sessionStorageAvailable;
+        }
+
+        try {
+            const testKey = `${autoOpenSessionKey}:test`;
+            window.sessionStorage.setItem(testKey, '1');
+            window.sessionStorage.removeItem(testKey);
+            sessionStorageAvailable = true;
+        }
+        catch {
+            sessionStorageAvailable = false;
+        }
+
+        return sessionStorageAvailable;
+    };
+
+    const wasAutoShownThisSession = () => {
+        if (!canUseSessionStorage()) {
+            return false;
+        }
+
+        try {
+            return window.sessionStorage.getItem(autoOpenSessionKey) === 'true';
+        }
+        catch {
+            return false;
+        }
+    };
+
+    const markAutoShownThisSession = () => {
+        if (!canUseSessionStorage()) {
+            return;
+        }
+
+        try {
+            window.sessionStorage.setItem(autoOpenSessionKey, 'true');
+        }
+        catch {
+            // Ignore storage failures and keep the modal functional.
+        }
+    };
+
+    const clearAutoTimers = () => {
+        if (autoOpenTimer !== null) {
+            window.clearTimeout(autoOpenTimer);
+            autoOpenTimer = null;
+        }
+
+        if (autoCloseTimer !== null) {
+            window.clearTimeout(autoCloseTimer);
+            autoCloseTimer = null;
+        }
+
+        autoInteractionTrackingArmed = false;
+    };
+
+    const markAutoInteracted = () => {
+        if (openSource !== 'auto' || !autoInteractionTrackingArmed) {
+            return;
+        }
+
+        autoUserInteracted = true;
+
+        if (autoCloseTimer !== null) {
+            window.clearTimeout(autoCloseTimer);
+            autoCloseTimer = null;
+        }
+    };
 
     const getFocusableElements = () =>
         Array.from(root.querySelectorAll(focusableSelector))
@@ -114,9 +206,81 @@
         submitButton.textContent = submitting ? 'Đang gửi yêu cầu...' : initialSubmitText;
     };
 
-    const setOpen = (open, trigger) => {
+    const focusModal = (focusMode) => {
+        window.requestAnimationFrame(() => {
+            const target = focusMode === 'dialog'
+                ? (panel || firstCloseButton || firstField)
+                : (firstField || panel || firstCloseButton);
+
+            if (target instanceof HTMLElement) {
+                target.focus();
+            }
+        });
+    };
+
+    const armAutoInteractionTracking = () => {
+        autoInteractionTrackingArmed = false;
+
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                if (openSource === 'auto' && isModalOpen()) {
+                    autoInteractionTrackingArmed = true;
+                }
+            });
+        });
+    };
+
+    const scheduleAutoClose = () => {
+        if (openSource !== 'auto' || autoUserInteracted) {
+            return;
+        }
+
+        if (autoCloseTimer !== null) {
+            window.clearTimeout(autoCloseTimer);
+        }
+
+        autoCloseTimer = window.setTimeout(() => {
+            autoCloseTimer = null;
+
+            const hasVisibleValidationState =
+                !summary.hidden ||
+                !success.hidden ||
+                root.querySelector('.booking-modal__field.is-invalid') !== null;
+
+            if (
+                openSource !== 'auto' ||
+                autoUserInteracted ||
+                isSubmitting ||
+                !isModalOpen() ||
+                hasVisibleValidationState
+            ) {
+                return;
+            }
+
+            closeModal({ skipFocusReturn: true });
+        }, autoCloseDelay);
+    };
+
+    const setOpen = (open, trigger, options = {}) => {
+        const {
+            source = open ? 'manual' : openSource,
+            focusMode = 'default',
+            skipFocusReturn = false
+        } = options;
+
         if (open) {
-            lastTrigger = trigger ?? document.activeElement;
+            clearAutoTimers();
+            openSource = source;
+            autoUserInteracted = source === 'manual';
+
+            if (source === 'manual') {
+                lastTrigger = trigger ?? document.activeElement;
+                markAutoShownThisSession();
+            }
+            else {
+                lastTrigger = null;
+            }
+
             resetFeedback(false);
         }
 
@@ -125,30 +289,55 @@
         document.body.classList.toggle('booking-modal-open', open);
 
         if (open) {
-            window.requestAnimationFrame(() => {
-                (firstField || panel).focus();
-            });
+            focusModal(focusMode);
+
+            if (source === 'auto') {
+                armAutoInteractionTracking();
+                scheduleAutoClose();
+            }
+
             return;
         }
 
+        clearAutoTimers();
         setSubmitting(false);
         resetFeedback(form.dataset.completed === 'true');
 
-        if (lastTrigger instanceof HTMLElement && document.contains(lastTrigger)) {
-            lastTrigger.focus();
+        const focusTarget =
+            !skipFocusReturn &&
+            lastTrigger instanceof HTMLElement &&
+            document.contains(lastTrigger)
+                ? lastTrigger
+                : null;
+
+        openSource = null;
+        autoUserInteracted = false;
+        lastTrigger = null;
+
+        if (focusTarget) {
+            focusTarget.focus();
         }
     };
 
-    const openModal = (trigger) => setOpen(true, trigger);
-    const closeModal = () => {
+    const openModal = (trigger, options = {}) => {
+        const source = options.source === 'auto' ? 'auto' : 'manual';
+        const focusMode = options.focusMode === 'dialog' ? 'dialog' : 'default';
+        setOpen(true, trigger, { source, focusMode });
+    };
+
+    const closeModal = (options = {}) => {
         if (isSubmitting) {
             return;
         }
 
-        setOpen(false);
+        setOpen(false, null, {
+            skipFocusReturn: options.skipFocusReturn === true
+        });
     };
 
     const showSummaryErrors = (messages) => {
+        markAutoInteracted();
+
         if (!messages.length) {
             clearSummary();
             return;
@@ -173,6 +362,8 @@
     };
 
     const showFieldErrors = (errors) => {
+        markAutoInteracted();
+
         const summaryMessages = [];
 
         Object.entries(errors || {}).forEach(([fieldName, messages]) => {
@@ -215,6 +406,10 @@
     };
 
     const renderSuccess = (payload) => {
+        markAutoInteracted();
+        markAutoShownThisSession();
+        clearAutoTimers();
+
         const summaryData = payload?.summary || {};
         const summaryItems = [
             ['Họ tên', summaryData.customerName],
@@ -286,10 +481,42 @@
         }
     };
 
+    const scheduleAutoOpenIfEnabled = () => {
+        if (!autoOpenEnabled || autoOpenHasRun || wasAutoShownThisSession()) {
+            return;
+        }
+
+        autoOpenHasRun = true;
+        autoOpenTimer = window.setTimeout(() => {
+            autoOpenTimer = null;
+
+            if (wasAutoShownThisSession()) {
+                return;
+            }
+
+            if (isModalOpen()) {
+                markAutoShownThisSession();
+                return;
+            }
+
+            openModal(null, {
+                source: 'auto',
+                focusMode: 'dialog'
+            });
+            markAutoShownThisSession();
+        }, autoOpenDelay);
+    };
+
     triggers.forEach((trigger) => {
         trigger.addEventListener('click', (event) => {
             event.preventDefault();
-            openModal(trigger);
+            clearAutoTimers();
+            autoUserInteracted = true;
+            markAutoShownThisSession();
+            openModal(trigger, {
+                source: 'manual',
+                focusMode: 'default'
+            });
         });
     });
 
@@ -301,7 +528,35 @@
         backdrop.addEventListener('click', closeModal);
     }
 
+    panel.addEventListener('pointerdown', (event) => {
+        if (event.isTrusted) {
+            markAutoInteracted();
+        }
+    });
+
+    panel.addEventListener('scroll', () => {
+        markAutoInteracted();
+    }, { passive: true });
+
+    root.addEventListener('focusin', (event) => {
+        if (!isModalOpen() || !panel.contains(event.target)) {
+            return;
+        }
+
+        markAutoInteracted();
+    });
+
+    form.addEventListener('input', (event) => {
+        if (event.isTrusted) {
+            markAutoInteracted();
+        }
+    });
+
     root.addEventListener('change', (event) => {
+        if (event.isTrusted) {
+            markAutoInteracted();
+        }
+
         const target = event.target;
         if (!(target instanceof HTMLInputElement)) {
             return;
@@ -320,6 +575,9 @@
         if (isSubmitting) {
             return;
         }
+
+        autoUserInteracted = true;
+        clearAutoTimers();
 
         resetFeedback(false);
         setSubmitting(true);
@@ -372,13 +630,17 @@
     });
 
     root.addEventListener('keydown', (event) => {
+        if (isModalOpen() && event.isTrusted) {
+            markAutoInteracted();
+        }
+
         if (event.key === 'Escape') {
             event.preventDefault();
             closeModal();
             return;
         }
 
-        if (event.key !== 'Tab' || !root.classList.contains('is-open')) {
+        if (event.key !== 'Tab' || !isModalOpen()) {
             return;
         }
 
@@ -403,4 +665,5 @@
     });
 
     syncConditionalFields();
+    scheduleAutoOpenIfEnabled();
 })();

@@ -5,90 +5,176 @@
     var hasZalo = !string.IsNullOrWhiteSpace(Model.ZaloUrl);
     var hasReservation = !string.IsNullOrWhiteSpace(Model.ReservationUrl);
     var hasAnyAction = hasMessenger || hasZalo || hasReservation;
+    var kigLogoUrl = string.IsNullOrWhiteSpace(Model.BrandLogoUrl)
+        ? "/images/general/kig-no-bg-logo.png"
+        : Model.BrandLogoUrl;
 }
 
 @if (hasAnyAction)
 {
-    <div class="floating-contact-fab" data-floating-contact aria-label="Liên hệ nhanh">
-        <div class="floating-contact-fab__actions" data-floating-contact-actions>
-            @if (hasMessenger)
-            {
-                <a href="@Model.FacebookUrl"
-                   class="floating-contact-fab__action floating-contact-fab__action--messenger"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   aria-label="Chat với chúng tôi qua Messenger"
-                   aria-hidden="true"
-                   tabindex="-1"
-                   data-floating-contact-action>
-                    <span class="floating-contact-fab__label">Chat với chúng tôi</span>
-                    <span class="floating-contact-fab__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M7 17.4 3.8 20l.9-4.1A8.2 8.2 0 1 1 20.2 12c0 4.5-3.7 8.2-8.2 8.2-1.8 0-3.6-.6-5-1.8Z"></path>
-                            <path d="m9.3 13 2.1-2.4 3.3 2.4 2.4-3"></path>
-                        </svg>
-                    </span>
-                </a>
-            }
+    var brands = new[]
+    {
+        new
+        {
+            Name = "KBB Cook",
+            LogoUrl = "/images/general/logo-kbbcook.webp",
+            ToggleOpenLabel = "Mở liên hệ nhanh KBB Cook",
+            ToggleCloseLabel = "Đóng liên hệ nhanh KBB Cook",
+            LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--kbb"
+        },
+        new
+        {
+            Name = "Gogi Maru",
+            LogoUrl = "/images/general/logo-gogi-maru.webp",
+            ToggleOpenLabel = "Mở liên hệ nhanh Gogi Maru",
+            ToggleCloseLabel = "Đóng liên hệ nhanh Gogi Maru",
+            LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--gogi"
+        },
+        new
+        {
+            Name = "KIG Holding",
+            LogoUrl = kigLogoUrl,
+            ToggleOpenLabel = "Mở liên hệ nhanh KIG Holding",
+            ToggleCloseLabel = "Đóng liên hệ nhanh KIG Holding",
+            LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--kig"
+        }
+    };
 
-            @if (hasZalo)
-            {
-                <a href="@Model.ZaloUrl"
-                   class="floating-contact-fab__action floating-contact-fab__action--zalo"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   aria-label="Liên hệ qua Zalo"
-                   aria-hidden="true"
-                   tabindex="-1"
-                   data-floating-contact-action>
-                    <span class="floating-contact-fab__label">Zalo</span>
-                    <span class="floating-contact-fab__icon" aria-hidden="true">
-                        <span class="floating-contact-fab__icon-text">Z</span>
-                    </span>
-                </a>
-            }
+    <div class="floating-contact-wrapper" role="group" aria-label="Liên hệ nhanh các thương hiệu">
+        @foreach (var brand in brands)
+        {
+            <div class="floating-contact-fab"
+                 data-floating-contact
+                 data-floating-contact-brand="@brand.Name"
+                 data-floating-contact-open-label="@brand.ToggleOpenLabel"
+                 data-floating-contact-close-label="@brand.ToggleCloseLabel">
+                <div class="floating-contact-fab__actions"
+                     data-floating-contact-actions
+                     aria-hidden="true">
+                    @if (hasMessenger)
+                    {
+                        <a href="@Model.FacebookUrl"
+                           class="floating-contact-fab__action floating-contact-fab__action--messenger"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="Chat với @brand.Name qua Messenger"
+                           aria-hidden="true"
+                           tabindex="-1"
+                           data-floating-contact-action>
+                            <span class="floating-contact-fab__label">Messenger</span>
+                            <span class="floating-contact-fab__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7 17.4 3.8 20l.9-4.1A8.2 8.2 0 1 1 20.2 12c0 4.5-3.7 8.2-8.2 8.2-1.8 0-3.6-.6-5-1.8Z"></path>
+                                    <path d="m9.3 13 2.1-2.4 3.3 2.4 2.4-3"></path>
+                                </svg>
+                            </span>
+                        </a>
+                    }
 
-            @if (hasReservation)
-            {
-                <a href="@Model.ReservationUrl"
-                   class="floating-contact-fab__action floating-contact-fab__action--reservation"
-                   aria-label="Đặt bàn ngay"
-                   data-booking-modal-trigger
-                   aria-hidden="true"
-                   tabindex="-1"
-                   data-floating-contact-action>
-                    <span class="floating-contact-fab__label">Đặt bàn ngay</span>
-                    <span class="floating-contact-fab__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M7 3v3"></path>
-                            <path d="M17 3v3"></path>
-                            <rect x="4" y="5" width="16" height="15" rx="3"></rect>
-                            <path d="M4 10h16"></path>
-                            <path d="M9 14h6"></path>
-                        </svg>
-                    </span>
-                </a>
-            }
-        </div>
+                    @if (hasZalo)
+                    {
+                        <a href="@Model.ZaloUrl"
+                           class="floating-contact-fab__action floating-contact-fab__action--zalo"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="Liên hệ @brand.Name qua Zalo"
+                           aria-hidden="true"
+                           tabindex="-1"
+                           data-floating-contact-action>
+                            <span class="floating-contact-fab__label">Zalo</span>
+                            <span class="floating-contact-fab__icon" aria-hidden="true">
+                                <span class="floating-contact-fab__icon-text">Z</span>
+                            </span>
+                        </a>
+                    }
 
-        <button type="button"
-                class="floating-contact-fab__toggle"
-                aria-label="Mở liên hệ nhanh KIG Holding"
-                aria-expanded="false"
-                data-floating-contact-toggle>
-            <span class="floating-contact-fab__brand" aria-hidden="true">
-                <img src="@Model.BrandLogoUrl"
-                     alt="KIG Holding"
-                     class="object-contain"
-                     decoding="async" />
-            </span>
-            <span class="floating-contact-fab__close" aria-hidden="true">&times;</span>
-        </button>
+                    @if (hasReservation)
+                    {
+                        <a href="@Model.ReservationUrl"
+                           class="floating-contact-fab__action floating-contact-fab__action--reservation"
+                           aria-label="Đặt bàn với @brand.Name"
+                           data-booking-modal-trigger
+                           aria-hidden="true"
+                           tabindex="-1"
+                           data-floating-contact-action>
+                            <span class="floating-contact-fab__label">Đặt bàn</span>
+                            <span class="floating-contact-fab__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7 3v3"></path>
+                                    <path d="M17 3v3"></path>
+                                    <rect x="4" y="5" width="16" height="15" rx="3"></rect>
+                                    <path d="M4 10h16"></path>
+                                    <path d="M9 14h6"></path>
+                                </svg>
+                            </span>
+                        </a>
+                    }
+                </div>
+
+                <button type="button"
+                        class="floating-contact-fab__toggle"
+                        aria-label="@brand.ToggleOpenLabel"
+                        aria-expanded="false"
+                        data-floating-contact-toggle>
+                    <span class="floating-contact-fab__brand" aria-hidden="true">
+                        <img src="@brand.LogoUrl"
+                             alt=""
+                             aria-hidden="true"
+                             width="64"
+                             height="64"
+                             class="@brand.LogoClass"
+                             decoding="async" />
+                    </span>
+                    <span class="floating-contact-fab__close" aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
     </div>
 
     <script>
         (() => {
-            const roots = document.querySelectorAll('[data-floating-contact]:not([data-floating-contact-bound="true"])');
+            const rootSelector = '[data-floating-contact]';
+            const roots = Array.from(document.querySelectorAll(`${rootSelector}:not([data-floating-contact-bound="true"])`));
+
+            if (!roots.length) {
+                return;
+            }
+
+            const getRoots = () => Array.from(document.querySelectorAll(rootSelector));
+
+            const setOpen = (root, open) => {
+                const toggle = root.querySelector('[data-floating-contact-toggle]');
+                const actionsContainer = root.querySelector('[data-floating-contact-actions]');
+                const actions = Array.from(root.querySelectorAll('[data-floating-contact-action]'));
+                const openLabel = root.dataset.floatingContactOpenLabel || 'Mở liên hệ nhanh';
+                const closeLabel = root.dataset.floatingContactCloseLabel || 'Đóng liên hệ nhanh';
+
+                if (!(toggle instanceof HTMLButtonElement) || !(actionsContainer instanceof HTMLElement)) {
+                    return;
+                }
+
+                root.classList.toggle('is-open', open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                toggle.setAttribute('aria-label', open ? closeLabel : openLabel);
+                actionsContainer.setAttribute('aria-hidden', open ? 'false' : 'true');
+
+                actions.forEach((action) => {
+                    action.setAttribute('aria-hidden', open ? 'false' : 'true');
+                    action.setAttribute('tabindex', open ? '0' : '-1');
+                });
+            };
+
+            const closeAllExcept = (activeRoot) => {
+                getRoots().forEach((root) => {
+                    if (root !== activeRoot) {
+                        setOpen(root, false);
+                    }
+                });
+            };
+
+            const closeAll = () => {
+                getRoots().forEach((root) => setOpen(root, false));
+            };
 
             roots.forEach((root) => {
                 root.dataset.floatingContactBound = 'true';
@@ -96,45 +182,48 @@
                 const toggle = root.querySelector('[data-floating-contact-toggle]');
                 const actions = Array.from(root.querySelectorAll('[data-floating-contact-action]'));
 
-                if (!toggle || !actions.length) {
+                if (!(toggle instanceof HTMLButtonElement)) {
                     return;
                 }
 
-                const setOpen = (open) => {
-                    root.classList.toggle('is-open', open);
-                    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-                    toggle.setAttribute('aria-label', open ? 'Đóng liên hệ nhanh KIG Holding' : 'Mở liên hệ nhanh KIG Holding');
-
-                    actions.forEach((action) => {
-                        action.tabIndex = open ? 0 : -1;
-                        action.setAttribute('aria-hidden', open ? 'false' : 'true');
-                    });
-                };
-
-                setOpen(false);
+                setOpen(root, false);
 
                 toggle.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    setOpen(!root.classList.contains('is-open'));
+
+                    const nextOpen = toggle.getAttribute('aria-expanded') !== 'true';
+                    closeAllExcept(root);
+                    setOpen(root, nextOpen);
                 });
 
                 actions.forEach((action) => {
                     action.addEventListener('click', () => {
-                        setOpen(false);
+                        setOpen(root, false);
                     });
                 });
+            });
 
-                document.addEventListener('click', (event) => {
-                    if (!root.contains(event.target)) {
-                        setOpen(false);
-                    }
-                });
+            if (document.documentElement.dataset.floatingContactGlobalBound === 'true') {
+                return;
+            }
 
-                document.addEventListener('keydown', (event) => {
-                    if (event.key === 'Escape') {
-                        setOpen(false);
-                    }
-                });
+            document.documentElement.dataset.floatingContactGlobalBound = 'true';
+
+            document.addEventListener('click', (event) => {
+                if (!(event.target instanceof Node)) {
+                    return;
+                }
+
+                const clickedInsideFloatingContact = getRoots().some((root) => root.contains(event.target));
+                if (!clickedInsideFloatingContact) {
+                    closeAll();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeAll();
+                }
             });
         })();
     </script>
