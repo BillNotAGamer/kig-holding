@@ -13,10 +13,10 @@
     const totalLabel = root.querySelector('[data-champong-hero-total]');
     const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    const autoplayDelay = 6500;
+    const autoplayDelay = 5000;
     const transitionDuration = 700;
 
-    let currentIndex = 0;
+    let currentIndex = -1;
     let autoplayId = null;
     let isHovered = false;
     let isFocused = false;
@@ -152,17 +152,18 @@
     slides.forEach((slide, index) => {
         slide.hidden = index !== 0;
         if ('inert' in slide) {
-            slide.inert = index !== 0;
+            slide.inert = true;
         }
-        slide.setAttribute('aria-hidden', index === 0 ? 'false' : 'true');
-        slide.classList.toggle('is-active', index === 0);
-        slide.classList.toggle('opacity-100', index === 0);
-        slide.classList.toggle('opacity-0', index !== 0);
-        slide.classList.toggle('pointer-events-auto', index === 0);
-        slide.classList.toggle('pointer-events-none', index !== 0);
-        slide.classList.toggle('z-20', index === 0);
-        slide.classList.toggle('z-10', index !== 0);
-        setRevealState(slide, index === 0);
+        slide.setAttribute('aria-hidden', 'true');
+        slide.classList.remove('is-active', 'opacity-100', 'z-20', 'pointer-events-auto');
+        slide.classList.add('opacity-0', 'z-10', 'pointer-events-none');
+        setRevealState(slide, false);
+    });
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            activateSlide(0, false);
+        });
     });
 
     updateCounter(0);

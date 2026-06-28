@@ -2089,7 +2089,7 @@
     }
 
     .floating-contact-fab__toggle {
-        color: #0b0b0b;
+        color: #111827;
         background: #fff;
         border: 1px solid #ffffff2e;
         border-radius: 999px;
@@ -2122,6 +2122,8 @@
         inset: 0
     }
 
+   
+
     .floating-contact-fab__close {
         opacity: 0;
         font-size: 1.85rem;
@@ -2135,14 +2137,11 @@
     }
 
     .floating-contact-fab.is-open .floating-contact-fab__close {
-        color: #0b0b0b;
+        color: #111827;
         opacity: 1;
         transform: scale(1)rotate(0)
     }
 
-    .floating-contact-fab__logo {
-        object-fit: contain;
-    }
 
     @media (prefers-reduced-motion:reduce) {
         .floating-contact-fab__action, .floating-contact-fab__label, .floating-contact-fab__icon, .floating-contact-fab__toggle, .floating-contact-fab__brand, .floating-contact-fab__close {
@@ -5292,6 +5291,21 @@
     .news-detail-media:hover .news-detail-media__image {
         transform: scale(1.04)
     }
+
+    .news-detail-media--hero {
+        height: auto;
+        min-height: 0;
+        overflow: visible
+    }
+
+        .news-detail-media--hero .news-detail-media__image {
+            object-fit: contain;
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            inset: auto
+        }
 
     .news-detail-article {
         box-shadow: 0 24px 70px #00000042

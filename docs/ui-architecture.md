@@ -125,3 +125,14 @@ if (shouldReduceMotion || !supportsObserver || !supportsAnimate) {
     return;
 }
 ```
+
+### Animation Ownership
+*   **Homepage Hero Slider**: Elements inside the hero slider (titles, descriptions, buttons) are exclusively animated by `home-hero-slider.js` using the `data-champong-hero-reveal` attribute. They must **not** also use `data-uw-reveal`.
+*   **General Page Content**: `uw-reveal.js` is reserved for general scroll-reveal sections outside the hero slider. Using both systems on the same element will cause transition conflicts (e.g., hidden content on mobile viewports).
+
+---
+
+## 4. News Details & Related Posts
+
+*   **Article Hero Images**: The main detail image on `/tin-tuc/{slug}` uses a natural aspect ratio (via `.news-detail-media--hero`) to prevent cropping important image content.
+*   **News Grid Cards**: Listing cards and related post cards intentionally keep fixed/cropped thumbnail behavior (`object-cover`) for visual grid consistency. Future changes must not mutate shared `.news-detail-media` base behavior without checking both detail hero and card usages.

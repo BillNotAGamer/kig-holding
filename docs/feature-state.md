@@ -33,6 +33,7 @@ The application is in a stable, optimized state:
 *   **Occasion Tags**: Delimited checkboxes to tag celebration milestones (Birthday, Meeting, etc.).
 *   **Resend Email Alerts**: Sends automated, rich HTML notifications to the business email once a reservation is successfully created.
 *   **Quick Booking Modal**: Responsive slide-over modal for reservation bookings, accessible via headers, footers, and floating contact buttons.
+*   **Floating Contact Routing**: Floating Contact Buttons support brand-specific Facebook/Zalo routing. Truyền Thuyết Champong, Gogi Maru, and KBB Cook each have their own Facebook/Zalo destination. Global `SiteSettings` social URLs remain available for global/footer/contact usage.
 
 ### 4. News & Media Hub (`/tin-tuc`)
 *   **Category Filtration**: Fast AJAX and route-based classification.

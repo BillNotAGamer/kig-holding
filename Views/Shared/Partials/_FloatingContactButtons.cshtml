@@ -1,48 +1,18 @@
 @model KIGHolding.ViewModels.Shared.FloatingContactButtonsViewModel
 
 @{
-    var hasMessenger = !string.IsNullOrWhiteSpace(Model.FacebookUrl);
-    var hasZalo = !string.IsNullOrWhiteSpace(Model.ZaloUrl);
     var hasReservation = !string.IsNullOrWhiteSpace(Model.ReservationUrl);
-    var hasAnyAction = hasMessenger || hasZalo || hasReservation;
-    var kigLogoUrl = string.IsNullOrWhiteSpace(Model.BrandLogoUrl)
-        ? "/images/general/kig-no-bg-logo.png"
-        : Model.BrandLogoUrl;
+    var hasAnyAction = Model.Brands.Count > 0 || hasReservation;
 }
 
 @if (hasAnyAction)
 {
-    var brands = new[]
-    {
-        new
-        {
-            Name = "KBB Cook",
-            LogoUrl = "/images/general/logo-kbbcook.webp",
-            ToggleOpenLabel = "Mở liên hệ nhanh KBB Cook",
-            ToggleCloseLabel = "Đóng liên hệ nhanh KBB Cook",
-            LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--kbb"
-        },
-        new
-        {
-            Name = "Gogi Maru",
-            LogoUrl = "/images/general/logo-gogi-maru.webp",
-            ToggleOpenLabel = "Mở liên hệ nhanh Gogi Maru",
-            ToggleCloseLabel = "Đóng liên hệ nhanh Gogi Maru",
-            LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--gogi"
-        },
-        new
-        {
-            Name = "KIG Holding",
-            LogoUrl = kigLogoUrl,
-            ToggleOpenLabel = "Mở liên hệ nhanh KIG Holding",
-            ToggleCloseLabel = "Đóng liên hệ nhanh KIG Holding",
-            LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--kig"
-        }
-    };
-
     <div class="floating-contact-wrapper" role="group" aria-label="Liên hệ nhanh các thương hiệu">
-        @foreach (var brand in brands)
+        @foreach (var brand in Model.Brands)
         {
+            var hasMessenger = !string.IsNullOrWhiteSpace(brand.FacebookUrl);
+            var hasZalo = !string.IsNullOrWhiteSpace(brand.ZaloUrl);
+
             <div class="floating-contact-fab"
                  data-floating-contact
                  data-floating-contact-brand="@brand.Name"
@@ -53,11 +23,11 @@
                      aria-hidden="true">
                     @if (hasMessenger)
                     {
-                        <a href="@Model.FacebookUrl"
+                        <a href="@brand.FacebookUrl"
                            class="floating-contact-fab__action floating-contact-fab__action--messenger"
                            target="_blank"
                            rel="noopener noreferrer"
-                           aria-label="Chat với @brand.Name qua Messenger"
+                           aria-label="Mở Facebook @brand.Name"
                            aria-hidden="true"
                            tabindex="-1"
                            data-floating-contact-action>
@@ -73,11 +43,11 @@
 
                     @if (hasZalo)
                     {
-                        <a href="@Model.ZaloUrl"
+                        <a href="@brand.ZaloUrl"
                            class="floating-contact-fab__action floating-contact-fab__action--zalo"
                            target="_blank"
                            rel="noopener noreferrer"
-                           aria-label="Liên hệ @brand.Name qua Zalo"
+                           aria-label="Mở Zalo @brand.Name"
                            aria-hidden="true"
                            tabindex="-1"
                            data-floating-contact-action>

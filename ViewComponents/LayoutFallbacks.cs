@@ -171,12 +171,48 @@ internal static class LayoutFallbacks
 
     public static FloatingContactButtonsViewModel CreateFloatingButtons(SiteSetting? setting)
     {
+        var brandLogoUrl = string.IsNullOrWhiteSpace(setting?.LogoUrl) ? "/images/general/kig-no-bg-logo.png" : setting!.LogoUrl;
+
         return new FloatingContactButtonsViewModel
         {
             Hotline = string.IsNullOrWhiteSpace(setting?.Hotline) ? "0922 055 755" : setting!.Hotline,
             FacebookUrl = string.IsNullOrWhiteSpace(setting?.FacebookUrl) ? "https://www.facebook.com/champong.official" : setting!.FacebookUrl,
             ZaloUrl = string.IsNullOrWhiteSpace(setting?.ZaloUrl) ? "https://oa.zalo.me/3191309080595223416" : setting!.ZaloUrl,
-            ReservationUrl = "/dat-ban"
+            ReservationUrl = "/dat-ban",
+            BrandLogoUrl = brandLogoUrl,
+            Brands =
+            [
+                new FloatingBrandContactLinkViewModel
+                {
+                    Name = "KBB Cook",
+                    LogoUrl = "/images/general/logo-kbbcook.webp",
+                    FacebookUrl = "https://www.facebook.com/kbbcook.buffet",
+                    ZaloUrl = "https://oa.zalo.me/779613344008241689",
+                    ToggleOpenLabel = "Mở liên hệ nhanh KBB Cook",
+                    ToggleCloseLabel = "Đóng liên hệ nhanh KBB Cook",
+                    LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--kbb"
+                },
+                new FloatingBrandContactLinkViewModel
+                {
+                    Name = "Gogi Maru",
+                    LogoUrl = "/images/general/logo-gogi-maru.webp",
+                    FacebookUrl = "https://www.facebook.com/gogimaru.bbq",
+                    ZaloUrl = "https://oa.zalo.me/1430731076415218116",
+                    ToggleOpenLabel = "Mở liên hệ nhanh Gogi Maru",
+                    ToggleCloseLabel = "Đóng liên hệ nhanh Gogi Maru",
+                    LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--gogi"
+                },
+                new FloatingBrandContactLinkViewModel
+                {
+                    Name = "Truyền Thuyết Champong",
+                    LogoUrl = brandLogoUrl,
+                    FacebookUrl = "https://www.facebook.com/champong.official",
+                    ZaloUrl = "https://oa.zalo.me/3191309080595223416",
+                    ToggleOpenLabel = "Mở liên hệ nhanh Truyền Thuyết Champong",
+                    ToggleCloseLabel = "Đóng liên hệ nhanh Truyền Thuyết Champong",
+                    LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--kig"
+                }
+            ]
         };
     }
 
