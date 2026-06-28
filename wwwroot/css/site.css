@@ -5304,7 +5304,8 @@
             height: auto;
             display: block;
             position: relative;
-            inset: auto
+            inset: auto;
+            border-radius: 1.5rem;
         }
 
     .news-detail-article {

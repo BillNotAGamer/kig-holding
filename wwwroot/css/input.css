@@ -3863,14 +3863,15 @@
     overflow: visible;
   }
 
-  .news-detail-media--hero .news-detail-media__image {
-    position: relative;
-    inset: auto;
-    display: block;
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-  }
+    .news-detail-media--hero .news-detail-media__image {
+        position: relative;
+        inset: auto;
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        border-radius: 1.5rem;
+    }
 
   .news-detail-article {
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
