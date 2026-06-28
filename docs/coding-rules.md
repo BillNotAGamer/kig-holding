@@ -88,8 +88,9 @@ To avoid filename collisions and sanitize incoming vectors, all filenames are re
 3.  **Final Pattern**: Resulting path matches: `{sanitized-slug}-{guid-hex}.{extension}`.
 
 ### Storage Locations
-*   **Menu Group Covers**: Restricted locally to WebRoot (`/uploads/menu-groups/covers/`) to ensure fast cached loading of menu categories.
-*   **Branches, Posts, Menu Flipbook Pages**: Transferred to the **Cloudinary** media library configuration (or localized fallback structures if keys are absent) matching the folder prefix `kig-holding/`.
+*   **Configurable Provider**: Image routing is handled via `ImageStorageSettings.Provider`.
+*   **LocalVolume (Default)**: Uploads are saved to an external persistent volume (e.g. `/data/uploads` in production) and the database stores the public relative path (e.g. `/uploads/posts/...`). No files are stored in the git repository or ephemeral container filesystem.
+*   **Cloudinary**: Supported for legacy backward compatibility and potential future use. If active, files are transferred to the Cloudinary media library.
 *   **Format Constraints**: Implement WebP format standardizations for user-facing layouts (`champong-hero.webp` and `post-card.webp`) to optimize visual loading.
 
 ---

@@ -12,7 +12,7 @@ The application is built on a modern, scalable web stack:
 *   **ORM**: Entity Framework Core 10.0 (Npgsql.EntityFrameworkCore.PostgreSQL)
 *   **CSS Utility Framework**: Tailwind CSS (compiled via `@tailwindcss/cli` via PostCSS)
 *   **Email Dispatch**: Resend API Integration (via Resend .NET SDK)
-*   **Image Storage**: Cloudinary (fallback to Local Storage for offline environments)
+*   **Image Storage**: Configurable Provider-based (LocalVolume default for Railway Hobby, Cloudinary supported for legacy URLs)
 
 ---
 

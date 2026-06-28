@@ -16,15 +16,18 @@ public sealed class ImageStorageService : IImageStorageService
 
     private readonly IWebHostEnvironment _environment;
     private readonly CloudinarySettings _settings;
+    private readonly ImageStorageSettings _imageSettings;
     private readonly ILogger<ImageStorageService> _logger;
 
     public ImageStorageService(
         IWebHostEnvironment environment,
-        IOptions<CloudinarySettings> settings,
+        IOptions<CloudinarySettings> cloudinarySettings,
+        IOptions<ImageStorageSettings> imageSettings,
         ILogger<ImageStorageService> logger)
     {
         _environment = environment;
-        _settings = settings.Value;
+        _settings = cloudinarySettings.Value;
+        _imageSettings = imageSettings.Value;
         _logger = logger;
     }
 
@@ -32,14 +35,29 @@ public sealed class ImageStorageService : IImageStorageService
     {
         ArgumentNullException.ThrowIfNull(file);
 
-        if (file.Length <= 0)
+        if (file.Length <= 0 || file.Length > _imageSettings.MaxFileSizeBytes)
         {
-            throw new InvalidOperationException("Tệp ảnh tải lên không hợp lệ.");
+            throw new InvalidOperationException($"Tệp ảnh không hợp lệ hoặc vượt quá dung lượng tối đa ({_imageSettings.MaxFileSizeBytes / 1024 / 1024}MB).");
         }
 
-        if (category == ImageCategory.MenuGroupCovers)
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!_imageSettings.AllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Định dạng tệp không được hỗ trợ.");
+        }
+
+        if (!_imageSettings.AllowedContentTypes.Contains(file.ContentType, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Định dạng nội dung tệp không được hỗ trợ.");
+        }
+
+        if (string.Equals(_imageSettings.Provider, "LocalVolume", StringComparison.OrdinalIgnoreCase))
         {
             return await UploadLocallyAsync(file, category, cancellationToken);
+        }
+        else if (!string.Equals(_imageSettings.Provider, "Cloudinary", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException($"Cấu hình ImageStorage Provider không hợp lệ: '{_imageSettings.Provider}'");
         }
 
         var folder = GetCloudinaryFolder(category);
@@ -100,14 +118,10 @@ public sealed class ImageStorageService : IImageStorageService
             return;
         }
 
-        if (imageUrlOrPath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+        if (imageUrlOrPath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) ||
+            imageUrlOrPath.StartsWith(_imageSettings.PublicBasePath, StringComparison.OrdinalIgnoreCase))
         {
             TryDeleteLocalFile(imageUrlOrPath, category);
-            return;
-        }
-
-        if (category == ImageCategory.MenuGroupCovers)
-        {
             return;
         }
 
@@ -177,7 +191,8 @@ public sealed class ImageStorageService : IImageStorageService
         {
             await using var fileStream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
             await file.CopyToAsync(fileStream, cancellationToken);
-            return $"{GetLocalUrlPrefix(category)}/{uniqueFileName}";
+            var publicPath = _imageSettings.PublicBasePath.TrimEnd('/');
+            return $"{publicPath}/{GetCategorySubPath(category)}/{uniqueFileName}";
         }
         catch (Exception exception)
         {
@@ -188,17 +203,30 @@ public sealed class ImageStorageService : IImageStorageService
 
     private void TryDeleteLocalFile(string imageUrlOrPath, ImageCategory category)
     {
-        var expectedPrefix = GetLocalUrlPrefix(category);
-        if (!imageUrlOrPath.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+        var publicPath = _imageSettings.PublicBasePath.TrimEnd('/');
+        var expectedPrefix = $"{publicPath}/{GetCategorySubPath(category)}";
+
+        if (!imageUrlOrPath.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase) &&
+            !imageUrlOrPath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
         try
         {
-            var trimmedPath = imageUrlOrPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
-            var fullPath = Path.GetFullPath(Path.Combine(_environment.WebRootPath, trimmedPath));
-            var uploadsRoot = Path.GetFullPath(GetLocalPhysicalFolder(category));
+            var urlBase = imageUrlOrPath.StartsWith(publicPath, StringComparison.OrdinalIgnoreCase)
+                ? publicPath
+                : "/uploads";
+            
+            var relativePath = imageUrlOrPath[urlBase.Length..].TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            
+            var rootPath = _imageSettings.RootPath;
+            var externalUploadRoot = Path.IsPathRooted(rootPath) 
+                ? rootPath 
+                : Path.Combine(_environment.ContentRootPath, rootPath);
+            
+            var fullPath = Path.GetFullPath(Path.Combine(externalUploadRoot, relativePath));
+            var uploadsRoot = Path.GetFullPath(externalUploadRoot);
 
             if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
             {
@@ -297,8 +325,6 @@ public sealed class ImageStorageService : IImageStorageService
             return null;
         }
 
-        // Phase 1 compatibility: the database stores only the delivery URL today.
-        // Deriving public_id from the URL is conservative and limited to our configured folder prefix.
         publicIdSegments[^1] = Path.GetFileNameWithoutExtension(publicIdSegments[^1]);
         if (string.IsNullOrWhiteSpace(publicIdSegments[^1]))
         {
@@ -322,37 +348,30 @@ public sealed class ImageStorageService : IImageStorageService
             ImageCategory.Branches => $"{folderPrefix}/branches",
             ImageCategory.Posts => $"{folderPrefix}/posts",
             ImageCategory.MenuPages => $"{folderPrefix}/menu-pages",
-            ImageCategory.MenuGroupCovers => throw new InvalidOperationException("Menu group covers stay on local storage."),
+            ImageCategory.MenuGroupCovers => $"{folderPrefix}/menu-group-covers",
             _ => throw new ArgumentOutOfRangeException(nameof(category), category, "Unsupported image category.")
         };
     }
 
     private string GetLocalPhysicalFolder(ImageCategory category)
     {
-        var relativeFolder = GetLocalRelativeFolder(category).Replace('/', Path.DirectorySeparatorChar);
-        return Path.Combine(_environment.WebRootPath, relativeFolder);
+        var rootPath = _imageSettings.RootPath;
+        var externalUploadRoot = Path.IsPathRooted(rootPath) 
+            ? rootPath 
+            : Path.Combine(_environment.ContentRootPath, rootPath);
+            
+        var categoryPath = GetCategorySubPath(category).Replace('/', Path.DirectorySeparatorChar);
+        return Path.Combine(externalUploadRoot, categoryPath);
     }
 
-    private static string GetLocalUrlPrefix(ImageCategory category)
+    private static string GetCategorySubPath(ImageCategory category)
     {
         return category switch
         {
-            ImageCategory.Branches => "/uploads/branches",
-            ImageCategory.Posts => "/uploads/posts",
-            ImageCategory.MenuPages => "/uploads/menu-pages",
-            ImageCategory.MenuGroupCovers => "/uploads/menu-groups/covers",
-            _ => throw new ArgumentOutOfRangeException(nameof(category), category, "Unsupported image category.")
-        };
-    }
-
-    private static string GetLocalRelativeFolder(ImageCategory category)
-    {
-        return category switch
-        {
-            ImageCategory.Branches => "uploads/branches",
-            ImageCategory.Posts => "uploads/posts",
-            ImageCategory.MenuPages => "uploads/menu-pages",
-            ImageCategory.MenuGroupCovers => "uploads/menu-groups/covers",
+            ImageCategory.Branches => "branches",
+            ImageCategory.Posts => "posts",
+            ImageCategory.MenuPages => "menu-pages",
+            ImageCategory.MenuGroupCovers => "menu-groups/covers",
             _ => throw new ArgumentOutOfRangeException(nameof(category), category, "Unsupported image category.")
         };
     }

@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>4d0dc236-a388-46b9-a1c6-bdc1af4d7721</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +31,7 @@
     <Folder Include="wwwroot\images\general\" />
     <Folder Include="wwwroot\images\menu\" />
     <Folder Include="wwwroot\images\introduce\" />
+    <Folder Include="wwwroot\uploads\posts\" />
   </ItemGroup>
 
 </Project>

@@ -47,7 +47,7 @@ The application is in a stable, optimized state:
 *   **Secure Authentication**: Standard cookie authentication flow backed by lockouts.
 *   **Sidebar Routing Navigation**: Highlighted active markers using `ViewContext` paths.
 *   **Global Layout Toast Alerts**: Integrated notification alerts using `TempData` banners.
-*   **Image Upload Pipeline**: Streamlined uploads mapping metadata to Cloudinary or localized fallback directories.
+*   **Image Upload Pipeline**: Railway Volume-ready local persistent storage via `LocalVolume` provider. Existing Cloudinary URLs remain completely backward-compatible.
 
 ---
 

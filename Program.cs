@@ -4,9 +4,11 @@ using KIGHolding.Options;
 using KIGHolding.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Net.Http.Headers;
 using Resend;
 
@@ -15,6 +17,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+
+// HTTP multipart request limits are slightly higher (60MB) to account for form-data overhead,
+// while the application-level image file validation strictly remains 50MB.
+const long MultipartUploadRequestLimitBytes = 60L * 1024 * 1024;
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = MultipartUploadRequestLimitBytes;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = MultipartUploadRequestLimitBytes;
+});
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -58,6 +74,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.Configure<ImageStorageSettings>(builder.Configuration.GetSection("ImageStorage"));
 builder.Services.Configure<ResendSettings>(builder.Configuration.GetSection("ResendSettings"));
 builder.Services.Configure<AdminBootstrapSettings>(builder.Configuration.GetSection("AdminBootstrap"));
 builder.Services.AddResend(options =>
@@ -98,6 +115,8 @@ else
 
 app.UseResponseCompression();
 app.UseHttpsRedirection();
+
+// Serve standard wwwroot assets
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = context =>
@@ -126,6 +145,26 @@ app.UseStaticFiles(new StaticFileOptions
         }
     }
 });
+
+// Configure external static files for uploads (Railway Volume support)
+var imageStorageConfig = app.Configuration.GetSection("ImageStorage").Get<ImageStorageSettings>() ?? new ImageStorageSettings();
+var externalUploadRoot = Path.IsPathRooted(imageStorageConfig.RootPath) 
+    ? imageStorageConfig.RootPath 
+    : Path.Combine(builder.Environment.ContentRootPath, imageStorageConfig.RootPath);
+
+// Ensure directory exists so FileProvider doesn't crash on startup
+Directory.CreateDirectory(externalUploadRoot);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(externalUploadRoot),
+    RequestPath = imageStorageConfig.PublicBasePath,
+    OnPrepareResponse = context =>
+    {
+        context.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=86400";
+    }
+});
+
 app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 app.UseRouting();
