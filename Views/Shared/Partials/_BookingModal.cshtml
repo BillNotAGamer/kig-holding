@@ -40,12 +40,12 @@
     var defaultTime = "18:00";
 }
 
-<div class="booking-modal"
+<div class="booking-modal booking-modal--compact"
      data-booking-modal
      aria-hidden="true">
     <div class="booking-modal__backdrop" data-booking-modal-backdrop></div>
 
-    <div class="booking-modal__panel"
+    <div class="booking-modal__panel booking-modal__panel--compact"
          data-booking-modal-panel
          role="dialog"
          aria-modal="true"
@@ -53,7 +53,7 @@
          aria-describedby="booking-modal-description"
          tabindex="-1">
         <div class="booking-modal__header">
-            <div>
+            <div class="booking-modal__header-main">
                 <p class="booking-modal__eyebrow">Quick Reservation</p>
                 <h2 id="booking-modal-title" class="booking-modal__title">Giữ bàn nhanh trong vài bước</h2>
                 <p id="booking-modal-description" class="booking-modal__description">
@@ -61,12 +61,14 @@
                 </p>
             </div>
 
-            <button type="button"
-                    class="booking-modal__close"
-                    aria-label="Đóng đặt bàn nhanh"
-                    data-booking-modal-close>
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <div class="booking-modal__header-actions">
+                <button type="button"
+                        class="booking-modal__close"
+                        aria-label="Đóng đặt bàn nhanh"
+                        data-booking-modal-close>
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         </div>
 
         <form method="post"
@@ -80,8 +82,10 @@
             <div class="booking-modal__summary" data-booking-modal-summary hidden aria-live="polite"></div>
 
             <div class="booking-modal__form-body" data-booking-modal-form-body>
-                <div class="booking-modal__grid">
-                    <label class="booking-modal__field booking-modal__field--span-2">
+                <div class="booking-modal__content-shell booking-modal__landscape-grid">
+                    <section class="booking-modal__section booking-modal__section--core">
+                        <div class="booking-modal__core-grid booking-modal__grid">
+                            <label class="booking-modal__field booking-modal__field--span-2 booking-modal__field--half">
                         <span class="booking-modal__label">Họ tên</span>
                         <input id="booking-modal-customer-name"
                                name="CustomerName"
@@ -93,7 +97,7 @@
                         <p class="booking-modal__field-error" data-booking-modal-error-for="CustomerName"></p>
                     </label>
 
-                    <label class="booking-modal__field booking-modal__field--span-2">
+                            <label class="booking-modal__field booking-modal__field--span-2 booking-modal__field--half">
                         <span class="booking-modal__label">Số điện thoại</span>
                         <input id="booking-modal-phone-number"
                                name="PhoneNumber"
@@ -105,7 +109,7 @@
                         <p class="booking-modal__field-error" data-booking-modal-error-for="PhoneNumber"></p>
                     </label>
 
-                    <label class="booking-modal__field">
+                            <label class="booking-modal__field booking-modal__field--third">
                         <span class="booking-modal__label">Số khách</span>
                         <input id="booking-modal-guest-count"
                                name="GuestCount"
@@ -118,7 +122,7 @@
                         <p class="booking-modal__field-error" data-booking-modal-error-for="GuestCount"></p>
                     </label>
 
-                    <label class="booking-modal__field">
+                            <label class="booking-modal__field booking-modal__field--third">
                         <span class="booking-modal__label">Ngày đến</span>
                         <input id="booking-modal-reservation-date"
                                name="ReservationDate"
@@ -129,7 +133,7 @@
                         <p class="booking-modal__field-error" data-booking-modal-error-for="ReservationDate"></p>
                     </label>
 
-                    <label class="booking-modal__field">
+                            <label class="booking-modal__field booking-modal__field--third">
                         <span class="booking-modal__label">Giờ đến</span>
                         <input id="booking-modal-reservation-time"
                                name="ReservationTime"
@@ -140,7 +144,7 @@
                         <p class="booking-modal__field-error" data-booking-modal-error-for="ReservationTime"></p>
                     </label>
 
-                    <label class="booking-modal__field booking-modal__field--span-3">
+                            <label class="booking-modal__field booking-modal__field--span-3 booking-modal__field--full">
                         <span class="booking-modal__label">Chi nhánh</span>
                         <select id="booking-modal-branch-id"
                                 name="BranchId"
@@ -161,8 +165,11 @@
                         </select>
                         <p class="booking-modal__field-error" data-booking-modal-error-for="BranchId"></p>
                     </label>
+                        </div>
+                    </section>
 
-                    <fieldset class="booking-modal__field booking-modal__field--span-3 booking-modal__option-group">
+                    <section class="booking-modal__section booking-modal__occasion-section">
+                        <fieldset class="booking-modal__field booking-modal__field--span-3 booking-modal__field--full booking-modal__option-group">
                         <legend class="booking-modal__label booking-modal__label--static">Hình thức dùng bữa</legend>
                         <p class="booking-modal__option-hint">Chọn một hình thức dùng bữa gần nhất với buổi ăn của bạn.</p>
                         <div class="booking-modal__check-grid">
@@ -182,7 +189,7 @@
                         <p class="booking-modal__field-error" data-booking-modal-error-for="DiningOccasionCode"></p>
                     </fieldset>
 
-                    <div class="booking-modal__field booking-modal__field--span-3" data-booking-modal-other-field="dining-occasion" hidden>
+                        <div class="booking-modal__field booking-modal__field--span-3 booking-modal__field--full" data-booking-modal-other-field="dining-occasion" hidden>
                         <label for="booking-modal-dining-occasion-other-note" class="booking-modal__label">Ghi chú hình thức khác</label>
                         <input id="booking-modal-dining-occasion-other-note"
                                name="DiningOccasionOtherNote"
@@ -190,9 +197,11 @@
                                class="booking-modal__input"
                                placeholder="Nhập thông tin khi chọn Khác" />
                         <p class="booking-modal__field-error" data-booking-modal-error-for="DiningOccasionOtherNote"></p>
-                    </div>
+                        </div>
+                    </section>
 
-                    <label class="booking-modal__field booking-modal__field--span-3">
+                    <section class="booking-modal__section booking-modal__notes-section">
+                        <label class="booking-modal__field booking-modal__field--span-3 booking-modal__field--full">
                         <span class="booking-modal__label">Ghi chú</span>
                         <textarea id="booking-modal-note"
                                   name="Note"
@@ -201,13 +210,14 @@
                                   placeholder="Ví dụ: cần ghế trẻ em, sinh nhật, bàn yên tĩnh..."></textarea>
                         <p class="booking-modal__field-error" data-booking-modal-error-for="Note"></p>
                     </label>
-                </div>
 
-                <div class="booking-modal__footer">
+                        <div class="booking-modal__footer booking-modal__actions-row">
                     <p class="booking-modal__footnote">
                         Để lại thông tin và chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất.
                     </p>
                     <button type="submit" class="booking-modal__submit" data-booking-modal-submit>Gửi yêu cầu đặt bàn</button>
+                        </div>
+                    </section>
                 </div>
             </div>
 

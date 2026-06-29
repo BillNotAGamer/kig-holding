@@ -1559,9 +1559,11 @@
         background: radial-gradient(circle at 100% 0,#e5091429,#0000 24rem),linear-gradient(#1c1c1cf2,#080808fa);
         border: 1px solid #ffffff1a;
         border-radius: 1.85rem;
-        width: min(100%,44rem);
-        max-height: min(100dvh - 2rem,52rem);
+        flex-direction: column;
+        width: min(100vw - 2rem,74rem);
+        max-height: calc(100dvh - 2rem);
         transition: transform .26s cubic-bezier(.22,1,.36,1);
+        display: flex;
         position: relative;
         overflow: auto;
         transform: translateY(1rem)scale(.98);
@@ -1587,11 +1589,28 @@
     }
 
     .booking-modal__header {
+        z-index: 3;
+        -webkit-backdrop-filter: blur(18px);
+        backdrop-filter: blur(18px);
+        background: linear-gradient(#141414f5,#141414e6),radial-gradient(circle at 100% 0,#e509141f,#0000 20rem);
+        border-bottom: 1px solid #ffffff14;
         justify-content: space-between;
         align-items: flex-start;
         gap: 1rem;
-        padding: clamp(1.4rem,3vw,2rem) clamp(1.35rem,3vw,2rem) 0;
-        display: flex
+        padding: 1.15rem clamp(1.15rem,2.8vw,1.75rem) 1rem;
+        display: flex;
+        position: sticky;
+        top: 0
+    }
+
+    .booking-modal__header-main {
+        flex: auto;
+        min-width: 0
+    }
+
+    .booking-modal__header-actions {
+        flex-shrink: 0;
+        padding-left: .35rem
     }
 
     .booking-modal__eyebrow, .booking-modal__label {
@@ -1606,18 +1625,18 @@
     .booking-modal__title {
         color: #fffaf2;
         text-wrap: balance;
-        margin-top: .9rem;
-        font-size: clamp(1.9rem,4vw,2.85rem);
+        margin-top: .65rem;
+        font-size: clamp(1.75rem,3vw,2.35rem);
         font-weight: 900;
-        line-height: 1.02
+        line-height: 1.05
     }
 
     .booking-modal__description {
         color: #ffffffb8;
-        max-width: 33rem;
-        margin-top: .9rem;
-        font-size: .96rem;
-        line-height: 1.75
+        max-width: 46rem;
+        margin-top: .65rem;
+        font-size: .92rem;
+        line-height: 1.62
     }
 
     .booking-modal__close {
@@ -1646,7 +1665,7 @@
         }
 
     .booking-modal__form {
-        padding: 1.35rem clamp(1.35rem,3vw,2rem) clamp(1.35rem,3vw,2rem)
+        padding: .95rem clamp(1.15rem,2.8vw,1.75rem) clamp(1.15rem,2.8vw,1.6rem)
     }
 
     .booking-modal__form-body[hidden] {
@@ -1655,7 +1674,7 @@
 
     .booking-modal__summary, .booking-modal__success {
         border-radius: 1rem;
-        margin-bottom: 1rem;
+        margin-bottom: .9rem;
         padding: .95rem 1rem;
         font-size: .92rem;
         line-height: 1.65
@@ -1673,23 +1692,42 @@
         border: 1px solid #6ee7b747
     }
 
-    .booking-modal__grid {
-        gap: 1rem;
+    .booking-modal__form-body {
+        min-width: 0
+    }
+
+    .booking-modal__content-shell {
+        gap: .9rem;
+        display: grid
+    }
+
+    .booking-modal__section {
+        background: #ffffff08;
+        border: 1px solid #ffffff14;
+        border-radius: 1.2rem;
+        min-width: 0;
+        padding: .95rem;
+        box-shadow: inset 0 1px #ffffff08
+    }
+
+    .booking-modal__grid, .booking-modal__core-grid, .booking-modal__occasion-section, .booking-modal__notes-section {
+        gap: .9rem;
         display: grid
     }
 
     .booking-modal__field {
+        min-width: 0;
         display: block
     }
 
     .booking-modal__label {
-        margin-bottom: .65rem
+        margin-bottom: .55rem
     }
 
     .booking-modal__field-error {
         color: #fca5a5;
         min-height: 1.2rem;
-        margin-top: .55rem;
+        margin-top: .45rem;
         font-size: .86rem;
         line-height: 1.45;
         display: block
@@ -1701,19 +1739,19 @@
         border: 1px solid #ffffff1f;
         border-radius: 1rem;
         width: 100%;
-        padding: .92rem 1rem;
+        padding: .84rem .95rem;
         font-size: .95rem;
         transition: border-color .18s,box-shadow .18s,background-color .18s;
         box-shadow: inset 0 1px #ffffff0a
     }
 
     .booking-modal__input {
-        min-height: 3.15rem
+        min-height: 3rem
     }
 
     .booking-modal__textarea {
         resize: vertical;
-        min-height: 7.8rem
+        min-height: 6.5rem
     }
 
         .booking-modal__input::placeholder, .booking-modal__textarea::placeholder {
@@ -1772,14 +1810,14 @@
 
     .booking-modal__option-hint {
         color: #ffffff9e;
-        margin-top: .45rem;
+        margin-top: .4rem;
         font-size: .82rem;
-        line-height: 1.65
+        line-height: 1.55
     }
 
     .booking-modal__check-grid {
-        gap: .75rem;
-        margin-top: 1rem;
+        gap: .65rem;
+        margin-top: .85rem;
         display: grid
     }
 
@@ -1788,8 +1826,8 @@
         border: 1px solid #ffffff1f;
         border-radius: 1rem;
         align-items: flex-start;
-        gap: .8rem;
-        padding: .9rem 1rem;
+        gap: .7rem;
+        padding: .8rem .9rem;
         transition: border-color .18s,background-color .18s,transform .18s;
         display: flex
     }
@@ -1820,7 +1858,7 @@
     .booking-modal__check-title {
         color: #fffaf2;
         font-size: .92rem;
-        line-height: 1.65;
+        line-height: 1.45;
         display: block
     }
 
@@ -1830,15 +1868,15 @@
 
     .booking-modal__footer {
         flex-direction: column;
-        gap: 1rem;
-        margin-top: 1.35rem;
+        gap: .85rem;
+        margin-top: 0;
         display: flex
     }
 
     .booking-modal__footnote {
         color: #ffffff9e;
         font-size: .84rem;
-        line-height: 1.7
+        line-height: 1.55
     }
 
         .booking-modal__footnote span {
@@ -1855,7 +1893,7 @@
         justify-content: center;
         align-items: center;
         width: 100%;
-        min-height: 3.25rem;
+        min-height: 3.1rem;
         font-size: .82rem;
         font-weight: 900;
         transition: transform .18s,box-shadow .18s,background-color .18s;
@@ -1937,32 +1975,90 @@
         }
 
     @media (min-width:640px) {
-        .booking-modal__grid {
-            grid-template-columns: repeat(3,minmax(0,1fr))
+        .booking-modal__content-shell {
+            gap: 1rem
         }
 
-        .booking-modal__check-grid {
+        .booking-modal__core-grid, .booking-modal__check-grid {
             grid-template-columns: repeat(2,minmax(0,1fr))
         }
 
-        .booking-modal__field--span-2 {
-            grid-column: span 2
-        }
-
-        .booking-modal__field--span-3 {
+        .booking-modal__field--full, .booking-modal__field--span-3 {
             grid-column: 1/-1
         }
 
         .booking-modal__footer {
             flex-direction: row;
             justify-content: space-between;
-            align-items: center
+            align-items: flex-end
+        }
+
+        .booking-modal__footnote {
+            max-width: 28rem
         }
 
         .booking-modal__submit {
             width: auto;
             min-width: 14rem;
             padding-inline: 1.8rem
+        }
+    }
+
+    @media (min-width:1024px) {
+        .booking-modal__panel {
+            width: min(100vw - 2rem,74rem)
+        }
+
+        .booking-modal__header {
+            gap: 1.25rem;
+            padding: 1.2rem 1.4rem .95rem
+        }
+
+        .booking-modal__description {
+            max-width: none
+        }
+
+        .booking-modal__form {
+            padding: .95rem 1.4rem 1.35rem
+        }
+
+        .booking-modal__section {
+            padding: 1rem 1.05rem
+        }
+
+        .booking-modal__core-grid {
+            grid-template-columns: repeat(6,minmax(0,1fr));
+            gap: .85rem 1rem
+        }
+
+        .booking-modal__field--half {
+            grid-column: span 3
+        }
+
+        .booking-modal__field--third {
+            grid-column: span 2
+        }
+
+        .booking-modal__field--full, .booking-modal__field--span-3 {
+            grid-column: 1/-1
+        }
+
+        .booking-modal__check-grid {
+            grid-template-columns: repeat(3,minmax(0,1fr))
+        }
+
+        .booking-modal__notes-section {
+            grid-template-columns: minmax(0,1.55fr) minmax(18rem,.95fr);
+            align-items: end
+        }
+
+        .booking-modal__textarea {
+            min-height: 5.75rem
+        }
+
+        .booking-modal__footer {
+            justify-content: flex-end;
+            height: 100%
         }
     }
 
@@ -1975,11 +2071,252 @@
         .booking-modal__panel {
             border-radius: 1.5rem;
             width: 100%;
-            max-height: min(100dvh - 1rem,100%)
+            max-height: calc(100dvh - 1rem)
         }
 
         .booking-modal__header {
-            padding-top: 1.25rem
+            gap: .75rem;
+            padding: 1rem 1rem .85rem
+        }
+
+        .booking-modal__title {
+            font-size: 1.6rem
+        }
+
+        .booking-modal__description {
+            font-size: .88rem
+        }
+
+        .booking-modal__form {
+            padding: .85rem 1rem 1rem
+        }
+
+        .booking-modal__section {
+            padding: .85rem
+        }
+
+        .booking-modal__submit, .booking-modal__success-close {
+            min-height: 3rem
+        }
+    }
+
+    .booking-modal--compact .booking-modal__panel {
+        border-radius: 1.65rem;
+        width: min(100vw - 1.5rem,78rem);
+        max-height: min(100dvh - 1.25rem,54rem)
+    }
+
+    .booking-modal--compact .booking-modal__header {
+        gap: .85rem;
+        padding: .95rem clamp(1rem,2.2vw,1.35rem) .78rem
+    }
+
+    .booking-modal--compact .booking-modal__header-actions {
+        padding-left: .15rem
+    }
+
+    .booking-modal--compact .booking-modal__title {
+        margin-top: .45rem;
+        font-size: clamp(1.6rem,2.25vw,2.05rem);
+        line-height: 1.02
+    }
+
+    .booking-modal--compact .booking-modal__description {
+        max-width: 42rem;
+        margin-top: .45rem;
+        font-size: .88rem;
+        line-height: 1.48
+    }
+
+    .booking-modal--compact .booking-modal__close {
+        width: 2.6rem;
+        height: 2.6rem
+    }
+
+        .booking-modal--compact .booking-modal__close span {
+            font-size: 1.55rem
+        }
+
+    .booking-modal--compact .booking-modal__form {
+        padding: .75rem clamp(1rem,2.2vw,1.35rem) 1rem
+    }
+
+    .booking-modal--compact .booking-modal__summary, .booking-modal--compact .booking-modal__success {
+        margin-bottom: .75rem;
+        padding: .8rem .9rem;
+        font-size: .88rem;
+        line-height: 1.5
+    }
+
+    .booking-modal--compact .booking-modal__landscape-grid {
+        gap: .75rem
+    }
+
+    .booking-modal--compact .booking-modal__section {
+        border-radius: 1rem;
+        padding: .8rem .85rem
+    }
+
+    .booking-modal--compact .booking-modal__core-grid, .booking-modal--compact .booking-modal__occasion-section, .booking-modal--compact .booking-modal__notes-section {
+        gap: .75rem
+    }
+
+    .booking-modal--compact .booking-modal__label {
+        margin-bottom: .45rem
+    }
+
+    .booking-modal--compact .booking-modal__field-error {
+        min-height: 1rem;
+        margin-top: .35rem;
+        font-size: .8rem;
+        line-height: 1.32
+    }
+
+    .booking-modal--compact .booking-modal__option-hint {
+        margin-top: .3rem;
+        font-size: .78rem;
+        line-height: 1.45
+    }
+
+    .booking-modal--compact .booking-modal__check-grid {
+        gap: .55rem;
+        margin-top: .7rem
+    }
+
+    .booking-modal--compact .booking-modal__check-item {
+        border-radius: .9rem;
+        gap: .6rem;
+        padding: .7rem .78rem
+    }
+
+    .booking-modal--compact .booking-modal__check-title {
+        font-size: .88rem;
+        line-height: 1.35
+    }
+
+    .booking-modal--compact .booking-modal__footer {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        gap: .65rem;
+        height: auto
+    }
+
+    .booking-modal--compact .booking-modal__footnote {
+        max-width: none;
+        font-size: .78rem;
+        line-height: 1.42
+    }
+
+    .booking-modal--compact .booking-modal__submit {
+        width: 100%;
+        min-width: 0;
+        padding-inline: 1rem
+    }
+
+    @media (min-width:640px) and (max-width:1023px) {
+        .booking-modal--compact .booking-modal__notes-section {
+            grid-template-columns: minmax(0,1fr) minmax(13.5rem,15rem);
+            align-items: end
+        }
+
+        .booking-modal--compact .booking-modal__footer {
+            justify-content: flex-end
+        }
+    }
+
+    @media (min-width:1024px) {
+        .booking-modal--compact .booking-modal__panel {
+            width: min(100vw - 1.5rem,78rem);
+            max-height: min(100dvh - 1.25rem,54rem)
+        }
+
+        .booking-modal--compact .booking-modal__header {
+            gap: .9rem;
+            padding: .9rem 1.1rem .72rem
+        }
+
+        .booking-modal--compact .booking-modal__description {
+            max-width: none
+        }
+
+        .booking-modal--compact .booking-modal__form {
+            padding: .68rem 1.1rem .95rem
+        }
+
+        .booking-modal--compact .booking-modal__landscape-grid {
+            grid-template-columns: minmax(0,1.18fr) minmax(21rem,.82fr);
+            align-items: start;
+            gap: .75rem
+        }
+
+        .booking-modal--compact .booking-modal__section--core {
+            grid-area: 1/1
+        }
+
+        .booking-modal--compact .booking-modal__occasion-section {
+            grid-area: 1/2/span 2;
+            align-content: start
+        }
+
+        .booking-modal--compact .booking-modal__notes-section {
+            grid-area: 2/1;
+            grid-template-columns: minmax(0,1fr) minmax(13.75rem,15.5rem);
+            align-items: end
+        }
+
+        .booking-modal--compact .booking-modal__section {
+            padding: .78rem .85rem
+        }
+
+        .booking-modal--compact .booking-modal__core-grid {
+            gap: .7rem .8rem
+        }
+
+        .booking-modal--compact .booking-modal__input {
+            min-height: 2.72rem;
+            padding: .72rem .82rem;
+            font-size: .92rem
+        }
+
+        .booking-modal--compact .booking-modal__textarea {
+            min-height: 4.65rem;
+            padding: .78rem .88rem
+        }
+
+        .booking-modal--compact .booking-modal__check-grid {
+            grid-template-columns: repeat(2,minmax(0,1fr))
+        }
+
+        .booking-modal--compact .booking-modal__checkbox {
+            margin-top: .1rem
+        }
+
+        .booking-modal--compact .booking-modal__submit {
+            letter-spacing: .14em;
+            min-height: 2.85rem;
+            font-size: .75rem
+        }
+    }
+
+    @media (max-width:639px) {
+        .booking-modal--compact .booking-modal__panel {
+            border-radius: 1.5rem;
+            width: 100%;
+            max-height: calc(100dvh - 1rem)
+        }
+
+        .booking-modal--compact .booking-modal__header {
+            gap: .75rem;
+            padding: 1rem 1rem .85rem
+        }
+
+        .booking-modal--compact .booking-modal__form {
+            padding: .85rem 1rem 1rem
+        }
+
+        .booking-modal--compact .booking-modal__section {
+            padding: .85rem
         }
     }
 
@@ -2122,8 +2459,6 @@
         inset: 0
     }
 
-   
-
     .floating-contact-fab__close {
         opacity: 0;
         font-size: 1.85rem;
@@ -2141,7 +2476,6 @@
         opacity: 1;
         transform: scale(1)rotate(0)
     }
-
 
     @media (prefers-reduced-motion:reduce) {
         .floating-contact-fab__action, .floating-contact-fab__label, .floating-contact-fab__icon, .floating-contact-fab__toggle, .floating-contact-fab__brand, .floating-contact-fab__close {
@@ -5300,12 +5634,12 @@
 
         .news-detail-media--hero .news-detail-media__image {
             object-fit: contain;
+            border-radius: 1.5rem;
             width: 100%;
             height: auto;
             display: block;
             position: relative;
-            inset: auto;
-            border-radius: 1.5rem;
+            inset: auto
         }
 
     .news-detail-article {
