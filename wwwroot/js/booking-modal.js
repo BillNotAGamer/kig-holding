@@ -601,6 +601,13 @@
             const payload = await parseJsonSafely(response);
 
             if (response.ok && payload?.ok) {
+                if (typeof window.kigTikTokTrack === 'function') {
+                    window.kigTikTokTrack('Schedule', {
+                        content_type: 'quick_reservation',
+                        source: 'booking_modal'
+                    });
+                }
+
                 renderSuccess(payload);
                 return;
             }

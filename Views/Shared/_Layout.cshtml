@@ -42,6 +42,11 @@
         baseUrl);
     var ogType = ViewData["OgType"]?.ToString() ?? "website";
     var autoOpenBookingModal = ViewData["AutoOpenBookingModal"] as bool? ?? false;
+    var requestPath = Context.Request.Path.Value ?? string.Empty;
+    var isFranchisePage =
+        requestPath.Equals("/lien-he-nhuong-quyen", StringComparison.OrdinalIgnoreCase)
+        || requestPath.StartsWith("/lien-he-nhuong-quyen/", StringComparison.OrdinalIgnoreCase);
+    var shouldRenderTikTokPixel = !isFranchisePage;
 }
 
 <!DOCTYPE html>
@@ -88,23 +93,10 @@
 
         gtag('config', 'AW-17917718766');
     </script>
-    <!-- TikTok Pixel Code Start -->
-    <script>
-        !function (w, d, t) {
-        w.TiktokAnalyticsObject = t; var ttq = w[t] = w[t] || []; ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie", "holdConsent", "revokeConsent", "grantConsent"], ttq.setAndDefer = function (t, e) { t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } }; for (var i = 0; i < ttq.methods.length; i++)ttq.setAndDefer(ttq, ttq.methods[i]); ttq.instance = function (t) {
-        for (
-        var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++)ttq.setAndDefer(e, ttq.methods[n]); return e
-        }, ttq.load = function (e, n) {
-        var r = "https://analytics.tiktok.com/i18n/pixel/events.js", o = n && n.partner; ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = r, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {}; n = document.createElement("script")
-        ; n.type = "text/javascript", n.async = !0, n.src = r + "?sdkid=" + e + "&lib=" + t; e = document.getElementsByTagName("script")[0]; e.parentNode.insertBefore(n, e)
-        };
-
-
-        ttq.load('D92SOPBC77U4775FL7GG');
-        ttq.page();
-        }(window, document, 'ttq');
-    </script>
-    <!-- TikTok Pixel Code End -->
+    @if (shouldRenderTikTokPixel)
+    {
+        <partial name="~/Views/Shared/Partials/_TikTokPixel.cshtml" />
+    }
 </head>
 
 <body class="min-h-screen bg-brand-light text-brand-dark antialiased"
@@ -130,6 +122,10 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/booking-modal.js" asp-append-version="true"></script>
     <script src="~/js/uw-reveal.js" asp-append-version="true"></script>
+    @if (shouldRenderTikTokPixel)
+    {
+        <script src="~/js/tiktok-tracking.js" asp-append-version="true" defer></script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

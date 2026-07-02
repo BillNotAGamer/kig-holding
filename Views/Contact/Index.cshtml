@@ -22,7 +22,7 @@
                         Gửi thông tin để đội ngũ của chúng tôi hỗ trợ bạn nhanh chóng.
                     </p>
                     <div class="contact-page__actions">
-                        <a href="@hotlineHref" class="contact-page__button contact-page__button--primary">Gọi hotline</a>
+                        <a href="@hotlineHref" class="contact-page__button contact-page__button--primary" data-tiktok-event="Contact" data-tiktok-label="Hotline" data-tiktok-content-type="contact_page">Gọi hotline</a>
                         <a href="/chi-nhanh" class="contact-page__button contact-page__button--secondary">Xem chi nhánh</a>
                     </div>
                 </div>
@@ -39,11 +39,11 @@
                         <div class="contact-page__meta-list" aria-label="Thông tin liên hệ chính">
                             <div class="contact-page__meta-item">
                                 <p class="contact-page__meta-label">Hotline</p>
-                                <a href="@hotlineHref" class="contact-page__meta-value">@Model.Hotline</a>
+                                <a href="@hotlineHref" class="contact-page__meta-value" data-tiktok-event="Contact" data-tiktok-label="Hotline" data-tiktok-content-type="contact_page">@Model.Hotline</a>
                             </div>
                             <div class="contact-page__meta-item">
                                 <p class="contact-page__meta-label">Email</p>
-                                <a href="mailto:@Model.EmailDisplay" class="contact-page__meta-value">@Model.EmailDisplay</a>
+                                <a href="mailto:@Model.EmailDisplay" class="contact-page__meta-value" data-tiktok-event="Contact" data-tiktok-label="Email" data-tiktok-content-type="contact_page">@Model.EmailDisplay</a>
                             </div>
                             <div class="contact-page__meta-item">
                                 <p class="contact-page__meta-label">Địa chỉ</p>
@@ -69,15 +69,15 @@
                             <div class="contact-page__links" aria-label="Liên kết mạng xã hội">
                                 @if (hasFacebook)
                                 {
-                                    <a href="@Model.FacebookUrl" target="_blank" rel="noopener" class="contact-page__link">Facebook</a>
+                                    <a href="@Model.FacebookUrl" target="_blank" rel="noopener" class="contact-page__link" data-tiktok-event="Contact" data-tiktok-label="Facebook" data-tiktok-content-type="contact_page_social">Facebook</a>
                                 }
                                 @if (hasZalo)
                                 {
-                                    <a href="@Model.ZaloUrl" target="_blank" rel="noopener" class="contact-page__link">Zalo</a>
+                                    <a href="@Model.ZaloUrl" target="_blank" rel="noopener" class="contact-page__link" data-tiktok-event="Contact" data-tiktok-label="Zalo" data-tiktok-content-type="contact_page_social">Zalo</a>
                                 }
                                 @if (hasTiktok)
                                 {
-                                    <a href="@Model.TiktokUrl" target="_blank" rel="noopener" class="contact-page__link">TikTok</a>
+                                    <a href="@Model.TiktokUrl" target="_blank" rel="noopener" class="contact-page__link" data-tiktok-event="Contact" data-tiktok-label="TikTok" data-tiktok-content-type="contact_page_social">TikTok</a>
                                 }
                             </div>
                         </div>
@@ -102,7 +102,7 @@
                                                         <span>Nghỉ trưa: @branch.LunchBreakHours</span>
                                                     }
                                                 </div>
-                                                <a href="tel:@branch.Hotline.Replace(" ", string.Empty)" class="contact-page__branch-phone">@branch.Hotline</a>
+                                                <a href="tel:@branch.Hotline.Replace(" ", string.Empty)" class="contact-page__branch-phone" data-tiktok-event="Contact" data-tiktok-label="Branch Hotline" data-tiktok-content-type="contact_branch" data-tiktok-content-name="@branch.Name">@branch.Hotline</a>
                                             </div>
                                         </article>
                                     }
@@ -125,6 +125,12 @@
                         @if (Model.IsSuccess)
                         {
                             <div class="contact-page__notice contact-page__notice--success" data-uw-reveal="fade-up" data-uw-once="true">
+                                <div hidden
+                                     aria-hidden="true"
+                                     data-tiktok-track-onload
+                                     data-tiktok-event="SubmitForm"
+                                     data-tiktok-label="Contact Form Success"
+                                     data-tiktok-content-type="contact_form"></div>
                                 <div class="flex items-start gap-3">
                                     <span class="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-emerald-300/20 bg-emerald-400/10 text-emerald-200" aria-hidden="true">
                                         <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">

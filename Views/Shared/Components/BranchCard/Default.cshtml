@@ -54,7 +54,12 @@
                     <p class="branch-card__label text-[11px] font-black uppercase tracking-[0.16em] text-brand-red">Hotline</p>
                     @if (!string.IsNullOrWhiteSpace(Model.Hotline))
                     {
-                        <a href="@hotlineHref" class="branch-card__value mt-1 inline-flex font-semibold text-white transition hover:text-[#fca5a5]">@Model.Hotline</a>
+                        <a href="@hotlineHref"
+                           class="branch-card__value mt-1 inline-flex font-semibold text-white transition hover:text-[#fca5a5]"
+                           data-tiktok-event="Contact"
+                           data-tiktok-label="Branch Hotline"
+                           data-tiktok-content-type="branch_contact"
+                           data-tiktok-content-name="@Model.Name">@Model.Hotline</a>
                     }
                     else
                     {
@@ -94,7 +99,7 @@
         <div class="branch-card__actions mt-auto grid gap-2 pt-5 sm:grid-cols-3">
             @if (!string.IsNullOrWhiteSpace(Model.GoogleMapUrl) && Model.GoogleMapUrl != "#")
             {
-                <a href="@Model.GoogleMapUrl" class="branch-card__action branch-card__action--secondary inline-flex h-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-3 text-sm font-black text-white transition hover:border-brand-red/60 hover:bg-white/[0.08] hover:text-white" target="_blank" rel="noopener">Chỉ đường</a>
+                <a href="@Model.GoogleMapUrl" class="branch-card__action branch-card__action--secondary inline-flex h-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-3 text-sm font-black text-white transition hover:border-brand-red/60 hover:bg-white/[0.08] hover:text-white" target="_blank" rel="noopener" data-tiktok-event="FindLocation" data-tiktok-label="Branch Map" data-tiktok-content-type="branch_location" data-tiktok-content-name="@Model.Name">Chỉ đường</a>
             }
             else
             {

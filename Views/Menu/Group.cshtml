@@ -30,6 +30,12 @@
 
 <section class="menu-group-viewer menu-group-viewer--dark relative overflow-hidden py-12 text-white sm:py-16 lg:py-20"
          data-menu-group-viewer>
+    <div hidden
+         aria-hidden="true"
+         data-tiktok-track-onload
+         data-tiktok-event="ViewContent"
+         data-tiktok-content-type="menu_group"
+         data-tiktok-content-name="@Model.Name"></div>
     <div class="container-page relative z-10">
         <div class="flex items-center justify-between border-b border-white/10 pb-4" data-uw-reveal="fade-up">
             <a href="@Model.BackUrl"
