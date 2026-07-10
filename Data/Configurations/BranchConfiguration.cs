@@ -38,6 +38,7 @@ public class BranchConfiguration : IEntityTypeConfiguration<Branch>
         builder.Property(x => x.SeoTitle).HasMaxLength(180);
         builder.Property(x => x.SeoDescription).HasMaxLength(320);
         builder.Property(x => x.IsActive).HasDefaultValue(true);
+        builder.Property(x => x.AllowsReservations).IsRequired().HasDefaultValue(true);
         builder.Property(x => x.DisplayOrder).HasDefaultValue(0);
         builder.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
         builder.Property(x => x.UpdatedAt).HasDefaultValueSql("now()");

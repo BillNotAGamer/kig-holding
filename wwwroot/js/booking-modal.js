@@ -15,6 +15,7 @@
     const success = root.querySelector('[data-booking-modal-success]');
     const successBody = root.querySelector('[data-booking-modal-success-body]');
     const submitButton = root.querySelector('[data-booking-modal-submit]');
+    const submitButtonUnavailable = submitButton?.dataset.bookingModalUnavailable === 'true';
     const firstField = root.querySelector('#booking-modal-customer-name');
     const antiForgeryField = form?.querySelector('input[name="__RequestVerificationToken"]');
     const firstCloseButton = closeButtons.find((button) => button instanceof HTMLElement) ?? null;
@@ -201,7 +202,7 @@
 
     const setSubmitting = (submitting) => {
         isSubmitting = submitting;
-        submitButton.disabled = submitting;
+        submitButton.disabled = submitting || submitButtonUnavailable;
         submitButton.classList.toggle('is-loading', submitting);
         submitButton.textContent = submitting ? 'Đang gửi yêu cầu...' : initialSubmitText;
     };

@@ -6,6 +6,7 @@
     ViewData["MetaDescription"] = "Đặt bàn trước tại Truyền Thuyết Champong. Chọn chi nhánh, thời gian và số khách để giữ bàn nhanh chóng.";
     var selectedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(Model.DiningOccasionCode);
     var showDiningOccasionOther = string.Equals(selectedDiningOccasionCode, ReservationOptionCatalog.OtherCode, StringComparison.Ordinal);
+    var hasReservableBranches = Model.Branches.Count > 0;
 }
 
 <main data-reservation-page="index" class="reservation-page--dark">
@@ -50,6 +51,15 @@
                         <div asp-validation-summary="ModelOnly" class="reservation-page__summary"></div>
                     }
 
+                    @if (!hasReservableBranches)
+                    {
+                        <div class="reservation-page__advisory">
+                            Hiện chưa có chi nhánh nào nhận đặt bàn trực tuyến. Vui lòng gọi hotline
+                            <a href="tel:@Model.Hotline.Replace(" ", string.Empty)" class="font-black text-brand-gold">@Model.Hotline</a>
+                            để được hỗ trợ nhanh.
+                        </div>
+                    }
+
                     <div class="grid gap-4 sm:grid-cols-2">
                         <label class="reservation-page__field-group">
                             <span class="reservation-page__field-label">Họ tên</span>
@@ -66,8 +76,11 @@
 
                     <label class="reservation-page__field-group">
                         <span class="reservation-page__field-label">Chi nhánh</span>
-                        <select asp-for="BranchId" class="reservation-page__field reservation-page__select">
-                            <option value="">Chọn chi nhánh</option>
+                        <select asp-for="BranchId"
+                                class="reservation-page__field reservation-page__select"
+                                disabled="@(hasReservableBranches ? null : "disabled")"
+                                aria-disabled="@(hasReservableBranches ? "false" : "true")">
+                            <option value="">@(hasReservableBranches ? "Chọn chi nhánh" : "Hiện chưa có chi nhánh nhận đặt bàn")</option>
                             @foreach (var branch in Model.Branches)
                             {
                                 var lunchBreakSuffix = string.IsNullOrWhiteSpace(branch.LunchBreakHours)
@@ -148,7 +161,10 @@
 
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <p class="reservation-page__form-note">Mọi thông tin được tiếp nhận với trạng thái chờ xác nhận từ nhà hàng.</p>
-                        <button type="submit" class="btn-primary reservation-page__submit">Hoàn tất đặt bàn</button>
+                        <button type="submit"
+                                class="btn-primary reservation-page__submit"
+                                disabled="@(hasReservableBranches ? null : "disabled")"
+                                aria-disabled="@(hasReservableBranches ? "false" : "true")">Hoàn tất đặt bàn</button>
                     </div>
                 </form>
             </div>
@@ -193,7 +209,7 @@
                     }
                     else
                     {
-                        <p class="reservation-page__support-copy">Danh sách chi nhánh sẽ hiển thị sau khi kết nối cơ sở dữ liệu.</p>
+                        <p class="reservation-page__support-copy">Hiện chưa có chi nhánh nào nhận đặt bàn trực tuyến.</p>
                     }
                 </div>
             </aside>

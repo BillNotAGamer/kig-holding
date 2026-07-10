@@ -23,6 +23,7 @@ public class Branch : IUpdatedAtEntity
     public string? SeoTitle { get; set; }
     public string? SeoDescription { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool AllowsReservations { get; set; } = true;
     public int DisplayOrder { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;

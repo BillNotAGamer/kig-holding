@@ -35,6 +35,14 @@ public class BranchService : IBranchService
         }) ?? [];
     }
 
+    public async Task<IReadOnlyList<Branch>> GetReservableBranchesAsync(CancellationToken cancellationToken = default)
+    {
+        var activeBranches = await GetActiveBranchesAsync(cancellationToken);
+        return activeBranches
+            .Where(x => x.AllowsReservations)
+            .ToList();
+    }
+
     public Task<Branch?> GetBranchBySlugAsync(string slug, CancellationToken cancellationToken = default)
     {
         return _dbContext.Branches

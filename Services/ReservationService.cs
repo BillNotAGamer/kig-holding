@@ -104,14 +104,14 @@ public class ReservationService : IReservationService
 
         var branch = await _dbContext.Branches
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == request.BranchId && x.IsActive, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == request.BranchId && x.IsActive && x.AllowsReservations, cancellationToken);
 
         if (branch is null)
         {
             errors.Add(new ReservationServiceError
             {
                 FieldName = nameof(request.BranchId),
-                Message = "Chi nhánh đã chọn không tồn tại hoặc đang tạm ngừng nhận đặt bàn."
+                Message = "Chi nhánh này hiện không nhận đặt bàn. Vui lòng chọn chi nhánh khác."
             });
         }
         else if (!IsWithinOpeningHours(request.ReservationTime, branch.OpeningTime, branch.ClosingTime))

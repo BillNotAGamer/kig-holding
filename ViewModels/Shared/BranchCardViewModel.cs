@@ -20,6 +20,7 @@ public class BranchCardViewModel
     public decimal? AreaSquareMeters { get; set; }
     public int? NumberOfFloors { get; set; }
     public string Description { get; set; } = string.Empty;
+    public bool AllowsReservations { get; set; }
 
     public static BranchCardViewModel FromBranch(Branch branch)
     {
@@ -39,7 +40,8 @@ public class BranchCardViewModel
             Capacity = branch.Capacity,
             AreaSquareMeters = branch.AreaSquareMeters,
             NumberOfFloors = branch.NumberOfFloors,
-            Description = branch.Description
+            Description = branch.Description,
+            AllowsReservations = branch.AllowsReservations
         };
     }
 

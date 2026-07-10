@@ -377,7 +377,7 @@ public class ReservationController : Controller
 
         try
         {
-            return await _branchService.GetActiveBranchesAsync(cancellationToken);
+            return await _branchService.GetReservableBranchesAsync(cancellationToken);
         }
         catch (Exception exception)
         {

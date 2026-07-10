@@ -73,6 +73,9 @@ public class BranchCreateViewModel
     [Display(Name = "Hiển thị công khai")]
     public bool IsActive { get; set; } = true;
 
+    [Display(Name = "Cho phép đặt bàn")]
+    public bool AllowsReservations { get; set; } = true;
+
     [Display(Name = "Thứ tự hiển thị")]
     public int DisplayOrder { get; set; }
 

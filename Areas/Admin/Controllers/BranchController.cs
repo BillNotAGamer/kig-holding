@@ -76,6 +76,7 @@ public class BranchController : AdminBaseController
     {
         return View(new BranchCreateViewModel
         {
+            AllowsReservations = true,
             OpeningTimeText = FormatTime(DefaultOpeningTime),
             ClosingTimeText = FormatTime(DefaultClosingTime)
         });
@@ -129,6 +130,7 @@ public class BranchController : AdminBaseController
             GoogleMapUrl = model.GoogleMapUrl.Trim(),
             ThumbnailUrl = thumbnailUrl,
             IsActive = model.IsActive,
+            AllowsReservations = model.AllowsReservations,
             DisplayOrder = model.DisplayOrder,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
@@ -180,6 +182,7 @@ public class BranchController : AdminBaseController
             GoogleMapUrl = branch.GoogleMapUrl,
             ExistingThumbnailUrl = branch.ThumbnailUrl,
             IsActive = branch.IsActive,
+            AllowsReservations = branch.AllowsReservations,
             DisplayOrder = branch.DisplayOrder
         };
 
@@ -250,6 +253,7 @@ public class BranchController : AdminBaseController
         }
 
         branch.IsActive = model.IsActive;
+        branch.AllowsReservations = model.AllowsReservations;
         branch.DisplayOrder = model.DisplayOrder;
         branch.UpdatedAt = DateTimeOffset.UtcNow;
 

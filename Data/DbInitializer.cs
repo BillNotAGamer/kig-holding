@@ -157,6 +157,7 @@ public class DbInitializer
                 SeoTitle = "Truyền Thuyết Champong Quận 1",
                 SeoDescription = "Chi nhánh Truyền Thuyết Champong Quận 1 phục vụ mì cay, BBQ và món Hàn.",
                 IsActive = true,
+                AllowsReservations = true,
                 DisplayOrder = 1,
                 CreatedAt = SeedTime,
                 UpdatedAt = SeedTime
@@ -182,6 +183,7 @@ public class DbInitializer
                 SeoTitle = "Truyền Thuyết Champong Gò Vấp",
                 SeoDescription = "Nhà hàng Hàn Quốc cay nóng tại Gò Vấp với mì Champong, BBQ và lẩu.",
                 IsActive = true,
+                AllowsReservations = true,
                 DisplayOrder = 2,
                 CreatedAt = SeedTime,
                 UpdatedAt = SeedTime
@@ -207,6 +209,7 @@ public class DbInitializer
                 SeoTitle = "Truyền Thuyết Champong Cầu Giấy",
                 SeoDescription = "Truyền Thuyết Champong Cầu Giấy dành cho khách yêu món Hàn cay nóng.",
                 IsActive = true,
+                AllowsReservations = true,
                 DisplayOrder = 3,
                 CreatedAt = SeedTime,
                 UpdatedAt = SeedTime

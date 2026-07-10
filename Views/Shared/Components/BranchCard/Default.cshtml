@@ -5,6 +5,7 @@
         && !Model.ImageUrl.Contains("/images/placeholders/", StringComparison.OrdinalIgnoreCase)
         && !Model.ImageUrl.Contains("branch-card.webp", StringComparison.OrdinalIgnoreCase)
         && !string.Equals(Model.ImageUrl, "#", StringComparison.OrdinalIgnoreCase);
+    var actionGridClasses = Model.AllowsReservations ? "sm:grid-cols-3" : "sm:grid-cols-2";
 
     var hotlineDigits = string.IsNullOrWhiteSpace(Model.Hotline)
         ? string.Empty
@@ -96,7 +97,7 @@
             </div>
         </div>
 
-        <div class="branch-card__actions mt-auto grid gap-2 pt-5 sm:grid-cols-3">
+        <div class="branch-card__actions mt-auto grid gap-2 pt-5 @actionGridClasses">
             @if (!string.IsNullOrWhiteSpace(Model.GoogleMapUrl) && Model.GoogleMapUrl != "#")
             {
                 <a href="@Model.GoogleMapUrl" class="branch-card__action branch-card__action--secondary inline-flex h-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-3 text-sm font-black text-white transition hover:border-brand-red/60 hover:bg-white/[0.08] hover:text-white" target="_blank" rel="noopener" data-tiktok-event="FindLocation" data-tiktok-label="Branch Map" data-tiktok-content-type="branch_location" data-tiktok-content-name="@Model.Name">Chỉ đường</a>
@@ -115,7 +116,10 @@
                 <span class="branch-card__action branch-card__action--secondary branch-card__action--disabled inline-flex h-10 cursor-not-allowed items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-3 text-sm font-black text-white/45 opacity-55">Gọi ngay</span>
             }
 
-            <a href="/dat-ban?branch=@Model.Slug" class="branch-card__action branch-card__action--primary inline-flex h-10 items-center justify-center rounded-full bg-brand-red px-3 text-sm font-black text-white shadow-soft transition hover:bg-brand-redDark">Đặt bàn</a>
+            @if (Model.AllowsReservations)
+            {
+                <a href="/dat-ban?branch=@Model.Slug" class="branch-card__action branch-card__action--primary inline-flex h-10 items-center justify-center rounded-full bg-brand-red px-3 text-sm font-black text-white shadow-soft transition hover:bg-brand-redDark">Đặt bàn</a>
+            }
         </div>
     </div>
 </article>

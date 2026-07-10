@@ -207,10 +207,21 @@
                     <span asp-validation-for="Description" class="admin-validation"></span>
                 </div>
 
-                <label class="admin-post-checkbox-shell">
-                    <input asp-for="IsActive" type="checkbox" class="admin-checkbox" />
-                    <span>@Html.DisplayNameFor(x => x.IsActive)</span>
-                </label>
+                <div class="space-y-3 rounded-2xl border border-brand-border bg-brand-light/40 p-4 sm:p-5">
+                    <label class="admin-post-checkbox-shell">
+                        <input asp-for="IsActive" type="checkbox" class="admin-checkbox" />
+                        <span>@Html.DisplayNameFor(x => x.IsActive)</span>
+                    </label>
+
+                    <label class="admin-post-checkbox-shell">
+                        <input asp-for="AllowsReservations" type="checkbox" class="admin-checkbox" />
+                        <span>@Html.DisplayNameFor(x => x.AllowsReservations)</span>
+                    </label>
+
+                    <p class="text-xs leading-6 text-brand-gray">
+                        Khi bật, chi nhánh sẽ xuất hiện trong các form đặt bàn và hiển thị nút “Đặt bàn” trên thẻ chi nhánh. Khi tắt, chi nhánh vẫn hiển thị công khai nhưng không nhận yêu cầu đặt bàn mới.
+                    </p>
+                </div>
             </div>
         </div>
 

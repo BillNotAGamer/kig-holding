@@ -19,7 +19,7 @@
     {
         try
         {
-            var branches = await BranchService.GetActiveBranchesAsync();
+            var branches = await BranchService.GetReservableBranchesAsync();
             branchOptions = branches
                 .Select(branch => (
                     branch.Id,
@@ -38,6 +38,7 @@
 
     var defaultDate = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
     var defaultTime = "18:00";
+    var hasReservableBranches = branchOptions.Count > 0;
 }
 
 <div class="booking-modal booking-modal--compact"
@@ -149,8 +150,10 @@
                         <select id="booking-modal-branch-id"
                                 name="BranchId"
                                 class="booking-modal__input booking-modal__select"
+                                disabled="@(hasReservableBranches ? null : "disabled")"
+                                aria-disabled="@(hasReservableBranches ? "false" : "true")"
                                 required>
-                            <option value="">Chọn chi nhánh</option>
+                            <option value="">@(hasReservableBranches ? "Chọn chi nhánh" : "Hiện chưa có chi nhánh nhận đặt bàn")</option>
                             @foreach (var branch in branchOptions)
                             {
                                 var lunchBreakSuffix = string.IsNullOrWhiteSpace(branch.LunchBreakHours)
@@ -158,12 +161,14 @@
                                     : $" • Nghỉ trưa {branch.LunchBreakHours.Replace(" - ", "-", StringComparison.Ordinal)}";
                                 <option value="@branch.Id">@branch.Name - @branch.OpeningHours@lunchBreakSuffix</option>
                             }
-                            @if (branchOptions.Count == 0)
-                            {
-                                <option value="" disabled>Danh sách chi nhánh sẽ hiển thị lại khi kết nối dữ liệu sẵn sàng.</option>
-                            }
                         </select>
                         <p class="booking-modal__field-error" data-booking-modal-error-for="BranchId"></p>
+                        @if (!hasReservableBranches)
+                        {
+                            <p class="text-xs leading-6 text-white/65">
+                                Hiện chưa có chi nhánh nhận đặt bàn. Vui lòng gọi hotline để được hỗ trợ nhanh.
+                            </p>
+                        }
                     </label>
                         </div>
                     </section>
@@ -215,7 +220,12 @@
                     <p class="booking-modal__footnote">
                         Để lại thông tin và chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất.
                     </p>
-                    <button type="submit" class="booking-modal__submit" data-booking-modal-submit>Gửi yêu cầu đặt bàn</button>
+                    <button type="submit"
+                            class="booking-modal__submit"
+                            data-booking-modal-submit
+                            data-booking-modal-unavailable="@(hasReservableBranches ? null : "true")"
+                            disabled="@(hasReservableBranches ? null : "disabled")"
+                            aria-disabled="@(hasReservableBranches ? "false" : "true")">Gửi yêu cầu đặt bàn</button>
                         </div>
                     </section>
                 </div>
