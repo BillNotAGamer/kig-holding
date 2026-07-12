@@ -5,13 +5,27 @@
     ViewData["MetaDescription"] = Model.SeoDescription;
 
     var allCategoriesActive = string.IsNullOrWhiteSpace(Model.SelectedCategorySlug);
-    var featuredCount = Math.Min(Model.Posts.Count, 5);
-    var secondaryStart = featuredCount > 0 ? 1 : 0;
-    var secondaryCount = Math.Min(Math.Max(featuredCount - secondaryStart, 0), 2);
-    var compactStart = secondaryStart + secondaryCount;
-    var compactCount = Math.Max(featuredCount - compactStart, 0);
-    var remainingStart = featuredCount;
-    var remainingCount = Math.Max(Model.Posts.Count - remainingStart, 0);
+    var posts = Model.Posts.ToList();
+    var leadPost = posts.FirstOrDefault();
+    var secondaryPosts = posts.Skip(1).Take(4).ToList();
+    var standardPosts = posts.Skip(5).ToList();
+    var editorialCount = Math.Min(posts.Count, 5);
+    var remainingCount = standardPosts.Count;
+    var editorialModifier = editorialCount switch
+    {
+        1 => "news-editorial--count-1",
+        2 => "news-editorial--count-2",
+        3 => "news-editorial--count-3",
+        4 => "news-editorial--count-4",
+        _ => "news-editorial--count-5"
+    };
+    var secondaryModifier = secondaryPosts.Count switch
+    {
+        1 => "news-editorial__secondary--count-1",
+        2 => "news-editorial__secondary--count-2",
+        3 => "news-editorial__secondary--count-3",
+        _ => "news-editorial__secondary--count-4"
+    };
 
     string BuildNewsUrl(string? categorySlug, int? page = null)
     {
@@ -62,10 +76,10 @@
                 }
             </div>
 
-            @if (Model.Posts.Count > 0)
+            @if (posts.Count > 0 && leadPost is not null)
             {
-                <div class="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-end" data-uw-reveal="fade-up" data-uw-delay="150">
-                    <div>
+                <div class="news-index__summary-row mt-10" data-uw-reveal="fade-up" data-uw-delay="150">
+                    <div class="news-index__summary-copy">
                         <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Tổng quan chuyên mục</p>
                         <h2 class="mt-2 text-[clamp(2rem,3vw,2.8rem)] font-black leading-tight text-white">
                             @(string.IsNullOrWhiteSpace(Model.SelectedCategoryName) ? "Tất cả tin tức" : Model.SelectedCategoryName)
@@ -74,18 +88,18 @@
                             Theo dõi các cập nhật mới nhất theo chủ đề, từ ưu đãi, sự kiện đến hệ thống chi nhánh và món mới.
                         </p>
                         <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
-                        <span class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-white/72">
-                            @Model.TotalItems bài viết
-                        </span>
-                        <span class="rounded-full border border-brand-red/20 bg-brand-red/10 px-4 py-2 text-brand-red">
-                            @featuredCount nổi bật
-                        </span>
-                        @if (Model.TotalPages > 1)
-                        {
                             <span class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-white/72">
-                                Trang @Model.Page / @Model.TotalPages
+                                @Model.TotalItems bài viết
                             </span>
-                        }
+                            <span class="rounded-full border border-brand-red/20 bg-brand-red/10 px-4 py-2 text-brand-red">
+                                @editorialCount nổi bật
+                            </span>
+                            @if (Model.TotalPages > 1)
+                            {
+                                <span class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-white/72">
+                                    Trang @Model.Page / @Model.TotalPages
+                                </span>
+                            }
                         </div>
                     </div>
 
@@ -96,145 +110,98 @@
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-uw-reveal="fade-up" data-uw-delay="180">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-red">Nổi bật</p>
-                            <h3 id="news-featured-heading" class="mt-2 text-2xl font-black text-white sm:text-[2rem]">
+                            <h2 id="news-featured-heading" class="mt-2 text-2xl font-black text-white sm:text-[2rem]">
                                 Dòng tin nổi bật hôm nay
-                            </h3>
+                            </h2>
                         </div>
                         <p class="max-w-2xl text-sm leading-7 text-white/60 sm:text-right">
                             Những bài viết quan trọng nhất được đặt ở đầu trang để tạo nhịp đọc rõ ràng hơn trước khi đi vào danh sách đầy đủ.
                         </p>
                     </div>
 
-                    <div class="mt-8 grid gap-5 lg:grid-cols-12">
-                        @if (featuredCount > 0)
-                        {
-                            var post = Model.Posts[0];
-
-                            <article class="news-card news-feature-lead group lg:col-span-7 xl:col-span-8" data-uw-reveal="fade-up" data-uw-delay="220">
-                                <a href="@post.Url" class="block h-full" aria-label="@post.Title">
-                                    <div class="news-card__media news-feature-lead__media">
-                                        <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(post.ImageUrl)"
-                                             alt="@post.Title"
-                                             class="news-card__image"
-                                             loading="eager"
-                                             fetchpriority="high"
-                                             decoding="async"
-                                             onerror="this.remove();" />
-                                        <div class="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 p-5 sm:p-6">
-                                            <span class="inline-flex rounded-full bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
-                                                @post.Category
-                                            </span>
-                                            @if (post.PublishedAt.HasValue)
-                                            {
-                                                <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")"
-                                                      class="rounded-full border border-white/15 bg-black/25 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/75 backdrop-blur">
-                                                    @post.PublishedAt.Value.ToString("dd/MM/yyyy")
-                                                </time>
-                                            }
-                                        </div>
-                                    </div>
-
-                                    <div class="p-6 sm:p-8">
-                                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Bài dẫn đầu</p>
-                                        <h2 class="mt-4 text-[clamp(2rem,3vw,3rem)] font-black leading-[1.02] text-white transition duration-200 group-hover:text-white/92">
-                                            @post.Title
-                                        </h2>
-                                        <p class="mt-5 max-w-3xl line-clamp-4 text-base leading-8 text-white/68">
-                                            @post.Excerpt
-                                        </p>
-                                        <span class="news-card__readmore mt-7 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-brand-red">
-                                            Đọc tiếp
-                                            <span aria-hidden="true">&rarr;</span>
+                    <div class="news-editorial @editorialModifier mt-8">
+                        <article class="news-card news-card--lead group" data-uw-reveal="fade-up" data-uw-delay="220">
+                            <a href="@leadPost.Url" class="news-card__link" aria-label="@leadPost.Title">
+                                <div class="news-card__media news-card__media--lead">
+                                    <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(leadPost.ImageUrl)"
+                                         alt="@leadPost.Title"
+                                         class="news-card__image"
+                                         loading="eager"
+                                         fetchpriority="high"
+                                         decoding="async"
+                                         onerror="this.remove();" />
+                                    <div class="news-card__media-meta news-card__media-meta--lead">
+                                        <span class="news-card__category news-card__category--solid">
+                                            @leadPost.Category
                                         </span>
+                                        @if (leadPost.PublishedAt.HasValue)
+                                        {
+                                            <time datetime="@leadPost.PublishedAt.Value.ToString("yyyy-MM-dd")"
+                                                  class="news-card__date-pill">
+                                                @leadPost.PublishedAt.Value.ToString("dd/MM/yyyy")
+                                            </time>
+                                        }
                                     </div>
-                                </a>
-                            </article>
-                        }
+                                </div>
 
-                        @if (secondaryCount > 0)
+                                <div class="news-card__content news-card__content--lead">
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Bài dẫn đầu</p>
+                                    <h3 class="news-card__title news-card__title--lead">
+                                        @leadPost.Title
+                                    </h3>
+                                    @if (!string.IsNullOrWhiteSpace(leadPost.Excerpt))
+                                    {
+                                        <p class="news-card__excerpt news-card__excerpt--lead line-clamp-4">
+                                            @leadPost.Excerpt
+                                        </p>
+                                    }
+                                    <span class="news-card__cta news-card__readmore">
+                                        Đọc tiếp
+                                        <span aria-hidden="true">&rarr;</span>
+                                    </span>
+                                </div>
+                            </a>
+                        </article>
+
+                        @if (secondaryPosts.Count > 0)
                         {
-                            <div class="grid gap-5 lg:col-span-5 xl:col-span-4">
-                                @for (var index = secondaryStart; index < secondaryStart + secondaryCount; index++)
+                            <div class="news-editorial__secondary @secondaryModifier">
+                                @for (var index = 0; index < secondaryPosts.Count; index++)
                                 {
-                                    var post = Model.Posts[index];
-                                    var delay = 260 + ((index - secondaryStart) * 60);
+                                    var post = secondaryPosts[index];
+                                    var delay = 260 + (index * 60);
 
-                                    <article class="news-card news-feature-secondary group" data-uw-reveal="fade-up" data-uw-delay="@delay">
-                                        <a href="@post.Url" class="block h-full" aria-label="@post.Title">
-                                            <div class="news-card__media news-feature-secondary__media">
+                                    <article class="news-card news-card--secondary group" data-uw-reveal="fade-up" data-uw-delay="@delay">
+                                        <a href="@post.Url" class="news-card__link" aria-label="@post.Title">
+                                            <div class="news-card__media news-card__media--secondary">
                                                 <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
                                                      alt="@post.Title"
                                                      class="news-card__image"
                                                      loading="lazy"
                                                      decoding="async"
                                                      onerror="this.remove();" />
-                                                <div class="absolute left-4 top-4 z-10 rounded-full bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
+                                                <span class="news-card__category news-card__category--floating">
                                                     @post.Category
-                                                </div>
+                                                </span>
                                             </div>
 
-                                            <div class="p-5 sm:p-6">
+                                            <div class="news-card__content news-card__content--secondary">
                                                 @if (post.PublishedAt.HasValue)
                                                 {
-                                                    <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
+                                                    <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="news-card__date">
                                                         @post.PublishedAt.Value.ToString("dd/MM/yyyy")
                                                     </time>
                                                 }
-                                                <h3 class="mt-3 text-[1.45rem] font-black leading-tight text-white transition duration-200 group-hover:text-white/92">
+                                                <h3 class="news-card__title news-card__title--secondary line-clamp-3">
                                                     @post.Title
                                                 </h3>
-                                                <p class="mt-3 line-clamp-3 text-sm leading-7 text-white/60">
-                                                    @post.Excerpt
-                                                </p>
-                                                <span class="news-card__readmore mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-red">
-                                                    Đọc tiếp
-                                                    <span aria-hidden="true">&rarr;</span>
-                                                </span>
-                                            </div>
-                                        </a>
-                                    </article>
-                                }
-                            </div>
-                        }
-
-                        @if (compactCount > 0)
-                        {
-                            <div class="grid gap-5 lg:col-span-12 md:grid-cols-2">
-                                @for (var index = compactStart; index < compactStart + compactCount; index++)
-                                {
-                                    var post = Model.Posts[index];
-                                    var delay = 360 + ((index - compactStart) * 60);
-
-                                    <article class="news-card news-feature-compact group" data-uw-reveal="fade-up" data-uw-delay="@delay">
-                                        <a href="@post.Url" class="block h-full sm:grid sm:grid-cols-[12rem_minmax(0,1fr)]" aria-label="@post.Title">
-                                            <div class="news-card__media news-feature-compact__media">
-                                                <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
-                                                     alt="@post.Title"
-                                                     class="news-card__image"
-                                                     loading="lazy"
-                                                     decoding="async"
-                                                     onerror="this.remove();" />
-                                            </div>
-
-                                            <div class="p-5 sm:p-6">
-                                                <div class="flex flex-wrap items-center gap-2">
-                                                    <span class="inline-flex rounded-full border border-brand-red/25 bg-brand-red/12 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-red">
-                                                        @post.Category
-                                                    </span>
-                                                    @if (post.PublishedAt.HasValue)
-                                                    {
-                                                        <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
-                                                            @post.PublishedAt.Value.ToString("dd/MM/yyyy")
-                                                        </time>
-                                                    }
-                                                </div>
-                                                <h3 class="mt-3 text-[1.28rem] font-black leading-tight text-white transition duration-200 group-hover:text-white/92">
-                                                    @post.Title
-                                                </h3>
-                                                <p class="mt-3 line-clamp-2 text-sm leading-7 text-white/60">
-                                                    @post.Excerpt
-                                                </p>
-                                                <span class="news-card__readmore mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-red">
+                                                @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+                                                {
+                                                    <p class="news-card__excerpt news-card__excerpt--secondary line-clamp-2">
+                                                        @post.Excerpt
+                                                    </p>
+                                                }
+                                                <span class="news-card__cta news-card__readmore">
                                                     Đọc tiếp
                                                     <span aria-hidden="true">&rarr;</span>
                                                 </span>
@@ -253,49 +220,52 @@
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-uw-reveal="fade-up" data-uw-delay="420">
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">Bài viết mới nhất</p>
-                                <h3 id="news-latest-heading" class="mt-2 text-2xl font-black text-white sm:text-[2rem]">
+                                <h2 id="news-latest-heading" class="mt-2 text-2xl font-black text-white sm:text-[2rem]">
                                     Các bài viết khác
-                                </h3>
+                                </h2>
                             </div>
                             <span class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/70">
                                 @remainingCount bài viết
                             </span>
                         </div>
 
-                        <div class="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                            @for (var index = remainingStart; index < Model.Posts.Count; index++)
+                        <div class="news-standard-grid mt-6">
+                            @for (var index = 0; index < standardPosts.Count; index++)
                             {
-                                var post = Model.Posts[index];
-                                var delay = 460 + (((index - remainingStart) % 6) * 60);
+                                var post = standardPosts[index];
+                                var delay = 460 + ((index % 6) * 60);
 
-                                <article class="news-card news-card-standard group" data-uw-reveal="fade-up" data-uw-delay="@delay">
-                                    <a href="@post.Url" class="block h-full" aria-label="@post.Title">
-                                        <div class="news-card__media news-card-standard__media">
+                                <article class="news-card news-card--standard group" data-uw-reveal="fade-up" data-uw-delay="@delay">
+                                    <a href="@post.Url" class="news-card__link" aria-label="@post.Title">
+                                        <div class="news-card__media news-card__media--standard">
                                             <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
                                                  alt="@post.Title"
                                                  class="news-card__image"
                                                  loading="lazy"
                                                  decoding="async"
                                                  onerror="this.remove();" />
-                                            <div class="absolute left-4 top-4 z-10 rounded-full bg-brand-red px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white shadow-[0_12px_24px_rgba(229,9,20,0.22)]">
+                                            <span class="news-card__category news-card__category--floating">
                                                 @post.Category
-                                            </div>
+                                            </span>
                                         </div>
 
-                                        <div class="p-5 sm:p-6">
+                                        <div class="news-card__content news-card__content--standard">
                                             @if (post.PublishedAt.HasValue)
                                             {
-                                                <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">
+                                                <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="news-card__date">
                                                     @post.PublishedAt.Value.ToString("dd/MM/yyyy")
                                                 </time>
                                             }
-                                            <h3 class="mt-3 text-[1.35rem] font-black leading-tight text-white transition duration-200 group-hover:text-white/92">
+                                            <h3 class="news-card__title news-card__title--standard line-clamp-3">
                                                 @post.Title
                                             </h3>
-                                            <p class="mt-4 line-clamp-3 text-sm leading-7 text-white/60">
-                                                @post.Excerpt
-                                            </p>
-                                            <span class="news-card__readmore mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-red">
+                                            @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+                                            {
+                                                <p class="news-card__excerpt news-card__excerpt--standard line-clamp-3">
+                                                    @post.Excerpt
+                                                </p>
+                                            }
+                                            <span class="news-card__cta news-card__readmore">
                                                 Đọc tiếp
                                                 <span aria-hidden="true">&rarr;</span>
                                             </span>
