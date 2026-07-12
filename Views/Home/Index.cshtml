@@ -535,9 +535,13 @@
         {
             var leadPost = homeNewsPosts[0];
             var supportingPosts = homeNewsPosts.Skip(1).Take(2).ToList();
-            var editorialLayoutClass = supportingPosts.Count > 0
-                ? "grid gap-6 xl:gap-7 lg:grid-cols-[1.12fr_0.88fr] lg:items-start"
-                : "max-w-5xl";
+            var homeNewsCountClass = homeNewsPosts.Count switch
+            {
+                1 => "home-news--count-1",
+                2 => "home-news--count-2",
+                _ => "home-news--count-3"
+            };
+            var leadHasImage = !string.IsNullOrWhiteSpace(leadPost.ImageUrl);
 
             <div class="mt-12 flex items-center justify-between gap-4" data-uw-reveal="fade-up" data-uw-delay="140">
                 <p class="text-xs font-black uppercase tracking-[0.28em] text-white">Nổi bật trong tuần</p>
@@ -546,118 +550,122 @@
                 </a>
             </div>
 
-            <div class="mt-7 @editorialLayoutClass">
-                <article class="home-news-card home-news-card--lead group" data-uw-reveal="fade-up" data-uw-delay="180">
-                    <a href="@leadPost.Url" class="flex h-full flex-col">
-                        <div class="home-news-card__media" data-home-news-media>
-                            <div class="home-news-card__fallback home-news-card__fallback--lead">
-                                <span class="home-news-card__eyebrow">Truyền Thuyết Champong</span>
-                                <p class="home-news-card__title">@leadPost.Title</p>
-                            </div>
+            <div class="home-news @homeNewsCountClass mt-7">
+                <div class="home-news__grid">
+                    <article class="news-card news-card--lead home-news__lead group" data-uw-reveal="fade-up" data-uw-delay="180">
+                        <a href="@leadPost.Url" class="news-card__link" aria-label="@leadPost.Title">
+                            <div class="news-card__media news-card__media--lead home-news__media @(leadHasImage ? string.Empty : "is-image-missing")" data-home-news-media>
+                                <div class="home-news__fallback home-news__fallback--lead" aria-hidden="true">
+                                    <span class="home-news__fallback-eyebrow">Truyền Thuyết Champong</span>
+                                    <p class="home-news__fallback-title home-news__fallback-title--lead">@leadPost.Title</p>
+                                </div>
 
-                            @if (!string.IsNullOrWhiteSpace(leadPost.ImageUrl))
-                            {
-                                <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(leadPost.ImageUrl)"
-                                     alt="@leadPost.Title"
-                                     class="home-news-card__image"
-                                     loading="lazy"
-                                     decoding="async"
-                                     onerror="this.closest('[data-home-news-media]')?.classList.add('is-image-missing'); this.remove();" />
-                            }
-                        </div>
-
-                        <div class="flex flex-1 flex-col p-6 sm:p-7 lg:p-6 xl:p-7">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span class="inline-flex rounded-full border border-brand-red/25 bg-brand-red/14 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-red-300">
-                                    @leadPost.Category
-                                </span>
-                                @if (leadPost.PublishedAt.HasValue)
+                                @if (leadHasImage)
                                 {
-                                    <span class="text-xs font-medium uppercase tracking-[0.14em] text-white/60">
-                                        @leadPost.PublishedAt.Value.ToString("dd/MM/yyyy")
-                                    </span>
+                                    <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(leadPost.ImageUrl)"
+                                         alt="@leadPost.Title"
+                                         class="news-card__image"
+                                         loading="lazy"
+                                         decoding="async"
+                                         onerror="this.closest('[data-home-news-media]')?.classList.add('is-image-missing'); this.remove();" />
                                 }
+
+                                <div class="news-card__media-meta home-news__media-meta">
+                                    <span class="news-card__category news-card__category--solid">
+                                        @leadPost.Category
+                                    </span>
+                                    @if (leadPost.PublishedAt.HasValue)
+                                    {
+                                        <time datetime="@leadPost.PublishedAt.Value.ToString("yyyy-MM-dd")"
+                                              class="news-card__date-pill">
+                                            @leadPost.PublishedAt.Value.ToString("dd/MM/yyyy")
+                                        </time>
+                                    }
+                                </div>
                             </div>
 
-                            <h3 class="mt-4 text-2xl font-black leading-tight text-white sm:text-[2rem] xl:max-w-[28rem]">
-                                @leadPost.Title
-                            </h3>
+                            <div class="news-card__content news-card__content--lead home-news__content home-news__content--lead">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Bài nổi bật</p>
+                                <h3 class="news-card__title news-card__title--lead line-clamp-3">
+                                    @leadPost.Title
+                                </h3>
 
-                            @if (!string.IsNullOrWhiteSpace(leadPost.Excerpt))
+                                @if (!string.IsNullOrWhiteSpace(leadPost.Excerpt))
+                                {
+                                    <p class="news-card__excerpt news-card__excerpt--lead line-clamp-3">
+                                        @leadPost.Excerpt
+                                    </p>
+                                }
+
+                                <span class="news-card__cta news-card__readmore">
+                                    <span>Đọc tiếp</span>
+                                    <span aria-hidden="true" class="transition duration-300 group-hover:translate-x-1">→</span>
+                                </span>
+                            </div>
+                        </a>
+                    </article>
+
+                    @if (supportingPosts.Count > 0)
+                    {
+                        <div class="home-news__secondary">
+                            @for (var i = 0; i < supportingPosts.Count; i++)
                             {
-                                <p class="mt-4 max-w-2xl text-sm leading-7 text-white sm:text-base sm:leading-8">
-                                    @leadPost.Excerpt
-                                </p>
-                            }
+                                var post = supportingPosts[i];
+                                var postHasImage = !string.IsNullOrWhiteSpace(post.ImageUrl);
 
-                            <div class="mt-7 flex items-center gap-2 text-sm font-semibold text-brand-red transition group-hover:text-white">
-                                <span>Đọc tiếp</span>
-                                <span aria-hidden="true" class="transition duration-300 group-hover:translate-x-1">→</span>
-                            </div>
-                        </div>
-                    </a>
-                </article>
+                                <article class="news-card news-card--secondary home-news__support group" data-uw-reveal="fade-up" data-uw-delay="@(240 + (i * 80))">
+                                    <a href="@post.Url" class="news-card__link" aria-label="@post.Title">
+                                        <div class="news-card__media news-card__media--secondary home-news__media @(postHasImage ? string.Empty : "is-image-missing")" data-home-news-media>
+                                            <div class="home-news__fallback" aria-hidden="true">
+                                                <span class="home-news__fallback-eyebrow">Tin mới</span>
+                                                <p class="home-news__fallback-title">@post.Title</p>
+                                            </div>
 
-                @if (supportingPosts.Count > 0)
-                {
-                    <div class="grid gap-6">
-                        @for (var i = 0; i < supportingPosts.Count; i++)
-                        {
-                            var post = supportingPosts[i];
+                                            @if (postHasImage)
+                                            {
+                                                <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
+                                                     alt="@post.Title"
+                                                     class="news-card__image"
+                                                     loading="lazy"
+                                                     decoding="async"
+                                                     onerror="this.closest('[data-home-news-media]')?.classList.add('is-image-missing'); this.remove();" />
+                                            }
 
-                            <article class="home-news-card home-news-card--support group h-full" data-uw-reveal="fade-up" data-uw-delay="@(240 + (i * 80))">
-                                <a href="@post.Url" class="flex h-full flex-col sm:flex-row lg:flex-col">
-                                    <div class="home-news-card__media" data-home-news-media>
-                                        <div class="home-news-card__fallback">
-                                            <span class="home-news-card__eyebrow">Tin mới</span>
-                                            <p class="home-news-card__title text-base sm:text-lg">@post.Title</p>
-                                        </div>
-
-                                        @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
-                                        {
-                                            <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
-                                                 alt="@post.Title"
-                                                 class="home-news-card__image"
-                                                 loading="lazy"
-                                                 decoding="async"
-                                                 onerror="this.closest('[data-home-news-media]')?.classList.add('is-image-missing'); this.remove();" />
-                                        }
-                                    </div>
-
-                                    <div class="flex flex-1 flex-col p-5 sm:p-6">
-                                        <div class="flex flex-wrap items-center gap-3">
-                                            <span class="inline-flex rounded-full border border-brand-red/25 bg-brand-red/14 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-red-300">
+                                            <span class="news-card__category news-card__category--floating">
                                                 @post.Category
                                             </span>
+                                        </div>
+
+                                        <div class="news-card__content news-card__content--secondary home-news__content home-news__content--secondary">
                                             @if (post.PublishedAt.HasValue)
                                             {
-                                                <span class="text-xs font-medium uppercase tracking-[0.14em] text-white/60">
+                                                <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="news-card__date">
                                                     @post.PublishedAt.Value.ToString("dd/MM/yyyy")
-                                                </span>
+                                                </time>
                                             }
+
+                                            <h3 class="news-card__title news-card__title--secondary line-clamp-2">
+                                                @post.Title
+                                            </h3>
+
+                                            @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+                                            {
+                                                <p class="news-card__excerpt news-card__excerpt--secondary line-clamp-2">
+                                                    @post.Excerpt
+                                                </p>
+                                            }
+
+                                            <span class="news-card__cta news-card__readmore">
+                                                <span>Đọc tiếp</span>
+                                                <span aria-hidden="true" class="transition duration-300 group-hover:translate-x-1">→</span>
+                                            </span>
                                         </div>
-
-                                        <h3 class="mt-4 text-xl font-black leading-tight text-white">
-                                            @post.Title
-                                        </h3>
-
-                                        @if (!string.IsNullOrWhiteSpace(post.Excerpt))
-                                        {
-                                            <p class="mt-3 text-sm leading-7 text-white">
-                                                @post.Excerpt
-                                            </p>
-                                        }
-
-                                        <div class="mt-5 flex items-center gap-2 text-sm font-semibold text-brand-red transition group-hover:text-white">
-                                            <span>Đọc tiếp</span>
-                                            <span aria-hidden="true" class="transition duration-300 group-hover:translate-x-1">→</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </article>
-                        }
-                    </div>
-                }
+                                    </a>
+                                </article>
+                            }
+                        </div>
+                    }
+                </div>
             </div>
         }
         else
