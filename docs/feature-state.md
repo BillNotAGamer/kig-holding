@@ -40,15 +40,27 @@ The application is in a stable, optimized state:
 *   **Editorial Excerpt Cards**: Elegant dark-styled article list cards.
 *   **Suggested Reading Engine**: Dynamic categories suggestions component based on active readers.
 
-### 5. Branch Locator (`/chi-nhanh`)
+### 5. Membership Program Page (`/thanh-vien`)
+*   **Static Informational Policy Page**: `/thanh-vien` is now a published informational page for the **Truyền Thuyết Champong** membership program, not a coming-soon placeholder.
+*   **Approved Policy Content**: The page presents the approved four tiers (Đồng, Bạc, Vàng, Kim Cương), point-earning rules, point-validity rules, invoice examples, birthday-week rates, and upgrade/downgrade rules.
+*   **No Backend Membership Engine**: This route does not implement member login, redemption workflows, account data, automatic calculations, or a database-backed membership model.
+*   **Maintenance Contract**: Any future change to approved membership tiers, thresholds, point rates, invoice examples, birthday benefits, upgrade/downgrade rules, or point-validity rules must update the member page, its tests, and the relevant documentation in the same change.
+
+### 6. Branch Locator (`/chi-nhanh`)
 *   **Operational Break Windows**: Full formatting support for standard hours and branch lunch breaks.
 *   **Google Maps Embeds**: Responsive iframe renders for individual branch coordinates.
 
-### 6. Admin Back-office Management Portal (`/Admin`)
+### 7. Admin Back-office Management Portal (`/Admin`)
 *   **Secure Authentication**: Standard cookie authentication flow backed by lockouts.
 *   **Sidebar Routing Navigation**: Highlighted active markers using `ViewContext` paths.
 *   **Global Layout Toast Alerts**: Integrated notification alerts using `TempData` banners.
-*   **Image Upload Pipeline**: Railway Volume-ready local persistent storage via `LocalVolume` provider. Existing Cloudinary URLs remain completely backward-compatible.
+*   **Image Upload Pipeline**: Provider-based storage is implemented. `CloudflareR2` can handle new uploads through the S3-compatible API and returns public absolute URLs. `LocalVolume` remains supported for local/legacy `/uploads/...` compatibility, and existing Cloudinary URLs remain backward-compatible for legacy handling.
+
+### 8. Image Storage Phase State
+*   **Implemented in Phase 1**: R2 options, provider parsing, startup validation, S3-compatible client wrapper, R2 upload/delete, conservative delete routing, safe template configuration, and opt-in live R2 smoke-test coverage.
+*   **Implemented in Phase 1.1**: New menu-page uploads use group-scoped R2 prefixes based on persisted `MenuGroup.Slug`, e.g. `menu-pages/truyen-thuyet-champong/<file>`. Existing root-level `menu-pages/<file>` objects remain supported; no existing object or database URL is migrated, and slug changes affect only future uploads.
+*   **Canonical Limits**: storage-service `ImageStorage:MaxFileSizeBytes` is 50 MB; Kestrel and multipart transport limits remain 60 MB. Stricter feature-level limits remain: Branch thumbnail 2 MB, Post thumbnail 2 MB, Menu group cover 10 MB, Menu pages 50 MB.
+*   **Not Yet Implemented**: managed asset registry, shared-reference delete protection, centralized URL resolver, legacy asset migration, decoder/magic-byte validation, production cutover, and full create/edit/delete lifecycle ownership refactor.
 
 ---
 

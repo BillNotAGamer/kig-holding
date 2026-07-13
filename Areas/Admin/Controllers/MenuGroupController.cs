@@ -397,6 +397,15 @@ public class MenuGroupController : AdminBaseController
             return NotFound();
         }
 
+        if (!ImageStoragePathUtilities.TryNormalizeStorageScopeSegment(group.Slug, out var menuPageStorageScope))
+        {
+            _logger.LogWarning(
+                "Menu page upload blocked because menu group {MenuGroupId} has an invalid persisted slug.",
+                menuGroupId);
+            SetErrorMessage("Slug nhóm thực đơn không hợp lệ. Vui lòng cập nhật slug trước khi tải ảnh.");
+            return RedirectToRoute("AdminMenuGroupImages", new { menuGroupId });
+        }
+
         var files = model.ImageFiles
             .Where(x => x is not null)
             .ToList();
@@ -445,6 +454,7 @@ public class MenuGroupController : AdminBaseController
                 imageUrl = await _imageStorageService.UploadAsync(
                     file,
                     ImageCategory.MenuPages,
+                    menuPageStorageScope,
                     HttpContext.RequestAborted);
             }
             catch (InvalidOperationException exception)

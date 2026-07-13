@@ -1,33 +1,40 @@
-@{
-    ViewData["Title"] = "Thành viên KIG Holding | Sắp ra mắt";
-    ViewData["MetaDescription"] = "Trang thành viên KIG Holding giới thiệu chương trình hội viên đang được hoàn thiện để kết nối trải nghiệm giữa Truyền Thuyết Champong, Gogimaru và KBB Cook.";
-}
-
-<main class="public-editorial-page">
+<main class="public-editorial-page member-program">
     <div class="public-editorial-page__shell">
         <div class="container-page">
             <section class="public-editorial-page__section public-editorial-page__section--hero">
-                <div class="public-editorial-page__hero" data-uw-reveal="fade-up" data-uw-once="true">
-                    <span class="public-editorial-page__eyebrow">Thành viên KIG Holding</span>
-                    <h1 class="public-editorial-page__title">
-                        Một không gian hội viên dành cho những trải nghiệm ẩm thực thân thuộc hơn
+                <div class="public-editorial-page__hero member-program__hero" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Truyền Thuyết Champong Membership</span>
+                    <h1 class="public-editorial-page__title member-program__title">
+                        Chương trình thành viên Truyền Thuyết Champong với 4 hạng tích điểm và đặc quyền dùng bữa
                     </h1>
-                    <p class="public-editorial-page__lead">
-                        Chương trình hội viên KIG Holding đang được hoàn thiện để kết nối trải nghiệm giữa
-                        Truyền Thuyết Champong, Gogimaru và KBB Cook. Đây sẽ là một hành trình được xây dựng
-                        chậm rãi, chỉn chu và phù hợp với những vị khách muốn được nhớ đến theo cách tinh tế hơn.
+                    <p class="public-editorial-page__lead member-program__lead">
+                        Trải nghiệm hành trình thành viên dành riêng cho Truyền Thuyết Champong với 4 hạng Đồng, Bạc, Vàng, Kim Cương, quyền lợi tích điểm, ưu đãi sinh nhật và quy tắc xét hạng rõ ràng sau mỗi lần dùng bữa.
                     </p>
-                    <p class="public-editorial-page__section-copy max-w-3xl">
-                        Trong giai đoạn này, chúng tôi ưu tiên công bố định hướng rõ ràng thay vì hứa hẹn những
-                        tính năng chưa sẵn sàng. Theo dõi thông tin mới nhất hoặc liên hệ để nhận cập nhật khi
-                        chương trình chính thức ra mắt.
+                    <p class="public-editorial-page__section-copy">
+                        Thành viên khi dùng bữa tại Truyền Thuyết Champong có thể nhận điểm bằng cách sử dụng số điện thoại thành viên để đăng nhập vào hệ thống sau khi thanh toán.
                     </p>
-                    <div class="public-editorial-page__actions">
-                        <a class="public-editorial-page__button public-editorial-page__button--primary" href="/lien-he">
-                            Nhận thông tin cập nhật
+
+                    <div class="member-program__hero-facts" data-uw-reveal="fade-up" data-uw-delay="100" data-uw-once="true">
+                        <article class="member-program__fact">
+                            <span class="member-program__fact-label">4 hạng thành viên</span>
+                            <strong class="member-program__fact-value">Đồng · Bạc · Vàng · Kim Cương</strong>
+                        </article>
+                        <article class="member-program__fact">
+                            <span class="member-program__fact-label">Điểm có hiệu lực</span>
+                            <strong class="member-program__fact-value">Tối đa 24 tháng</strong>
+                        </article>
+                        <article class="member-program__fact">
+                            <span class="member-program__fact-label">Xét hạng định kỳ</span>
+                            <strong class="member-program__fact-value">Ngày 1 hàng tháng</strong>
+                        </article>
+                    </div>
+
+                    <div class="public-editorial-page__actions member-program__actions">
+                        <a class="public-editorial-page__button public-editorial-page__button--primary" href="/dat-ban">
+                            Đặt bàn
                         </a>
-                        <a class="public-editorial-page__button public-editorial-page__button--secondary" href="/thuc-don">
-                            Khám phá hệ sinh thái
+                        <a class="public-editorial-page__button public-editorial-page__button--secondary" href="/chi-nhanh">
+                            Tìm chi nhánh
                         </a>
                     </div>
                 </div>
@@ -35,217 +42,388 @@
 
             <section class="public-editorial-page__section">
                 <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
-                    <span class="public-editorial-page__eyebrow">Lời hứa hội viên</span>
+                    <span class="public-editorial-page__eyebrow">Quy tắc tích điểm</span>
                     <h2 class="public-editorial-page__section-title">
-                        Không chỉ là ưu đãi, mà là một mối quan hệ được chăm chút
+                        Tỷ lệ tích điểm và quyền lợi áp dụng theo từng hạng thành viên
+                    </h2>
+                    <p class="public-editorial-page__section-copy">
+                        Điểm có thể sử dụng để đổi món ăn, quà tặng hoặc ưu đãi trong hệ thống Truyền Thuyết Champong. Điểm không thể quy đổi thành tiền mặt.
+                    </p>
+                </div>
+
+                <div class="member-program__rate-grid">
+                    <article class="member-program__rate-card member-program__rate-card--bronze" data-uw-reveal="fade-up" data-uw-delay="40" data-uw-once="true">
+                        <span class="member-program__rate-tier">Đồng (Bronze)</span>
+                        <strong class="member-program__rate-value">2%</strong>
+                        <p class="member-program__rate-copy">Tích điểm trong phần tổng quan quyền lợi.</p>
+                    </article>
+                    <article class="member-program__rate-card member-program__rate-card--silver" data-uw-reveal="fade-up" data-uw-delay="90" data-uw-once="true">
+                        <span class="member-program__rate-tier">Bạc (Silver)</span>
+                        <strong class="member-program__rate-value">4%</strong>
+                        <p class="member-program__rate-copy">Tích điểm và bắt đầu đổi món.</p>
+                    </article>
+                    <article class="member-program__rate-card member-program__rate-card--gold" data-uw-reveal="fade-up" data-uw-delay="140" data-uw-once="true">
+                        <span class="member-program__rate-tier">Vàng (Gold)</span>
+                        <strong class="member-program__rate-value">3% + 3%</strong>
+                        <p class="member-program__rate-copy">Giảm trực tiếp 3% và tích 3%.</p>
+                    </article>
+                    <article class="member-program__rate-card member-program__rate-card--diamond" data-uw-reveal="fade-up" data-uw-delay="190" data-uw-once="true">
+                        <span class="member-program__rate-tier">Kim Cương (Diamond)</span>
+                        <strong class="member-program__rate-value">5% + 5%</strong>
+                        <p class="member-program__rate-copy">Giảm trực tiếp 5% và tích 5%.</p>
+                    </article>
+                </div>
+
+                <div class="member-program__validity" data-uw-reveal="fade-up" data-uw-delay="220" data-uw-once="true">
+                    <p class="member-program__validity-title">Hiệu lực điểm</p>
+                    <p class="member-program__validity-copy">
+                        Điểm có hiệu lực tối đa 24 tháng kể từ ngày phát sinh. Điểm tự động hết hạn vào ngày đầu tiên của tháng thứ 25.
+                    </p>
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Ngưỡng hạng thành viên</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Bốn cấp độ thành viên theo mốc chi tiêu tích lũy
                     </h2>
                 </div>
 
-                <div class="public-editorial-page__columns">
-                    <div class="public-editorial-page__column" data-uw-reveal="fade-right" data-uw-once="true" data-uw-delay="80">
-                        <p class="public-editorial-page__section-copy">
-                            Chương trình đang được thiết kế quanh ba điều cốt lõi: sự ghi nhận, cảm giác được
-                            quan tâm và những cập nhật thực sự liên quan đến thói quen dùng bữa của bạn.
-                        </p>
-                        <p class="public-editorial-page__section-copy">
-                            Mục tiêu của KIG Holding không phải tạo thêm một lớp thủ tục, mà là làm cho mỗi lần
-                            quay lại trở nên gần gũi hơn, từ cách chào đón đến những quyền lợi phù hợp với từng
-                            dịp ghé thăm.
-                        </p>
-                    </div>
+                <div class="member-program__threshold-grid">
+                    <article class="member-program__threshold-card" data-uw-reveal="fade-up" data-uw-delay="40" data-uw-once="true">
+                        <h3 class="member-program__threshold-tier">Đồng (Bronze)</h3>
+                        <p class="member-program__threshold-value">0 – dưới 5 triệu</p>
+                    </article>
+                    <article class="member-program__threshold-card" data-uw-reveal="fade-up" data-uw-delay="90" data-uw-once="true">
+                        <h3 class="member-program__threshold-tier">Bạc (Silver)</h3>
+                        <p class="member-program__threshold-value">Từ 5 triệu</p>
+                    </article>
+                    <article class="member-program__threshold-card" data-uw-reveal="fade-up" data-uw-delay="140" data-uw-once="true">
+                        <h3 class="member-program__threshold-tier">Vàng (Gold)</h3>
+                        <p class="member-program__threshold-value">Từ 12 triệu</p>
+                    </article>
+                    <article class="member-program__threshold-card" data-uw-reveal="fade-up" data-uw-delay="190" data-uw-once="true">
+                        <h3 class="member-program__threshold-tier">Kim Cương (Diamond)</h3>
+                        <p class="member-program__threshold-value">Từ 45 triệu</p>
+                    </article>
+                </div>
+            </section>
 
-                    <div class="public-editorial-page__column lg:border-l lg:border-white/10 lg:pl-8" data-uw-reveal="fade-left" data-uw-once="true" data-uw-delay="120">
-                        <ul class="public-editorial-page__bullets">
-                            <li class="public-editorial-page__bullet">
-                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
-                                <span>Nhận diện khách quen theo một tiêu chuẩn phục vụ nhất quán giữa các thương hiệu.</span>
-                            </li>
-                            <li class="public-editorial-page__bullet">
-                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
-                                <span>Xây dựng cập nhật chọn lọc, tránh cảm giác dồn dập hoặc thiếu liên quan.</span>
-                            </li>
-                            <li class="public-editorial-page__bullet">
-                                <span class="public-editorial-page__bullet-mark" aria-hidden="true"></span>
-                                <span>Giữ trải nghiệm hội viên gọn gàng, dễ hiểu và tôn trọng nhịp sử dụng thực tế.</span>
-                            </li>
+            <section class="public-editorial-page__section">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Chi tiết 4 hạng thành viên</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Quyền lợi, hóa đơn mẫu và trạng thái tích điểm theo từng hạng
+                    </h2>
+                </div>
+
+                <div class="member-program__tier-grid">
+                    <article class="member-program__tier-card member-program__tier-card--bronze" data-uw-reveal="fade-up" data-uw-delay="40" data-uw-once="true">
+                        <div class="member-program__tier-header">
+                            <span class="member-program__tier-badge">Đồng (Bronze)</span>
+                            <p class="member-program__tier-phase">Giai đoạn “Đua hạng”</p>
+                        </div>
+                        <ul class="member-program__tier-list">
+                            <li>Chưa áp dụng đổi món.</li>
+                            <li>Được tích lũy điểm thăng hạng.</li>
+                            <li>Bắt đầu mở khóa quyền lợi thành viên.</li>
                         </ul>
-                    </div>
+                        <div class="member-program__invoice">
+                            <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
+                            <dl class="member-program__invoice-list">
+                                <div class="member-program__invoice-row">
+                                    <dt>Thanh toán</dt>
+                                    <dd>1.000.000 VNĐ</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Giảm giá</dt>
+                                    <dd>0%</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Điểm tiêu dùng</dt>
+                                    <dd>chưa áp dụng</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Điểm thăng hạng</dt>
+                                    <dd>100 điểm</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <p class="member-program__tier-note">
+                            “Anh/chị chỉ còn 400 điểm nữa là lên hạng Bạc để bắt đầu tích điểm đổi món miễn phí cùng Champong nhé!”
+                        </p>
+                    </article>
+
+                    <article class="member-program__tier-card member-program__tier-card--silver" data-uw-reveal="fade-up" data-uw-delay="90" data-uw-once="true">
+                        <div class="member-program__tier-header">
+                            <span class="member-program__tier-badge">Bạc (Silver)</span>
+                            <p class="member-program__tier-phase">Giai đoạn “Bắt đầu có quà”</p>
+                            <p class="member-program__tier-subcopy">Sau khi chi tiêu đạt từ 5 triệu đồng</p>
+                        </div>
+                        <ul class="member-program__tier-list">
+                            <li>Tích điểm 4%.</li>
+                            <li>Được sử dụng điểm để đổi món.</li>
+                            <li>Tham gia ưu đãi thành viên định kỳ.</li>
+                        </ul>
+                        <div class="member-program__invoice">
+                            <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
+                            <dl class="member-program__invoice-list">
+                                <div class="member-program__invoice-row">
+                                    <dt>Thanh toán</dt>
+                                    <dd>1.000.000 VNĐ</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Giảm giá</dt>
+                                    <dd>0%</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Điểm tiêu dùng nhận được</dt>
+                                    <dd>40.000 điểm</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Điểm thăng hạng</dt>
+                                    <dd>100 điểm</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <p class="member-program__tier-note">
+                            Sau khoảng 3 lần dùng bữa ở hạng này, khách hàng đã có đủ điểm để đổi 1 món trị giá khoảng 120K.
+                        </p>
+                    </article>
+
+                    <article class="member-program__tier-card member-program__tier-card--gold" data-uw-reveal="fade-up" data-uw-delay="140" data-uw-once="true">
+                        <div class="member-program__tier-header">
+                            <span class="member-program__tier-badge">Vàng (Gold)</span>
+                            <p class="member-program__tier-phase">Đặc quyền “Giảm giá + Tích điểm”</p>
+                            <p class="member-program__tier-subcopy">Sau khi chi tiêu đạt từ 12 triệu đồng</p>
+                        </div>
+                        <ul class="member-program__tier-list">
+                            <li>Giảm trực tiếp 3% trên hóa đơn.</li>
+                            <li>Tích điểm 3%.</li>
+                            <li>Nhận ưu đãi thành viên cao cấp.</li>
+                        </ul>
+                        <div class="member-program__invoice">
+                            <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
+                            <dl class="member-program__invoice-list">
+                                <div class="member-program__invoice-row">
+                                    <dt>Giảm trực tiếp</dt>
+                                    <dd>30.000 VNĐ</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Thanh toán thực tế</dt>
+                                    <dd>970.000 VNĐ</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Điểm tiêu dùng nhận được</dt>
+                                    <dd>29.000 điểm</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Điểm thăng hạng</dt>
+                                    <dd>97 điểm</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <p class="member-program__tier-note">
+                            Chỉ cần khoảng 4 lần dùng bữa là khách hàng đã có thể đổi 1 món trị giá khoảng 120K.
+                        </p>
+                    </article>
+
+                    <article class="member-program__tier-card member-program__tier-card--diamond" data-uw-reveal="fade-up" data-uw-delay="190" data-uw-once="true">
+                        <div class="member-program__tier-header">
+                            <span class="member-program__tier-badge">Kim Cương (Diamond)</span>
+                            <p class="member-program__tier-phase">Đặc quyền VIP “5 + 5”</p>
+                            <p class="member-program__tier-subcopy">Sau khi chi tiêu đạt từ 45 triệu đồng</p>
+                        </div>
+                        <ul class="member-program__tier-list">
+                            <li>Giảm trực tiếp 5% trên hóa đơn.</li>
+                            <li>Tích điểm 5%.</li>
+                            <li>Quyền lợi VIP toàn hệ thống.</li>
+                            <li>Ưu tiên sự kiện và quà tặng đặc biệt.</li>
+                        </ul>
+                        <div class="member-program__invoice">
+                            <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
+                            <dl class="member-program__invoice-list">
+                                <div class="member-program__invoice-row">
+                                    <dt>Giảm trực tiếp</dt>
+                                    <dd>50.000 VNĐ</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Thanh toán thực tế</dt>
+                                    <dd>950.000 VNĐ</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Điểm tiêu dùng nhận được</dt>
+                                    <dd>47.500 điểm</dd>
+                                </div>
+                                <div class="member-program__invoice-row">
+                                    <dt>Điểm thăng hạng</dt>
+                                    <dd>95 điểm</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <p class="member-program__tier-note">
+                            Chỉ cần chưa tới 3 lần dùng bữa là khách hàng đã đủ điểm đổi 1 món trị giá khoảng 120K. Tổng quyền lợi nhận được từ giảm giá và tích điểm tương đương gần 10% giá trị hóa đơn.
+                        </p>
+                    </article>
                 </div>
             </section>
 
             <section class="public-editorial-page__section">
                 <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
-                    <span class="public-editorial-page__eyebrow">Xem trước quyền lợi</span>
+                    <span class="public-editorial-page__eyebrow">Điểm thăng hạng</span>
                     <h2 class="public-editorial-page__section-title">
-                        Một vài nhóm trải nghiệm đang được hoàn thiện cho giai đoạn ra mắt
+                        Phân biệt rõ điểm thăng hạng và điểm tiêu dùng
                     </h2>
-                    <p class="public-editorial-page__section-copy">
-                        Các nội dung dưới đây là định hướng công khai ở thời điểm hiện tại. Chi tiết áp dụng sẽ
-                        được công bố sau khi chính sách và trải nghiệm vận hành được chốt.
-                    </p>
                 </div>
 
-                <div class="public-editorial-page__grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
-                        <span class="public-editorial-page__item-index">01</span>
-                        <h3 class="public-editorial-page__item-title">Ưu đãi thành viên</h3>
-                        <p class="public-editorial-page__item-copy">
-                            Những quyền lợi được xây dựng để mỗi lần quay lại có thêm cảm giác được chào đón
-                            đúng lúc, đúng nhu cầu.
-                        </p>
+                <div class="member-program__rule-grid">
+                    <article class="member-program__rule-card" data-uw-reveal="fade-up" data-uw-delay="50" data-uw-once="true">
+                        <h3 class="member-program__rule-title">Quy tắc tính điểm thăng hạng</h3>
+                        <ul class="member-program__rule-list">
+                            <li>Điểm thăng hạng được tính dựa trên tổng giá trị thanh toán thực tế trong 12 tháng gần nhất.</li>
+                            <li>10.000 VNĐ = 1 điểm thăng hạng.</li>
+                            <li>Điểm thăng hạng không thể sử dụng đổi quà.</li>
+                            <li>Điểm được cập nhật vào ngày 1 hàng tháng.</li>
+                        </ul>
                     </article>
-
-                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="120">
-                        <span class="public-editorial-page__item-index">02</span>
-                        <h3 class="public-editorial-page__item-title">Tích điểm &amp; đổi quà</h3>
-                        <p class="public-editorial-page__item-copy">
-                            Cơ chế tích lũy đang được hoàn thiện để minh bạch, dễ hiểu và phù hợp với nhịp dùng
-                            bữa tại các thương hiệu trong hệ sinh thái.
-                        </p>
-                    </article>
-
-                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="160">
-                        <span class="public-editorial-page__item-index">03</span>
-                        <h3 class="public-editorial-page__item-title">Dịp đặc biệt</h3>
-                        <p class="public-editorial-page__item-copy">
-                            Những thời điểm đáng nhớ như sinh nhật, kỷ niệm hay mùa lễ sẽ được cân nhắc theo
-                            hướng cá nhân hóa vừa đủ và tinh tế.
-                        </p>
-                    </article>
-
-                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="200">
-                        <span class="public-editorial-page__item-index">04</span>
-                        <h3 class="public-editorial-page__item-title">Cập nhật chương trình</h3>
-                        <p class="public-editorial-page__item-copy">
-                            Khách quan tâm sẽ có kênh theo dõi thông tin mới nhất về quyền lợi, lịch công bố và
-                            các thay đổi quan trọng khi chương trình hoàn thiện.
-                        </p>
+                    <article class="member-program__rule-card" data-uw-reveal="fade-up" data-uw-delay="110" data-uw-once="true">
+                        <h3 class="member-program__rule-title">Ghi chú về điểm tiêu dùng</h3>
+                        <ul class="member-program__rule-list">
+                            <li>Điểm tiêu dùng được dùng để đổi món ăn, quà tặng hoặc ưu đãi khi chính sách hạng thành viên cho phép.</li>
+                            <li>Tại hạng Đồng, “Điểm tiêu dùng: chưa áp dụng” và quyền đổi món chưa được mở.</li>
+                            <li>Điểm không thể quy đổi thành tiền mặt.</li>
+                        </ul>
                     </article>
                 </div>
             </section>
 
             <section class="public-editorial-page__section">
                 <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
-                    <span class="public-editorial-page__eyebrow">Hệ sinh thái thương hiệu</span>
+                    <span class="public-editorial-page__eyebrow">Đặc quyền tuần sinh nhật</span>
                     <h2 class="public-editorial-page__section-title">
-                        Một chương trình hội viên được xây dựng để kết nối trải nghiệm giữa ba thương hiệu
+                        Điểm thưởng được nhân đôi trong tuần chứa ngày sinh nhật
                     </h2>
                     <p class="public-editorial-page__section-copy">
-                        Trải nghiệm hội viên tương lai của KIG Holding hướng đến cảm giác liền mạch, dù bạn chọn
-                        một bữa mì cay ấm áp, một buổi nướng đậm vị hay một cuộc hẹn đông vui bên bàn buffet.
+                        Tuần sinh nhật là tuần chứa ngày sinh nhật của khách hàng. Tuần được tính từ Thứ 2 đến Chủ nhật.
                     </p>
                 </div>
 
-                <div class="public-editorial-page__grid grid-cols-1 gap-y-6 lg:grid-cols-3">
-                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
-                        <span class="public-editorial-page__item-index">01</span>
-                        <h3 class="public-editorial-page__item-title">Truyền Thuyết Champong</h3>
-                        <p class="public-editorial-page__item-copy">
-                            Điểm chạm quen thuộc cho những bữa ăn đậm vị Hàn Quốc, nơi trải nghiệm hội viên cần
-                            giữ được cảm giác gần gũi và nhất quán.
-                        </p>
-                    </article>
+                <div class="member-program__table-wrap" data-uw-reveal="fade-up" data-uw-delay="70" data-uw-once="true">
+                    <table class="member-program__table">
+                        <caption>
+                            Bảng điểm thường và điểm tuần sinh nhật theo từng hạng thành viên Truyền Thuyết Champong.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Hạng</th>
+                                <th scope="col">Điểm thường</th>
+                                <th scope="col">Điểm tuần sinh nhật</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Bronze</th>
+                                <td>2%</td>
+                                <td>4%</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Silver</th>
+                                <td>4%</td>
+                                <td>8%</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Gold</th>
+                                <td>3%</td>
+                                <td>6%</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Diamond</th>
+                                <td>5%</td>
+                                <td>10%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="120">
-                        <span class="public-editorial-page__item-index">02</span>
-                        <h3 class="public-editorial-page__item-title">Gogimaru</h3>
-                        <p class="public-editorial-page__item-copy">
-                            Không gian nướng mang tính gặp gỡ và chia sẻ, phù hợp cho những cập nhật hội viên có
-                            chiều sâu nhưng vẫn tiết chế.
-                        </p>
-                    </article>
+                <p class="member-program__table-note" data-uw-reveal="fade-up" data-uw-delay="120" data-uw-once="true">
+                    Hệ thống sẽ tự động gửi thông báo quyền lợi sinh nhật vào đầu tuần sinh nhật của khách hàng.
+                </p>
+            </section>
 
-                    <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="160">
-                        <span class="public-editorial-page__item-index">03</span>
-                        <h3 class="public-editorial-page__item-title">KBB Cook</h3>
-                        <p class="public-editorial-page__item-copy">
-                            Một nhịp trải nghiệm năng động hơn trong hệ sinh thái, nơi các quyền lợi tương lai
-                            cần tiếp tục rõ ràng, dễ dùng và phù hợp với nhóm khách đa dạng.
-                        </p>
+            <section class="public-editorial-page__section">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Nâng hạng và hạ hạng</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Xét hạng định kỳ dựa trên chi tiêu trong 12 tháng gần nhất
+                    </h2>
+                </div>
+
+                <div class="member-program__rule-grid">
+                    <article class="member-program__rule-card" data-uw-reveal="fade-up" data-uw-delay="50" data-uw-once="true">
+                        <h3 class="member-program__rule-title">Nâng cấp thành viên</h3>
+                        <ul class="member-program__rule-list">
+                            <li>Hệ thống xét hạng vào ngày 1 hàng tháng.</li>
+                            <li>Việc xét hạng dựa trên tổng chi tiêu tích lũy trong 12 tháng gần nhất.</li>
+                            <li>Khi đạt đủ điều kiện chi tiêu, thành viên tự động được nâng lên hạng tương ứng.</li>
+                        </ul>
+                    </article>
+                    <article class="member-program__rule-card" data-uw-reveal="fade-up" data-uw-delay="110" data-uw-once="true">
+                        <h3 class="member-program__rule-title">Hạ cấp thành viên</h3>
+                        <ul class="member-program__rule-list">
+                            <li>Nếu tổng chi tiêu trong 12 tháng gần nhất không đủ duy trì hạng hiện tại, hệ thống tự động hạ xuống cấp độ phù hợp.</li>
+                            <li>Giới hạn tối đa 1 lần hạ hạng trong vòng 6 tháng.</li>
+                        </ul>
                     </article>
                 </div>
             </section>
 
             <section class="public-editorial-page__section">
-                <div class="public-editorial-page__columns">
-                    <div class="public-editorial-page__column" data-uw-reveal="fade-right" data-uw-once="true">
-                        <div class="public-editorial-page__section-head mb-0">
-                            <span class="public-editorial-page__eyebrow">Lộ trình ra mắt</span>
-                            <h2 class="public-editorial-page__section-title">
-                                Chương trình đang đi qua từng bước để ra mắt một cách minh bạch hơn
-                            </h2>
-                        </div>
-                        <p class="public-editorial-page__section-copy">
-                            Hiện tại, trọng tâm là hoàn thiện chính sách, làm rõ quyền lợi và chuẩn bị kênh
-                            đăng ký phù hợp trước khi mở rộng truyền thông ra công chúng.
-                        </p>
-                    </div>
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Điều khoản điểm cần lưu ý</span>
+                    <h2 class="public-editorial-page__section-title">
+                        Những quy tắc quan trọng để theo dõi điểm và quyền lợi đúng chính sách
+                    </h2>
+                </div>
 
-                    <div class="public-editorial-page__column lg:border-l lg:border-white/10 lg:pl-8" data-uw-reveal="fade-left" data-uw-once="true" data-uw-delay="120">
-                        <div class="public-editorial-page__steps">
-                            <article class="public-editorial-page__step">
-                                <span class="public-editorial-page__step-index">01</span>
-                                <div>
-                                    <h3 class="public-editorial-page__step-title">Hoàn thiện chính sách</h3>
-                                    <p class="public-editorial-page__step-copy">
-                                        Làm rõ phạm vi áp dụng, nguyên tắc quyền lợi và cách vận hành thống nhất giữa các thương hiệu.
-                                    </p>
-                                </div>
-                            </article>
-
-                            <article class="public-editorial-page__step">
-                                <span class="public-editorial-page__step-index">02</span>
-                                <div>
-                                    <h3 class="public-editorial-page__step-title">Công bố quyền lợi</h3>
-                                    <p class="public-editorial-page__step-copy">
-                                        Cập nhật công khai các nhóm ưu đãi, điều kiện áp dụng và thông tin quan trọng liên quan đến hội viên.
-                                    </p>
-                                </div>
-                            </article>
-
-                            <article class="public-editorial-page__step">
-                                <span class="public-editorial-page__step-index">03</span>
-                                <div>
-                                    <h3 class="public-editorial-page__step-title">Mở kênh đăng ký</h3>
-                                    <p class="public-editorial-page__step-copy">
-                                        Khi hạ tầng và quy trình sẵn sàng, chúng tôi sẽ mở kênh tiếp nhận thông tin theo cách rõ ràng và thuận tiện.
-                                    </p>
-                                </div>
-                            </article>
-
-                            <article class="public-editorial-page__step">
-                                <span class="public-editorial-page__step-index">04</span>
-                                <div>
-                                    <h3 class="public-editorial-page__step-title">Cập nhật trải nghiệm</h3>
-                                    <p class="public-editorial-page__step-copy">
-                                        Tiếp tục tinh chỉnh chương trình dựa trên phản hồi thực tế để hành trình hội viên giữ được sự tinh gọn lâu dài.
-                                    </p>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
+                <div class="member-program__terms-grid">
+                    <article class="member-program__term-card" data-uw-reveal="fade-up" data-uw-delay="40" data-uw-once="true">
+                        <h3 class="member-program__term-title">Hiệu lực điểm</h3>
+                        <p class="member-program__term-copy">Điểm có hiệu lực tối đa 24 tháng kể từ ngày phát sinh và tự động hết hạn vào ngày đầu tiên của tháng thứ 25.</p>
+                    </article>
+                    <article class="member-program__term-card" data-uw-reveal="fade-up" data-uw-delay="80" data-uw-once="true">
+                        <h3 class="member-program__term-title">Đổi quà và ưu đãi</h3>
+                        <p class="member-program__term-copy">Điểm có thể sử dụng để đổi món ăn, quà tặng hoặc ưu đãi trong hệ thống Truyền Thuyết Champong khi chính sách hạng thành viên cho phép.</p>
+                    </article>
+                    <article class="member-program__term-card" data-uw-reveal="fade-up" data-uw-delay="120" data-uw-once="true">
+                        <h3 class="member-program__term-title">Không quy đổi tiền mặt</h3>
+                        <p class="member-program__term-copy">Điểm không thể quy đổi thành tiền mặt và điểm thăng hạng cũng không thể sử dụng đổi quà.</p>
+                    </article>
+                    <article class="member-program__term-card" data-uw-reveal="fade-up" data-uw-delay="160" data-uw-once="true">
+                        <h3 class="member-program__term-title">Nhận diện thành viên</h3>
+                        <p class="member-program__term-copy">Thành viên sử dụng số điện thoại thành viên để đăng nhập vào hệ thống sau khi thanh toán nhằm ghi nhận quyền lợi.</p>
+                    </article>
                 </div>
             </section>
 
             <section class="public-editorial-page__section public-editorial-page__section--cta">
-                <div class="public-editorial-page__cta" data-uw-reveal="fade-up" data-uw-once="true">
+                <div class="public-editorial-page__cta member-program__cta" data-uw-reveal="fade-up" data-uw-once="true">
                     <div class="public-editorial-page__cta-copy">
-                        <span class="public-editorial-page__eyebrow">Theo dõi cập nhật</span>
+                        <span class="public-editorial-page__eyebrow">Sẵn sàng dùng bữa cùng Champong?</span>
                         <h2 class="public-editorial-page__section-title">
-                            Muốn nhận thông tin khi chương trình hội viên ra mắt?
+                            Lên kế hoạch dùng bữa để bắt đầu tích lũy quyền lợi theo hạng thành viên của bạn
                         </h2>
                         <p class="public-editorial-page__section-copy">
-                            Liên hệ với KIG Holding để nhận cập nhật sớm, hoặc tìm chi nhánh gần bạn để tiếp tục
-                            khám phá hệ sinh thái ẩm thực trong lúc chương trình vẫn đang được hoàn thiện.
+                            Chọn chi nhánh phù hợp, đặt bàn trước và lưu ý sử dụng số điện thoại thành viên sau khi thanh toán để ghi nhận điểm và quyền lợi theo đúng chính sách hiện hành.
                         </p>
                     </div>
 
                     <div class="public-editorial-page__cta-actions">
-                        <a class="public-editorial-page__button public-editorial-page__button--primary" href="/lien-he">
-                            Liên hệ nhận cập nhật
+                        <a class="public-editorial-page__button public-editorial-page__button--primary" href="/dat-ban">
+                            Đặt bàn ngay
                         </a>
                         <a class="public-editorial-page__button public-editorial-page__button--secondary" href="/chi-nhanh">
-                            Tìm chi nhánh gần bạn
+                            Xem chi nhánh
                         </a>
                     </div>
                 </div>

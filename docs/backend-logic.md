@@ -12,7 +12,7 @@ The application separates execution into three primary layers to guarantee testa
 graph TD
     A[Public & Admin Controllers] -->|Validates Payloads| B[Business Service Layer]
     B -->|Cached Fetch / Mutation| C[EF Core AppDbContext]
-    B -->|Third-Party APIs| D[Resend SDK / Cloudinary API]
+    B -->|Third-Party APIs| D[Resend SDK / Cloudinary API / Cloudflare R2 S3 API]
     C -->|PostgreSQL Driver| E[(Neon Database)]
 ```
 
@@ -25,7 +25,7 @@ graph TD
     *   *Constraint*: Controllers must never write raw SQL queries, direct EF Linq context filters, or execute external API calls directly.
 2.  **Service Layer (Business Logic)**:
     *   Act as the exclusive source of business calculations, validation rules, formatting, and operations.
-    *   Integrate external dependencies (e.g. Resend SDK inside `EmailService`, Cloudinary storage client inside `ImageStorageService`).
+    *   Integrate external dependencies (e.g. Resend SDK inside `EmailService`, image-storage providers behind `IImageStorageService`).
     *   Handle memory cache configurations to optimize query times.
 3.  **Data Access Layer (EF Core & PostgreSQL)**:
     *   Provide relational persistence via `AppDbContext`.
@@ -159,3 +159,39 @@ To prevent race conditions where a client submits multiple overlapping reservati
 3. **Serialized Evaluation**: If another request for the same phone number attempts to run concurrently, it is blocked at the database level and must wait until the current transaction commits or rolls back.
 4. **Safe Verification**: Inside the locked window, the service executes `AnyAsync` checks to ensure the database doesn't already contain a reservation for the client on that day.
 5. **Commit and Auto-Release**: On transaction completion, PostgreSQL automatically releases the advisory lock, ensuring zero residual locking overhead on the server.
+
+---
+
+## 6. Image Storage Provider Flow
+
+Admin image uploads must enter through `IImageStorageService`; controllers do not know Cloudinary, LocalVolume, AWS SDK, or Cloudflare-specific types.
+
+```text
+Admin form upload
+-> controller validation
+-> IImageStorageService
+-> active IImageStorageProvider
+-> physical LocalVolume path or Cloudflare R2 object key
+-> returned public URL/path stored on the entity
+-> Razor renders the stored URL/path directly
+```
+
+`ImageStorage:Provider` is parsed centrally and supports `LocalVolume`, `Cloudinary`, and `CloudflareR2`. New R2 uploads return absolute public URLs. Delete routing is based on the stored reference, not only on the current active upload provider:
+
+* `/uploads/...` remains LocalVolume-compatible.
+* Recognized Cloudinary URLs remain Cloudinary-compatible.
+* Configured R2 public URLs or safe R2 object keys are deleted only when they are under the expected category prefix.
+* External unmanaged URLs and static assets are ignored.
+
+Menu page uploads add one scoped storage segment from the persisted `MenuGroup.Slug`:
+
+```text
+MenuGroup.Slug
+-> validated single path segment
+-> IImageStorageService.UploadAsync(file, ImageCategory.MenuPages, slug)
+-> menu-pages/<slug>/<safe-unique-filename>
+```
+
+Invalid persisted slugs stop the upload before any object is written or `MenuPageImage` row is saved. Existing root-level `menu-pages/<filename>` objects remain supported for deletes, and slug renames do not move previously uploaded objects.
+
+Upload size uses `ImageStorage:MaxFileSizeBytes` as the canonical storage-service limit. The current value is 50 MB. Kestrel and multipart transport limits remain 60 MB to allow form-data overhead. Feature-specific controller checks may be stricter: branch thumbnails are 2 MB, menu group covers are 10 MB, menu pages are 50 MB, and post thumbnails are 2 MB.

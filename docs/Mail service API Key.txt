@@ -1,1 +1,16 @@
-re_6qJvbhYa_9pPpJjjQHu4m9oYCC5aEEMQz
+# Mail Service API Key Setup
+
+Do not store real mail provider API keys in tracked repository files.
+
+Use one of these secret stores instead:
+
+- Local development: ignored `appsettings.Development.json` or .NET user-secrets.
+- Railway production: Railway Variables.
+
+Required key name:
+
+```text
+ResendSettings__ApiKey
+```
+
+If a real API key was ever committed to this file or any other tracked file, treat it as compromised and rotate it manually with the provider. Cleaning the current source file does not remove values from Git history.

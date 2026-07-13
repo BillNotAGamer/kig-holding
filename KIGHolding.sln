@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KIGHolding", "KIGHolding.csproj", "{C9C47747-A34A-4D23-9DB9-618A89A29E63}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KIGHolding.Tests", "KIGHolding.Tests\KIGHolding.Tests.csproj", "{041DF8E9-172F-41BC-8E8A-37E716B0C05B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{C9C47747-A34A-4D23-9DB9-618A89A29E63}.Release|x64.Build.0 = Release|Any CPU
 		{C9C47747-A34A-4D23-9DB9-618A89A29E63}.Release|x86.ActiveCfg = Release|Any CPU
 		{C9C47747-A34A-4D23-9DB9-618A89A29E63}.Release|x86.Build.0 = Release|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Debug|x64.Build.0 = Debug|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Debug|x86.Build.0 = Debug|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Release|x64.ActiveCfg = Release|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Release|x64.Build.0 = Release|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Release|x86.ActiveCfg = Release|Any CPU
+		{041DF8E9-172F-41BC-8E8A-37E716B0C05B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

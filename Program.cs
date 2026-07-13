@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Resend;
 
@@ -74,7 +75,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
-builder.Services.Configure<ImageStorageSettings>(builder.Configuration.GetSection("ImageStorage"));
+builder.Services.AddSingleton<IValidateOptions<ImageStorageSettings>, ImageStorageSettingsValidator>();
+builder.Services.AddOptions<ImageStorageSettings>()
+    .Bind(builder.Configuration.GetSection("ImageStorage"))
+    .ValidateOnStart();
 builder.Services.Configure<ResendSettings>(builder.Configuration.GetSection("ResendSettings"));
 builder.Services.Configure<AdminBootstrapSettings>(builder.Configuration.GetSection("AdminBootstrap"));
 builder.Services.AddResend(options =>
@@ -91,6 +95,10 @@ builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<ICloudflareR2Client, CloudflareR2Client>();
+builder.Services.AddScoped<IImageStorageProvider, LocalVolumeImageStorageProvider>();
+builder.Services.AddScoped<IImageStorageProvider, CloudinaryImageStorageProvider>();
+builder.Services.AddScoped<IImageStorageProvider, CloudflareR2ImageStorageProvider>();
 builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
 builder.Services.AddScoped<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddScoped<AdminCookieAuthenticationEvents>();
@@ -146,19 +154,26 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 
-// Configure external static files for uploads (Railway Volume support)
-var imageStorageConfig = app.Configuration.GetSection("ImageStorage").Get<ImageStorageSettings>() ?? new ImageStorageSettings();
+// Configure external static files for legacy /uploads compatibility.
+var imageStorageConfig = app.Services.GetRequiredService<IOptions<ImageStorageSettings>>().Value;
 var externalUploadRoot = Path.IsPathRooted(imageStorageConfig.RootPath) 
     ? imageStorageConfig.RootPath 
     : Path.Combine(builder.Environment.ContentRootPath, imageStorageConfig.RootPath);
 
-// Ensure directory exists so FileProvider doesn't crash on startup
-Directory.CreateDirectory(externalUploadRoot);
+var activeImageProvider = ImageStorageProviderKindParser.ParseOrThrow(imageStorageConfig.Provider);
+if (activeImageProvider == ImageStorageProviderKind.LocalVolume)
+{
+    Directory.CreateDirectory(externalUploadRoot);
+}
+
+IFileProvider uploadFileProvider = Directory.Exists(externalUploadRoot)
+    ? new PhysicalFileProvider(externalUploadRoot)
+    : new NullFileProvider();
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(externalUploadRoot),
-    RequestPath = imageStorageConfig.PublicBasePath,
+    FileProvider = uploadFileProvider,
+    RequestPath = ImageStoragePathUtilities.NormalizePublicPath(imageStorageConfig.PublicBasePath),
     OnPrepareResponse = context =>
     {
         context.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=86400";

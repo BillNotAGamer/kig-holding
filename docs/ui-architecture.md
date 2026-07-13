@@ -136,3 +136,34 @@ if (shouldReduceMotion || !supportsObserver || !supportsAnimate) {
 
 *   **Article Hero Images**: The main detail image on `/tin-tuc/{slug}` uses a natural aspect ratio (via `.news-detail-media--hero`) to prevent cropping important image content.
 *   **News Grid Cards**: Listing cards and related post cards intentionally keep fixed/cropped thumbnail behavior (`object-cover`) for visual grid consistency. Future changes must not mutate shared `.news-detail-media` base behavior without checking both detail hero and card usages.
+
+---
+
+## 5. Membership Program Editorial Page
+
+The public route `/thanh-vien` uses the existing editorial shell (`.public-editorial-page`) with a dedicated member-page namespace layered on top (`.member-program*`). This keeps the shared page chrome and button system stable while allowing the membership page to present denser policy content safely.
+
+### Content Architecture
+The page is intentionally server-rendered and static. It presents:
+
+1. A Truyền Thuyết Champong-specific hero
+2. Point-earning overview
+3. Tier thresholds
+4. Four detailed tier cards
+5. Tier-progress rules
+6. Birthday-week benefits in a semantic table
+7. Upgrade and downgrade rules
+8. Important point terms
+9. Final practical CTAs
+
+### Styling Rules
+*   Shared button selectors such as `.public-editorial-page__button` remain untouched because they are reused by other pages including reservation success.
+*   Membership-specific layout and card rules must stay under `.member-program` selectors to avoid affecting `/gioi-thieu`, reservation success, or other editorial views.
+*   The birthday-benefit table is rendered once with semantic `<table>` markup and may scroll horizontally on smaller screens rather than duplicating the DOM for mobile.
+
+### Maintenance Rule
+Any future change to approved membership tiers, thresholds, point rates, invoice examples, birthday benefits, upgrade/downgrade rules, or point-validity rules must update:
+
+*   `/thanh-vien`
+*   the member-page tests
+*   the synchronized documentation

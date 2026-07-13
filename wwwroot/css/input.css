@@ -1930,6 +1930,313 @@
     max-width: 46rem;
   }
 
+  .member-program__hero {
+    gap: 1.15rem;
+  }
+
+  .member-program__title {
+    max-width: 14ch;
+  }
+
+  .member-program__lead {
+    max-width: 48rem;
+  }
+
+  .member-program__hero-facts,
+  .member-program__rate-grid,
+  .member-program__threshold-grid,
+  .member-program__tier-grid,
+  .member-program__rule-grid,
+  .member-program__terms-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .member-program__hero-facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 0.85rem;
+  }
+
+  .member-program__fact,
+  .member-program__rate-card,
+  .member-program__threshold-card,
+  .member-program__tier-card,
+  .member-program__rule-card,
+  .member-program__term-card,
+  .member-program__validity,
+  .member-program__table-wrap {
+    min-width: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(18px);
+  }
+
+  .member-program__fact {
+    padding: 1.15rem 1.2rem;
+  }
+
+  .member-program__fact-label,
+  .member-program__validity-title {
+    display: block;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .member-program__fact-value {
+    display: block;
+    margin-top: 0.45rem;
+    color: #fff;
+    font-size: 1.05rem;
+    line-height: 1.45;
+    font-weight: 800;
+  }
+
+  .member-program__rate-grid,
+  .member-program__threshold-grid,
+  .member-program__terms-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 1.5rem;
+  }
+
+  .member-program__rate-card,
+  .member-program__threshold-card,
+  .member-program__term-card {
+    padding: 1.25rem;
+  }
+
+  .member-program__rate-tier,
+  .member-program__threshold-tier,
+  .member-program__tier-badge,
+  .member-program__term-title,
+  .member-program__rule-title,
+  .member-program__invoice-title {
+    display: block;
+    color: #fff;
+    font-size: 0.96rem;
+    line-height: 1.45;
+    font-weight: 800;
+  }
+
+  .member-program__rate-value,
+  .member-program__threshold-value {
+    display: block;
+    margin-top: 0.7rem;
+    color: #fff7ed;
+    font-size: clamp(1.7rem, 3vw, 2.45rem);
+    line-height: 0.95;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+  }
+
+  .member-program__rate-copy,
+  .member-program__tier-phase,
+  .member-program__tier-subcopy,
+  .member-program__term-copy,
+  .member-program__table-note {
+    margin-top: 0.55rem;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .member-program__validity {
+    margin-top: 1rem;
+    padding: 1.25rem 1.35rem;
+  }
+
+  .member-program__validity-copy {
+    margin-top: 0.55rem;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.85;
+    font-weight: 700;
+  }
+
+  .member-program__tier-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 1.5rem;
+  }
+
+  .member-program__tier-card {
+    padding: 1.35rem;
+  }
+
+  .member-program__tier-header {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .member-program__tier-badge {
+    width: fit-content;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.55rem 0.9rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .member-program__tier-phase {
+    color: #fff7ed;
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .member-program__tier-subcopy {
+    margin-top: 0.15rem;
+  }
+
+  .member-program__tier-list,
+  .member-program__rule-list {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.7rem;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    padding-left: 1.1rem;
+  }
+
+  .member-program__invoice {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 1rem;
+  }
+
+  .member-program__invoice-list {
+    margin-top: 0.7rem;
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .member-program__invoice-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding-bottom: 0.65rem;
+  }
+
+  .member-program__invoice-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .member-program__invoice-row dt,
+  .member-program__invoice-row dd {
+    min-width: 0;
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.6;
+  }
+
+  .member-program__invoice-row dt {
+    color: rgba(255, 255, 255, 0.66);
+  }
+
+  .member-program__invoice-row dd {
+    text-align: right;
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .member-program__tier-note {
+    margin-top: 1rem;
+    border-left: 3px solid rgba(229, 9, 20, 0.55);
+    padding-left: 0.95rem;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.94rem;
+    line-height: 1.75;
+  }
+
+  .member-program__rule-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 1.5rem;
+  }
+
+  .member-program__rule-card {
+    padding: 1.25rem 1.3rem;
+  }
+
+  .member-program__table-wrap {
+    margin-top: 1.5rem;
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  .member-program__table {
+    width: 100%;
+    min-width: 36rem;
+    border-collapse: collapse;
+  }
+
+  .member-program__table caption {
+    margin-bottom: 0.8rem;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .member-program__table th,
+  .member-program__table td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.9rem 1rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .member-program__table thead th {
+    color: #fff7ed;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .member-program__table tbody th,
+  .member-program__table tbody td {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .member-program__table tbody tr:last-child th,
+  .member-program__table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .member-program__cta {
+    align-items: start;
+  }
+
+  .member-program__rate-card--bronze,
+  .member-program__tier-card--bronze {
+    border-color: rgba(198, 138, 82, 0.35);
+  }
+
+  .member-program__rate-card--silver,
+  .member-program__tier-card--silver {
+    border-color: rgba(203, 213, 225, 0.35);
+  }
+
+  .member-program__rate-card--gold,
+  .member-program__tier-card--gold {
+    border-color: rgba(231, 217, 189, 0.34);
+  }
+
+  .member-program__rate-card--diamond,
+  .member-program__tier-card--diamond {
+    border-color: rgba(147, 197, 253, 0.34);
+  }
+
   .about-reward-visual {
     display: flex;
     align-items: center;
@@ -1983,6 +2290,10 @@
       justify-content: flex-end;
       min-width: max-content;
     }
+
+    .member-program__hero-facts {
+      max-width: 58rem;
+    }
   }
 
   @media (max-width: 767px) {
@@ -2015,6 +2326,42 @@
 
     .public-editorial-page__section-title {
       font-size: clamp(1.65rem, 7vw, 2.25rem);
+    }
+
+    .member-program__hero-facts,
+    .member-program__rate-grid,
+    .member-program__threshold-grid,
+    .member-program__tier-grid,
+    .member-program__rule-grid,
+    .member-program__terms-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .member-program__invoice-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
+    }
+
+    .member-program__invoice-row dd {
+      text-align: left;
+    }
+
+    .member-program__table {
+      min-width: 31rem;
+    }
+  }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .member-program__rate-grid,
+    .member-program__threshold-grid,
+    .member-program__terms-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .member-program__tier-grid,
+    .member-program__rule-grid {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 

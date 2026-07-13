@@ -16,3 +16,6 @@ backups/
 outbuild/
 KIGHolding.slnx
 wwwroot/uploads/
+appsettings.example.json
+build_error.log
+KIGHolding.Tests/

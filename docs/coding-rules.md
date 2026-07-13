@@ -89,9 +89,22 @@ To avoid filename collisions and sanitize incoming vectors, all filenames are re
 
 ### Storage Locations
 *   **Configurable Provider**: Image routing is handled via `ImageStorageSettings.Provider`.
-*   **LocalVolume (Default)**: Uploads are saved to an external persistent volume (e.g. `/data/uploads` in production) and the database stores the public relative path (e.g. `/uploads/posts/...`). No files are stored in the git repository or ephemeral container filesystem.
-*   **Cloudinary**: Supported for legacy backward compatibility and potential future use. If active, files are transferred to the Cloudinary media library.
+*   **CloudflareR2**: Supported provider for new production uploads. Files are streamed to the S3-compatible API, object keys are immutable and unique, and the database stores an absolute public URL.
+*   **LocalVolume**: Supported for local development and legacy `/uploads/...` compatibility. When active, uploads are saved to an external persistent volume (e.g. `/data/uploads`) and the database stores the public relative path (e.g. `/uploads/posts/...`).
+*   **Cloudinary**: Supported for legacy backward compatibility and optional future activation. Recognized Cloudinary URLs continue routing through Cloudinary delete handling.
+*   **R2 Category Prefixes**: Branches -> `BranchesPrefix`; Posts -> `NewsPrefix`; Menu pages -> `MenuPagesPrefix/<MenuGroup.Slug>` for new page-image uploads; Menu group covers -> `BrandsPrefix`.
+*   **Menu Page Storage Scope**: Only menu page uploads may provide a storage scope. The scope must be the persisted `MenuGroup.Slug`, validated as one safe lowercase slug segment. Do not use `MenuGroup.Name`, route text, form data, alt text, or uploaded filename to choose the folder. Existing root-level `menu-pages/<filename>` objects remain supported and must not be migrated implicitly.
+*   **Upload Limits**: `ImageStorage:MaxFileSizeBytes` is the canonical storage-service limit and must remain 50 MB unless explicitly changed with documentation. Kestrel and multipart limits remain 60 MB. Do not reintroduce `MaxUploadBytes`.
+*   **Validation Scope**: Extension and MIME checks are enforced, but they are not decoder or magic-byte validation. Content-signature validation remains a future hardening item.
 *   **Format Constraints**: Implement WebP format standardizations for user-facing layouts (`champong-hero.webp` and `post-card.webp`) to optimize visual loading.
+
+### Image Storage Documentation Rule
+
+Any change to image-storage providers, configuration keys, upload limits, object-key mapping, URL resolution, managed-asset ownership, create/edit/delete behavior, deployment requirements, or migration logic must update the relevant architecture, coding, deployment, and feature-state documentation in the same change.
+
+### Secret Configuration Rule
+
+Real local `appsettings.json` and `appsettings.Development.json` files are intentionally ignored and untracked. They may hold local-only secrets, but they must never be force-added to Git or printed in diagnostics. Use ignored settings or .NET user-secrets locally, and Railway Variables in production.
 
 ---
 
