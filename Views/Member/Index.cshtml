@@ -43,7 +43,7 @@
             <section class="public-editorial-page__section">
                 <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
                     <span class="public-editorial-page__eyebrow">Quy tắc tích điểm</span>
-                    <h2 class="public-editorial-page__section-title">
+                    <h2 class="public-editorial-page__section-title" id="member-tier-heading">
                         Tỷ lệ tích điểm và quyền lợi áp dụng theo từng hạng thành viên
                     </h2>
                     <p class="public-editorial-page__section-copy">
@@ -51,28 +51,275 @@
                     </p>
                 </div>
 
-                <div class="member-program__rate-grid">
-                    <article class="member-program__rate-card member-program__rate-card--bronze" data-uw-reveal="fade-up" data-uw-delay="40" data-uw-once="true">
-                        <span class="member-program__rate-tier">Đồng (Bronze)</span>
-                        <strong class="member-program__rate-value">2%</strong>
-                        <p class="member-program__rate-copy">Tích điểm trong phần tổng quan quyền lợi.</p>
-                    </article>
-                    <article class="member-program__rate-card member-program__rate-card--silver" data-uw-reveal="fade-up" data-uw-delay="90" data-uw-once="true">
-                        <span class="member-program__rate-tier">Bạc (Silver)</span>
-                        <strong class="member-program__rate-value">4%</strong>
-                        <p class="member-program__rate-copy">Tích điểm và bắt đầu đổi món.</p>
-                    </article>
-                    <article class="member-program__rate-card member-program__rate-card--gold" data-uw-reveal="fade-up" data-uw-delay="140" data-uw-once="true">
-                        <span class="member-program__rate-tier">Vàng (Gold)</span>
-                        <strong class="member-program__rate-value">3% + 3%</strong>
-                        <p class="member-program__rate-copy">Giảm trực tiếp 3% và tích 3%.</p>
-                    </article>
-                    <article class="member-program__rate-card member-program__rate-card--diamond" data-uw-reveal="fade-up" data-uw-delay="190" data-uw-once="true">
-                        <span class="member-program__rate-tier">Kim Cương (Diamond)</span>
-                        <strong class="member-program__rate-value">5% + 5%</strong>
-                        <p class="member-program__rate-copy">Giảm trực tiếp 5% và tích 5%.</p>
-                    </article>
-                </div>
+                <section class="member-tier" data-member-tier-tabs data-uw-reveal="fade-up" data-uw-delay="80" data-uw-once="true" aria-labelledby="member-tier-heading">
+                    <div class="member-tier__visual-stage" aria-live="polite">
+                        <article class="member-tier__visual-card member-tier__visual-card--bronze" id="member-tier-visual-bronze" data-member-tier-visual="bronze" aria-labelledby="member-tier-visual-title-bronze">
+                            <div class="member-tier__visual-content">
+                                <div class="member-tier__visual-copy">
+                                    <p class="member-tier__visual-kicker">Bronze</p>
+                                    <h3 class="member-tier__visual-title" id="member-tier-visual-title-bronze">Thành viên Đồng</h3>
+                                    <p class="member-tier__visual-summary">Tích 2% trong phần tổng quan quyền lợi.</p>
+                                </div>
+                                <img class="member-tier__visual-logo" src="/images/member/kig-metallic-logo.webp" alt="" width="240" height="120" loading="eager" decoding="async" aria-hidden="true" />
+                                <div class="member-tier__track" aria-hidden="true"></div>
+                                <p class="member-tier__progress-message">Mốc tiếp theo: Hạng Bạc từ 5 triệu đồng</p>
+                                <p class="sr-only">Thanh tiến trình trên thẻ là minh họa điều kiện hạng, không phải tiến độ cá nhân của người dùng.</p>
+                            </div>
+                        </article>
+
+                        <article class="member-tier__visual-card member-tier__visual-card--silver" id="member-tier-visual-silver" data-member-tier-visual="silver" aria-labelledby="member-tier-visual-title-silver">
+                            <div class="member-tier__visual-content">
+                                <div class="member-tier__visual-copy">
+                                    <p class="member-tier__visual-kicker">Silver</p>
+                                    <h3 class="member-tier__visual-title" id="member-tier-visual-title-silver">Thành viên Bạc</h3>
+                                    <p class="member-tier__visual-summary">Tích 4% và bắt đầu đổi món.</p>
+                                </div>
+                                <img class="member-tier__visual-logo" src="/images/member/kig-metallic-logo.webp" alt="" width="240" height="120" loading="lazy" decoding="async" aria-hidden="true" />
+                                <div class="member-tier__track" aria-hidden="true"></div>
+                                <p class="member-tier__progress-message">Mốc tiếp theo: Hạng Vàng từ 12 triệu đồng</p>
+                                <p class="sr-only">Thanh tiến trình trên thẻ là minh họa điều kiện hạng, không phải tiến độ cá nhân của người dùng.</p>
+                            </div>
+                        </article>
+
+                        <article class="member-tier__visual-card member-tier__visual-card--gold" id="member-tier-visual-gold" data-member-tier-visual="gold" aria-labelledby="member-tier-visual-title-gold">
+                            <div class="member-tier__visual-content">
+                                <div class="member-tier__visual-copy">
+                                    <p class="member-tier__visual-kicker">Gold</p>
+                                    <h3 class="member-tier__visual-title" id="member-tier-visual-title-gold">Thành viên Vàng</h3>
+                                    <p class="member-tier__visual-summary">3% + 3%: Giảm trực tiếp 3% và tích 3%.</p>
+                                </div>
+                                <img class="member-tier__visual-logo" src="/images/member/kig-metallic-logo.webp" alt="" width="240" height="120" loading="lazy" decoding="async" aria-hidden="true" />
+                                <div class="member-tier__track" aria-hidden="true"></div>
+                                <p class="member-tier__progress-message">Mốc tiếp theo: Hạng Kim Cương từ 45 triệu đồng</p>
+                                <p class="sr-only">Thanh tiến trình trên thẻ là minh họa điều kiện hạng, không phải tiến độ cá nhân của người dùng.</p>
+                            </div>
+                        </article>
+
+                        <article class="member-tier__visual-card member-tier__visual-card--diamond" id="member-tier-visual-diamond" data-member-tier-visual="diamond" aria-labelledby="member-tier-visual-title-diamond">
+                            <div class="member-tier__visual-content">
+                                <div class="member-tier__visual-copy">
+                                    <p class="member-tier__visual-kicker">Diamond</p>
+                                    <h3 class="member-tier__visual-title" id="member-tier-visual-title-diamond">Thành viên Kim Cương</h3>
+                                    <p class="member-tier__visual-summary">5% + 5%: Giảm trực tiếp 5% và tích 5%.</p>
+                                </div>
+                                <img class="member-tier__visual-logo" src="/images/member/kig-metallic-logo.webp" alt="" width="240" height="120" loading="lazy" decoding="async" aria-hidden="true" />
+                                <div class="member-tier__track" aria-hidden="true"></div>
+                                <p class="member-tier__progress-message">Hạng thành viên cao nhất</p>
+                                <p class="sr-only">Thanh tiến trình trên thẻ là minh họa điều kiện hạng, không phải tiến độ cá nhân của người dùng.</p>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="member-tier__tab-scroll" aria-label="Chọn hạng thành viên">
+                        <div class="member-tier__tablist" role="tablist" aria-labelledby="member-tier-heading">
+                            <button class="member-tier__tab" id="member-tier-tab-bronze" type="button" role="tab" aria-selected="true" aria-controls="member-tier-panel-bronze" tabindex="0" data-member-tier-tab="bronze">
+                                Thành viên Đồng
+                            </button>
+                            <button class="member-tier__tab" id="member-tier-tab-silver" type="button" role="tab" aria-selected="false" aria-controls="member-tier-panel-silver" tabindex="-1" data-member-tier-tab="silver">
+                                Thành viên Bạc
+                            </button>
+                            <button class="member-tier__tab" id="member-tier-tab-gold" type="button" role="tab" aria-selected="false" aria-controls="member-tier-panel-gold" tabindex="-1" data-member-tier-tab="gold">
+                                Thành viên Vàng
+                            </button>
+                            <button class="member-tier__tab" id="member-tier-tab-diamond" type="button" role="tab" aria-selected="false" aria-controls="member-tier-panel-diamond" tabindex="-1" data-member-tier-tab="diamond">
+                                Thành viên Kim Cương
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="member-tier__content">
+                        <article class="member-tier__panel" id="member-tier-panel-bronze" role="tabpanel" aria-labelledby="member-tier-tab-bronze" tabindex="0" data-member-tier-panel="bronze">
+                            <div class="member-tier__panel-head">
+                                <p class="member-tier__panel-kicker">Giai đoạn “Đua hạng”</p>
+                                <h3 class="member-tier__panel-title">Quyền lợi Thành viên Đồng</h3>
+                            </div>
+                            <ul class="member-tier__benefits">
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-discount.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Tích 2% trong phần tổng quan quyền lợi.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-gift.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Chưa áp dụng đổi món.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-points.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Được tích lũy điểm thăng hạng.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-priority.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Bắt đầu mở khóa quyền lợi thành viên.</span>
+                                </li>
+                            </ul>
+                            <div class="member-program__invoice member-tier__invoice">
+                                <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
+                                <dl class="member-program__invoice-list">
+                                    <div class="member-program__invoice-row">
+                                        <dt>Thanh toán</dt>
+                                        <dd>1.000.000 VNĐ</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Giảm giá</dt>
+                                        <dd>0%</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Điểm tiêu dùng</dt>
+                                        <dd>chưa áp dụng</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Điểm thăng hạng</dt>
+                                        <dd>100 điểm</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <p class="member-program__tier-note member-tier__status">
+                                “Anh/chị chỉ còn 400 điểm nữa là lên hạng Bạc để bắt đầu tích điểm đổi món miễn phí cùng Champong nhé!”
+                            </p>
+                        </article>
+
+                        <article class="member-tier__panel" id="member-tier-panel-silver" role="tabpanel" aria-labelledby="member-tier-tab-silver" tabindex="0" data-member-tier-panel="silver">
+                            <div class="member-tier__panel-head">
+                                <p class="member-tier__panel-kicker">Giai đoạn “Bắt đầu có quà”</p>
+                                <h3 class="member-tier__panel-title">Quyền lợi Thành viên Bạc</h3>
+                                <p class="member-tier__panel-subcopy">Sau khi chi tiêu đạt từ 5 triệu đồng</p>
+                            </div>
+                            <ul class="member-tier__benefits">
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-discount.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Tích điểm 4%.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-gift.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Được sử dụng điểm để đổi món.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-priority.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Tham gia ưu đãi thành viên định kỳ.</span>
+                                </li>
+                            </ul>
+                            <div class="member-program__invoice member-tier__invoice">
+                                <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
+                                <dl class="member-program__invoice-list">
+                                    <div class="member-program__invoice-row">
+                                        <dt>Thanh toán</dt>
+                                        <dd>1.000.000 VNĐ</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Giảm giá</dt>
+                                        <dd>0%</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Điểm tiêu dùng nhận được</dt>
+                                        <dd>40.000 điểm</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Điểm thăng hạng</dt>
+                                        <dd>100 điểm</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <p class="member-program__tier-note member-tier__status">
+                                Sau khoảng 3 lần dùng bữa ở hạng này, khách hàng đã có đủ điểm để đổi 1 món trị giá khoảng 120K.
+                            </p>
+                        </article>
+
+                        <article class="member-tier__panel" id="member-tier-panel-gold" role="tabpanel" aria-labelledby="member-tier-tab-gold" tabindex="0" data-member-tier-panel="gold">
+                            <div class="member-tier__panel-head">
+                                <p class="member-tier__panel-kicker">Đặc quyền “Giảm giá + Tích điểm”</p>
+                                <h3 class="member-tier__panel-title">Quyền lợi Thành viên Vàng</h3>
+                                <p class="member-tier__panel-subcopy">Sau khi chi tiêu đạt từ 12 triệu đồng</p>
+                            </div>
+                            <ul class="member-tier__benefits">
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-discount.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Giảm trực tiếp 3% trên hóa đơn.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-points.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Tích điểm 3%.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-priority.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Nhận ưu đãi thành viên cao cấp.</span>
+                                </li>
+                            </ul>
+                            <div class="member-program__invoice member-tier__invoice">
+                                <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
+                                <dl class="member-program__invoice-list">
+                                    <div class="member-program__invoice-row">
+                                        <dt>Giảm trực tiếp</dt>
+                                        <dd>30.000 VNĐ</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Thanh toán thực tế</dt>
+                                        <dd>970.000 VNĐ</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Điểm tiêu dùng nhận được</dt>
+                                        <dd>29.000 điểm</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Điểm thăng hạng</dt>
+                                        <dd>97 điểm</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <p class="member-program__tier-note member-tier__status">
+                                Chỉ cần khoảng 4 lần dùng bữa là khách hàng đã có thể đổi 1 món trị giá khoảng 120K.
+                            </p>
+                        </article>
+
+                        <article class="member-tier__panel" id="member-tier-panel-diamond" role="tabpanel" aria-labelledby="member-tier-tab-diamond" tabindex="0" data-member-tier-panel="diamond">
+                            <div class="member-tier__panel-head">
+                                <p class="member-tier__panel-kicker">Đặc quyền VIP “5 + 5”</p>
+                                <h3 class="member-tier__panel-title">Quyền lợi Thành viên Kim Cương</h3>
+                                <p class="member-tier__panel-subcopy">Sau khi chi tiêu đạt từ 45 triệu đồng</p>
+                            </div>
+                            <ul class="member-tier__benefits">
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-discount.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Giảm trực tiếp 5% trên hóa đơn.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-points.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Tích điểm 5%.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-priority.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Quyền lợi VIP toàn hệ thống.</span>
+                                </li>
+                                <li class="member-tier__benefit">
+                                    <img class="member-tier__benefit-icon" src="/images/member/benefit-gift.svg" alt="" width="40" height="40" loading="lazy" decoding="async" aria-hidden="true" />
+                                    <span>Ưu tiên sự kiện và quà tặng đặc biệt.</span>
+                                </li>
+                            </ul>
+                            <div class="member-program__invoice member-tier__invoice">
+                                <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
+                                <dl class="member-program__invoice-list">
+                                    <div class="member-program__invoice-row">
+                                        <dt>Giảm trực tiếp</dt>
+                                        <dd>50.000 VNĐ</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Thanh toán thực tế</dt>
+                                        <dd>950.000 VNĐ</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Điểm tiêu dùng nhận được</dt>
+                                        <dd>47.500 điểm</dd>
+                                    </div>
+                                    <div class="member-program__invoice-row">
+                                        <dt>Điểm thăng hạng</dt>
+                                        <dd>95 điểm</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <p class="member-program__tier-note member-tier__status">
+                                Chỉ cần chưa tới 3 lần dùng bữa là khách hàng đã đủ điểm đổi 1 món trị giá khoảng 120K. Tổng quyền lợi nhận được từ giảm giá và tích điểm tương đương gần 10% giá trị hóa đơn.
+                            </p>
+                        </article>
+                    </div>
+                </section>
 
                 <div class="member-program__validity" data-uw-reveal="fade-up" data-uw-delay="220" data-uw-once="true">
                     <p class="member-program__validity-title">Hiệu lực điểm</p>
@@ -106,165 +353,6 @@
                     <article class="member-program__threshold-card" data-uw-reveal="fade-up" data-uw-delay="190" data-uw-once="true">
                         <h3 class="member-program__threshold-tier">Kim Cương (Diamond)</h3>
                         <p class="member-program__threshold-value">Từ 45 triệu</p>
-                    </article>
-                </div>
-            </section>
-
-            <section class="public-editorial-page__section">
-                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
-                    <span class="public-editorial-page__eyebrow">Chi tiết 4 hạng thành viên</span>
-                    <h2 class="public-editorial-page__section-title">
-                        Quyền lợi, hóa đơn mẫu và trạng thái tích điểm theo từng hạng
-                    </h2>
-                </div>
-
-                <div class="member-program__tier-grid">
-                    <article class="member-program__tier-card member-program__tier-card--bronze" data-uw-reveal="fade-up" data-uw-delay="40" data-uw-once="true">
-                        <div class="member-program__tier-header">
-                            <span class="member-program__tier-badge">Đồng (Bronze)</span>
-                            <p class="member-program__tier-phase">Giai đoạn “Đua hạng”</p>
-                        </div>
-                        <ul class="member-program__tier-list">
-                            <li>Chưa áp dụng đổi món.</li>
-                            <li>Được tích lũy điểm thăng hạng.</li>
-                            <li>Bắt đầu mở khóa quyền lợi thành viên.</li>
-                        </ul>
-                        <div class="member-program__invoice">
-                            <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
-                            <dl class="member-program__invoice-list">
-                                <div class="member-program__invoice-row">
-                                    <dt>Thanh toán</dt>
-                                    <dd>1.000.000 VNĐ</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Giảm giá</dt>
-                                    <dd>0%</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Điểm tiêu dùng</dt>
-                                    <dd>chưa áp dụng</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Điểm thăng hạng</dt>
-                                    <dd>100 điểm</dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <p class="member-program__tier-note">
-                            “Anh/chị chỉ còn 400 điểm nữa là lên hạng Bạc để bắt đầu tích điểm đổi món miễn phí cùng Champong nhé!”
-                        </p>
-                    </article>
-
-                    <article class="member-program__tier-card member-program__tier-card--silver" data-uw-reveal="fade-up" data-uw-delay="90" data-uw-once="true">
-                        <div class="member-program__tier-header">
-                            <span class="member-program__tier-badge">Bạc (Silver)</span>
-                            <p class="member-program__tier-phase">Giai đoạn “Bắt đầu có quà”</p>
-                            <p class="member-program__tier-subcopy">Sau khi chi tiêu đạt từ 5 triệu đồng</p>
-                        </div>
-                        <ul class="member-program__tier-list">
-                            <li>Tích điểm 4%.</li>
-                            <li>Được sử dụng điểm để đổi món.</li>
-                            <li>Tham gia ưu đãi thành viên định kỳ.</li>
-                        </ul>
-                        <div class="member-program__invoice">
-                            <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
-                            <dl class="member-program__invoice-list">
-                                <div class="member-program__invoice-row">
-                                    <dt>Thanh toán</dt>
-                                    <dd>1.000.000 VNĐ</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Giảm giá</dt>
-                                    <dd>0%</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Điểm tiêu dùng nhận được</dt>
-                                    <dd>40.000 điểm</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Điểm thăng hạng</dt>
-                                    <dd>100 điểm</dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <p class="member-program__tier-note">
-                            Sau khoảng 3 lần dùng bữa ở hạng này, khách hàng đã có đủ điểm để đổi 1 món trị giá khoảng 120K.
-                        </p>
-                    </article>
-
-                    <article class="member-program__tier-card member-program__tier-card--gold" data-uw-reveal="fade-up" data-uw-delay="140" data-uw-once="true">
-                        <div class="member-program__tier-header">
-                            <span class="member-program__tier-badge">Vàng (Gold)</span>
-                            <p class="member-program__tier-phase">Đặc quyền “Giảm giá + Tích điểm”</p>
-                            <p class="member-program__tier-subcopy">Sau khi chi tiêu đạt từ 12 triệu đồng</p>
-                        </div>
-                        <ul class="member-program__tier-list">
-                            <li>Giảm trực tiếp 3% trên hóa đơn.</li>
-                            <li>Tích điểm 3%.</li>
-                            <li>Nhận ưu đãi thành viên cao cấp.</li>
-                        </ul>
-                        <div class="member-program__invoice">
-                            <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
-                            <dl class="member-program__invoice-list">
-                                <div class="member-program__invoice-row">
-                                    <dt>Giảm trực tiếp</dt>
-                                    <dd>30.000 VNĐ</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Thanh toán thực tế</dt>
-                                    <dd>970.000 VNĐ</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Điểm tiêu dùng nhận được</dt>
-                                    <dd>29.000 điểm</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Điểm thăng hạng</dt>
-                                    <dd>97 điểm</dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <p class="member-program__tier-note">
-                            Chỉ cần khoảng 4 lần dùng bữa là khách hàng đã có thể đổi 1 món trị giá khoảng 120K.
-                        </p>
-                    </article>
-
-                    <article class="member-program__tier-card member-program__tier-card--diamond" data-uw-reveal="fade-up" data-uw-delay="190" data-uw-once="true">
-                        <div class="member-program__tier-header">
-                            <span class="member-program__tier-badge">Kim Cương (Diamond)</span>
-                            <p class="member-program__tier-phase">Đặc quyền VIP “5 + 5”</p>
-                            <p class="member-program__tier-subcopy">Sau khi chi tiêu đạt từ 45 triệu đồng</p>
-                        </div>
-                        <ul class="member-program__tier-list">
-                            <li>Giảm trực tiếp 5% trên hóa đơn.</li>
-                            <li>Tích điểm 5%.</li>
-                            <li>Quyền lợi VIP toàn hệ thống.</li>
-                            <li>Ưu tiên sự kiện và quà tặng đặc biệt.</li>
-                        </ul>
-                        <div class="member-program__invoice">
-                            <p class="member-program__invoice-title">Hóa đơn mẫu 1.000.000 VNĐ</p>
-                            <dl class="member-program__invoice-list">
-                                <div class="member-program__invoice-row">
-                                    <dt>Giảm trực tiếp</dt>
-                                    <dd>50.000 VNĐ</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Thanh toán thực tế</dt>
-                                    <dd>950.000 VNĐ</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Điểm tiêu dùng nhận được</dt>
-                                    <dd>47.500 điểm</dd>
-                                </div>
-                                <div class="member-program__invoice-row">
-                                    <dt>Điểm thăng hạng</dt>
-                                    <dd>95 điểm</dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <p class="member-program__tier-note">
-                            Chỉ cần chưa tới 3 lần dùng bữa là khách hàng đã đủ điểm đổi 1 món trị giá khoảng 120K. Tổng quyền lợi nhận được từ giảm giá và tích điểm tương đương gần 10% giá trị hóa đơn.
-                        </p>
                     </article>
                 </div>
             </section>
@@ -428,6 +516,56 @@
                     </div>
                 </div>
             </section>
+
+            <section class="member-app-promo" aria-labelledby="member-app-promo-title" data-uw-reveal="fade-up" data-uw-once="true">
+                <div class="member-app-promo__inner">
+                    <div class="member-app-promo__qr" aria-label="Mã QR tải ứng dụng">
+                        <img src="~/images/general/kig-holding-qr-app.webp"
+                             alt="Quét mã QR để tải ứng dụng KIG Holding"
+                             class="member-app-promo__qr-image"
+                             loading="lazy"
+                             decoding="async" />
+                    </div>
+
+                    <div class="member-app-promo__content">
+                        <p class="member-app-promo__eyebrow">Ứng dụng Truyền Thuyết Champong</p>
+                        <h2 class="member-app-promo__title" id="member-app-promo-title">
+                            Tải ứng dụng để kết nối thuận tiện hơn
+                        </h2>
+                        <p class="member-app-promo__copy">
+                            Quét mã QR hoặc lựa chọn nền tảng phù hợp để tải ứng dụng.
+                        </p>
+
+                        <div class="member-app-promo__stores" aria-label="Liên kết tải ứng dụng">
+                            <a href="https://apps.apple.com/vn/app/truy%E1%BB%81n-thuy%E1%BA%BFt-champong-%EC%A0%88%EC%84%A4%EC%9D%98%EC%A7%AC%EB%BD%BB/id6753157313?l=vi"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="Tải ứng dụng trên App Store"
+                               class="member-app-promo__store-link">
+                                <img src="~/images/general/icons/app-store-download.svg"
+                                     alt="Tải ứng dụng trên App Store"
+                                     class="member-app-promo__store-badge"
+                                     asp-append-version="true" />
+                            </a>
+
+                            <a href="https://play.google.com/store/apps/details?id=com.eggstech.champong.app&pcampaignid=web_share"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="Tải ứng dụng trên Google Play"
+                               class="member-app-promo__store-link">
+                                <img src="~/images/general/icons/google-play-download.svg"
+                                     alt="Tải ứng dụng trên Google Play"
+                                     class="member-app-promo__store-badge"
+                                     asp-append-version="true" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </main>
+
+@section Scripts {
+    <script src="~/js/member-tier-tabs.js" asp-append-version="true" defer></script>
+}

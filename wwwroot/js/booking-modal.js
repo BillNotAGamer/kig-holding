@@ -57,6 +57,7 @@
     let autoCloseTimer = null;
     let autoUserInteracted = false;
     let autoOpenHasRun = false;
+    let autoOpenSuppressed = false;
     let autoInteractionTrackingArmed = false;
     let sessionStorageAvailable = null;
 
@@ -118,6 +119,12 @@
         }
 
         autoInteractionTrackingArmed = false;
+    };
+
+    const suppressAutoOpen = () => {
+        autoOpenSuppressed = true;
+        clearAutoTimers();
+        markAutoShownThisSession();
     };
 
     const markAutoInteracted = () => {
@@ -483,7 +490,7 @@
     };
 
     const scheduleAutoOpenIfEnabled = () => {
-        if (!autoOpenEnabled || autoOpenHasRun || wasAutoShownThisSession()) {
+        if (!autoOpenEnabled || autoOpenHasRun || autoOpenSuppressed || wasAutoShownThisSession()) {
             return;
         }
 
@@ -491,7 +498,12 @@
         autoOpenTimer = window.setTimeout(() => {
             autoOpenTimer = null;
 
-            if (wasAutoShownThisSession()) {
+            if (
+                autoOpenSuppressed ||
+                document.body.classList.contains('home-app-modal-open') ||
+                wasAutoShownThisSession()
+            ) {
+                markAutoShownThisSession();
                 return;
             }
 
@@ -507,6 +519,8 @@
             markAutoShownThisSession();
         }, autoOpenDelay);
     };
+
+    document.addEventListener('kig:booking-modal:suppress-auto-open', suppressAutoOpen);
 
     triggers.forEach((trigger) => {
         trigger.addEventListener('click', (event) => {

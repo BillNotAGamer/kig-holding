@@ -132,14 +132,36 @@ if (shouldReduceMotion || !supportsObserver || !supportsAnimate) {
 
 ---
 
-## 4. News Details & Related Posts
+## 4. Homepage App Download Modal
+
+The homepage `Mang Champong về nhà` CTA uses a page-scoped app-download modal loaded by `wwwroot/js/home-app-modal.js`. The modal is static server-rendered markup in `Views/Home/Index.cshtml`, keeps `/dat-ban` as the no-JavaScript fallback, and reuses the same footer QR and store badge/link values.
+
+### Cross-Modal Coordination
+
+The app modal and homepage booking modal follow a strict single-active-modal policy. `home-app-modal.js` dispatches:
+
+```javascript
+document.dispatchEvent(
+  new CustomEvent("kig:booking-modal:suppress-auto-open", {
+    detail: { source: "home-app-modal" }
+  })
+);
+```
+
+Consumer: `wwwroot/js/booking-modal.js`.
+
+Purpose: cancel the pending automatic homepage booking prompt, mark that automatic prompt as handled for the current browser session, and prevent stacked dialogs. Manual booking triggers remain unaffected and continue to open the booking modal normally.
+
+---
+
+## 5. News Details & Related Posts
 
 *   **Article Hero Images**: The main detail image on `/tin-tuc/{slug}` uses a natural aspect ratio (via `.news-detail-media--hero`) to prevent cropping important image content.
 *   **News Grid Cards**: Listing cards and related post cards intentionally keep fixed/cropped thumbnail behavior (`object-cover`) for visual grid consistency. Future changes must not mutate shared `.news-detail-media` base behavior without checking both detail hero and card usages.
 
 ---
 
-## 5. Membership Program Editorial Page
+## 6. Membership Program Editorial Page
 
 The public route `/thanh-vien` uses the existing editorial shell (`.public-editorial-page`) with a dedicated member-page namespace layered on top (`.member-program*`). This keeps the shared page chrome and button system stable while allowing the membership page to present denser policy content safely.
 
@@ -149,7 +171,7 @@ The page is intentionally server-rendered and static. It presents:
 1. A Truyền Thuyết Champong-specific hero
 2. Point-earning overview
 3. Tier thresholds
-4. Four detailed tier cards
+4. One accessible tabbed tier module with Bronze selected by default
 5. Tier-progress rules
 6. Birthday-week benefits in a semantic table
 7. Upgrade and downgrade rules
@@ -159,10 +181,13 @@ The page is intentionally server-rendered and static. It presents:
 ### Styling Rules
 *   Shared button selectors such as `.public-editorial-page__button` remain untouched because they are reused by other pages including reservation success.
 *   Membership-specific layout and card rules must stay under `.member-program` selectors to avoid affecting `/gioi-thieu`, reservation success, or other editorial views.
+*   The tier module uses a dedicated `.member-tier*` namespace for the selected visual card, scrollable tab pills, benefit rows, invoice block, and status text.
+*   The tier module is progressively enhanced by `wwwroot/js/member-tier-tabs.js`: all tier content is server-rendered first, then JavaScript hides inactive panels and visual cards, updates `aria-selected`, supports arrow/Home/End keys, and scrolls the active pill into view.
+*   The selected membership-card track is decorative/informational only. It must not display fabricated personalized progress unless a future backend member-progress source is implemented.
 *   The birthday-benefit table is rendered once with semantic `<table>` markup and may scroll horizontally on smaller screens rather than duplicating the DOM for mobile.
 
 ### Maintenance Rule
-Any future change to approved membership tiers, thresholds, point rates, invoice examples, birthday benefits, upgrade/downgrade rules, or point-validity rules must update:
+Any future change to approved membership tiers, thresholds, point rates, invoice examples, birthday benefits, upgrade/downgrade rules, tier-tab behavior, or point-validity rules must update:
 
 *   `/thanh-vien`
 *   the member-page tests

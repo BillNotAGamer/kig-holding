@@ -21,6 +21,7 @@ The application is in a stable, optimized state:
 *   **Brand Narrative Sections**: High-fidelity light-theme grids detailing KIG Holding's milestones.
 *   **3-Card Concept Showcase**: Editorial teasers for the three main concepts: Truyền Thuyết Champong, Gogi Maru, and KBB Cook.
 *   **Unified Booking CTAs**: Quick navigation hooks to launch reservations.
+*   **Take-Home App Modal**: The homepage "Mang Champong về nhà" CTA opens a scoped app-download modal that reuses the footer QR code, App Store badge/link, and Google Play badge/link. The CTA keeps `/dat-ban` as its no-JavaScript fallback, does not claim an ordering backend, suppresses only the automatic homepage booking prompt for the current session, and leaves manual booking triggers available.
 
 ### 2. Multi-Concept Digital Menu Flipbook
 *   **Flipbook Engine**: Custom mobile-friendly viewport render loop loaded from `wwwroot/js/menu-flipbook.js`.
@@ -43,8 +44,11 @@ The application is in a stable, optimized state:
 ### 5. Membership Program Page (`/thanh-vien`)
 *   **Static Informational Policy Page**: `/thanh-vien` is now a published informational page for the **Truyền Thuyết Champong** membership program, not a coming-soon placeholder.
 *   **Approved Policy Content**: The page presents the approved four tiers (Đồng, Bạc, Vàng, Kim Cương), point-earning rules, point-validity rules, invoice examples, birthday-week rates, and upgrade/downgrade rules.
+*   **Tabbed Tier Presentation**: The four-tier detail area is rendered as one accessible tabbed module. Bronze is selected by default after progressive enhancement, the tier visual card uses owner-approved member assets, and all tier benefits, invoice examples, and status text remain server-rendered.
+*   **Progress Display Boundary**: The membership card track is informational/decorative only. The page does not fabricate personalized "points remaining" values because there is no member-account progress data source in this phase.
+*   **App Download Promotion**: The page ends with a scoped app-download promotion that reuses the existing footer QR code, App Store badge/link, and Google Play badge/link.
 *   **No Backend Membership Engine**: This route does not implement member login, redemption workflows, account data, automatic calculations, or a database-backed membership model.
-*   **Maintenance Contract**: Any future change to approved membership tiers, thresholds, point rates, invoice examples, birthday benefits, upgrade/downgrade rules, or point-validity rules must update the member page, its tests, and the relevant documentation in the same change.
+*   **Maintenance Contract**: Any future change to approved membership tiers, thresholds, point rates, invoice examples, birthday benefits, upgrade/downgrade rules, tier-tab markup, or point-validity rules must update the member page, its tests, and the relevant documentation in the same change.
 
 ### 6. Branch Locator (`/chi-nhanh`)
 *   **Operational Break Windows**: Full formatting support for standard hours and branch lunch breaks.
