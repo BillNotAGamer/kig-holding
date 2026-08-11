@@ -21,6 +21,7 @@ public class ReservationController : Controller
     private readonly ResendSettings _resendSettings;
     private readonly IConfiguration _configuration;
     private readonly ILogger<ReservationController> _logger;
+    private readonly TimeProvider _timeProvider;
 
     public ReservationController(
         IReservationService reservationService,
@@ -29,7 +30,8 @@ public class ReservationController : Controller
         IEmailService emailService,
         IOptions<ResendSettings> resendSettings,
         IConfiguration configuration,
-        ILogger<ReservationController> logger)
+        ILogger<ReservationController> logger,
+        TimeProvider timeProvider)
     {
         _reservationService = reservationService;
         _branchService = branchService;
@@ -38,6 +40,7 @@ public class ReservationController : Controller
         _resendSettings = resendSettings.Value;
         _configuration = configuration;
         _logger = logger;
+        _timeProvider = timeProvider;
     }
 
     [HttpGet("")]
@@ -63,7 +66,7 @@ public class ReservationController : Controller
             PhoneNumber = phoneNumber ?? string.Empty,
             BranchId = selectedBranch?.Id,
             GuestCount = guestCount ?? guests ?? 2,
-            ReservationDate = reservationDate ?? date ?? DateOnly.FromDateTime(DateTime.Today),
+            ReservationDate = reservationDate ?? date ?? VietnamHolidayEvaluator.GetVietnamToday(_timeProvider),
             ReservationTime = reservationTime ?? time ?? new TimeOnly(18, 0),
             SelectedBranchSlug = branch,
             Branches = MapBranches(branches),
@@ -284,9 +287,18 @@ public class ReservationController : Controller
 
     private void ApplyControllerValidation(ReservationCreateViewModel model)
     {
-        if (model.ReservationDate.HasValue && model.ReservationDate.Value < DateOnly.FromDateTime(DateTime.Today))
+        if (model.ReservationDate.HasValue)
         {
-            ModelState.AddModelError(nameof(model.ReservationDate), "Ngày đến không được sớm hơn hôm nay.");
+            var datePolicyResult = VietnamHolidayEvaluator.EvaluateReservationDate(
+                model.ReservationDate.Value,
+                VietnamHolidayEvaluator.GetVietnamToday(_timeProvider));
+
+            if (!datePolicyResult.IsAllowed)
+            {
+                ModelState.AddModelError(
+                    nameof(model.ReservationDate),
+                    VietnamHolidayEvaluator.GetReservationDatePolicyMessage(datePolicyResult.Status));
+            }
         }
 
         if (model.BranchId == Guid.Empty)

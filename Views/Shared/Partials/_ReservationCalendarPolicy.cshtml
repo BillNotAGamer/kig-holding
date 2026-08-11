@@ -1,0 +1,110 @@
+@using System.Globalization
+@using System.Text.Json
+@using KIGHolding.Services
+
+@{
+    var vietnamToday = VietnamHolidayEvaluator.GetVietnamToday();
+    var policyPayload = new
+    {
+        minDate = FormatReservationCalendarDate(vietnamToday),
+        maxDate = FormatReservationCalendarDate(VietnamHolidayEvaluator.MaximumOpenReservationDate),
+        weekendRestricted = true,
+        configuredHolidayYears = VietnamHolidayEvaluator.GetConfiguredHolidayYears(),
+        restrictedDates = VietnamHolidayEvaluator.GetConfiguredHolidayDates()
+            .Select(FormatReservationCalendarDate)
+            .ToArray(),
+        messages = new
+        {
+            pastDate = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.PastDate),
+            weekend = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.Weekend),
+            holiday = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.Holiday),
+            bookingCalendarClosed = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.BookingCalendarClosed),
+            invalidDate = "Ngày đến không hợp lệ."
+        }
+    };
+}
+
+<script type="application/json" id="reservation-calendar-policy">@Html.Raw(JsonSerializer.Serialize(policyPayload))</script>
+<script>
+    (function () {
+        if (window.kigValidateReservationDate) {
+            return;
+        }
+
+        var policyElement = document.getElementById('reservation-calendar-policy');
+        var policy = {};
+
+        try {
+            policy = JSON.parse(policyElement ? policyElement.textContent || '{}' : '{}');
+        }
+        catch {
+            policy = {};
+        }
+
+        var restrictedDates = new Set(Array.isArray(policy.restrictedDates) ? policy.restrictedDates : []);
+        var messages = policy.messages || {};
+
+        function parseDateInputValue(value) {
+            var match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+            if (!match) {
+                return null;
+            }
+
+            var year = Number(match[1]);
+            var month = Number(match[2]);
+            var day = Number(match[3]);
+            var date = new Date(Date.UTC(year, month - 1, day));
+
+            if (
+                date.getUTCFullYear() !== year ||
+                date.getUTCMonth() !== month - 1 ||
+                date.getUTCDate() !== day
+            ) {
+                return null;
+            }
+
+            return {
+                value: value,
+                year: year,
+                dayOfWeek: date.getUTCDay()
+            };
+        }
+
+        window.kigReservationCalendarPolicy = policy;
+        window.kigValidateReservationDate = function (value) {
+            if (!value) {
+                return { valid: true };
+            }
+
+            var parsed = parseDateInputValue(value);
+            if (!parsed) {
+                return { valid: false, message: messages.invalidDate || 'Ngày đến không hợp lệ.' };
+            }
+
+            if (policy.minDate && value < policy.minDate) {
+                return { valid: false, message: messages.pastDate || 'Ngày đến không được sớm hơn hôm nay.' };
+            }
+
+            if (policy.maxDate && value > policy.maxDate) {
+                return { valid: false, message: messages.bookingCalendarClosed || 'Hệ thống chưa mở lịch đặt bàn cho thời gian này.' };
+            }
+
+            if (policy.weekendRestricted && (parsed.dayOfWeek === 0 || parsed.dayOfWeek === 6)) {
+                return { valid: false, message: messages.weekend || 'Nhà hàng không nhận đặt bàn vào thứ Bảy và Chủ nhật.' };
+            }
+
+            if (restrictedDates.has(value)) {
+                return { valid: false, message: messages.holiday || 'Hệ thống không nhận đặt bàn vào các ngày Lễ Tết.' };
+            }
+
+            return { valid: true };
+        };
+    })();
+</script>
+
+@functions {
+    private static string FormatReservationCalendarDate(DateOnly date)
+    {
+        return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+}

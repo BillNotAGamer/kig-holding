@@ -69,11 +69,17 @@ public async Task<IActionResult> Edit(int id, ReservationEditViewModel model)
     TempData["SuccessMessage"] = "Cập nhật đặt bàn thành công.";
     return RedirectToAction(nameof(Index));
 }
+```
 
 ### Localized Timezone Validation
 *   **Clock Localizing Rule**: Developers are strictly prohibited from using raw `DateTime.Today`, `DateTime.Now`, or `DateTime.UtcNow` to assess localized Vietnamese calendar boundaries in business logic layers. Because hosting environments (AWS/Azure/Neon DB) operate on UTC clocks, direct server clock references cause shifting window mismatches.
-*   **Required Provider**: Use [VietnamHolidayEvaluator.GetVietnamToday()](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/VietnamHolidayEvaluator.cs) to resolve the active calendar day under the local `Asia/Ho_Chi_Minh` timezone (GMT+7).
-```
+*   **Required Provider**: Use [VietnamHolidayEvaluator.GetVietnamToday(TimeProvider)](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/VietnamHolidayEvaluator.cs) to resolve the active calendar day under the local `Asia/Ho_Chi_Minh` timezone (GMT+7). Production code should receive `TimeProvider` from dependency injection.
+*   **Reservation Date Policy Boundary**: Reservation date bookability must be evaluated through `VietnamHolidayEvaluator.EvaluateReservationDate(...)`. Do not duplicate Saturday/Sunday, holiday, or booking-calendar boundary logic inside controllers, services, Razor views, or JavaScript.
+*   **Policy Precedence Rule**: Date policy precedence is `PastDate`, `BookingCalendarClosed`, `Weekend`, `Holiday`, then `Allowed`.
+*   **DateOnly Integrity Rule**: Submitted reservation calendar dates are `DateOnly` values. Do not transform them through UTC, `DateTimeOffset`, locale-specific parsing, or server-local `.Date` conversions before policy evaluation or persistence.
+*   **Frontend Advisory Rule**: Browser-side reservation date restrictions must consume the server-owned calendar-policy payload and remain advisory. `ReservationService.CreateReservationAsync` is still the final enforcement point when requests bypass JavaScript.
+*   **Holiday Dataset Rule**: Do not maintain independent handwritten holiday arrays or configured special-date lists. New holiday years require owner-approved dates in the centralized evaluator before the year may be opened for online booking.
+*   **Open Calendar Rule**: The maximum open reservation date is `VietnamHolidayEvaluator.MaximumOpenReservationDate`. Dates after that boundary must return `BookingCalendarClosed`.
 
 ---
 
@@ -126,3 +132,14 @@ Security checks are enforced to safeguard the site against manipulation, request
 
 ### Input Normalization Rule
 *   **Identity Normalization**: Raw customer inputs (such as phone numbers) must be normalized prior to executing in-memory cache lockups, database checks, or identity comparisons. Sanitization must run through [IdentityNormalizer.NormalizePhone()](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/IdentityNormalizer.cs) to strip whitespace, drop non-numeric characters, and unify country calling prefixes (e.g. converting `+84` and `84` to local `0` formatting) to prevent rate limit bypasses.
+
+### Real-Time Admin Notification Rule
+*   **SignalR Boundary**: Controllers and business services must not depend directly on `IHubContext`. Use `IAdminReservationNotifier` for Admin reservation notifications.
+*   **Hub Authorization**: Admin Hubs must require the existing Admin cookie authentication scheme and must not expose anonymous endpoints.
+*   **Event Naming**: SignalR event names must be centralized in `AdminReservationNotificationEvents` rather than repeated as string literals across C# code.
+*   **Payload Privacy**: Real-time reservation payloads must include only operationally necessary fields. Do not send phone numbers, emails, customer notes, dining occasion notes, internal notes, API keys, cookies, or passwords.
+*   **Safe DOM Rendering**: Client notification scripts must render server-originated values with DOM APIs and `textContent`; do not inject notification payload fields with `innerHTML`.
+*   **Security Stamp Scope**: Security-stamp revocation is enforced on new Hub connections and reconnects. Forcibly terminating already-open WebSocket connections is outside Phase 1.
+*   **Client Reconnect Scope**: Admin notification scripts must keep SignalR automatic reconnect enabled and must restart a guarded manual start loop after terminal close without registering duplicate handlers or creating overlapping connection starts.
+*   **Audio Coordination Scope**: Admin notification audio may be attempted only when the persisted sound preference is enabled and the tab is visible; hidden tabs must stay silent. Keep page-level browser unlock separate from the persisted preference, and never disable that preference solely because autoplay is blocked. Use Web Locks for per-reservation cross-tab exclusion where available; older browsers may fall back to visible-tab playback with possible duplicate audio.
+*   **Deployment Assets**: The vendored SignalR browser client and Admin notification MP3 live under `wwwroot` as source-controlled deployment assets and must not be replaced by serving files from `node_modules` at runtime.

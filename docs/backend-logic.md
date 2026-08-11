@@ -74,10 +74,18 @@ public async Task<IActionResult> Create(ReservationCreateRequest request)
 
 ### Multi-Tier Server-Side Validation Chain
 Once a request passes the initial `ModelState` gateway, the business service layer ([ReservationService.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/ReservationService.cs)) processes it through a strict sequential validation pipeline:
-1. **Past Date Check**: Validates that the requested reservation date is not in the past relative to Vietnam Standard Time (GMT+7).
-2. **Weekend & Holiday Check**: Evaluates if the reservation date falls on a restricted weekend (Saturday/Sunday) or a statutory/lunar holiday (using [VietnamHolidayEvaluator.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/VietnamHolidayEvaluator.cs)).
-3. **In-Memory Rate Limiting Gate**: Checks the memory cache for active locks on the normalized phone number to block spam submissions within a 10-minute window.
-4. **Database Parameter Validation**: Assures validity of branch IDs, capacity bounds, and session slots prior to storage execution.
+1. **Authoritative Date Policy**: Calls `VietnamHolidayEvaluator.EvaluateReservationDate(request.ReservationDate, VietnamHolidayEvaluator.GetVietnamToday(timeProvider))` before branch database lookup or persistence. Precedence is `PastDate`, `BookingCalendarClosed`, `Weekend`, `Holiday`, then `Allowed`.
+2. **In-Memory Rate Limiting Gate**: Checks the memory cache for active locks on the normalized phone number to block spam submissions within a 10-minute window.
+3. **Database Parameter Validation**: Assures validity of branch IDs, capacity bounds, and session slots prior to storage execution.
+4. **Transaction & Persistence**: Opens the transaction, takes the advisory lock, creates the `Reservation`, saves, commits, stamps the rate-limit success key, and publishes post-commit notifications only after all validation succeeds.
+
+The date policy is centralized under [VietnamHolidayEvaluator.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/VietnamHolidayEvaluator.cs). The submitted `DateOnly` is evaluated directly and, when allowed, stored unchanged. Frontend date restrictions mirror this policy for user experience only; the service layer remains authoritative if client-side checks are bypassed.
+
+Configured holiday data currently exists for 2026, 2027, and 2028. The authoritative open booking calendar ends at `VietnamHolidayEvaluator.MaximumOpenReservationDate`, currently `2028-12-31` inclusive. Dates after that maximum return `BookingCalendarClosed`; 2029 is not open until an owner-approved Vietnamese public/lunar/compensatory holiday list is supplied and the configured coverage boundary is extended.
+
+Rejected date-policy requests return before branch database lookup, branch-hours validation, transaction begin, advisory lock, `Reservations.Add`, `SaveChangesAsync`, rate-limit success stamping, SignalR notification, and controller-owned email dispatch.
+
+`VietnamHolidayEvaluator` is the only authoritative holiday-date collection. Obsolete independently configured reservation special-date lists must not be reintroduced.
 
 ---
 
@@ -159,6 +167,16 @@ To prevent race conditions where a client submits multiple overlapping reservati
 3. **Serialized Evaluation**: If another request for the same phone number attempts to run concurrently, it is blocked at the database level and must wait until the current transaction commits or rolls back.
 4. **Safe Verification**: Inside the locked window, the service executes `AnyAsync` checks to ensure the database doesn't already contain a reservation for the client on that day.
 5. **Commit and Auto-Release**: On transaction completion, PostgreSQL automatically releases the advisory lock, ensuring zero residual locking overhead on the server.
+
+---
+
+## 5.1 Post-Commit Admin Reservation Notifications
+
+Public website reservations publish the `AdminReservationCreated` SignalR event only after `ReservationService.CreateReservationAsync` has completed `SaveChangesAsync`, committed the PostgreSQL transaction, and stamped the in-memory rate-limit key. The notification is sent through `IAdminReservationNotifier`, not by using `IHubContext` directly from the reservation service or a controller.
+
+Notification publishing is best-effort and independent from email dispatch. If SignalR publishing fails, the service logs the reservation ID and exception, keeps the committed reservation successful, and returns the existing success result so the public controller can continue the existing best-effort email workflow. The reservation database remains the source of truth; missed real-time events are recovered operationally through the Admin reservation list and pending dashboard count.
+
+The server does not persist notification history or guarantee durable delivery in Phase 1. The Admin browser client handles transient disconnects with SignalR automatic reconnect plus a guarded manual restart after terminal close; if no Admin page is connected, the committed reservation remains visible through the normal Admin reservation views.
 
 ---
 

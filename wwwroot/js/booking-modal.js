@@ -18,6 +18,7 @@
     const submitButtonUnavailable = submitButton?.dataset.bookingModalUnavailable === 'true';
     const firstField = root.querySelector('#booking-modal-customer-name');
     const antiForgeryField = form?.querySelector('input[name="__RequestVerificationToken"]');
+    const reservationDateField = form?.querySelector('[name="ReservationDate"]');
     const firstCloseButton = closeButtons.find((button) => button instanceof HTMLElement) ?? null;
     const focusableSelector = [
         'a[href]',
@@ -413,6 +414,22 @@
         }
     };
 
+    const validateReservationDateField = () => {
+        if (!(reservationDateField instanceof HTMLInputElement) || typeof window.kigValidateReservationDate !== 'function') {
+            return true;
+        }
+
+        const result = window.kigValidateReservationDate(reservationDateField.value);
+        if (result.valid) {
+            reservationDateField.setCustomValidity('');
+            return true;
+        }
+
+        reservationDateField.setCustomValidity(result.message || '');
+        showFieldErrors({ ReservationDate: [result.message || 'Ngày đến không hợp lệ.'] });
+        return false;
+    };
+
     const renderSuccess = (payload) => {
         markAutoInteracted();
         markAutoShownThisSession();
@@ -582,6 +599,11 @@
                 syncConditionalField(config);
             }
         });
+
+        if (target.name === 'ReservationDate') {
+            clearFieldErrors();
+            validateReservationDateField();
+        }
     });
 
     form.addEventListener('submit', async (event) => {
@@ -595,6 +617,11 @@
         clearAutoTimers();
 
         resetFeedback(false);
+
+        if (!validateReservationDateField()) {
+            return;
+        }
+
         setSubmitting(true);
 
         const formData = new FormData(form);

@@ -29,12 +29,14 @@ The application is in a stable, optimized state:
 *   **Backoffice File Uploads**: Allows admins to upload image plates, automatically indexing pages in display order.
 
 ### 3. Public Booking System (`/dat-ban`)
-*   **Dynamic Client Validation**: Immediate input formatting (such as date and guest limit constraints).
+*   **Dynamic Client Validation**: Immediate input formatting (such as date and guest limit constraints). Full-page booking and the quick booking modal now share the same server-generated reservation calendar-policy payload for weekend, configured-holiday, and booking-calendar-closed UX feedback.
 *   **District Lockouts**: Enforces backend/frontend blocks on restricted zones based on app configuration limits.
 *   **Occasion Tags**: Delimited checkboxes to tag celebration milestones (Birthday, Meeting, etc.).
 *   **Resend Email Alerts**: Sends automated, rich HTML notifications to the business email once a reservation is successfully created.
 *   **Quick Booking Modal**: Responsive slide-over modal for reservation bookings, accessible via headers, footers, and floating contact buttons.
 *   **Floating Contact Routing**: Floating Contact Buttons support brand-specific Facebook/Zalo routing. Truyền Thuyết Champong, Gogi Maru, and KBB Cook each have their own Facebook/Zalo destination. Global `SiteSettings` social URLs remain available for global/footer/contact usage.
+*   **Reservation Date Policy Hardening**: Server-side policy rejects past dates, dates after the maximum open reservation date, every Saturday, every Sunday, and configured holidays before branch database lookup, persistence, email, or real-time notification. Regression coverage includes `2026-08-08`, `2026-08-09`, and `2026-08-10`.
+*   **Holiday Coverage State**: Approved configured holiday dates exist for 2026, 2027, and 2028, so the current open booking calendar ends on 2028-12-31 inclusive. The intended 2029 business period is explicitly blocked for online booking until an owner-approved 2029 Vietnamese holiday list is supplied.
 
 ### 4. News & Media Hub (`/tin-tuc`)
 *   **Category Filtration**: Fast AJAX and route-based classification.
@@ -58,6 +60,7 @@ The application is in a stable, optimized state:
 *   **Secure Authentication**: Standard cookie authentication flow backed by lockouts.
 *   **Sidebar Routing Navigation**: Highlighted active markers using `ViewContext` paths.
 *   **Global Layout Toast Alerts**: Integrated notification alerts using `TempData` banners.
+*   **Real-Time Reservation Alerts Phase 1**: Public website reservations now publish a best-effort `AdminReservationCreated` SignalR event after the database transaction commits. Authenticated Admin pages show a four-second dynamic toast. The Admin sound preference persists across visits, each page silently attempts browser-compliant unlock on the first normal interaction, and visible tabs attempt the local MP3 notification sound while hidden tabs stay silent. If playback is blocked, the preference remains enabled and a compact activation control appears. The client uses SignalR automatic reconnect with guarded terminal-close restart handling. The event payload excludes phone, email, notes, and other unnecessary personal data.
 *   **Image Upload Pipeline**: Provider-based storage is implemented. `CloudflareR2` can handle new uploads through the S3-compatible API and returns public absolute URLs. `LocalVolume` remains supported for local/legacy `/uploads/...` compatibility, and existing Cloudinary URLs remain backward-compatible for legacy handling.
 
 ### 8. Image Storage Phase State
@@ -65,6 +68,7 @@ The application is in a stable, optimized state:
 *   **Implemented in Phase 1.1**: New menu-page uploads use group-scoped R2 prefixes based on persisted `MenuGroup.Slug`, e.g. `menu-pages/truyen-thuyet-champong/<file>`. Existing root-level `menu-pages/<file>` objects remain supported; no existing object or database URL is migrated, and slug changes affect only future uploads.
 *   **Canonical Limits**: storage-service `ImageStorage:MaxFileSizeBytes` is 50 MB; Kestrel and multipart transport limits remain 60 MB. Stricter feature-level limits remain: Branch thumbnail 2 MB, Post thumbnail 2 MB, Menu group cover 10 MB, Menu pages 50 MB.
 *   **Not Yet Implemented**: managed asset registry, shared-reference delete protection, centralized URL resolver, legacy asset migration, decoder/magic-byte validation, production cutover, and full create/edit/delete lifecycle ownership refactor.
+*   **Out of Scope for Real-Time Reservation Alerts Phase 1**: durable notification storage, notification history, browser push notifications, service workers, Redis, SignalR backplane, polling fallback, Admin manual reservation creation, multi-instance fan-out, and guaranteed single-audio behavior in browsers without Web Locks.
 
 ---
 

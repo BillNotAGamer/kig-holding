@@ -1,11 +1,17 @@
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KIGHolding.Services;
 
 public static class VietnamHolidayEvaluator
 {
+    public const int FirstConfiguredHolidayYear = 2026;
+    public const int LastConfiguredHolidayYear = 2028;
+
+    public static DateOnly MaximumOpenReservationDate { get; } = new(LastConfiguredHolidayYear, 12, 31);
+
     private static readonly TimeZoneInfo VietnamTimeZone = GetVietnamTimeZone();
 
     private static readonly FrozenSet<DateOnly> Holidays = new[]
@@ -63,21 +69,92 @@ public static class VietnamHolidayEvaluator
 
     public static DateTimeOffset GetVietnamNow()
     {
-        return TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, VietnamTimeZone);
+        return GetVietnamNow(TimeProvider.System);
+    }
+
+    public static DateTimeOffset GetVietnamNow(TimeProvider timeProvider)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+
+        return TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), VietnamTimeZone);
     }
 
     public static DateOnly GetVietnamToday()
     {
-        return DateOnly.FromDateTime(GetVietnamNow().DateTime);
+        return GetVietnamToday(TimeProvider.System);
     }
 
-    public static bool IsRestrictedDate(DateOnly date)
+    public static DateOnly GetVietnamToday(TimeProvider timeProvider)
     {
-        if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        return DateOnly.FromDateTime(GetVietnamNow(timeProvider).DateTime);
+    }
+
+    public static ReservationDatePolicyResult EvaluateReservationDate(DateOnly reservationDate, DateOnly vietnamToday)
+    {
+        if (reservationDate < vietnamToday)
         {
-            return true;
+            return new ReservationDatePolicyResult(ReservationDatePolicyStatus.PastDate);
         }
 
-        return Holidays.Contains(date);
+        if (reservationDate > MaximumOpenReservationDate)
+        {
+            return new ReservationDatePolicyResult(ReservationDatePolicyStatus.BookingCalendarClosed);
+        }
+
+        if (reservationDate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+        {
+            return new ReservationDatePolicyResult(ReservationDatePolicyStatus.Weekend);
+        }
+
+        if (Holidays.Contains(reservationDate))
+        {
+            return new ReservationDatePolicyResult(ReservationDatePolicyStatus.Holiday);
+        }
+
+        return new ReservationDatePolicyResult(ReservationDatePolicyStatus.Allowed);
     }
+
+    public static IReadOnlyList<DateOnly> GetConfiguredHolidayDates()
+    {
+        return Holidays.OrderBy(date => date).ToArray();
+    }
+
+    public static IReadOnlyList<int> GetConfiguredHolidayYears()
+    {
+        return Holidays
+            .Select(date => date.Year)
+            .Distinct()
+            .OrderBy(year => year)
+            .ToArray();
+    }
+
+    public static string GetReservationDatePolicyMessage(ReservationDatePolicyStatus status)
+    {
+        return status switch
+        {
+            ReservationDatePolicyStatus.PastDate =>
+                "Ngày đến không được sớm hơn hôm nay.",
+            ReservationDatePolicyStatus.Weekend =>
+                "Nhà hàng không nhận đặt bàn vào thứ Bảy và Chủ nhật. Vui lòng chọn ngày khác.",
+            ReservationDatePolicyStatus.Holiday =>
+                "Hệ thống không nhận đặt bàn vào Thứ Bảy, Chủ Nhật và các ngày Lễ Tết.",
+            ReservationDatePolicyStatus.BookingCalendarClosed =>
+                "Hệ thống chưa mở lịch đặt bàn cho thời gian này. Vui lòng chọn ngày khác hoặc liên hệ nhà hàng.",
+            _ => string.Empty
+        };
+    }
+}
+
+public sealed record ReservationDatePolicyResult(ReservationDatePolicyStatus Status)
+{
+    public bool IsAllowed => Status == ReservationDatePolicyStatus.Allowed;
+}
+
+public enum ReservationDatePolicyStatus
+{
+    Allowed,
+    PastDate,
+    BookingCalendarClosed,
+    Weekend,
+    Holiday
 }

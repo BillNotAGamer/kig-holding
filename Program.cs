@@ -1,7 +1,9 @@
 using KIGHolding.Data;
+using KIGHolding.Hubs;
 using KIGHolding.Models.Entities;
 using KIGHolding.Options;
 using KIGHolding.Services;
+using KIGHolding.Services.Notifications;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Features;
@@ -34,6 +36,7 @@ builder.Services.Configure<FormOptions>(options =>
 });
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -61,6 +64,7 @@ builder.Services.AddResponseCompression(options =>
         "text/xml"
     ]);
 });
+builder.Services.AddSingleton(TimeProvider.System);
 
 var dataProtectionKeyDirectory = new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys"));
 dataProtectionKeyDirectory.Create();
@@ -93,6 +97,7 @@ builder.Services.AddScoped<IMenuGroupService, MenuGroupService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IAdminReservationNotifier, SignalRAdminReservationNotifier>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<ICloudflareR2Client, CloudflareR2Client>();
@@ -186,6 +191,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<AdminReservationNotificationHub>("/admin/hubs/reservations");
 
 app.MapControllerRoute(
     name: "admin-root",

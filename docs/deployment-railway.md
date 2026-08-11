@@ -132,4 +132,12 @@ Phase 1 does not implement:
 * decoder or magic-byte image validation
 * full create/edit/delete lifecycle ownership refactor
 
+## 8. Real-Time Admin Reservation Notifications
+
+Admin reservation notifications use ASP.NET Core SignalR at `/admin/hubs/reservations`. No new Railway secret is required. The browser client authenticates with the existing same-origin Admin cookie, and the Hub rejects unauthenticated connections.
+
+Railway supports WebSocket traffic, and the client includes automatic reconnect plus guarded terminal-close restart handling for dropped connections. Phase 1 is intentionally single-instance and best-effort: if no Admin page is connected, the event is missed, while the reservation remains stored and visible in the Admin reservation list and pending dashboard count. If the service is horizontally scaled later, add a SignalR backplane or equivalent shared fan-out mechanism before relying on cross-instance delivery.
+
+The vendored SignalR browser client at `wwwroot/lib/microsoft-signalr/signalr.min.js` and the notification MP3 at `wwwroot/audio/Hem366_remix_bolero_vui_loa.mp3` are deployment source assets that must be included in version control. ASP.NET Core publish includes them from `wwwroot`; verify that with a publish smoke test before release.
+
 Those items should be addressed before broad production migration of existing assets.

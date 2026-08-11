@@ -1,6 +1,6 @@
-bin/
-obj/
-.vs/
+**/bin/
+**/obj/
+**/.vs/
 .tmp/
 node_modules/
 wwwroot/css/site.css.map
@@ -18,4 +18,8 @@ KIGHolding.slnx
 wwwroot/uploads/
 appsettings.example.json
 build_error.log
-KIGHolding.Tests/
+**/TestResults/
+coverage/
+coverage.*
+*.trx
+reports/

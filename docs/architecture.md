@@ -69,6 +69,14 @@ The services configured in `Program.cs` isolate database access and external API
 | `AdminCookieAuthenticationEvents`| Scoped | Validates admin session cookie and security stamp consistency |
 | `IMemoryCache` | Singleton | Bounded memory cache (`SizeLimit = 50_000` in `Program.cs`) for rate limit gating |
 
+### Reservation Calendar Policy Boundary
+
+`VietnamHolidayEvaluator` is the central server-owned boundary for reservation calendar decisions. `ReservationService.CreateReservationAsync` calls `EvaluateReservationDate(...)` before branch lookup, branch-hours validation, transaction begin, advisory lock acquisition, persistence, rate-limit success stamping, SignalR notification, or controller-owned email dispatch.
+
+The public full reservation page and quick booking modal consume the same server-generated calendar-policy payload from `Views/Shared/Partials/_ReservationCalendarPolicy.cshtml`. That payload exposes Vietnam-local minimum date, `VietnamHolidayEvaluator.MaximumOpenReservationDate`, configured restricted dates, weekend restriction, and customer-facing policy messages. JavaScript mirrors the policy for immediate UX feedback only; it does not replace server enforcement.
+
+Configured holiday data currently covers 2026-2028, so the open booking calendar currently ends on 2028-12-31 inclusive. Dates after that boundary return `BookingCalendarClosed`. The business-required 2029 online booking period remains explicitly closed until owner-approved holiday dates are added to the centralized policy source and the boundary is extended.
+
 ---
 
 ## 4. Key Infrastructure Features
@@ -76,6 +84,7 @@ The services configured in `Program.cs` isolate database access and external API
 *   **Cookie Authentication**: Session cookies are configured with `SlidingExpiration = true` and `ExpireTimeSpan = TimeSpan.FromHours(8)` using custom event validation.
 *   **Data Protection**: Persists cryptography keys to a secure local folder: `App_Data/DataProtectionKeys/` to ensure persistent login states across application recycling.
 *   **Response Compression**: Optimized for SVG/XML formats to enhance loading performance.
+*   **Admin Reservation Real-Time Notifications**: ASP.NET Core SignalR is registered through the shared framework and exposes the authenticated Hub endpoint `/admin/hubs/reservations`. `IAdminReservationNotifier` is the application boundary used by reservation creation logic, with `SignalRAdminReservationNotifier` adapting that boundary to `AdminReservationNotificationHub`. The browser client is vendored locally at `wwwroot/lib/microsoft-signalr/signalr.min.js` through the `vendor:signalr` npm script, and that file plus `wwwroot/audio/Hem366_remix_bolero_vui_loa.mp3` are deployment source assets under `wwwroot` that ASP.NET Core publish includes automatically. The Admin script keeps automatic reconnect enabled and restarts the guarded manual start loop after a terminal SignalR close. Phase 1 is single-instance and best-effort; horizontally scaled deployments require a future SignalR backplane or equivalent fan-out.
 
 ---
 

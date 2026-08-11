@@ -110,6 +110,12 @@ A local script initializes inside the HTML shell, automatically fading out and c
 })();
 ```
 
+### Real-Time Reservation Toasts
+
+Authenticated Admin pages using `_AdminLayout.cshtml` also host dynamic reservation notifications from SignalR. The layout provides a stable `data-admin-reservation-toast-host` container, the `/admin/hubs/reservations` Hub URL, the reservation detail URL template, and the local MP3 notification URL. The client script appends new-reservation toasts into the same visual stack and removes them after approximately 4 seconds, preserving existing TempData toast behavior. Its guarded start loop retries initial connection failures and restarts after SignalR automatic reconnect reaches a terminal close.
+
+The Admin header includes a compact sound enable/disable control. The sound preference persists in `localStorage`, but every new document remains subject to browser autoplay policy. When the preference is enabled, the page prepares the audio and silently attempts to unlock it on the Admin's first normal interaction; reservation playback is also attempted automatically. If the browser blocks playback, the preference remains enabled, the toast still appears, and a small activation control is shown. Multiple Admin tabs all show toasts. Hidden tabs do not play audio; visible tabs use an exclusive per-reservation Web Locks claim when supported, while older browsers fall back to visible-tab playback and may play duplicate audio if multiple visible tabs receive the same event.
+
 ---
 
 ## 4. Step-by-Step Developer Guide: Adding a New Admin Module

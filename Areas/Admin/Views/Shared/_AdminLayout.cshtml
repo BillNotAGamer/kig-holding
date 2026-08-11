@@ -10,6 +10,12 @@
             ? pageTitle
             : $"{pageTitle} - Quản trị";
     var headerTitle = string.IsNullOrWhiteSpace(pageTitle) ? "Tổng quan quản trị" : pageTitle;
+    var reservationDetailsUrlTemplate = Url.Action(
+        "Details",
+        "Reservation",
+        new { area = "Admin", id = "__RESERVATION_ID__" }) ?? "/Admin/Reservation/Details/__RESERVATION_ID__";
+    var reservationHubUrl = Url.Content("~/admin/hubs/reservations");
+    var reservationAudioUrl = Url.Content("~/audio/Hem366_remix_bolero_vui_loa.mp3");
 }
 
 <!DOCTYPE html>
@@ -140,12 +146,26 @@
         <div class="min-w-0 overflow-hidden">
             <header class="sticky top-16 z-30 border-b border-brand-border bg-white/90 backdrop-blur lg:top-0">
                 <div class="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <div>
-                        <h1 class="text-lg font-black text-brand-dark">@headerTitle</h1>
+                    <div class="min-w-0">
+                        <h1 class="truncate text-lg font-black text-brand-dark">@headerTitle</h1>
                         <p class="text-xs uppercase tracking-[0.16em] text-brand-gray">Khu vực quản trị</p>
                     </div>
 
                     <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <button type="button"
+                                    class="btn-secondary min-h-10 max-w-36 whitespace-normal px-2 text-[11px] leading-tight sm:h-10 sm:max-w-none sm:px-3 sm:text-xs"
+                                    aria-pressed="false"
+                                    data-admin-reservation-sound-toggle>
+                                <span data-admin-reservation-sound-label>Bật âm thanh thông báo</span>
+                            </button>
+                            <button type="button"
+                                    class="btn-secondary hidden min-h-10 max-w-36 whitespace-normal border-amber-200 bg-amber-50 px-2 text-[11px] leading-tight text-amber-900 hover:bg-amber-100 sm:h-10 sm:max-w-none sm:px-3 sm:text-xs"
+                                    hidden
+                                    data-admin-reservation-sound-activation>
+                                Nhấn để kích hoạt âm thanh
+                            </button>
+                        </div>
                         <div class="hidden text-right sm:block">
                             <p class="text-sm font-semibold text-brand-dark">@User.Identity?.Name</p>
                             <p class="text-xs text-brand-gray">SuperAdmin</p>
@@ -164,7 +184,11 @@
         </div>
     </div>
 
-    <div class="pointer-events-none fixed bottom-4 left-1/2 z-[60] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 space-y-3 sm:bottom-auto sm:left-auto sm:right-4 sm:top-4 sm:translate-x-0">
+    <div class="pointer-events-none fixed bottom-4 left-1/2 z-[60] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 space-y-3 sm:bottom-auto sm:left-auto sm:right-4 sm:top-4 sm:translate-x-0"
+         data-admin-reservation-toast-host
+         data-admin-reservation-hub-url="@reservationHubUrl"
+         data-admin-reservation-details-url-template="@reservationDetailsUrlTemplate"
+         data-admin-reservation-audio-url="@reservationAudioUrl">
         @if (!string.IsNullOrWhiteSpace(successMessage))
         {
             <div class="admin-toast pointer-events-auto rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-soft transition-all duration-300" data-toast>
@@ -195,6 +219,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/admin.js" asp-append-version="true"></script>
+    <script src="~/lib/microsoft-signalr/signalr.min.js" asp-append-version="true"></script>
+    <script src="~/js/admin-reservation-notifications.js" asp-append-version="true"></script>
     <script>
         (function () {
             var toasts = document.querySelectorAll('[data-toast]');

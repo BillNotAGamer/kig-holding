@@ -132,6 +132,16 @@ if (shouldReduceMotion || !supportsObserver || !supportsAnimate) {
 
 ---
 
+## 3.1 Reservation Calendar Policy UI
+
+The public reservation page (`Views/Reservation/Index.cshtml`) and quick booking modal (`Views/Shared/Partials/_BookingModal.cshtml` with `wwwroot/js/booking-modal.js`) consume the same server-generated calendar-policy payload from `Views/Shared/Partials/_ReservationCalendarPolicy.cshtml`.
+
+The payload is emitted as JSON plus a small shared browser helper exposed as `window.kigValidateReservationDate`. It contains the Vietnam-local minimum date, `VietnamHolidayEvaluator.MaximumOpenReservationDate`, configured restricted dates, weekend restriction, booking-calendar-closed message, and Vietnamese validation messages. Date input values are treated as `yyyy-MM-dd`, parsed with `Date.UTC(...)`, and classified with `getUTCDay()` where Sunday is `0` and Saturday is `6`.
+
+The frontend policy is advisory. It provides immediate inline feedback and blocks avoidable fetch/form submissions, but `ReservationService.CreateReservationAsync` remains the authoritative server-side enforcement point.
+
+---
+
 ## 4. Homepage App Download Modal
 
 The homepage `Mang Champong về nhà` CTA uses a page-scoped app-download modal loaded by `wwwroot/js/home-app-modal.js`. The modal is static server-rendered markup in `Views/Home/Index.cshtml`, keeps `/dat-ban` as the no-JavaScript fallback, and reuses the same footer QR and store badge/link values.
@@ -158,6 +168,18 @@ Purpose: cancel the pending automatic homepage booking prompt, mark that automat
 
 *   **Article Hero Images**: The main detail image on `/tin-tuc/{slug}` uses a natural aspect ratio (via `.news-detail-media--hero`) to prevent cropping important image content.
 *   **News Grid Cards**: Listing cards and related post cards intentionally keep fixed/cropped thumbnail behavior (`object-cover`) for visual grid consistency. Future changes must not mutate shared `.news-detail-media` base behavior without checking both detail hero and card usages.
+
+---
+
+## 5.1 Admin Real-Time Reservation Notifications
+
+The Admin shell owns the dynamic reservation notification host in `_AdminLayout.cshtml`. The host uses `data-admin-reservation-toast-host` and supplies same-origin configuration for the SignalR Hub, reservation details URL template, and notification audio URL. `wwwroot/js/admin-reservation-notifications.js` owns the guarded connection start loop, SignalR automatic reconnect, terminal-close restart, duplicate suppression, dynamic toast creation, sound toggle behavior, and visible-tab audio coordination.
+
+The sound control uses `aria-pressed` and persists the Admin preference in `localStorage` under `kig.admin.reservationNotifications.soundEnabled`. Page unlock remains runtime-only: each new document prepares the MP3, waits for browser permission, and silently attempts unlock on the Admin's first normal interaction when the preference is enabled. Reservation playback is attempted automatically; if the browser blocks it, the preference stays enabled and a compact activation button is shown. Managed browsers may allow playback without another interaction, but the client does not bypass autoplay policy. Server-originated toast values are rendered with DOM APIs and `textContent`.
+
+Every connected Admin tab may show the toast. Audio is attempted only by tabs where the sound preference is enabled and `document.visibilityState` is `visible`; hidden tabs do not play audio. When Web Locks are available, the script requests an exclusive per-reservation lock and holds it briefly after playback starts so a slightly delayed visible tab does not immediately play the same sound. Browsers without Web Locks fall back to visible-tab playback and may play duplicate audio if multiple visible tabs receive the same reservation event.
+
+The vendored SignalR browser client and the notification MP3 are local deployment source assets under `wwwroot`. ASP.NET Core publish includes them from the static web root; keep them version-controlled with the rest of the feature.
 
 ---
 

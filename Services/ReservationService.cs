@@ -1,6 +1,7 @@
 using KIGHolding.Data;
 using KIGHolding.Models.Entities;
 using KIGHolding.Models.Enums;
+using KIGHolding.Services.Notifications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -12,36 +13,42 @@ public class ReservationService : IReservationService
 
     private readonly AppDbContext _dbContext;
     private readonly IMemoryCache _cache;
+    private readonly IAdminReservationNotifier _adminReservationNotifier;
+    private readonly ILogger<ReservationService> _logger;
+    private readonly TimeProvider _timeProvider;
 
-    public ReservationService(AppDbContext dbContext, IMemoryCache cache)
+    public ReservationService(
+        AppDbContext dbContext,
+        IMemoryCache cache,
+        IAdminReservationNotifier adminReservationNotifier,
+        ILogger<ReservationService> logger,
+        TimeProvider timeProvider)
     {
         _dbContext = dbContext;
         _cache = cache;
+        _adminReservationNotifier = adminReservationNotifier;
+        _logger = logger;
+        _timeProvider = timeProvider;
     }
 
     public async Task<ReservationCreateResult> CreateReservationAsync(ReservationCreateRequest request, CancellationToken cancellationToken = default)
     {
         var errors = new List<ReservationServiceError>();
-        var today = VietnamHolidayEvaluator.GetVietnamToday();
+        var today = VietnamHolidayEvaluator.GetVietnamToday(_timeProvider);
         var normalizedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(request.DiningOccasionCode);
         var diningOccasionOtherNote = NormalizeOptionalText(request.DiningOccasionOtherNote);
+        var datePolicyResult = VietnamHolidayEvaluator.EvaluateReservationDate(request.ReservationDate, today);
 
-        if (request.ReservationDate < today)
+        if (!datePolicyResult.IsAllowed)
         {
-            errors.Add(new ReservationServiceError
-            {
-                FieldName = nameof(request.ReservationDate),
-                Message = "Ngày đến không được sớm hơn hôm nay."
-            });
-        }
-
-        if (VietnamHolidayEvaluator.IsRestrictedDate(request.ReservationDate))
-        {
-            errors.Add(new ReservationServiceError
-            {
-                FieldName = nameof(request.ReservationDate),
-                Message = "Hệ thống không nhận đặt bàn vào Thứ Bảy, Chủ Nhật và các ngày Lễ Tết."
-            });
+            return ReservationCreateResult.Failed(
+            [
+                new()
+                {
+                    FieldName = nameof(request.ReservationDate),
+                    Message = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(datePolicyResult.Status)
+                }
+            ]);
         }
 
         // ── Gate 1: IMemoryCache fail-fast rate-limit ─────────────────────────────
@@ -182,6 +189,31 @@ public class ReservationService : IReservationService
         if (!string.IsNullOrEmpty(normalizedPhone))
         {
             _cache.Set(phoneLockKey, true, cacheOptions);
+        }
+
+        if (reservation.Source == ReservationSource.Website)
+        {
+            try
+            {
+                await _adminReservationNotifier.NotifyReservationCreatedAsync(
+                    new AdminReservationCreatedNotification(
+                        reservation.Id,
+                        reservation.CustomerName,
+                        branch!.Name,
+                        reservation.ReservationDate,
+                        reservation.ReservationTime,
+                        reservation.GuestCount,
+                        reservation.CreatedAt,
+                        reservation.Source.ToString()),
+                    CancellationToken.None);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Unable to publish Admin reservation notification for committed reservation {ReservationId}. The reservation remains successfully committed.",
+                    reservation.Id);
+            }
         }
 
         return ReservationCreateResult.Success(reservation.Id);

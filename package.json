@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "vendor:signalr": "node -e \"const fs=require('fs'); const path=require('path'); const target=path.join('wwwroot','lib','microsoft-signalr'); fs.mkdirSync(target,{recursive:true}); fs.copyFileSync(path.join('node_modules','@microsoft','signalr','dist','browser','signalr.min.js'), path.join(target,'signalr.min.js'));\"",
+    "build:frontend": "npm run vendor:signalr && npm run build:css",
     "build:css": "tailwindcss -i ./wwwroot/css/input.css -o ./wwwroot/css/site.css --postcss --minify",
     "watch:css": "tailwindcss -i ./wwwroot/css/input.css -o ./wwwroot/css/site.css --postcss --watch"
   },
@@ -18,6 +20,7 @@
     "doc": "docs"
   },
   "dependencies": {
+    "@microsoft/signalr": "10.0.0",
     "ansi-regex": "^5.0.1",
     "ansi-styles": "^4.3.0",
     "any-promise": "^1.3.0",
