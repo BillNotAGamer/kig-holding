@@ -1,0 +1,61 @@
+@model KIGHolding.Areas.Admin.ViewModels.IPostContentEditorViewModel
+
+@{
+    var isHtmlMode = Model.ContentMode == PostContentMode.Html;
+}
+
+<div class="admin-post-editor"
+     data-admin-post-editor
+     data-admin-post-editor-initial-mode="@((int)Model.ContentMode)">
+    <input type="hidden" asp-for="ContentMode" data-post-editor-mode-input />
+
+    <div class="admin-post-editor__header">
+        <label asp-for="Content" class="admin-post-label"></label>
+        <div class="admin-post-editor__tabs" role="tablist" aria-label="Chọn chế độ biên tập nội dung">
+            <button type="button"
+                    id="post-content-tab-visual"
+                    class="admin-post-editor__tab"
+                    role="tab"
+                    aria-selected="@(!isHtmlMode ? "true" : "false")"
+                    aria-controls="post-content-panel-visual"
+                    tabindex="@(!isHtmlMode ? "0" : "-1")"
+                    data-post-editor-tab="@((int)PostContentMode.Visual)">
+                Soạn thảo
+            </button>
+            <button type="button"
+                    id="post-content-tab-html"
+                    class="admin-post-editor__tab"
+                    role="tab"
+                    aria-selected="@(isHtmlMode ? "true" : "false")"
+                    aria-controls="post-content-panel-html"
+                    tabindex="@(isHtmlMode ? "0" : "-1")"
+                    data-post-editor-tab="@((int)PostContentMode.Html)">
+                HTML
+            </button>
+        </div>
+    </div>
+
+    <div id="post-content-panel-visual"
+         class="admin-post-editor__panel"
+         role="tabpanel"
+         aria-labelledby="post-content-tab-visual"
+         hidden="@isHtmlMode">
+        <p>Soạn nội dung bài viết dạng văn bản thông thường. Nội dung sẽ được hiển thị công khai theo từng đoạn và được Razor mã hóa.</p>
+    </div>
+    <div id="post-content-panel-html"
+         class="admin-post-editor__panel admin-post-editor__panel--html"
+         role="tabpanel"
+         aria-labelledby="post-content-tab-html"
+         hidden="@(!isHtmlMode)">
+        <p>Chế độ nâng cao. Mã HTML sẽ được hệ thống lọc an toàn trước khi lưu.</p>
+        <p class="admin-post-editor__supported-tags">Hỗ trợ: p, br, h2-h4, strong, em, u, ul, ol, blockquote, a, img, figure, table, pre, code, hr, span, div.</p>
+    </div>
+
+    <textarea asp-for="Content"
+              rows="14"
+              class="admin-post-area admin-post-content-editor__textarea@(isHtmlMode ? " admin-post-content-editor__textarea--html" : string.Empty)"
+              spellcheck="@(!isHtmlMode ? "true" : "false")"
+              data-post-editor-content></textarea>
+    <span asp-validation-for="Content" class="admin-post-validation"></span>
+    <span asp-validation-for="ContentMode" class="admin-post-validation"></span>
+</div>

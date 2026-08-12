@@ -1,7 +1,37 @@
 using System.ComponentModel.DataAnnotations;
+using KIGHolding.Models.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KIGHolding.Areas.Admin.ViewModels;
+
+public static class PostEditorLimits
+{
+    public const int ContentMaxLength = 100_000;
+    public const int FocusKeywordMaxLength = 120;
+    public const int CanonicalUrlMaxLength = 500;
+    public const int OgTitleMaxLength = 180;
+    public const int OgDescriptionMaxLength = 320;
+    public const int OgImageUrlMaxLength = 500;
+}
+
+public interface IPostContentEditorViewModel
+{
+    string Content { get; set; }
+    PostContentMode ContentMode { get; set; }
+}
+
+public interface IPostSeoEditorViewModel
+{
+    string? SeoTitle { get; set; }
+    string? SeoDescription { get; set; }
+    string? FocusKeyword { get; set; }
+    string? CanonicalUrl { get; set; }
+    string? OgTitle { get; set; }
+    string? OgDescription { get; set; }
+    string? OgImageUrl { get; set; }
+    bool RobotsIndex { get; set; }
+    bool RobotsFollow { get; set; }
+}
 
 public class PostIndexViewModel
 {
@@ -43,7 +73,7 @@ public class PostFilterOptionViewModel
     public string Label { get; set; } = string.Empty;
 }
 
-public class PostCreateViewModel
+public class PostCreateViewModel : IPostContentEditorViewModel, IPostSeoEditorViewModel
 {
     public IReadOnlyList<SelectListItem> CategoryOptions { get; set; } = [];
 
@@ -68,7 +98,11 @@ public class PostCreateViewModel
 
     [Required(ErrorMessage = "Vui lòng nhập nội dung.")]
     [Display(Name = "Nội dung")]
+    [StringLength(PostEditorLimits.ContentMaxLength)]
     public string Content { get; set; } = string.Empty;
+
+    [Display(Name = "Che do noi dung")]
+    public PostContentMode ContentMode { get; set; } = PostContentMode.Visual;
 
     [Display(Name = "Đăng công khai")]
     public bool IsPublished { get; set; }
@@ -84,11 +118,37 @@ public class PostCreateViewModel
     [Display(Name = "SEO Description")]
     public string? SeoDescription { get; set; }
 
+    [StringLength(PostEditorLimits.FocusKeywordMaxLength)]
+    [Display(Name = "Focus Keyword")]
+    public string? FocusKeyword { get; set; }
+
+    [StringLength(PostEditorLimits.CanonicalUrlMaxLength)]
+    [Display(Name = "Canonical URL")]
+    public string? CanonicalUrl { get; set; }
+
+    [StringLength(PostEditorLimits.OgTitleMaxLength)]
+    [Display(Name = "OG Title")]
+    public string? OgTitle { get; set; }
+
+    [StringLength(PostEditorLimits.OgDescriptionMaxLength)]
+    [Display(Name = "OG Description")]
+    public string? OgDescription { get; set; }
+
+    [StringLength(PostEditorLimits.OgImageUrlMaxLength)]
+    [Display(Name = "OG Image URL")]
+    public string? OgImageUrl { get; set; }
+
+    [Display(Name = "Robots Index")]
+    public bool RobotsIndex { get; set; } = true;
+
+    [Display(Name = "Robots Follow")]
+    public bool RobotsFollow { get; set; } = true;
+
     [Display(Name = "Ảnh thumbnail")]
     public IFormFile? ThumbnailFile { get; set; }
 }
 
-public class PostEditViewModel
+public class PostEditViewModel : IPostContentEditorViewModel, IPostSeoEditorViewModel
 {
     public IReadOnlyList<SelectListItem> CategoryOptions { get; set; } = [];
 
@@ -116,7 +176,11 @@ public class PostEditViewModel
 
     [Required(ErrorMessage = "Vui lòng nhập nội dung.")]
     [Display(Name = "Nội dung")]
+    [StringLength(PostEditorLimits.ContentMaxLength)]
     public string Content { get; set; } = string.Empty;
+
+    [Display(Name = "Che do noi dung")]
+    public PostContentMode ContentMode { get; set; } = PostContentMode.Visual;
 
     [Display(Name = "Đăng công khai")]
     public bool IsPublished { get; set; }
@@ -131,6 +195,32 @@ public class PostEditViewModel
     [StringLength(320)]
     [Display(Name = "SEO Description")]
     public string? SeoDescription { get; set; }
+
+    [StringLength(PostEditorLimits.FocusKeywordMaxLength)]
+    [Display(Name = "Focus Keyword")]
+    public string? FocusKeyword { get; set; }
+
+    [StringLength(PostEditorLimits.CanonicalUrlMaxLength)]
+    [Display(Name = "Canonical URL")]
+    public string? CanonicalUrl { get; set; }
+
+    [StringLength(PostEditorLimits.OgTitleMaxLength)]
+    [Display(Name = "OG Title")]
+    public string? OgTitle { get; set; }
+
+    [StringLength(PostEditorLimits.OgDescriptionMaxLength)]
+    [Display(Name = "OG Description")]
+    public string? OgDescription { get; set; }
+
+    [StringLength(PostEditorLimits.OgImageUrlMaxLength)]
+    [Display(Name = "OG Image URL")]
+    public string? OgImageUrl { get; set; }
+
+    [Display(Name = "Robots Index")]
+    public bool RobotsIndex { get; set; } = true;
+
+    [Display(Name = "Robots Follow")]
+    public bool RobotsFollow { get; set; } = true;
 
     [Display(Name = "Ảnh thumbnail")]
     public IFormFile? ThumbnailFile { get; set; }

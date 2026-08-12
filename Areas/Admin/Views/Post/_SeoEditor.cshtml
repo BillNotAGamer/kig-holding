@@ -1,0 +1,70 @@
+@model KIGHolding.Areas.Admin.ViewModels.IPostSeoEditorViewModel
+
+<section class="admin-post-seo" aria-labelledby="post-seo-heading">
+    <div class="admin-post-seo__header">
+        <div>
+            <p class="admin-page-kicker">SEO</p>
+            <h2 id="post-seo-heading" class="admin-post-seo__title">Thông tin tìm kiếm và chia sẻ</h2>
+        </div>
+        <p class="admin-post-seo__hint">Các trường trống sẽ dùng tiêu đề, trích dẫn và thumbnail hiện có.</p>
+    </div>
+
+    <div class="grid gap-5 lg:grid-cols-3">
+        <div>
+            <label asp-for="SeoTitle" class="admin-post-label">SEO Title</label>
+            <input asp-for="SeoTitle" class="admin-post-field" />
+            <span asp-validation-for="SeoTitle" class="admin-post-validation"></span>
+        </div>
+        <div class="lg:col-span-2">
+            <label asp-for="SeoDescription" class="admin-post-label">Meta Description</label>
+            <input asp-for="SeoDescription" class="admin-post-field" />
+            <span asp-validation-for="SeoDescription" class="admin-post-validation"></span>
+        </div>
+    </div>
+
+    <div class="grid gap-5 lg:grid-cols-2">
+        <div>
+            <label asp-for="FocusKeyword" class="admin-post-label">Focus Keyword</label>
+            <input asp-for="FocusKeyword" class="admin-post-field" />
+            <p class="admin-post-help">Dùng để hỗ trợ biên tập nội dung; không tạo thẻ meta keywords.</p>
+            <span asp-validation-for="FocusKeyword" class="admin-post-validation"></span>
+        </div>
+        <div>
+            <label asp-for="CanonicalUrl" class="admin-post-label">Canonical URL</label>
+            <input asp-for="CanonicalUrl" class="admin-post-field" placeholder="https://example.com/tin-tuc/bai-viet" />
+            <p class="admin-post-help">Để trống để dùng URL mặc định của bài viết.</p>
+            <span asp-validation-for="CanonicalUrl" class="admin-post-validation"></span>
+        </div>
+    </div>
+
+    <div class="grid gap-5 lg:grid-cols-3">
+        <div>
+            <label asp-for="OgTitle" class="admin-post-label">Open Graph Title</label>
+            <input asp-for="OgTitle" class="admin-post-field" />
+            <span asp-validation-for="OgTitle" class="admin-post-validation"></span>
+        </div>
+        <div class="lg:col-span-2">
+            <label asp-for="OgDescription" class="admin-post-label">Open Graph Description</label>
+            <input asp-for="OgDescription" class="admin-post-field" />
+            <span asp-validation-for="OgDescription" class="admin-post-validation"></span>
+        </div>
+    </div>
+
+    <div>
+        <label asp-for="OgImageUrl" class="admin-post-label">Open Graph Image URL</label>
+        <input asp-for="OgImageUrl" class="admin-post-field" placeholder="/uploads/posts/cover.webp" />
+        <p class="admin-post-help">Chap nhan URL HTTPS hoac duong dan noi bo an toan.</p>
+        <span asp-validation-for="OgImageUrl" class="admin-post-validation"></span>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+        <label class="admin-post-checkbox-shell">
+            <input asp-for="RobotsIndex" type="checkbox" class="admin-post-checkbox" />
+            <span>Cho phép công cụ tìm kiếm lập chỉ mục</span>
+        </label>
+        <label class="admin-post-checkbox-shell">
+            <input asp-for="RobotsFollow" type="checkbox" class="admin-post-checkbox" />
+            <span>Cho phép công cụ tìm kiếm theo liên kết</span>
+        </label>
+    </div>
+</section>

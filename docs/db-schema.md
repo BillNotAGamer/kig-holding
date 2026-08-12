@@ -95,14 +95,24 @@ Actual scanned or custom designed layout pages for the digital PDF/Flipbook.
 ### 6. Posts (`DbSet<Post>`)
 Blog articles, promotions, and announcements.
 *   **Id** (`Guid`, PK): Unique identifier.
-*   **Title** (`string`): Article title.
-*   **Slug** (`string`): Unique URL segment.
-*   **Excerpt** (`string`): Short snippet.
-*   **Content** (`string`): Markdown format article body.
-*   **ThumbnailUrl** (`string`): Image path.
-*   **Category** (`string`): News category segmentation.
-*   **IsPublished** (`bool`): True if active.
+*   **Title** (`string`, max 220): Article title.
+*   **Slug** (`string`, max 220, unique): Unique URL segment.
+*   **Excerpt** (`string`, max 600): Short snippet.
+*   **Content** (`string`, PostgreSQL `text`): Article body. `ContentMode=Visual` stores plain text rendered through the encoded paragraph path; `ContentMode=Html` stores server-sanitized HTML that the public detail page may render as raw HTML only in the HTML-mode branch.
+*   **ContentMode** (`PostContentMode`, integer, default `Visual`/`0`): Authoring/storage mode. Existing rows default to Visual and are not converted to HTML.
+*   **ThumbnailUrl** (`string`, max 500): Image path.
+*   **Category** (`string`, max 80): News category segmentation.
+*   **IsPublished** (`bool`, default false): True if active.
 *   **PublishedAt** (`DateTimeOffset?`): Timestamp for publication.
+*   **SeoTitle** (`string?`, max 180): Optional SEO title.
+*   **SeoDescription** (`string?`, max 320): Optional meta description.
+*   **FocusKeyword** (`string?`, max 120): Editorial SEO keyword; it does not generate a legacy meta-keywords tag.
+*   **CanonicalUrl** (`string?`, max 500): Optional canonical override. Empty means generated `/tin-tuc/{slug}` can be used by SEO rendering.
+*   **OgTitle** (`string?`, max 180): Optional Open Graph title.
+*   **OgDescription** (`string?`, max 320): Optional Open Graph description.
+*   **OgImageUrl** (`string?`, max 500): Optional Open Graph image URL.
+*   **RobotsIndex** (`bool`, default true): Whether the published article should be indexable. `false` emits `noindex` and excludes the post from `sitemap.xml`.
+*   **RobotsFollow** (`bool`, default true): Whether crawlers should follow links. `false` emits `nofollow`.
 
 ### 7. Reviews (`DbSet<Review>`)
 Customer feedback and rating stars.

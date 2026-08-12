@@ -49,22 +49,9 @@
                 <span asp-validation-for="Excerpt" class="admin-post-validation"></span>
             </div>
 
-            <div>
-                <label asp-for="Content" class="admin-post-label"></label>
-                <textarea asp-for="Content" rows="10" class="admin-post-area min-h-48 max-h-[60svh] sm:min-h-56"></textarea>
-                <span asp-validation-for="Content" class="admin-post-validation"></span>
-            </div>
+            <partial name="_ContentEditor" model="Model" />
 
-            <div class="grid gap-5 lg:grid-cols-3">
-                <div>
-                    <label asp-for="SeoTitle" class="admin-post-label"></label>
-                    <input asp-for="SeoTitle" class="admin-post-field" />
-                </div>
-                <div class="lg:col-span-2">
-                    <label asp-for="SeoDescription" class="admin-post-label"></label>
-                    <input asp-for="SeoDescription" class="admin-post-field" />
-                </div>
-            </div>
+            <partial name="_SeoEditor" model="Model" />
 
             <div class="admin-upload admin-upload--compact">
                 <label asp-for="ThumbnailFile" class="admin-upload__label"></label>
@@ -115,4 +102,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/admin-post-editor.js" asp-append-version="true"></script>
 }

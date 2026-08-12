@@ -14,6 +14,7 @@ public class PostCardViewModel
     public string Category { get; set; } = string.Empty;
     public DateTimeOffset? PublishedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public bool RobotsIndex { get; set; } = true;
 
     public static PostCardViewModel FromPost(Post post)
     {
@@ -27,7 +28,8 @@ public class PostCardViewModel
             Excerpt = post.Excerpt,
             Category = NewsCategories.GetDisplayName(post.Category),
             PublishedAt = post.PublishedAt,
-            UpdatedAt = post.UpdatedAt
+            UpdatedAt = post.UpdatedAt,
+            RobotsIndex = post.RobotsIndex
         };
     }
 }

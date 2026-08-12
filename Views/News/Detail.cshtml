@@ -1,8 +1,17 @@
+@using KIGHolding.Models.Enums
 @model NewsDetailViewModel
 
 @{
     ViewData["Title"] = Model.SeoTitle;
     ViewData["MetaDescription"] = Model.SeoDescription;
+    ViewData["CanonicalUrl"] = Model.CanonicalUrl;
+    ViewData["OgTitle"] = Model.OgTitle;
+    ViewData["OgDescription"] = Model.OgDescription;
+    ViewData["OgImage"] = Model.OgImageUrl;
+    ViewData["OgType"] = "article";
+    ViewData["Robots"] = Model.RobotsContent;
+    ViewData["ArticlePublishedTime"] = Model.ArticlePublishedTime;
+    ViewData["ArticleModifiedTime"] = Model.ArticleModifiedTime;
 
     var post = Model.Post;
     var hasThumbnail = HasRenderableImage(post.ThumbnailUrl);
@@ -10,9 +19,13 @@
     var categoryUrl = string.IsNullOrWhiteSpace(Model.CategorySlug)
         ? "/tin-tuc"
         : $"/tin-tuc?category={Uri.EscapeDataString(Model.CategorySlug)}";
+}
 
-    ViewData["OgImage"] = hasThumbnail ? imageUrl : "/images/placeholders/post-card.webp";
-    ViewData["OgType"] = "article";
+@section Head {
+    @if (!string.IsNullOrWhiteSpace(Model.ArticleJsonLd))
+    {
+        <script type="application/ld+json">@Html.Raw(Model.ArticleJsonLd)</script>
+    }
 }
 
 <section class="news-detail news-detail--dark relative isolate overflow-hidden py-16 lg:py-20" data-news-page="detail">
@@ -129,10 +142,18 @@
             <div class="news-detail-article mx-auto mt-8 max-w-4xl rounded-[1.8rem] border border-white/12 bg-white/[0.055] p-6 shadow-[0_24px_70px_rgba(0,0,0,0.26)] backdrop-blur sm:p-8 lg:p-10"
                  data-uw-reveal="fade-up"
                  data-uw-delay="160">
-                <div class="space-y-6 text-base leading-[2.02] text-white sm:text-[1.05rem]">
-                    @foreach (var paragraph in GetParagraphs(post.Content))
+                <div class="article-content">
+                    @if (post.ContentMode == PostContentMode.Html)
                     {
-                        <p>@paragraph</p>
+                        @* HTML-mode content is sanitized by IBlogHtmlSanitizer before persistence. *@
+                        @Html.Raw(post.Content)
+                    }
+                    else
+                    {
+                        foreach (var paragraph in GetParagraphs(post.Content))
+                        {
+                            <p>@paragraph</p>
+                        }
                     }
                 </div>
             </div>

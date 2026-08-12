@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text.Json;
 using KIGHolding.Models;
 using KIGHolding.Models.Content;
 using KIGHolding.Services;
@@ -114,6 +116,37 @@ public class NewsController : Controller
                 .ToList();
         }
 
+        var seoTitle = FirstNonWhiteSpace(post.SeoTitle, post.Title);
+        var seoDescription = FirstNonWhiteSpace(post.SeoDescription, post.Excerpt);
+        var ogTitle = FirstNonWhiteSpace(post.OgTitle, post.SeoTitle, post.Title);
+        var ogDescription = FirstNonWhiteSpace(post.OgDescription, post.SeoDescription, post.Excerpt);
+        var ogImageUrl = FirstNonWhiteSpace(post.OgImageUrl, post.ThumbnailUrl, "/images/placeholders/post-card.webp");
+        var canonicalUrl = FirstNonWhiteSpace(post.CanonicalUrl, $"/tin-tuc/{post.Slug}");
+        var articlePublishedTime = post.PublishedAt?.UtcDateTime.ToString("O", CultureInfo.InvariantCulture);
+        var articleModifiedTime = post.UpdatedAt.UtcDateTime.ToString("O", CultureInfo.InvariantCulture);
+        var robotsContent = $"{(post.RobotsIndex ? "index" : "noindex")},{(post.RobotsFollow ? "follow" : "nofollow")}";
+        var baseUrl = GetBaseUrl();
+        var absoluteCanonicalUrl = BuildAbsoluteUrl(canonicalUrl, baseUrl);
+        var absoluteOgImageUrl = BuildAbsoluteUrl(ogImageUrl, baseUrl);
+        var articleJsonLd = BuildArticleJsonLd(
+            seoTitle,
+            seoDescription,
+            absoluteCanonicalUrl,
+            absoluteOgImageUrl,
+            articlePublishedTime,
+            articleModifiedTime);
+
+        ViewData["Title"] = seoTitle;
+        ViewData["MetaDescription"] = seoDescription;
+        ViewData["CanonicalUrl"] = canonicalUrl;
+        ViewData["OgTitle"] = ogTitle;
+        ViewData["OgDescription"] = ogDescription;
+        ViewData["OgImage"] = ogImageUrl;
+        ViewData["OgType"] = "article";
+        ViewData["Robots"] = robotsContent;
+        ViewData["ArticlePublishedTime"] = articlePublishedTime;
+        ViewData["ArticleModifiedTime"] = articleModifiedTime;
+
         var model = new NewsDetailViewModel
         {
             Post = post,
@@ -121,8 +154,16 @@ public class NewsController : Controller
             CategoryDisplayName = NewsCategories.GetDisplayName(post.Category),
             IsPromotion = string.Equals(NewsCategories.NormalizeCategory(post.Category), NewsCategories.KhuyenMaiUuDai, StringComparison.OrdinalIgnoreCase),
             RelatedPosts = relatedPosts,
-            SeoTitle = string.IsNullOrWhiteSpace(post.SeoTitle) ? post.Title : post.SeoTitle,
-            SeoDescription = string.IsNullOrWhiteSpace(post.SeoDescription) ? post.Excerpt : post.SeoDescription
+            SeoTitle = seoTitle,
+            SeoDescription = seoDescription,
+            OgTitle = ogTitle,
+            OgDescription = ogDescription,
+            OgImageUrl = ogImageUrl,
+            CanonicalUrl = canonicalUrl,
+            RobotsContent = robotsContent,
+            ArticlePublishedTime = articlePublishedTime,
+            ArticleModifiedTime = articleModifiedTime,
+            ArticleJsonLd = articleJsonLd
         };
 
         return View(model);
@@ -149,6 +190,74 @@ public class NewsController : Controller
             && !connectionString.Contains("your-neon-host", StringComparison.OrdinalIgnoreCase)
             && !connectionString.Contains("your_username", StringComparison.OrdinalIgnoreCase)
             && !connectionString.Contains("your_password", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string GetBaseUrl()
+    {
+        var configuredBaseUrl = _configuration["AppSettings:AppBaseUrl"];
+        if (!string.IsNullOrWhiteSpace(configuredBaseUrl))
+        {
+            return configuredBaseUrl.TrimEnd('/');
+        }
+
+        return $"{Request.Scheme}://{Request.Host}".TrimEnd('/');
+    }
+
+    private static string BuildAbsoluteUrl(string? url, string baseUrl)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return baseUrl;
+        }
+
+        if (Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
+        {
+            return absoluteUri.ToString();
+        }
+
+        var relativeUrl = url.StartsWith('/') ? url : $"/{url}";
+        return $"{baseUrl.TrimEnd('/')}{relativeUrl}";
+    }
+
+    private static string FirstNonWhiteSpace(params string?[] values)
+    {
+        foreach (var value in values)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value.Trim();
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static string BuildArticleJsonLd(
+        string headline,
+        string description,
+        string canonicalUrl,
+        string imageUrl,
+        string? publishedTime,
+        string modifiedTime)
+    {
+        var article = new Dictionary<string, object?>
+        {
+            ["@context"] = "https://schema.org",
+            ["@type"] = "Article",
+            ["headline"] = headline,
+            ["description"] = description,
+            ["url"] = canonicalUrl,
+            ["mainEntityOfPage"] = canonicalUrl,
+            ["image"] = imageUrl,
+            ["dateModified"] = modifiedTime
+        };
+
+        if (!string.IsNullOrWhiteSpace(publishedTime))
+        {
+            article["datePublished"] = publishedTime;
+        }
+
+        return JsonSerializer.Serialize(article);
     }
 
     private static string? NormalizeSlug(string? slug)

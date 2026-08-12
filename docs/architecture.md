@@ -59,6 +59,7 @@ The services configured in `Program.cs` isolate database access and external API
 | `IMenuGroupService` | Scoped | Cached service to manage menu groups and flipbook menu pages |
 | `IBranchService` | Scoped | Cached service for branch operations and visible customer reviews |
 | `INewsService` | Scoped | Service for news categories, articles, and suggestions |
+| `IBlogHtmlSanitizer` | Scoped | Project-owned boundary for sanitizing admin-authored HTML post content before persistence |
 | `IReservationService` | Scoped | Logic for creating, listing, and transitioning reservations |
 | `IContactService` | Scoped | Logic for storing franchise and general contact messages |
 | `IEmailService` | Scoped | Dispatches emails via Resend integration for notifications |
@@ -76,6 +77,14 @@ The services configured in `Program.cs` isolate database access and external API
 The public full reservation page and quick booking modal consume the same server-generated calendar-policy payload from `Views/Shared/Partials/_ReservationCalendarPolicy.cshtml`. That payload exposes Vietnam-local minimum date, `VietnamHolidayEvaluator.MaximumOpenReservationDate`, configured restricted dates, weekend restriction, and customer-facing policy messages. JavaScript mirrors the policy for immediate UX feedback only; it does not replace server enforcement.
 
 Configured holiday data currently covers 2026-2028, so the open booking calendar currently ends on 2028-12-31 inclusive. Dates after that boundary return `BookingCalendarClosed`. The business-required 2029 online booking period remains explicitly closed until owner-approved holiday dates are added to the centralized policy source and the boundary is extended.
+
+### Blog HTML and SEO
+
+The Blog/News model uses one canonical `Post.Content` column and a `PostContentMode` enum. Visual posts store plain text and continue to render through the encoded paragraph path. HTML posts store only server-sanitized HTML after `IBlogHtmlSanitizer` removes unsupported tags, attributes, and unsafe URL schemes. Public raw rendering is allowed only in the `ContentMode=Html` branch of `Views/News/Detail.cshtml`; it must never be used for Visual content.
+
+Admin Create/Edit uses shared content and SEO partials under `Areas/Admin/Views/Post/`. `wwwroot/js/admin-post-editor.js` owns the Visual/HTML tab state and accessibility behavior only; server-side validation and sanitization remain authoritative.
+
+SEO metadata is persisted on `Post` and rendered through the shared layout: `SeoTitle`, `SeoDescription`, `CanonicalUrl`, `OgTitle`, `OgDescription`, `OgImageUrl`, `RobotsIndex`, and `RobotsFollow`. Article detail also emits JSON-LD Article metadata. `FocusKeyword` is an editor aid, not a meta-keywords output field.
 
 ---
 

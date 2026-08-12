@@ -42,6 +42,11 @@ The application is in a stable, optimized state:
 *   **Category Filtration**: Fast AJAX and route-based classification.
 *   **Editorial Excerpt Cards**: Elegant dark-styled article list cards.
 *   **Suggested Reading Engine**: Dynamic categories suggestions component based on active readers.
+*   **Blog HTML + SEO Phase 2**: Admin Create/Edit now use shared Visual/HTML authoring tabs over the same `Post.Content` field. Visual content remains plain text; HTML content is still sanitized server-side before persistence.
+*   **Sanitized HTML Rendering**: Public article detail renders `Post.Content` as raw HTML only when `ContentMode=Html`; Visual posts continue through the encoded paragraph renderer for backward compatibility.
+*   **Article SEO Output**: Blog detail pages emit SEO title/description fallbacks, canonical URLs, Open Graph, Twitter Card, article published/modified metadata, JSON-LD Article schema, and robots metadata. `FocusKeyword` remains editorial only and does not emit meta keywords.
+*   **Noindex Sitemap Behavior**: Published posts with `RobotsIndex=false` remain publicly accessible but are excluded from `sitemap.xml` and receive `noindex` robots metadata.
+*   **Pending Blog HTML + SEO Work**: Runtime editor polish and broader browser smoke coverage remain review items; the backend sanitizer, public mode gate, SEO output, and scoped article-content CSS are implemented.
 
 ### 5. Membership Program Page (`/thanh-vien`)
 *   **Static Informational Policy Page**: `/thanh-vien` is now a published informational page for the **Truyền Thuyết Champong** membership program, not a coming-soon placeholder.

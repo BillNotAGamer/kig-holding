@@ -122,6 +122,16 @@ public async Task<IReadOnlyList<Branch>> GetActiveBranchesAsync(CancellationToke
 *   **Key patterns**: `news:categories:active` and list filters.
 *   **Duration**: 5 minutes sliding expiration.
 
+### 3.1 Blog Content and SEO Persistence Boundary
+Admin post create/edit continues to use `Areas/Admin/Controllers/PostController.cs` with EF Core-backed persistence. The Blog HTML + SEO implementation uses `PostContentMode` as the public rendering boundary:
+
+*   **Visual mode**: `Post.Content` remains plain text. Existing posts default to `Visual` and are not rewritten into HTML.
+*   **HTML mode**: submitted HTML is sanitized server-side through `IBlogHtmlSanitizer` before persistence. The original unsanitized HTML must never become the canonical stored post body.
+*   **Rendering boundary**: `Views/News/Detail.cshtml` renders raw post content only in the `ContentMode=Html` branch. Visual posts still use the encoded paragraph renderer.
+*   **SEO output**: `SeoTitle` and `SeoDescription` fall back to `Title` and `Excerpt`. `OgTitle`, `OgDescription`, `OgImageUrl`, `CanonicalUrl`, `RobotsIndex`, and `RobotsFollow` feed the shared layout metadata and sitemap decisions. `FocusKeyword` is editorial metadata only; the application must not emit a legacy meta-keywords tag from it.
+*   **Sitemap rule**: published posts with `RobotsIndex=false` remain routable but are excluded from `sitemap.xml` and receive `noindex` robots metadata.
+*   **Security rule**: do not sanitize HTML with regular expressions. Blog HTML must pass through the project-owned sanitizer abstraction backed by a maintained .NET sanitizer library.
+
 ### 4. Reservation Rate Limiting ([ReservationService](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/ReservationService.cs))
 *   **Key Pattern**: `res_lock:phone:{NormalizedPhone}` where `{NormalizedPhone}` is normalized by [IdentityNormalizer.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/IdentityNormalizer.cs).
 *   **Duration**: 10 minutes absolute expiration.

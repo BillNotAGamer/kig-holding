@@ -5,6 +5,7 @@ using KIGHolding.Areas.Admin.ViewModels;
 using KIGHolding.Data;
 using KIGHolding.Models.Content;
 using KIGHolding.Models.Entities;
+using KIGHolding.Models.Enums;
 using KIGHolding.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -21,6 +22,7 @@ public class PostController : AdminBaseController
     private readonly AppDbContext _dbContext;
     private readonly IImageStorageService _imageStorageService;
     private readonly INewsService _newsService;
+    private readonly IBlogHtmlSanitizer _blogHtmlSanitizer;
 
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -35,11 +37,13 @@ public class PostController : AdminBaseController
     public PostController(
         AppDbContext dbContext,
         IImageStorageService imageStorageService,
-        INewsService newsService)
+        INewsService newsService,
+        IBlogHtmlSanitizer blogHtmlSanitizer)
     {
         _dbContext = dbContext;
         _imageStorageService = imageStorageService;
         _newsService = newsService;
+        _blogHtmlSanitizer = blogHtmlSanitizer;
     }
 
     [HttpGet]
@@ -173,6 +177,12 @@ public class PostController : AdminBaseController
 
         var slug = await BuildUniqueSlugAsync(model.Slug, model.Title);
         var thumbnailUrl = string.Empty;
+        if (!TryPreparePostContent(model.Content, model.ContentMode, nameof(model.Content), nameof(model.ContentMode), out var preparedContent) ||
+            !TryNormalizeSeoUrls(model.CanonicalUrl, model.OgImageUrl, out var canonicalUrl, out var ogImageUrl))
+        {
+            model.CategoryOptions = BuildCategoryOptions();
+            return View(model);
+        }
 
         if (model.ThumbnailFile is not null && model.ThumbnailFile.Length > 0)
         {
@@ -197,14 +207,22 @@ public class PostController : AdminBaseController
             Slug = slug,
             Category = normalizedCategory,
             Excerpt = model.Excerpt.Trim(),
-            Content = model.Content.Trim(),
+            Content = preparedContent,
+            ContentMode = model.ContentMode,
             ThumbnailUrl = thumbnailUrl,
             IsPublished = model.IsPublished,
             PublishedAt = model.IsPublished
                 ? NormalizeLocalInputToUtc(model.PublishedAt) ?? DateTimeOffset.UtcNow
                 : NormalizeLocalInputToUtc(model.PublishedAt),
-            SeoTitle = string.IsNullOrWhiteSpace(model.SeoTitle) ? model.Title.Trim() : model.SeoTitle.Trim(),
-            SeoDescription = string.IsNullOrWhiteSpace(model.SeoDescription) ? model.Excerpt.Trim() : model.SeoDescription.Trim(),
+            SeoTitle = TrimToNull(model.SeoTitle),
+            SeoDescription = TrimToNull(model.SeoDescription),
+            FocusKeyword = TrimToNull(model.FocusKeyword),
+            CanonicalUrl = canonicalUrl,
+            OgTitle = TrimToNull(model.OgTitle),
+            OgDescription = TrimToNull(model.OgDescription),
+            OgImageUrl = ogImageUrl,
+            RobotsIndex = model.RobotsIndex,
+            RobotsFollow = model.RobotsFollow,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };
@@ -241,10 +259,18 @@ public class PostController : AdminBaseController
             Category = NewsCategories.NormalizeCategory(post.Category) ?? NewsCategories.Default.Slug,
             Excerpt = post.Excerpt,
             Content = post.Content,
+            ContentMode = post.ContentMode,
             IsPublished = post.IsPublished,
             PublishedAt = post.PublishedAt?.LocalDateTime,
             SeoTitle = post.SeoTitle,
             SeoDescription = post.SeoDescription,
+            FocusKeyword = post.FocusKeyword,
+            CanonicalUrl = post.CanonicalUrl,
+            OgTitle = post.OgTitle,
+            OgDescription = post.OgDescription,
+            OgImageUrl = post.OgImageUrl,
+            RobotsIndex = post.RobotsIndex,
+            RobotsFollow = post.RobotsFollow,
             ExistingThumbnailUrl = post.ThumbnailUrl,
             CategoryOptions = BuildCategoryOptions()
         });
@@ -293,6 +319,13 @@ public class PostController : AdminBaseController
         var slug = await BuildUniqueSlugAsync(model.Slug, model.Title, post.Id);
         var previousThumbnailUrl = post.ThumbnailUrl;
         string? uploadedThumbnailUrl = null;
+        if (!TryPreparePostContent(model.Content, model.ContentMode, nameof(model.Content), nameof(model.ContentMode), out var preparedContent) ||
+            !TryNormalizeSeoUrls(model.CanonicalUrl, model.OgImageUrl, out var canonicalUrl, out var ogImageUrl))
+        {
+            model.ExistingThumbnailUrl = post.ThumbnailUrl;
+            model.CategoryOptions = BuildCategoryOptions();
+            return View(model);
+        }
 
         if (model.ThumbnailFile is not null && model.ThumbnailFile.Length > 0)
         {
@@ -316,7 +349,8 @@ public class PostController : AdminBaseController
         post.Slug = slug;
         post.Category = normalizedCategory;
         post.Excerpt = model.Excerpt.Trim();
-        post.Content = model.Content.Trim();
+        post.Content = preparedContent;
+        post.ContentMode = model.ContentMode;
         if (!string.IsNullOrWhiteSpace(uploadedThumbnailUrl))
         {
             post.ThumbnailUrl = uploadedThumbnailUrl;
@@ -326,8 +360,15 @@ public class PostController : AdminBaseController
         post.PublishedAt = model.IsPublished
             ? NormalizeLocalInputToUtc(model.PublishedAt) ?? DateTimeOffset.UtcNow
             : NormalizeLocalInputToUtc(model.PublishedAt);
-        post.SeoTitle = string.IsNullOrWhiteSpace(model.SeoTitle) ? model.Title.Trim() : model.SeoTitle.Trim();
-        post.SeoDescription = string.IsNullOrWhiteSpace(model.SeoDescription) ? model.Excerpt.Trim() : model.SeoDescription.Trim();
+        post.SeoTitle = TrimToNull(model.SeoTitle);
+        post.SeoDescription = TrimToNull(model.SeoDescription);
+        post.FocusKeyword = TrimToNull(model.FocusKeyword);
+        post.CanonicalUrl = canonicalUrl;
+        post.OgTitle = TrimToNull(model.OgTitle);
+        post.OgDescription = TrimToNull(model.OgDescription);
+        post.OgImageUrl = ogImageUrl;
+        post.RobotsIndex = model.RobotsIndex;
+        post.RobotsFollow = model.RobotsFollow;
         post.UpdatedAt = DateTimeOffset.UtcNow;
 
         try
@@ -398,6 +439,113 @@ public class PostController : AdminBaseController
     private static DateTimeOffset? NormalizeLocalInputToUtc(DateTime? value)
     {
         return value.HasValue ? NormalizeLocalInputToUtc(value.Value) : null;
+    }
+
+    private bool TryPreparePostContent(
+        string? content,
+        PostContentMode contentMode,
+        string contentModelStateKey,
+        string contentModeModelStateKey,
+        out string preparedContent)
+    {
+        preparedContent = string.Empty;
+        if (!Enum.IsDefined(contentMode))
+        {
+            ModelState.AddModelError(contentModeModelStateKey, "Che do noi dung khong hop le.");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            ModelState.AddModelError(contentModelStateKey, "Vui long nhap noi dung.");
+            return false;
+        }
+
+        var trimmedContent = content.Trim();
+        if (trimmedContent.Length > PostEditorLimits.ContentMaxLength)
+        {
+            ModelState.AddModelError(contentModelStateKey, $"Noi dung khong duoc vuot qua {PostEditorLimits.ContentMaxLength:N0} ky tu.");
+            return false;
+        }
+
+        if (contentMode == PostContentMode.Visual)
+        {
+            preparedContent = trimmedContent;
+            return true;
+        }
+
+        var sanitizedContent = _blogHtmlSanitizer.Sanitize(trimmedContent).Trim();
+        if (sanitizedContent.Length > PostEditorLimits.ContentMaxLength)
+        {
+            ModelState.AddModelError(contentModelStateKey, $"Noi dung HTML sau khi loc an toan khong duoc vuot qua {PostEditorLimits.ContentMaxLength:N0} ky tu.");
+            return false;
+        }
+
+        if (!_blogHtmlSanitizer.ContainsMeaningfulContent(sanitizedContent))
+        {
+            ModelState.AddModelError(contentModelStateKey, "Noi dung HTML khong co noi dung hop le sau khi loc an toan.");
+            return false;
+        }
+
+        preparedContent = sanitizedContent;
+        return true;
+    }
+
+    private bool TryNormalizeSeoUrls(
+        string? canonicalUrlInput,
+        string? ogImageUrlInput,
+        out string? canonicalUrl,
+        out string? ogImageUrl)
+    {
+        canonicalUrl = TrimToNull(canonicalUrlInput);
+        ogImageUrl = TrimToNull(ogImageUrlInput);
+
+        var isValid = true;
+        if (canonicalUrl is not null && !IsSafeCanonicalUrl(canonicalUrl))
+        {
+            ModelState.AddModelError(nameof(PostCreateViewModel.CanonicalUrl), "Canonical URL phai la URL HTTP/HTTPS hop le hoac duong dan noi bo an toan.");
+            isValid = false;
+        }
+
+        if (ogImageUrl is not null && !IsSafeOgImageUrl(ogImageUrl))
+        {
+            ModelState.AddModelError(nameof(PostCreateViewModel.OgImageUrl), "OG Image URL phai la HTTPS hoac duong dan noi bo an toan.");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    private static string? TrimToNull(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static bool IsSafeCanonicalUrl(string value)
+    {
+        return IsSafeInternalUrl(value)
+            || (Uri.TryCreate(value, UriKind.Absolute, out var uri)
+                && uri.Scheme is "http" or "https");
+    }
+
+    private static bool IsSafeOgImageUrl(string value)
+    {
+        return IsSafeInternalUrl(value)
+            || (Uri.TryCreate(value, UriKind.Absolute, out var uri)
+                && uri.Scheme == Uri.UriSchemeHttps);
+    }
+
+    private static bool IsSafeInternalUrl(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var trimmedValue = value.Trim();
+        return trimmedValue.StartsWith("/", StringComparison.Ordinal)
+            && !trimmedValue.StartsWith("//", StringComparison.Ordinal)
+            && !trimmedValue.Contains("\\", StringComparison.Ordinal);
     }
 
     private static DateTimeOffset NormalizeLocalInputToUtc(DateTime value)

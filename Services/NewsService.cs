@@ -298,7 +298,8 @@ public class NewsService : INewsService
             Excerpt = x.Excerpt,
             Category = x.Category,
             PublishedAt = x.PublishedAt,
-            UpdatedAt = x.UpdatedAt
+            UpdatedAt = x.UpdatedAt,
+            RobotsIndex = x.RobotsIndex
         });
     }
 
@@ -314,7 +315,8 @@ public class NewsService : INewsService
             Excerpt = post.Excerpt,
             Category = NewsCategories.GetDisplayName(post.Category),
             PublishedAt = post.PublishedAt,
-            UpdatedAt = post.UpdatedAt
+            UpdatedAt = post.UpdatedAt,
+            RobotsIndex = post.RobotsIndex
         };
     }
 
@@ -361,6 +363,7 @@ public class NewsService : INewsService
         public string Category { get; init; } = string.Empty;
         public DateTimeOffset? PublishedAt { get; init; }
         public DateTimeOffset UpdatedAt { get; init; }
+        public bool RobotsIndex { get; init; } = true;
     }
 
     private sealed record SuggestedPostCategoryPost(

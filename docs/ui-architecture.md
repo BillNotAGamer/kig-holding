@@ -168,6 +168,8 @@ Purpose: cancel the pending automatic homepage booking prompt, mark that automat
 
 *   **Article Hero Images**: The main detail image on `/tin-tuc/{slug}` uses a natural aspect ratio (via `.news-detail-media--hero`) to prevent cropping important image content.
 *   **News Grid Cards**: Listing cards and related post cards intentionally keep fixed/cropped thumbnail behavior (`object-cover`) for visual grid consistency. Future changes must not mutate shared `.news-detail-media` base behavior without checking both detail hero and card usages.
+*   **Article Content Styling**: Public article bodies use `.article-content` for scoped semantic HTML typography. Visual/plain-text posts still render encoded paragraphs; HTML-mode posts render only sanitized stored HTML inside this container.
+*   **Admin Blog Editor Tabs**: Admin Create/Edit uses shared Visual/HTML tabs in `_ContentEditor.cshtml`, enhanced by `wwwroot/js/admin-post-editor.js`. The script owns ARIA state, keyboard navigation, textarea spellcheck/class changes, and the warning before switching custom HTML back to Visual. It does not sanitize, parse, or rewrite article content.
 
 ---
 

@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.511.8" />
     <PackageReference Include="CloudinaryDotNet" Version="1.29.2" />
+    <PackageReference Include="HtmlSanitizer" Version="9.1.973" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

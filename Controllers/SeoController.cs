@@ -63,7 +63,7 @@ public class SeoController : Controller
                 () => _newsService.GetPublishedPostCardsAsync(null, cancellationToken),
                 "sitemap posts") ?? [];
 
-            urls.AddRange(posts.Select(post => new SitemapUrl(
+            urls.AddRange(posts.Where(post => post.RobotsIndex).Select(post => new SitemapUrl(
                 BuildAbsoluteUrl($"/tin-tuc/{post.Slug}", baseUrl),
                 post.UpdatedAt,
                 "weekly",

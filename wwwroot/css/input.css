@@ -5220,6 +5220,92 @@
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
   }
 
+  .article-content {
+    @apply text-base leading-[2.02] text-white sm:text-[1.05rem];
+    overflow-wrap: anywhere;
+  }
+
+  .article-content > * + * {
+    margin-top: 1.5rem;
+  }
+
+  .article-content h2,
+  .article-content h3,
+  .article-content h4 {
+    @apply font-black leading-tight text-white;
+  }
+
+  .article-content h2 {
+    @apply text-3xl;
+  }
+
+  .article-content h3 {
+    @apply text-2xl;
+  }
+
+  .article-content h4 {
+    @apply text-xl;
+  }
+
+  .article-content a {
+    @apply font-semibold text-brand-red underline underline-offset-4 transition duration-200 hover:text-white;
+  }
+
+  .article-content ul,
+  .article-content ol {
+    @apply space-y-2 pl-6;
+  }
+
+  .article-content ul {
+    list-style: disc;
+  }
+
+  .article-content ol {
+    list-style: decimal;
+  }
+
+  .article-content blockquote {
+    @apply border-l-4 border-brand-red/70 pl-5 italic text-white/82;
+  }
+
+  .article-content img {
+    @apply h-auto max-w-full rounded-2xl border border-white/10 shadow-[0_18px_45px_rgba(0,0,0,0.24)];
+  }
+
+  .article-content figure {
+    @apply space-y-3;
+  }
+
+  .article-content figcaption {
+    @apply text-center text-sm leading-6 text-white/58;
+  }
+
+  .article-content table {
+    @apply block w-full overflow-x-auto rounded-2xl border border-white/10 text-left text-sm;
+    border-collapse: collapse;
+  }
+
+  .article-content th,
+  .article-content td {
+    @apply border-b border-white/10 px-4 py-3;
+  }
+
+  .article-content th {
+    @apply bg-white/10 font-bold text-white;
+  }
+
+  .article-content pre {
+    @apply overflow-x-auto rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-6 text-white/86;
+  }
+
+  .article-content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  .article-content hr {
+    @apply border-white/12;
+  }
+
   .news-detail-related-card {
     position: relative;
     overflow: hidden;
@@ -5986,6 +6072,68 @@
     @apply w-full rounded-2xl border border-brand-border bg-brand-white px-4 py-3 text-sm leading-7 text-brand-dark shadow-sm outline-none transition duration-200 placeholder:text-brand-gray/60 focus:border-brand-red focus:ring-2 focus:ring-brand-red/20 focus:outline-none;
     min-height: 8rem;
     resize: vertical;
+  }
+
+  .admin-post-help {
+    @apply mt-2 text-sm leading-6 text-brand-gray;
+  }
+
+  .admin-post-editor {
+    @apply rounded-2xl border border-brand-border bg-brand-light/60 p-4 sm:p-5;
+  }
+
+  .admin-post-editor__header {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .admin-post-editor__tabs {
+    @apply inline-flex w-full rounded-2xl border border-brand-border bg-brand-white p-1 shadow-sm sm:w-auto;
+  }
+
+  .admin-post-editor__tab {
+    @apply min-h-10 flex-1 rounded-xl px-4 py-2 text-sm font-semibold text-brand-gray transition duration-200 focus:outline-none focus:ring-2 focus:ring-brand-red/25 sm:flex-none;
+  }
+
+  .admin-post-editor__tab[aria-selected="true"] {
+    @apply bg-brand-red text-white shadow-sm;
+  }
+
+  .admin-post-editor__panel {
+    @apply mt-4 rounded-2xl border border-brand-border bg-brand-white px-4 py-3 text-sm leading-6 text-brand-gray;
+  }
+
+  .admin-post-editor__panel--html {
+    @apply border-brand-red/20 bg-brand-red/5 text-brand-dark;
+  }
+
+  .admin-post-editor__supported-tags {
+    @apply mt-2 text-xs uppercase tracking-[0.12em] text-brand-gray;
+  }
+
+  .admin-post-content-editor__textarea {
+    @apply mt-4 min-h-72 max-h-[70svh] sm:min-h-80;
+  }
+
+  .admin-post-content-editor__textarea--html {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    line-height: 1.7;
+    tab-size: 2;
+  }
+
+  .admin-post-seo {
+    @apply space-y-5 rounded-2xl border border-brand-border bg-brand-white p-4 shadow-sm sm:p-5;
+  }
+
+  .admin-post-seo__header {
+    @apply flex flex-col gap-2 border-b border-brand-border pb-4 sm:flex-row sm:items-end sm:justify-between;
+  }
+
+  .admin-post-seo__title {
+    @apply text-xl font-black text-brand-dark;
+  }
+
+  .admin-post-seo__hint {
+    @apply max-w-xl text-sm leading-6 text-brand-gray;
   }
 
   .admin-post-summary {
