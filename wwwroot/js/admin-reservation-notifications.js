@@ -32,17 +32,36 @@
     var retryTimerId = null;
     var retryAttempt = 0;
     var audio = null;
+    var audioContext = null;
+    var notificationAudioData = null;
+    var notificationAudioDataPromise = null;
+    var notificationAudioBuffer = null;
+    var notificationBufferPromise = null;
+    var activeNotificationSource = null;
+    var webAudioFailed = false;
+    var audioContextReady = false;
     var soundPreferenceEnabled = false;
     var soundUnlockedForPage = false;
-    var unlockPromise = null;
-    var unlockInteractionEvents = ["pointerdown", "keydown", "touchstart"];
+    var soundPlaybackBlockedByBrowser = false;
+    var unlockAttemptInFlight = null;
+    var unlockInteractionEvents = ["pointerdown", "touchstart", "keydown", "click"];
     var unlockInteractionListenersRegistered = false;
 
     function readStorage() {
         try {
-            return window.localStorage.getItem(soundStorageKey) === "true";
+            var storedValue = window.localStorage.getItem(soundStorageKey);
+            if (storedValue === "false") {
+                return false;
+            }
+
+            if (storedValue === "true") {
+                return true;
+            }
+
+            writeStorage(true);
+            return true;
         } catch {
-            return false;
+            return true;
         }
     }
 
@@ -55,7 +74,7 @@
     }
 
     function updateSoundControls(reason) {
-        var showActivation = soundPreferenceEnabled && !soundUnlockedForPage;
+        var showActivation = soundPreferenceEnabled && !soundUnlockedForPage && soundPlaybackBlockedByBrowser;
 
         if (soundToggle) {
             soundToggle.setAttribute("aria-pressed", soundPreferenceEnabled ? "true" : "false");
@@ -125,14 +144,262 @@
 
     function markSoundUnlockedForPage() {
         soundUnlockedForPage = true;
+        soundPlaybackBlockedByBrowser = false;
         removeAutomaticUnlockListeners();
         updateSoundControls();
     }
 
-    function markSoundLockedForPage(reason) {
+    function markSoundLockedForPage(reason, options) {
+        var settings = options || {};
+
         soundUnlockedForPage = false;
+        if (settings.showActivation === true) {
+            soundPlaybackBlockedByBrowser = true;
+        }
+
         registerAutomaticUnlockListeners();
         updateSoundControls(reason);
+    }
+
+    function isTrustedUserEvent(event) {
+        return !!event && (!("isTrusted" in event) || event.isTrusted === true);
+    }
+
+    function isAudioDebugEnabled() {
+        try {
+            return window.localStorage.getItem("kig.admin.reservationNotifications.debugAudio") === "true";
+        } catch {
+            return false;
+        }
+    }
+
+    function logAudioDebug(message, details) {
+        if (!isAudioDebugEnabled()) {
+            return;
+        }
+
+        if (details) {
+            console.debug("[AdminReservationAudio] " + message, details);
+            return;
+        }
+
+        console.debug("[AdminReservationAudio] " + message);
+    }
+
+    function isAutoplayBlocked(error) {
+        return error && (error.name === "NotAllowedError" || error.name === "SecurityError");
+    }
+
+    function handleAudioFailure(error, options) {
+        var settings = options || {};
+
+        if (isAutoplayBlocked(error)) {
+            markSoundLockedForPage("Browser interaction is required before notification sound can play.", {
+                showActivation: settings.showActivation === true
+            });
+
+            if (settings.logBlocked === true) {
+                console.warn("Admin reservation notification sound is waiting for browser activation.", error);
+            }
+
+            return;
+        }
+
+        soundUnlockedForPage = false;
+        audioContextReady = false;
+        soundPlaybackBlockedByBrowser = false;
+        updateSoundControls("Notification sound file could not be played.");
+        console.error("Admin reservation notification sound media error.", error);
+    }
+
+    function getAudioContextConstructor() {
+        return window.AudioContext || window.webkitAudioContext || null;
+    }
+
+    function getAudioContext() {
+        if (audioContext) {
+            return audioContext;
+        }
+
+        var AudioContextConstructor = getAudioContextConstructor();
+        if (!AudioContextConstructor) {
+            return null;
+        }
+
+        try {
+            audioContext = new AudioContextConstructor();
+            logAudioDebug("audio-context-created", { state: audioContext.state });
+        } catch (error) {
+            webAudioFailed = true;
+            console.warn("Admin reservation notification Web Audio initialization failed.", error);
+            return null;
+        }
+
+        return audioContext;
+    }
+
+    function primeWebAudioSilently(context) {
+        try {
+            var sampleRate = context.sampleRate || 44100;
+            var silentBuffer = context.createBuffer(1, 1, sampleRate);
+            var silentSource = context.createBufferSource();
+            silentSource.buffer = silentBuffer;
+            silentSource.connect(context.destination);
+            silentSource.start(0);
+        } catch (error) {
+            logAudioDebug("silent-prime-failed", { name: error.name, message: error.message });
+        }
+    }
+
+    function decodeAudioData(context, audioData) {
+        return new Promise(function (resolve, reject) {
+            var settled = false;
+
+            try {
+                var decodeResult = context.decodeAudioData(
+                    audioData,
+                    function (decodedBuffer) {
+                        settled = true;
+                        resolve(decodedBuffer);
+                    },
+                    function (error) {
+                        settled = true;
+                        reject(error);
+                    });
+
+                if (decodeResult && typeof decodeResult.then === "function") {
+                    decodeResult.then(function (decodedBuffer) {
+                        if (!settled) {
+                            resolve(decodedBuffer);
+                        }
+                    }).catch(function (error) {
+                        if (!settled) {
+                            reject(error);
+                        }
+                    });
+                }
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    function ensureNotificationAudioData() {
+        if (notificationAudioData) {
+            return Promise.resolve(notificationAudioData);
+        }
+
+        if (notificationAudioDataPromise) {
+            return notificationAudioDataPromise;
+        }
+
+        if (typeof window.fetch !== "function") {
+            return Promise.reject(new Error("Audio fetch is unavailable."));
+        }
+
+        notificationAudioDataPromise = window.fetch(audioUrl, { cache: "force-cache" })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Notification audio request failed with HTTP " + response.status + ".");
+                }
+
+                return response.arrayBuffer();
+            })
+            .then(function (audioData) {
+                notificationAudioData = audioData;
+                logAudioDebug("audio-data-ready", { byteLength: audioData.byteLength });
+                return audioData;
+            })
+            .catch(function (error) {
+                notificationAudioDataPromise = null;
+                console.warn("Admin reservation notification audio loading failed.", error);
+                throw error;
+            });
+
+        return notificationAudioDataPromise;
+    }
+
+    function ensureNotificationAudioBuffer() {
+        if (notificationAudioBuffer) {
+            return Promise.resolve(notificationAudioBuffer);
+        }
+
+        if (notificationBufferPromise) {
+            return notificationBufferPromise;
+        }
+
+        var context = getAudioContext();
+        if (!context || typeof window.fetch !== "function") {
+            return Promise.reject(new Error("Web Audio is unavailable."));
+        }
+
+        notificationBufferPromise = ensureNotificationAudioData()
+            .then(function (audioData) {
+                return decodeAudioData(context, audioData.slice(0));
+            })
+            .then(function (decodedBuffer) {
+                notificationAudioBuffer = decodedBuffer;
+                logAudioDebug("audio-buffer-ready", {
+                    duration: decodedBuffer.duration,
+                    sampleRate: decodedBuffer.sampleRate
+                });
+                return decodedBuffer;
+            })
+            .catch(function (error) {
+                webAudioFailed = true;
+                notificationBufferPromise = null;
+                console.warn("Admin reservation notification Web Audio buffer loading failed.", error);
+                throw error;
+            });
+
+        return notificationBufferPromise;
+    }
+
+    function updateWebAudioReadyState() {
+        audioContextReady = !!audioContext && audioContext.state === "running" && !!notificationAudioBuffer && !webAudioFailed;
+        if (audioContextReady) {
+            markSoundUnlockedForPage();
+        }
+
+        return audioContextReady;
+    }
+
+    async function prepareWebAudioFromGesture() {
+        var context = getAudioContext();
+        if (!context || webAudioFailed) {
+            return false;
+        }
+
+        var resumePromise = Promise.resolve();
+        try {
+            if (context.state === "suspended" && typeof context.resume === "function") {
+                resumePromise = context.resume();
+            }
+
+            primeWebAudioSilently(context);
+            await resumePromise;
+            await ensureNotificationAudioBuffer();
+            var ready = updateWebAudioReadyState();
+            logAudioDebug("gesture-unlock-result", {
+                contextState: context.state,
+                bufferReady: !!notificationAudioBuffer,
+                ready: ready
+            });
+
+            if (!ready) {
+                markSoundLockedForPage("Browser interaction is required before notification sound can play.", {
+                    showActivation: true
+                });
+            }
+
+            return ready;
+        } catch (error) {
+            handleAudioFailure(error, {
+                showActivation: true,
+                logBlocked: true
+            });
+            return false;
+        }
     }
 
     async function unlockNotificationAudioFromGesture() {
@@ -140,46 +407,35 @@
             return false;
         }
 
-        if (soundUnlockedForPage) {
-            return true;
+        if (unlockAttemptInFlight) {
+            return unlockAttemptInFlight;
         }
 
-        if (unlockPromise) {
-            return unlockPromise;
+        unlockAttemptInFlight = prepareWebAudioFromGesture()
+            .finally(function () {
+                unlockAttemptInFlight = null;
+            });
+
+        return unlockAttemptInFlight;
+    }
+
+    function attemptPageLoadAudioReadiness() {
+        if (!soundPreferenceEnabled) {
+            return;
         }
 
-        var instance = getAudio();
-        unlockPromise = (async function () {
-            var previousMuted = instance.muted;
-            var previousVolume = instance.volume;
-
-            try {
-                instance.muted = true;
-                instance.volume = 0;
-                resetAudio(instance);
-                await instance.play();
-                resetAudio(instance);
-                if (!soundPreferenceEnabled) {
-                    return false;
-                }
-
-                markSoundUnlockedForPage();
-                return true;
-            } catch (error) {
-                markSoundLockedForPage("Trình duyệt cần một thao tác để cho phép phát âm thanh.");
-                console.warn("Admin reservation notification sound is waiting for browser activation.", error);
-                return false;
-            } finally {
-                instance.muted = previousMuted;
-                instance.volume = previousVolume;
-                unlockPromise = null;
-            }
-        })();
-
-        return unlockPromise;
+        getAudio();
+        ensureNotificationAudioData()
+            .catch(function (error) {
+                logAudioDebug("page-load-audio-prepare-failed", { name: error.name, message: error.message });
+            });
     }
 
     function handleFirstInteraction(event) {
+        if (!isTrustedUserEvent(event)) {
+            return;
+        }
+
         if (event.type === "keydown" && (event.isComposing || event.key === "Process")) {
             return;
         }
@@ -187,19 +443,24 @@
         unlockNotificationAudioFromGesture();
     }
 
-    function enableSoundPreferenceFromGesture() {
+    function enableSoundPreferenceFromGesture(event) {
         soundPreferenceEnabled = true;
         soundUnlockedForPage = false;
+        soundPlaybackBlockedByBrowser = false;
         writeStorage(true);
         getAudio();
         registerAutomaticUnlockListeners();
         updateSoundControls();
-        unlockNotificationAudioFromGesture();
+
+        if (isTrustedUserEvent(event)) {
+            unlockNotificationAudioFromGesture();
+        }
     }
 
     function disableSoundPreference() {
         soundPreferenceEnabled = false;
         soundUnlockedForPage = false;
+        soundPlaybackBlockedByBrowser = false;
         removeAutomaticUnlockListeners();
 
         if (audio) {
@@ -213,29 +474,122 @@
     function initSoundControls() {
         soundPreferenceEnabled = readStorage();
         soundUnlockedForPage = false;
+        soundPlaybackBlockedByBrowser = false;
         getAudio();
 
         if (soundPreferenceEnabled) {
             registerAutomaticUnlockListeners();
+            attemptPageLoadAudioReadiness();
         }
 
-        updateSoundControls(soundPreferenceEnabled ? "Trình duyệt có thể cần một thao tác để cho phép phát âm thanh." : null);
+        updateSoundControls(soundPreferenceEnabled ? "Notification sound is enabled." : null);
 
         if (soundToggle) {
-            soundToggle.addEventListener("click", function () {
+            soundToggle.addEventListener("click", function (event) {
                 if (soundPreferenceEnabled) {
                     disableSoundPreference();
                     return;
                 }
 
-                enableSoundPreferenceFromGesture();
+                enableSoundPreferenceFromGesture(event);
             });
         }
 
         if (soundActivation) {
-            soundActivation.addEventListener("click", function () {
+            soundActivation.addEventListener("click", function (event) {
+                if (!isTrustedUserEvent(event)) {
+                    return;
+                }
+
                 unlockNotificationAudioFromGesture();
             });
+        }
+
+        window.addEventListener("pageshow", attemptPageLoadAudioReadiness);
+        window.addEventListener("focus", attemptPageLoadAudioReadiness);
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "visible") {
+                attemptPageLoadAudioReadiness();
+            }
+        });
+    }
+
+    function stopActiveNotificationSource() {
+        if (!activeNotificationSource) {
+            return;
+        }
+
+        try {
+            activeNotificationSource.stop(0);
+        } catch {
+            return;
+        } finally {
+            activeNotificationSource = null;
+        }
+    }
+
+    function playNotificationSoundWithWebAudio() {
+        if (!audioContextReady || !audioContext || audioContext.state !== "running" || !notificationAudioBuffer) {
+            return false;
+        }
+
+        try {
+            stopActiveNotificationSource();
+            var source = audioContext.createBufferSource();
+            source.buffer = notificationAudioBuffer;
+            source.connect(audioContext.destination);
+            source.onended = function () {
+                if (activeNotificationSource === source) {
+                    activeNotificationSource = null;
+                }
+            };
+
+            activeNotificationSource = source;
+            source.start(0);
+            markSoundUnlockedForPage();
+            logAudioDebug("web-audio-playback-started", {
+                contextState: audioContext.state,
+                bufferDuration: notificationAudioBuffer.duration
+            });
+            return true;
+        } catch (error) {
+            activeNotificationSource = null;
+            handleAudioFailure(error, {
+                showActivation: true,
+                logBlocked: true
+            });
+            return false;
+        }
+    }
+
+    async function playNotificationSoundWithHtmlAudioFallback() {
+        var instance = getAudio();
+        try {
+            resetAudio(instance);
+            instance.muted = false;
+            if (instance.volume === 0) {
+                instance.volume = 1;
+            }
+
+            await instance.play();
+            if (!soundPreferenceEnabled) {
+                return false;
+            }
+
+            markSoundUnlockedForPage();
+            logAudioDebug("html-audio-fallback-playback-started", {
+                muted: instance.muted,
+                volume: instance.volume,
+                readyState: instance.readyState,
+                networkState: instance.networkState
+            });
+            return true;
+        } catch (error) {
+            handleAudioFailure(error, {
+                showActivation: true,
+                logBlocked: true
+            });
+            return false;
         }
     }
 
@@ -244,21 +598,37 @@
             return false;
         }
 
-        var instance = getAudio();
-        try {
-            resetAudio(instance);
-            await instance.play();
-            if (!soundPreferenceEnabled) {
-                return false;
-            }
+        logAudioDebug("playback-requested", {
+            visibilityState: document.visibilityState,
+            hasFocus: document.hasFocus ? document.hasFocus() : null,
+            audioContextState: audioContext ? audioContext.state : null,
+            audioContextReady: audioContextReady,
+            bufferReady: !!notificationAudioBuffer,
+            webAudioFailed: webAudioFailed
+        });
 
-            markSoundUnlockedForPage();
-            return true;
-        } catch (error) {
-            markSoundLockedForPage("Trình duyệt cần một thao tác để cho phép phát âm thanh.");
-            console.warn("Admin reservation notification sound playback was blocked.", error);
-            return false;
+        if (unlockAttemptInFlight) {
+            await unlockAttemptInFlight;
         }
+
+        updateWebAudioReadyState();
+        if (playNotificationSoundWithWebAudio()) {
+            return true;
+        }
+
+        if (!webAudioFailed && getAudioContextConstructor()) {
+            try {
+                await ensureNotificationAudioBuffer();
+                updateWebAudioReadyState();
+                if (playNotificationSoundWithWebAudio()) {
+                    return true;
+                }
+            } catch (error) {
+                logAudioDebug("web-audio-playback-prepare-failed", { name: error.name, message: error.message });
+            }
+        }
+
+        return playNotificationSoundWithHtmlAudioFallback();
     }
 
     function attemptReservationAudio(reservationId) {
@@ -293,10 +663,51 @@
     function teardownSoundForPage() {
         removeAutomaticUnlockListeners();
         soundUnlockedForPage = false;
+        soundPlaybackBlockedByBrowser = false;
+        audioContextReady = false;
+        stopActiveNotificationSource();
 
         if (audio) {
             resetAudio(audio);
         }
+    }
+
+    function exposeAudioDebugApi() {
+        if (!isAudioDebugEnabled()) {
+            return;
+        }
+
+        window.KIGAdminReservationNotificationAudioDebug = {
+            state: function () {
+                return {
+                    soundPreferenceEnabled: soundPreferenceEnabled,
+                    soundUnlockedForPage: soundUnlockedForPage,
+                    soundPlaybackBlockedByBrowser: soundPlaybackBlockedByBrowser,
+                    audioContextState: audioContext ? audioContext.state : null,
+                    audioContextReady: audioContextReady,
+                    notificationDataReady: !!notificationAudioData,
+                    notificationBufferReady: !!notificationAudioBuffer,
+                    webAudioFailed: webAudioFailed,
+                    htmlAudio: audio
+                        ? {
+                            paused: audio.paused,
+                            muted: audio.muted,
+                            volume: audio.volume,
+                            currentTime: audio.currentTime,
+                            readyState: audio.readyState,
+                            networkState: audio.networkState,
+                            error: audio.error ? audio.error.code : null
+                        }
+                        : null
+                };
+            },
+            playTestSound: function () {
+                return playNotificationSound();
+            },
+            unlockFromGesture: function () {
+                return unlockNotificationAudioFromGesture();
+            }
+        };
     }
 
     function getPayloadValue(payload, camelName, pascalName) {
@@ -609,5 +1020,6 @@
     }
 
     initSoundControls();
+    exposeAudioDebugApi();
     initConnection();
 })();
