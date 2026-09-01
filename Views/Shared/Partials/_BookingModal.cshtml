@@ -2,6 +2,7 @@
 @using System.Globalization
 @inject IConfiguration Configuration
 @inject IBranchService BranchService
+@inject TimeProvider TimeProvider
 
 @{
     var branchOptions = new List<(Guid Id, string Name, string OpeningHours, string? LunchBreakHours)>();
@@ -36,8 +37,7 @@
         }
     }
 
-    var defaultDate = VietnamHolidayEvaluator.GetVietnamToday().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-    var maximumOpenDate = VietnamHolidayEvaluator.MaximumOpenReservationDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    var defaultDate = VietnamClock.GetVietnamToday(TimeProvider).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
     var defaultTime = "18:00";
     var hasReservableBranches = branchOptions.Count > 0;
 }
@@ -133,7 +133,6 @@
                                type="date"
                                value="@defaultDate"
                                min="@defaultDate"
-                               max="@maximumOpenDate"
                                class="booking-modal__input"
                                required />
                         <p class="booking-modal__field-error" data-booking-modal-error-for="ReservationDate"></p>

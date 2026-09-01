@@ -67,3 +67,14 @@ public class ReservationDetailViewModel
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 }
+
+public class ReservationPolicyViewModel
+{
+    public DateOnly VietnamToday { get; set; }
+    public int CalendarYear { get; set; }
+    public int CalendarMonth { get; set; }
+    public IReadOnlyList<DateOnly> BlockedDates { get; set; } = [];
+    public string? BlockedDatesInput { get; set; }
+    public bool PolicyPayloadPresent { get; set; }
+    public bool ConfirmClearAllBlockedDates { get; set; }
+}

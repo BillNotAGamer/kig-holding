@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<MenuGroup> MenuGroups => Set<MenuGroup>();
     public DbSet<MenuPageImage> MenuPageImages => Set<MenuPageImage>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
+    public DbSet<BlockedReservationDate> BlockedReservationDates => Set<BlockedReservationDate>();
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();

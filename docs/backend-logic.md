@@ -74,18 +74,18 @@ public async Task<IActionResult> Create(ReservationCreateRequest request)
 
 ### Multi-Tier Server-Side Validation Chain
 Once a request passes the initial `ModelState` gateway, the business service layer ([ReservationService.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/ReservationService.cs)) processes it through a strict sequential validation pipeline:
-1. **Authoritative Date Policy**: Calls `VietnamHolidayEvaluator.EvaluateReservationDate(request.ReservationDate, VietnamHolidayEvaluator.GetVietnamToday(timeProvider))` before branch database lookup or persistence. Precedence is `PastDate`, `BookingCalendarClosed`, `Weekend`, `Holiday`, then `Allowed`.
+1. **Authoritative Date Policy**: Resolves Vietnam-local today through `VietnamClock.GetVietnamToday(timeProvider)`, rejects past dates, then checks the exact submitted `DateOnly` against the `BlockedReservationDates` table through `IReservationBlockedDateService`.
 2. **In-Memory Rate Limiting Gate**: Checks the memory cache for active locks on the normalized phone number to block spam submissions within a 10-minute window.
 3. **Database Parameter Validation**: Assures validity of branch IDs, capacity bounds, and session slots prior to storage execution.
 4. **Transaction & Persistence**: Opens the transaction, takes the advisory lock, creates the `Reservation`, saves, commits, stamps the rate-limit success key, and publishes post-commit notifications only after all validation succeeds.
 
-The date policy is centralized under [VietnamHolidayEvaluator.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/VietnamHolidayEvaluator.cs). The submitted `DateOnly` is evaluated directly and, when allowed, stored unchanged. Frontend date restrictions mirror this policy for user experience only; the service layer remains authoritative if client-side checks are bypassed.
+The current date-policy precedence is `PastDate`, `BlockedDate`, then `Allowed`. Saturday and Sunday are allowed by default. Holidays and closure days are not inferred from code; Admin users block any exact date by adding a row to `BlockedReservationDates`.
 
-Configured holiday data currently exists for 2026, 2027, and 2028. The authoritative open booking calendar ends at `VietnamHolidayEvaluator.MaximumOpenReservationDate`, currently `2028-12-31` inclusive. Dates after that maximum return `BookingCalendarClosed`; 2029 is not open until an owner-approved Vietnamese public/lunar/compensatory holiday list is supplied and the configured coverage boundary is extended.
+The submitted `DateOnly` is evaluated directly and, when allowed, stored unchanged. Frontend date restrictions mirror active database rows for user experience only; the service layer remains authoritative if client-side checks are bypassed.
 
 Rejected date-policy requests return before branch database lookup, branch-hours validation, transaction begin, advisory lock, `Reservations.Add`, `SaveChangesAsync`, rate-limit success stamping, SignalR notification, and controller-owned email dispatch.
 
-`VietnamHolidayEvaluator` is the only authoritative holiday-date collection. Obsolete independently configured reservation special-date lists must not be reintroduced.
+`BlockedReservationDates` is the only active reservation closure-date collection. Obsolete handwritten holiday evaluators and configured special-date lists must not be reintroduced. The `AddBlockedReservationDatePolicy` migration seeds the remaining future legacy closure dates as ordinary Admin-managed rows; the migration is created but must be reviewed and applied separately.
 
 ---
 

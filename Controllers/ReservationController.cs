@@ -66,7 +66,7 @@ public class ReservationController : Controller
             PhoneNumber = phoneNumber ?? string.Empty,
             BranchId = selectedBranch?.Id,
             GuestCount = guestCount ?? guests ?? 2,
-            ReservationDate = reservationDate ?? date ?? VietnamHolidayEvaluator.GetVietnamToday(_timeProvider),
+            ReservationDate = reservationDate ?? date ?? VietnamClock.GetVietnamToday(_timeProvider),
             ReservationTime = reservationTime ?? time ?? new TimeOnly(18, 0),
             SelectedBranchSlug = branch,
             Branches = MapBranches(branches),
@@ -287,20 +287,6 @@ public class ReservationController : Controller
 
     private void ApplyControllerValidation(ReservationCreateViewModel model)
     {
-        if (model.ReservationDate.HasValue)
-        {
-            var datePolicyResult = VietnamHolidayEvaluator.EvaluateReservationDate(
-                model.ReservationDate.Value,
-                VietnamHolidayEvaluator.GetVietnamToday(_timeProvider));
-
-            if (!datePolicyResult.IsAllowed)
-            {
-                ModelState.AddModelError(
-                    nameof(model.ReservationDate),
-                    VietnamHolidayEvaluator.GetReservationDatePolicyMessage(datePolicyResult.Status));
-            }
-        }
-
         if (model.BranchId == Guid.Empty)
         {
             ModelState.AddModelError(nameof(model.BranchId), "Vui lòng chọn chi nhánh.");

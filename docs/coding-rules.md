@@ -73,13 +73,13 @@ public async Task<IActionResult> Edit(int id, ReservationEditViewModel model)
 
 ### Localized Timezone Validation
 *   **Clock Localizing Rule**: Developers are strictly prohibited from using raw `DateTime.Today`, `DateTime.Now`, or `DateTime.UtcNow` to assess localized Vietnamese calendar boundaries in business logic layers. Because hosting environments (AWS/Azure/Neon DB) operate on UTC clocks, direct server clock references cause shifting window mismatches.
-*   **Required Provider**: Use [VietnamHolidayEvaluator.GetVietnamToday(TimeProvider)](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/VietnamHolidayEvaluator.cs) to resolve the active calendar day under the local `Asia/Ho_Chi_Minh` timezone (GMT+7). Production code should receive `TimeProvider` from dependency injection.
-*   **Reservation Date Policy Boundary**: Reservation date bookability must be evaluated through `VietnamHolidayEvaluator.EvaluateReservationDate(...)`. Do not duplicate Saturday/Sunday, holiday, or booking-calendar boundary logic inside controllers, services, Razor views, or JavaScript.
-*   **Policy Precedence Rule**: Date policy precedence is `PastDate`, `BookingCalendarClosed`, `Weekend`, `Holiday`, then `Allowed`.
+*   **Required Provider**: Use `VietnamClock.GetVietnamToday(TimeProvider)` to resolve the active calendar day under the local `Asia/Ho_Chi_Minh` timezone (GMT+7). Production code should receive `TimeProvider` from dependency injection.
+*   **Reservation Date Policy Boundary**: Reservation date bookability must be evaluated through `IReservationBlockedDateService` from `ReservationService`. Do not duplicate blocked-date collections or past-date checks inside controllers, Razor views, or JavaScript.
+*   **Policy Precedence Rule**: Date policy precedence is `PastDate`, `BlockedDate`, then `Allowed`.
 *   **DateOnly Integrity Rule**: Submitted reservation calendar dates are `DateOnly` values. Do not transform them through UTC, `DateTimeOffset`, locale-specific parsing, or server-local `.Date` conversions before policy evaluation or persistence.
 *   **Frontend Advisory Rule**: Browser-side reservation date restrictions must consume the server-owned calendar-policy payload and remain advisory. `ReservationService.CreateReservationAsync` is still the final enforcement point when requests bypass JavaScript.
-*   **Holiday Dataset Rule**: Do not maintain independent handwritten holiday arrays or configured special-date lists. New holiday years require owner-approved dates in the centralized evaluator before the year may be opened for online booking.
-*   **Open Calendar Rule**: The maximum open reservation date is `VietnamHolidayEvaluator.MaximumOpenReservationDate`. Dates after that boundary must return `BookingCalendarClosed`.
+*   **Blocked Date Rule**: Saturday, Sunday, holidays, and future years are allowed unless the exact date exists in `BlockedReservationDates`. Do not add runtime weekend inference, hard-coded holiday lists, or a maximum open-calendar cap.
+*   **Admin Policy Rule**: Authorized Admin users manage today/future blocked dates from `/Admin/Reservation/Policy`. Past submitted dates must not become active blocked dates, and cleanup must remove only rows where `Date < VietnamToday`.
 
 ---
 

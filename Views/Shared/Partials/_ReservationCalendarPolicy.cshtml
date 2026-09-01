@@ -1,25 +1,23 @@
 @using System.Globalization
 @using System.Text.Json
 @using KIGHolding.Services
+@inject IReservationBlockedDateService ReservationBlockedDateService
+@inject TimeProvider TimeProvider
 
 @{
-    var vietnamToday = VietnamHolidayEvaluator.GetVietnamToday();
+    var vietnamToday = VietnamClock.GetVietnamToday(TimeProvider);
+    var blockedDates = await ReservationBlockedDateService.GetActiveBlockedDatesAsync(vietnamToday);
     var policyPayload = new
     {
         minDate = FormatReservationCalendarDate(vietnamToday),
-        maxDate = FormatReservationCalendarDate(VietnamHolidayEvaluator.MaximumOpenReservationDate),
-        weekendRestricted = true,
-        configuredHolidayYears = VietnamHolidayEvaluator.GetConfiguredHolidayYears(),
-        restrictedDates = VietnamHolidayEvaluator.GetConfiguredHolidayDates()
+        blockedDates = blockedDates
             .Select(FormatReservationCalendarDate)
             .ToArray(),
         messages = new
         {
-            pastDate = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.PastDate),
-            weekend = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.Weekend),
-            holiday = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.Holiday),
-            bookingCalendarClosed = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.BookingCalendarClosed),
-            invalidDate = "Ngày đến không hợp lệ."
+            pastDate = KIGHolding.Services.ReservationBlockedDateService.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.PastDate),
+            blockedDate = KIGHolding.Services.ReservationBlockedDateService.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.BlockedDate),
+            invalidDate = "Ngay den khong hop le."
         }
     };
 }
@@ -41,7 +39,7 @@
             policy = {};
         }
 
-        var restrictedDates = new Set(Array.isArray(policy.restrictedDates) ? policy.restrictedDates : []);
+        var blockedDates = new Set(Array.isArray(policy.blockedDates) ? policy.blockedDates : []);
         var messages = policy.messages || {};
 
         function parseDateInputValue(value) {
@@ -65,8 +63,7 @@
 
             return {
                 value: value,
-                year: year,
-                dayOfWeek: date.getUTCDay()
+                year: year
             };
         }
 
@@ -78,23 +75,15 @@
 
             var parsed = parseDateInputValue(value);
             if (!parsed) {
-                return { valid: false, message: messages.invalidDate || 'Ngày đến không hợp lệ.' };
+                return { valid: false, message: messages.invalidDate || 'Ngay den khong hop le.' };
             }
 
             if (policy.minDate && value < policy.minDate) {
-                return { valid: false, message: messages.pastDate || 'Ngày đến không được sớm hơn hôm nay.' };
+                return { valid: false, message: messages.pastDate || 'Ngay den khong duoc som hon hom nay.' };
             }
 
-            if (policy.maxDate && value > policy.maxDate) {
-                return { valid: false, message: messages.bookingCalendarClosed || 'Hệ thống chưa mở lịch đặt bàn cho thời gian này.' };
-            }
-
-            if (policy.weekendRestricted && (parsed.dayOfWeek === 0 || parsed.dayOfWeek === 6)) {
-                return { valid: false, message: messages.weekend || 'Nhà hàng không nhận đặt bàn vào thứ Bảy và Chủ nhật.' };
-            }
-
-            if (restrictedDates.has(value)) {
-                return { valid: false, message: messages.holiday || 'Hệ thống không nhận đặt bàn vào các ngày Lễ Tết.' };
+            if (blockedDates.has(value)) {
+                return { valid: false, message: messages.blockedDate || 'Nha hang khong nhan dat ban vao ngay nay.' };
             }
 
             return { valid: true };

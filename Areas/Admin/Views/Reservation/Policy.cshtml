@@ -1,0 +1,226 @@
+@using System.Globalization
+@using System.Text.Json
+@model KIGHolding.Areas.Admin.ViewModels.ReservationPolicyViewModel
+
+@{
+    ViewData["Title"] = "Reservation Policy";
+
+    var firstOfMonth = new DateOnly(Model.CalendarYear, Model.CalendarMonth, 1);
+    var daysInMonth = DateTime.DaysInMonth(Model.CalendarYear, Model.CalendarMonth);
+    var firstOffset = ((int)firstOfMonth.DayOfWeek + 6) % 7;
+    var previousMonth = firstOfMonth.AddMonths(-1);
+    var nextMonth = firstOfMonth.AddMonths(1);
+    var blockedDateValues = Model.BlockedDates
+        .Select(date => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
+        .ToArray();
+    var blockedDatesJson = JsonSerializer.Serialize(blockedDateValues);
+}
+
+<section class="admin-page">
+    <div class="admin-page-header flex flex-col gap-3 p-4 sm:p-5 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+            <p class="admin-page-kicker">Reservation Ops</p>
+            <h1 class="admin-page-title">Chính sách đặt bàn</h1>
+            <p class="admin-help">Quản lý những ngày nhà hàng không nhận đặt bàn. Những ngày không được khóa vẫn nhận đặt bàn bình thường.</p>
+        </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+        <a asp-area="Admin"
+           asp-controller="Reservation"
+           asp-action="Index"
+           class="inline-flex min-h-11 items-center rounded-full border border-brand-border bg-white px-4 py-2 text-sm font-semibold text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+            Danh sách đặt bàn
+        </a>
+        <a asp-area="Admin"
+           asp-controller="Reservation"
+           asp-action="Policy"
+           asp-route-year="@Model.CalendarYear"
+           asp-route-month="@Model.CalendarMonth"
+           class="inline-flex min-h-11 items-center rounded-full border border-brand-red bg-brand-red px-4 py-2 text-sm font-semibold text-white">
+            Chính sách đặt bàn
+        </a>
+    </div>
+
+    <form method="post"
+          asp-area="Admin"
+          asp-controller="Reservation"
+          asp-action="Policy"
+          class="admin-card space-y-4 p-4 sm:p-5"
+          data-reservation-policy-calendar
+          data-reservation-policy-blocked-dates="@blockedDatesJson">
+        @Html.AntiForgeryToken()
+        <input asp-for="CalendarYear" type="hidden" />
+        <input asp-for="CalendarMonth" type="hidden" />
+        <input asp-for="BlockedDatesInput" type="hidden" data-reservation-policy-input />
+        <input asp-for="PolicyPayloadPresent" type="hidden" />
+        <input asp-for="ConfirmClearAllBlockedDates" type="hidden" data-reservation-policy-clear-all />
+
+        <div asp-validation-summary="ModelOnly" class="text-sm font-semibold text-red-700"></div>
+        <span asp-validation-for="BlockedDatesInput" class="text-sm font-semibold text-red-700"></span>
+        <span asp-validation-for="PolicyPayloadPresent" class="text-sm font-semibold text-red-700"></span>
+        <span asp-validation-for="ConfirmClearAllBlockedDates" class="text-sm font-semibold text-red-700"></span>
+
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <a asp-area="Admin"
+               asp-controller="Reservation"
+               asp-action="Policy"
+               asp-route-year="@previousMonth.Year"
+               asp-route-month="@previousMonth.Month"
+               class="btn-secondary min-h-11">
+                &lt; Tháng trước
+            </a>
+            <h2 class="text-center text-xl font-black text-brand-dark">
+            Tháng @Model.CalendarMonth / @Model.CalendarYear
+            </h2>
+            <a asp-area="Admin"
+               asp-controller="Reservation"
+               asp-action="Policy"
+               asp-route-year="@nextMonth.Year"
+               asp-route-month="@nextMonth.Month"
+               class="btn-secondary min-h-11">
+                Tháng sau &gt;
+            </a>
+        </div>
+
+        <div class="grid min-w-0 grid-cols-7 gap-1 text-center text-xs font-black uppercase tracking-[0.08em] text-brand-gray sm:gap-2 sm:tracking-[0.12em]">
+            <span>T2</span>
+            <span>T3</span>
+            <span>T4</span>
+            <span>T5</span>
+            <span>T6</span>
+            <span>T7</span>
+            <span>CN</span>
+        </div>
+
+        <div class="grid min-w-0 grid-cols-7 gap-1 sm:gap-2">
+            @for (var offset = 0; offset < firstOffset; offset++)
+            {
+                <span class="min-h-12 rounded border border-transparent sm:min-h-16"></span>
+            }
+
+            @for (var day = 1; day <= daysInMonth; day++)
+            {
+                var date = new DateOnly(Model.CalendarYear, Model.CalendarMonth, day);
+                var dateValue = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                var isPast = date < Model.VietnamToday;
+                var isBlocked = Model.BlockedDates.Contains(date);
+                var status = isBlocked ? "Không nhận đặt bàn" : isPast ? "Đã qua" : "Cho phép đặt bàn";
+                var initialClasses = isBlocked
+                    ? "border-red-600 bg-red-600 text-white"
+                    : isPast
+                        ? "border-brand-border bg-brand-light text-brand-gray/60"
+                        : "border-brand-border bg-white text-brand-dark";
+
+                <button type="button"
+                        class="min-h-12 min-w-0 overflow-hidden rounded border px-1 py-1 text-sm font-semibold transition sm:min-h-16 sm:px-2 sm:py-2 @initialClasses disabled:cursor-not-allowed disabled:border-brand-border disabled:bg-brand-light disabled:text-brand-gray/60"
+                        data-reservation-policy-date="@dateValue"
+                        aria-pressed="@(isBlocked ? "true" : "false")"
+                        aria-label="Ngày @day tháng @Model.CalendarMonth năm @Model.CalendarYear - @status"
+                        disabled="@(isPast ? "disabled" : null)">
+                    <span class="block text-base font-black">@day</span>
+                    <span class="block text-[11px]" data-reservation-policy-state>
+                        @status
+                    </span>
+                </button>
+            }
+        </div>
+
+        <div class="flex flex-col gap-3 text-sm text-brand-gray sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-wrap gap-4">
+                <span class="inline-flex items-center gap-2"><span class="inline-block size-3 rounded bg-red-600"></span>Không nhận đặt bàn</span>
+                <span class="inline-flex items-center gap-2"><span class="inline-block size-3 rounded border border-brand-border bg-white"></span>Cho phép đặt bàn</span>
+                <span class="inline-flex items-center gap-2"><span class="inline-block size-3 rounded bg-brand-light"></span>Ngày đã qua</span>
+            </div>
+            <button type="submit" class="btn-primary min-h-11">
+                Cập nhật
+            </button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <script>
+        (() => {
+            const root = document.querySelector('[data-reservation-policy-calendar]');
+            if (!(root instanceof HTMLFormElement)) {
+                return;
+            }
+
+            const hiddenInput = root.querySelector('[data-reservation-policy-input]');
+            const clearAllInput = root.querySelector('[data-reservation-policy-clear-all]');
+            const buttons = Array.from(root.querySelectorAll('[data-reservation-policy-date]'));
+            const initialBlockedDates = JSON.parse(root.dataset.reservationPolicyBlockedDates || '[]');
+            const blockedDates = new Set(initialBlockedDates);
+
+            const renderButton = (button) => {
+                const date = button.dataset.reservationPolicyDate || '';
+                const blocked = blockedDates.has(date);
+                const state = button.querySelector('[data-reservation-policy-state]');
+
+                button.setAttribute('aria-pressed', blocked ? 'true' : 'false');
+                button.classList.toggle('border-red-600', blocked);
+                button.classList.toggle('bg-red-600', blocked);
+                button.classList.toggle('text-white', blocked);
+                button.classList.toggle('border-brand-border', !blocked);
+                button.classList.toggle('bg-white', !blocked);
+                button.classList.toggle('text-brand-dark', !blocked);
+
+                if (state instanceof HTMLElement && !button.disabled) {
+                    state.textContent = blocked ? 'Không nhận' : 'Cho phép';
+                }
+            };
+
+            const syncInput = () => {
+                if (hiddenInput instanceof HTMLInputElement) {
+                    hiddenInput.value = Array.from(blockedDates).sort().join(',');
+                }
+            };
+
+            root.addEventListener('submit', (event) => {
+                if (!(clearAllInput instanceof HTMLInputElement)) {
+                    return;
+                }
+
+                const clearingExistingPolicy = blockedDates.size === 0 && initialBlockedDates.length > 0;
+                if (!clearingExistingPolicy) {
+                    clearAllInput.value = 'false';
+                    return;
+                }
+
+                if (!window.confirm('Thao tac nay se mo lai toan bo ngay dang bi khoa dat ban. Ban co chac chan muon tiep tuc?')) {
+                    event.preventDefault();
+                    return;
+                }
+
+                clearAllInput.value = 'true';
+            });
+
+            buttons.forEach((button) => {
+                if (!(button instanceof HTMLButtonElement)) {
+                    return;
+                }
+
+                renderButton(button);
+                button.addEventListener('click', () => {
+                    const date = button.dataset.reservationPolicyDate || '';
+                    if (!date || button.disabled) {
+                        return;
+                    }
+
+                    if (blockedDates.has(date)) {
+                        blockedDates.delete(date);
+                    }
+                    else {
+                        blockedDates.add(date);
+                    }
+
+                    renderButton(button);
+                    syncInput();
+                });
+            });
+
+            syncInput();
+        })();
+    </script>
+}

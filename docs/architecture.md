@@ -36,7 +36,7 @@ KIGHolding/
 │   └── PagedResult.cs        # Generic pagination helper
 ├── Options/                  # Options pattern settings classes (ResendSettings, CloudinarySettings, etc.)
 ├── Properties/               # launchSettings.json configurations
-├── Services/                 # Business logic interfaces, evaluations (VietnamHolidayEvaluator.cs, IdentityNormalizer.cs) & cached implementations (MenuGroupService, BranchService, etc.)
+├── Services/                 # Business logic interfaces, clocks/policies (VietnamClock.cs, ReservationBlockedDateService.cs, IdentityNormalizer.cs) & cached implementations
 ├── ViewComponents/           # ViewComponents for reusable components (SiteHeader, SiteFooter, LayoutFallbacks, etc.)
 ├── ViewModels/               # ViewModels for public-facing forms and detail views
 ├── Views/                    # Razor Views for public routes (Home, Menu, News, Reservation, Branch, Contact, Shared)
@@ -61,6 +61,7 @@ The services configured in `Program.cs` isolate database access and external API
 | `INewsService` | Scoped | Service for news categories, articles, and suggestions |
 | `IBlogHtmlSanitizer` | Scoped | Project-owned boundary for sanitizing admin-authored HTML post content before persistence |
 | `IReservationService` | Scoped | Logic for creating, listing, and transitioning reservations |
+| `IReservationBlockedDateService` | Scoped | Authoritative DB-backed reservation closure-date policy and cleanup operations |
 | `IContactService` | Scoped | Logic for storing franchise and general contact messages |
 | `IEmailService` | Scoped | Dispatches emails via Resend integration for notifications |
 | `IImageStorageService` | Scoped | Orchestrates image uploads/deletes across Cloudflare R2, LocalVolume, and Cloudinary providers |
@@ -72,11 +73,13 @@ The services configured in `Program.cs` isolate database access and external API
 
 ### Reservation Calendar Policy Boundary
 
-`VietnamHolidayEvaluator` is the central server-owned boundary for reservation calendar decisions. `ReservationService.CreateReservationAsync` calls `EvaluateReservationDate(...)` before branch lookup, branch-hours validation, transaction begin, advisory lock acquisition, persistence, rate-limit success stamping, SignalR notification, or controller-owned email dispatch.
+`ReservationBlockedDateService` is the central server-owned boundary for reservation calendar decisions. `ReservationService.CreateReservationAsync` gets Vietnam-local today from `VietnamClock`, rejects past dates, then checks the submitted `DateOnly` against the `BlockedReservationDates` table before branch lookup, branch-hours validation, transaction begin, advisory lock acquisition, persistence, rate-limit success stamping, SignalR notification, or controller-owned email dispatch.
 
-The public full reservation page and quick booking modal consume the same server-generated calendar-policy payload from `Views/Shared/Partials/_ReservationCalendarPolicy.cshtml`. That payload exposes Vietnam-local minimum date, `VietnamHolidayEvaluator.MaximumOpenReservationDate`, configured restricted dates, weekend restriction, and customer-facing policy messages. JavaScript mirrors the policy for immediate UX feedback only; it does not replace server enforcement.
+Saturday and Sunday are allowed by default. Public holidays, lunar holidays, private events, maintenance closures, and any other non-bookable days are represented only as exact rows in `BlockedReservationDates`; no runtime holiday or weekend inference is active.
 
-Configured holiday data currently covers 2026-2028, so the open booking calendar currently ends on 2028-12-31 inclusive. Dates after that boundary return `BookingCalendarClosed`. The business-required 2029 online booking period remains explicitly closed until owner-approved holiday dates are added to the centralized policy source and the boundary is extended.
+The public full reservation page and quick booking modal consume the same server-generated calendar-policy payload from `Views/Shared/Partials/_ReservationCalendarPolicy.cshtml`. That payload exposes the Vietnam-local minimum date, active database blocked dates, and customer-facing policy messages. JavaScript mirrors the policy for immediate UX feedback only; it does not replace server enforcement.
+
+The Admin reservation area exposes a Reservation Policy calendar where authorized Admin users can toggle today/future dates between allowed and blocked, then persist the whole active future set through a single update. Past dates are disabled in the UI and ignored server-side. Daily hosted cleanup and Admin policy access/update both remove expired rows, but reservation correctness does not depend on cleanup because past dates are rejected before the DB blocked-date check.
 
 ### Blog HTML and SEO
 

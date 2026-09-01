@@ -1,5 +1,6 @@
 @using KIGHolding.Services
 @model ReservationCreateViewModel
+@inject TimeProvider TimeProvider
 
 @{
     ViewData["Title"] = "Đặt bàn";
@@ -7,8 +8,7 @@
     var selectedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(Model.DiningOccasionCode);
     var showDiningOccasionOther = string.Equals(selectedDiningOccasionCode, ReservationOptionCatalog.OtherCode, StringComparison.Ordinal);
     var hasReservableBranches = Model.Branches.Count > 0;
-    var reservationCalendarMinDate = VietnamHolidayEvaluator.GetVietnamToday().ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
-    var reservationCalendarMaxDate = VietnamHolidayEvaluator.MaximumOpenReservationDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+    var reservationCalendarMinDate = VietnamClock.GetVietnamToday(TimeProvider).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 }
 
 @section Head {
@@ -126,7 +126,7 @@
 
                         <label class="reservation-page__field-group">
                             <span class="reservation-page__field-label">Ngày đến</span>
-                            <input asp-for="ReservationDate" type="date" asp-format="{0:yyyy-MM-dd}" min="@reservationCalendarMinDate" max="@reservationCalendarMaxDate" class="reservation-page__field" />
+                            <input asp-for="ReservationDate" type="date" asp-format="{0:yyyy-MM-dd}" min="@reservationCalendarMinDate" class="reservation-page__field" />
                             <span asp-validation-for="ReservationDate" class="reservation-page__validation" data-calendar-policy-error-for="ReservationDate"></span>
                         </label>
 

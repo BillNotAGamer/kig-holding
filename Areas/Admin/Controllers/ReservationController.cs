@@ -13,10 +13,17 @@ public class ReservationController : AdminBaseController
     private const int PageSize = 10;
 
     private readonly AppDbContext _dbContext;
+    private readonly IReservationBlockedDateService _blockedDateService;
+    private readonly TimeProvider _timeProvider;
 
-    public ReservationController(AppDbContext dbContext)
+    public ReservationController(
+        AppDbContext dbContext,
+        IReservationBlockedDateService blockedDateService,
+        TimeProvider timeProvider)
     {
         _dbContext = dbContext;
+        _blockedDateService = blockedDateService;
+        _timeProvider = timeProvider;
     }
 
     [HttpGet]
@@ -86,6 +93,74 @@ public class ReservationController : AdminBaseController
         filter.BranchOptions = await BuildBranchOptionsAsync();
 
         return View(filter);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Policy(
+        int? year = null,
+        int? month = null,
+        CancellationToken cancellationToken = default)
+    {
+        var vietnamToday = VietnamClock.GetVietnamToday(_timeProvider);
+        await _blockedDateService.CleanupPastDatesAsync(vietnamToday, cancellationToken);
+
+        var model = await BuildPolicyViewModelAsync(vietnamToday, year, month, cancellationToken);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Policy(ReservationPolicyViewModel model, CancellationToken cancellationToken)
+    {
+        var vietnamToday = VietnamClock.GetVietnamToday(_timeProvider);
+
+        if (!model.PolicyPayloadPresent)
+        {
+            ModelState.Remove(nameof(model.PolicyPayloadPresent));
+            ModelState.AddModelError(nameof(model.PolicyPayloadPresent), "Du lieu chinh sach khong day du. Vui long tai lai trang va thu lai.");
+            model = await BuildPolicyViewModelAsync(
+                vietnamToday,
+                model.CalendarYear,
+                model.CalendarMonth,
+                cancellationToken);
+            return View(model);
+        }
+
+        var submittedDates = ParseSubmittedBlockedDates(model.BlockedDatesInput, model, vietnamToday);
+
+        if (!ModelState.IsValid)
+        {
+            model = await BuildPolicyViewModelAsync(
+                vietnamToday,
+                model.CalendarYear,
+                model.CalendarMonth,
+                cancellationToken,
+                submittedDates);
+            return View(model);
+        }
+
+        if (submittedDates.Count == 0 && !model.ConfirmClearAllBlockedDates)
+        {
+            var activeBlockedDates = await _blockedDateService.GetActiveBlockedDatesAsync(vietnamToday, cancellationToken);
+            if (activeBlockedDates.Count > 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.ConfirmClearAllBlockedDates),
+                    "Vui long xac nhan mo lai tat ca ngay dang bi khoa truoc khi cap nhat.");
+                model = await BuildPolicyViewModelAsync(
+                    vietnamToday,
+                    model.CalendarYear,
+                    model.CalendarMonth,
+                    cancellationToken,
+                    submittedDates);
+                return View(model);
+            }
+        }
+
+        await _blockedDateService.ReplaceActiveBlockedDatesAsync(submittedDates, vietnamToday, cancellationToken);
+
+        TempData["SuccessMessage"] = "Da cap nhat chinh sach dat ban.";
+        return RedirectToAction(nameof(Policy), new { year = model.CalendarYear, month = model.CalendarMonth });
     }
 
     [HttpGet]
@@ -245,6 +320,68 @@ public class ReservationController : AdminBaseController
 
         options.AddRange(branchItems);
         return options;
+    }
+
+    private async Task<ReservationPolicyViewModel> BuildPolicyViewModelAsync(
+        DateOnly vietnamToday,
+        int? requestedYear,
+        int? requestedMonth,
+        CancellationToken cancellationToken,
+        IReadOnlyList<DateOnly>? submittedDates = null)
+    {
+        var year = requestedYear.GetValueOrDefault(vietnamToday.Year);
+        var month = requestedMonth.GetValueOrDefault(vietnamToday.Month);
+
+        if (month is < 1 or > 12)
+        {
+            year = vietnamToday.Year;
+            month = vietnamToday.Month;
+        }
+
+        var blockedDates = submittedDates
+            ?? await _blockedDateService.GetActiveBlockedDatesAsync(vietnamToday, cancellationToken);
+
+        return new ReservationPolicyViewModel
+        {
+            VietnamToday = vietnamToday,
+            CalendarYear = year,
+            CalendarMonth = month,
+            BlockedDates = blockedDates.OrderBy(date => date).ToArray(),
+            BlockedDatesInput = string.Join(",", blockedDates
+                .OrderBy(date => date)
+                .Select(date => date.ToString("yyyy-MM-dd"))),
+            PolicyPayloadPresent = true
+        };
+    }
+
+    private List<DateOnly> ParseSubmittedBlockedDates(
+        string? blockedDatesInput,
+        ReservationPolicyViewModel model,
+        DateOnly vietnamToday)
+    {
+        var dates = new List<DateOnly>();
+
+        if (string.IsNullOrWhiteSpace(blockedDatesInput))
+        {
+            return dates;
+        }
+
+        foreach (var rawValue in blockedDatesInput.Split(',', StringSplitOptions.None))
+        {
+            var normalizedValue = rawValue.Trim();
+            if (!DateOnly.TryParseExact(normalizedValue, "yyyy-MM-dd", out var date))
+            {
+                ModelState.AddModelError(nameof(model.BlockedDatesInput), "Danh sach ngay khoa khong hop le.");
+                continue;
+            }
+
+            if (date >= vietnamToday && !dates.Contains(date))
+            {
+                dates.Add(date);
+            }
+        }
+
+        return dates;
     }
 
     private static IReadOnlyList<SelectListItem> BuildFilterStatusOptions()

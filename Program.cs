@@ -97,6 +97,7 @@ builder.Services.AddScoped<IMenuGroupService, MenuGroupService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IBlogHtmlSanitizer, BlogHtmlSanitizer>();
+builder.Services.AddScoped<IReservationBlockedDateService, ReservationBlockedDateService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IAdminReservationNotifier, SignalRAdminReservationNotifier>();
 builder.Services.AddScoped<IContactService, ContactService>();
@@ -108,6 +109,7 @@ builder.Services.AddScoped<IImageStorageProvider, CloudflareR2ImageStorageProvid
 builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
 builder.Services.AddScoped<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddScoped<AdminCookieAuthenticationEvents>();
+builder.Services.AddHostedService<ReservationPolicyCleanupHostedService>();
 
 var app = builder.Build();
 

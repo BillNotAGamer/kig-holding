@@ -84,6 +84,7 @@ public sealed class AdminReservationNotificationTests
             dbContext,
             cache,
             notifier,
+            new AllowAllReservationBlockedDateService(),
             NullLogger<ReservationService>.Instance,
             TimeProvider.System);
 
@@ -93,7 +94,7 @@ public sealed class AdminReservationNotificationTests
             PhoneNumber = "0900000000",
             BranchId = Guid.NewGuid(),
             GuestCount = 0,
-            ReservationDate = VietnamHolidayEvaluator.GetVietnamToday().AddDays(-1),
+            ReservationDate = VietnamClock.GetVietnamToday().AddDays(-1),
             ReservationTime = new TimeOnly(18, 30)
         });
 
@@ -429,6 +430,42 @@ public sealed class AdminReservationNotificationTests
         {
             CallCount++;
             return Task.CompletedTask;
+        }
+    }
+
+    private sealed class AllowAllReservationBlockedDateService : IReservationBlockedDateService
+    {
+        public Task<ReservationDatePolicyResult> EvaluateReservationDateAsync(
+            DateOnly reservationDate,
+            DateOnly vietnamToday,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new ReservationDatePolicyResult(ReservationDatePolicyStatus.Allowed));
+        }
+
+        public Task<bool> IsBlockedAsync(DateOnly date, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(false);
+        }
+
+        public Task<IReadOnlyList<DateOnly>> GetActiveBlockedDatesAsync(
+            DateOnly vietnamToday,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<DateOnly>>([]);
+        }
+
+        public Task ReplaceActiveBlockedDatesAsync(
+            IReadOnlyCollection<DateOnly> dates,
+            DateOnly vietnamToday,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<int> CleanupPastDatesAsync(DateOnly vietnamToday, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(0);
         }
     }
 

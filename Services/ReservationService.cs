@@ -14,6 +14,7 @@ public class ReservationService : IReservationService
     private readonly AppDbContext _dbContext;
     private readonly IMemoryCache _cache;
     private readonly IAdminReservationNotifier _adminReservationNotifier;
+    private readonly IReservationBlockedDateService _blockedDateService;
     private readonly ILogger<ReservationService> _logger;
     private readonly TimeProvider _timeProvider;
 
@@ -21,12 +22,14 @@ public class ReservationService : IReservationService
         AppDbContext dbContext,
         IMemoryCache cache,
         IAdminReservationNotifier adminReservationNotifier,
+        IReservationBlockedDateService blockedDateService,
         ILogger<ReservationService> logger,
         TimeProvider timeProvider)
     {
         _dbContext = dbContext;
         _cache = cache;
         _adminReservationNotifier = adminReservationNotifier;
+        _blockedDateService = blockedDateService;
         _logger = logger;
         _timeProvider = timeProvider;
     }
@@ -34,10 +37,13 @@ public class ReservationService : IReservationService
     public async Task<ReservationCreateResult> CreateReservationAsync(ReservationCreateRequest request, CancellationToken cancellationToken = default)
     {
         var errors = new List<ReservationServiceError>();
-        var today = VietnamHolidayEvaluator.GetVietnamToday(_timeProvider);
+        var today = VietnamClock.GetVietnamToday(_timeProvider);
         var normalizedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(request.DiningOccasionCode);
         var diningOccasionOtherNote = NormalizeOptionalText(request.DiningOccasionOtherNote);
-        var datePolicyResult = VietnamHolidayEvaluator.EvaluateReservationDate(request.ReservationDate, today);
+        var datePolicyResult = await _blockedDateService.EvaluateReservationDateAsync(
+            request.ReservationDate,
+            today,
+            cancellationToken);
 
         if (!datePolicyResult.IsAllowed)
         {
@@ -46,7 +52,7 @@ public class ReservationService : IReservationService
                 new()
                 {
                     FieldName = nameof(request.ReservationDate),
-                    Message = VietnamHolidayEvaluator.GetReservationDatePolicyMessage(datePolicyResult.Status)
+                    Message = ReservationBlockedDateService.GetReservationDatePolicyMessage(datePolicyResult.Status)
                 }
             ]);
         }

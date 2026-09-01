@@ -16,12 +16,16 @@ The database schema has evolved through the following migrations:
 6.  **`20260608104636_RemoveReservationDiningGroupOptions`**: Refactors dining options to use delimited strings, avoiding junction tables.
 7.  **`20260613073215_AddAdminAccountSecurityFoundation`**: Adds account lockouts, failed attempts tracking, and password timestamps.
 8.  **`20260617210701_AddBranchLunchBreakHours`**: Introduces optional `LunchBreakStart` and `LunchBreakEnd` times for individual branches.
+9.  **`20260710204624_AddBranchAllowsReservations`**: Adds per-branch online reservation availability.
+10. **`20260811075846_AddPostHtmlModeAndSeoMetadata`**: Adds Blog content mode and SEO metadata fields.
+11. **`20260812123110_Update`**: Snapshot alignment migration.
+12. **`20260901170736_AddBlockedReservationDatePolicy`**: Creates the DB-backed reservation closure-date table and seeds the 23 remaining future legacy blocked dates. This migration is created for review and has not been applied by implementation work.
 
 ---
 
 ## 2. Active DbSets & Data Dictionary
 
-The `AppDbContext` manages **10 DbSets**:
+The `AppDbContext` manages **11 DbSets**:
 
 ### 1. AdminUsers (`DbSet<AdminUser>`)
 Stores credentials and security markers for the admin back-office dashboard.
@@ -61,7 +65,7 @@ Manages table bookings submitted by customers.
 *   **CustomerName** / **PhoneNumber** (`string`): Primary customer contacts (Required).
 *   **Email** (`string?`): Optional email for booking confirmations.
 *   **GuestCount** (`int`): Number of seats reserved (validated in range 1-100).
-*   **ReservationDate** (`DateOnly`): Reserved date (restricted to $\geq$ Today).
+*   **ReservationDate** (`DateOnly`): Reserved date. The service rejects dates before Vietnam-local today and rejects exact dates stored in `BlockedReservationDates`.
 *   **ReservationTime** (`TimeOnly`): Reserved time.
 *   **DiningOccasionCodes** (`string?`): Comma-delimited strings representing celebration categories (e.g. `Occasion_Birthday,Occasion_Meeting`).
 *   **DiningOccasionOtherNote** (`string?`): Text filled when "Other" is selected.
@@ -69,6 +73,13 @@ Manages table bookings submitted by customers.
 *   **Status** (`Enum`): Booking status (Pending, Confirmed, Seated, Cancelled, Completed).
 *   **Source** (`Enum`): Origin of booking (Website, Backoffice).
 *   *Relationships*: Belongs to `Branch` (required relationship).
+
+### 3.1 BlockedReservationDates (`DbSet<BlockedReservationDate>`)
+Authoritative Admin-managed reservation closure dates.
+*   **Date** (`DateOnly`, PostgreSQL `date`, PK): Exact calendar date that cannot be booked. There is no surrogate `Id`.
+*   **CreatedAt** (`DateTimeOffset`, PostgreSQL `timestamptz`, default `now()`): Audit timestamp for when the blocked date row was created.
+*   **Policy semantics**: Saturday, Sunday, holidays, and future years are allowed unless the exact date exists in this table. The `AddBlockedReservationDatePolicy` migration seeds only the 23 future legacy closure dates at the September 2026 cutover; Admin users may later unblock or add dates through `/Admin/Reservation/Policy`.
+*   **Cleanup**: `ReservationPolicyCleanupHostedService` and Admin policy access/update remove rows where `Date < VietnamToday`. Reservation correctness does not depend on physical cleanup because past dates are rejected before blocked-date lookup.
 
 ### 4. MenuGroups (`DbSet<MenuGroup>`)
 Concept divisions in the restaurant's menu ecosystem (e.g. "Truyền Thuyết Champong", "Gogi Maru", "KBB Cook").

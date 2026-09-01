@@ -18,9 +18,9 @@ public sealed class ReservationControllerDatePolicyTests
         new FixedTimeProvider(DateTimeOffset.Parse("2026-08-05T17:00:00+00:00"));
 
     [Fact]
-    public async Task IndexPost_IncidentSunday_RendersFormWithDateErrorAndNoEmail()
+    public async Task IndexPost_ServiceBlockedDate_RendersFormWithDateErrorAndNoEmail()
     {
-        var reservationService = new CapturingReservationService();
+        var reservationService = new CapturingReservationService(CreateDatePolicyFailure());
         var emailService = new CapturingEmailService();
         var controller = CreateController(reservationService, emailService);
 
@@ -29,55 +29,37 @@ public sealed class ReservationControllerDatePolicyTests
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.IsType<ReservationCreateViewModel>(viewResult.Model);
         Assert.False(controller.ModelState.IsValid);
-        Assert.True(controller.ModelState.ContainsKey(nameof(ReservationCreateViewModel.ReservationDate)));
-        Assert.Equal(0, reservationService.CreateCallCount);
+        Assert.Contains(controller.ModelState[nameof(ReservationCreateViewModel.ReservationDate)]!.Errors, error =>
+            error.ErrorMessage == ReservationBlockedDateService.BlockedDateMessage);
+        Assert.Equal(1, reservationService.CreateCallCount);
         Assert.Equal(0, emailService.ReservationNotificationCallCount);
     }
 
     [Fact]
-    public async Task IndexPost_ClosedCalendarDate_RendersFormWithDateErrorAndNoEmail()
+    public async Task IndexPost_SeptemberSecondBlockedByService_RendersFormWithDateErrorAndNoEmail()
     {
-        var reservationService = new CapturingReservationService();
+        var reservationService = new CapturingReservationService(CreateDatePolicyFailure());
         var emailService = new CapturingEmailService();
         var controller = CreateController(reservationService, emailService);
 
-        var result = await controller.Index(CreateValidModel(new DateOnly(2029, 1, 1)), CancellationToken.None);
+        var result = await controller.Index(CreateValidModel(new DateOnly(2026, 9, 2)), CancellationToken.None);
 
         Assert.IsType<ViewResult>(result);
         Assert.False(controller.ModelState.IsValid);
         Assert.Contains(controller.ModelState[nameof(ReservationCreateViewModel.ReservationDate)]!.Errors, error =>
-            error.ErrorMessage == VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.BookingCalendarClosed));
-        Assert.Equal(0, reservationService.CreateCallCount);
+            error.ErrorMessage == ReservationBlockedDateService.BlockedDateMessage);
+        Assert.Equal(1, reservationService.CreateCallCount);
         Assert.Equal(0, emailService.ReservationNotificationCallCount);
     }
 
     [Fact]
-    public async Task QuickPost_IncidentSunday_ReturnsBadRequestJsonAndNoEmail()
+    public async Task QuickPost_ServiceBlockedDate_ReturnsBadRequestJsonAndNoEmail()
     {
-        var reservationService = new CapturingReservationService();
+        var reservationService = new CapturingReservationService(CreateDatePolicyFailure());
         var emailService = new CapturingEmailService();
         var controller = CreateController(reservationService, emailService);
 
         var result = await controller.Quick(CreateValidModel(new DateOnly(2026, 8, 9)), CancellationToken.None);
-
-        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-        var json = JsonSerializer.Serialize(badRequest.Value);
-
-        Assert.Contains("\"ok\":false", json, StringComparison.Ordinal);
-        Assert.Contains(nameof(ReservationCreateViewModel.ReservationDate), json, StringComparison.Ordinal);
-        Assert.DoesNotContain("\"ok\":true", json, StringComparison.Ordinal);
-        Assert.Equal(0, reservationService.CreateCallCount);
-        Assert.Equal(0, emailService.ReservationNotificationCallCount);
-    }
-
-    [Fact]
-    public async Task QuickPost_ClosedCalendarDate_ReturnsBadRequestJsonAndNoEmail()
-    {
-        var reservationService = new CapturingReservationService();
-        var emailService = new CapturingEmailService();
-        var controller = CreateController(reservationService, emailService);
-
-        var result = await controller.Quick(CreateValidModel(new DateOnly(2029, 1, 1)), CancellationToken.None);
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
         var json = JsonSerializer.Serialize(badRequest.Value);
@@ -91,9 +73,73 @@ public sealed class ReservationControllerDatePolicyTests
             .ToArray();
 
         Assert.Contains("\"ok\":false", json, StringComparison.Ordinal);
-        Assert.Contains(VietnamHolidayEvaluator.GetReservationDatePolicyMessage(ReservationDatePolicyStatus.BookingCalendarClosed), dateErrors);
-        Assert.Equal(0, reservationService.CreateCallCount);
+        Assert.Contains(ReservationBlockedDateService.BlockedDateMessage, dateErrors);
+        Assert.DoesNotContain("\"ok\":true", json, StringComparison.Ordinal);
+        Assert.Equal(1, reservationService.CreateCallCount);
         Assert.Equal(0, emailService.ReservationNotificationCallCount);
+    }
+
+    [Fact]
+    public async Task QuickPost_SeptemberSecondBlockedByService_ReturnsBadRequestJsonAndNoEmail()
+    {
+        var reservationService = new CapturingReservationService(CreateDatePolicyFailure());
+        var emailService = new CapturingEmailService();
+        var controller = CreateController(reservationService, emailService);
+
+        var result = await controller.Quick(CreateValidModel(new DateOnly(2026, 9, 2)), CancellationToken.None);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        var json = JsonSerializer.Serialize(badRequest.Value);
+
+        Assert.Contains("\"ok\":false", json, StringComparison.Ordinal);
+        Assert.Contains(nameof(ReservationCreateViewModel.ReservationDate), json, StringComparison.Ordinal);
+        Assert.Equal(1, reservationService.CreateCallCount);
+        Assert.Equal(0, emailService.ReservationNotificationCallCount);
+    }
+
+    [Fact]
+    public async Task QuickPost_PastDateFailure_ReturnsSafeReservationDateError()
+    {
+        var reservationService = new CapturingReservationService(ReservationCreateResult.Failed(
+        [
+            new ReservationServiceError
+            {
+                FieldName = nameof(ReservationCreateRequest.ReservationDate),
+                Message = ReservationBlockedDateService.PastDateMessage
+            }
+        ]));
+        var emailService = new CapturingEmailService();
+        var controller = CreateController(reservationService, emailService);
+
+        var result = await controller.Quick(CreateValidModel(new DateOnly(2026, 8, 5)), CancellationToken.None);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        var json = JsonSerializer.Serialize(badRequest.Value);
+        using var document = JsonDocument.Parse(json);
+        var dateErrors = document
+            .RootElement
+            .GetProperty("errors")
+            .GetProperty(nameof(ReservationCreateViewModel.ReservationDate))
+            .EnumerateArray()
+            .Select(error => error.GetString())
+            .ToArray();
+
+        Assert.Contains("\"ok\":false", json, StringComparison.Ordinal);
+        Assert.Contains(ReservationBlockedDateService.PastDateMessage, dateErrors);
+        Assert.Equal(1, reservationService.CreateCallCount);
+        Assert.Equal(0, emailService.ReservationNotificationCallCount);
+    }
+
+    private static ReservationCreateResult CreateDatePolicyFailure()
+    {
+        return ReservationCreateResult.Failed(
+        [
+            new ReservationServiceError
+            {
+                FieldName = nameof(ReservationCreateRequest.ReservationDate),
+                Message = ReservationBlockedDateService.BlockedDateMessage
+            }
+        ]);
     }
 
     private static ReservationController CreateController(
@@ -140,6 +186,13 @@ public sealed class ReservationControllerDatePolicyTests
 
     private sealed class CapturingReservationService : IReservationService
     {
+        private readonly ReservationCreateResult _result;
+
+        public CapturingReservationService(ReservationCreateResult? result = null)
+        {
+            _result = result ?? ReservationCreateResult.Success(Guid.NewGuid());
+        }
+
         public int CreateCallCount { get; private set; }
 
         public Task<ReservationCreateResult> CreateReservationAsync(
@@ -147,7 +200,7 @@ public sealed class ReservationControllerDatePolicyTests
             CancellationToken cancellationToken = default)
         {
             CreateCallCount++;
-            return Task.FromResult(ReservationCreateResult.Success(Guid.NewGuid()));
+            return Task.FromResult(_result);
         }
 
         public Task<Reservation?> GetReservationByIdAsync(Guid id, CancellationToken cancellationToken = default)

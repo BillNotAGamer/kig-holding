@@ -14,67 +14,49 @@ public sealed class ReservationServiceDatePolicyTests
         new FixedTimeProvider(DateTimeOffset.Parse("2026-08-05T17:00:00+00:00"));
 
     [Theory]
-    [InlineData("2026-08-08", ReservationDatePolicyStatus.Weekend)]
-    [InlineData("2026-08-09", ReservationDatePolicyStatus.Weekend)]
-    [InlineData("2027-01-01", ReservationDatePolicyStatus.Holiday)]
-    public async Task CreateReservationAsync_RejectedPolicyDate_DoesNotPersistOrNotify(
-        string dateValue,
-        ReservationDatePolicyStatus expectedPolicyStatus)
+    [InlineData("2026-08-08")]
+    [InlineData("2026-08-09")]
+    [InlineData("2026-09-02")]
+    public async Task CreateReservationAsync_BlockedDatabaseDate_DoesNotPersistOrNotify(string dateValue)
     {
         await using var dbContext = CreateDbContext();
-        var branch = CreateReservableBranch();
-        dbContext.Branches.Add(branch);
+        var blockedDate = DateOnly.ParseExact(dateValue, "yyyy-MM-dd");
+        dbContext.BlockedReservationDates.Add(new BlockedReservationDate { Date = blockedDate });
+        dbContext.Branches.Add(CreateReservableBranch());
         await dbContext.SaveChangesAsync();
+        dbContext.ChangeTracker.Clear();
 
         var notifier = new CapturingReservationNotifier();
         using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
         var service = CreateService(dbContext, cache, notifier);
-        var request = CreateRequest(branch.Id, DateOnly.ParseExact(dateValue, "yyyy-MM-dd"));
+        var request = CreateRequest(Guid.NewGuid(), blockedDate);
 
-        var result = await service.CreateReservationAsync(request);
-
-        Assert.False(result.Succeeded);
-        Assert.Contains(result.Errors, error => error.FieldName == nameof(ReservationCreateRequest.ReservationDate));
-        Assert.Equal(0, await dbContext.Reservations.CountAsync());
-        Assert.Equal(0, notifier.CallCount);
-        Assert.Equal(expectedPolicyStatus, VietnamHolidayEvaluator.EvaluateReservationDate(request.ReservationDate, new DateOnly(2025, 12, 31)).Status);
-    }
-
-    [Theory]
-    [InlineData("2026-08-08", ReservationDatePolicyStatus.Weekend)]
-    [InlineData("2026-08-09", ReservationDatePolicyStatus.Weekend)]
-    [InlineData("2029-01-01", ReservationDatePolicyStatus.BookingCalendarClosed)]
-    public async Task CreateReservationAsync_RejectedPolicyDate_ReturnsBeforeDatabaseWorkOrSideEffects(
-        string dateValue,
-        ReservationDatePolicyStatus expectedPolicyStatus)
-    {
-        await using var dbContext = CreateProviderlessDbContext();
-        var notifier = new CapturingReservationNotifier();
-        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
-        var service = CreateService(dbContext, cache, notifier);
-
-        var request = CreateRequest(Guid.NewGuid(), DateOnly.ParseExact(dateValue, "yyyy-MM-dd"));
         var result = await service.CreateReservationAsync(request);
 
         Assert.False(result.Succeeded);
         Assert.Contains(result.Errors, error =>
             error.FieldName == nameof(ReservationCreateRequest.ReservationDate) &&
-            error.Message == VietnamHolidayEvaluator.GetReservationDatePolicyMessage(expectedPolicyStatus));
-        Assert.Equal(0, dbContext.SaveChangesAsyncCallCount);
+            error.Message == ReservationBlockedDateService.BlockedDateMessage);
+        Assert.Equal(0, await dbContext.Reservations.CountAsync());
         Assert.Equal(0, notifier.CallCount);
-        var phoneLockKey = IdentityNormalizer.PhoneLockKey(IdentityNormalizer.NormalizePhone(request.PhoneNumber));
-        Assert.False(cache.TryGetValue(phoneLockKey, out _));
+        AssertRateLimitNotStamped(cache, request);
     }
 
-    [Fact]
-    public async Task CreateReservationAsync_ValidMonday_HasNoDatePolicyErrorWhenLaterBranchRuleFails()
+    [Theory]
+    [InlineData("2026-08-08")]
+    [InlineData("2026-08-09")]
+    [InlineData("2026-09-02")]
+    [InlineData("2029-01-01")]
+    [InlineData("2030-01-02")]
+    public async Task CreateReservationAsync_UnblockedFutureDate_HasNoDatePolicyErrorWhenLaterBranchRuleFails(string dateValue)
     {
         await using var dbContext = CreateDbContext();
         var notifier = new CapturingReservationNotifier();
         using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
         var service = CreateService(dbContext, cache, notifier);
 
-        var result = await service.CreateReservationAsync(CreateRequest(Guid.NewGuid(), new DateOnly(2026, 8, 10)));
+        var result = await service.CreateReservationAsync(
+            CreateRequest(Guid.NewGuid(), DateOnly.ParseExact(dateValue, "yyyy-MM-dd")));
 
         Assert.False(result.Succeeded);
         Assert.DoesNotContain(result.Errors, error => error.FieldName == nameof(ReservationCreateRequest.ReservationDate));
@@ -83,15 +65,64 @@ public sealed class ReservationServiceDatePolicyTests
         Assert.Equal(0, notifier.CallCount);
     }
 
+    [Fact]
+    public async Task CreateReservationAsync_PastDate_ReturnsBeforeDatabaseWorkOrSideEffects()
+    {
+        await using var dbContext = CreateProviderlessDbContext();
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var service = CreateService(dbContext, cache, notifier);
+
+        var request = CreateRequest(Guid.NewGuid(), new DateOnly(2026, 8, 5));
+        var result = await service.CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error =>
+            error.FieldName == nameof(ReservationCreateRequest.ReservationDate) &&
+            error.Message == ReservationBlockedDateService.PastDateMessage);
+        Assert.Equal(0, dbContext.SaveChangesAsyncCallCount);
+        Assert.Equal(0, notifier.CallCount);
+        AssertRateLimitNotStamped(cache, request);
+    }
+
+    [Theory]
+    [InlineData("2026-08-08")]
+    [InlineData("2026-08-09")]
+    [InlineData("2026-09-02")]
+    public async Task CreateReservationAsync_BlockedDate_ReturnsBeforeBranchQueryOrSideEffects(string dateValue)
+    {
+        await using var dbContext = CreateProviderlessDbContext();
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var service = CreateService(
+            dbContext,
+            cache,
+            notifier,
+            new StubBlockedDateService(ReservationDatePolicyStatus.BlockedDate));
+
+        var request = CreateRequest(Guid.NewGuid(), DateOnly.ParseExact(dateValue, "yyyy-MM-dd"));
+        var result = await service.CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error =>
+            error.FieldName == nameof(ReservationCreateRequest.ReservationDate) &&
+            error.Message == ReservationBlockedDateService.BlockedDateMessage);
+        Assert.Equal(0, dbContext.SaveChangesAsyncCallCount);
+        Assert.Equal(0, notifier.CallCount);
+        AssertRateLimitNotStamped(cache, request);
+    }
+
     private static ReservationService CreateService(
         AppDbContext dbContext,
         IMemoryCache cache,
-        IAdminReservationNotifier notifier)
+        IAdminReservationNotifier notifier,
+        IReservationBlockedDateService? blockedDateService = null)
     {
         return new ReservationService(
             dbContext,
             cache,
             notifier,
+            blockedDateService ?? new ReservationBlockedDateService(dbContext),
             NullLogger<ReservationService>.Instance,
             AuditTimeProvider);
     }
@@ -143,6 +174,12 @@ public sealed class ReservationServiceDatePolicyTests
         };
     }
 
+    private static void AssertRateLimitNotStamped(IMemoryCache cache, ReservationCreateRequest request)
+    {
+        var phoneLockKey = IdentityNormalizer.PhoneLockKey(IdentityNormalizer.NormalizePhone(request.PhoneNumber));
+        Assert.False(cache.TryGetValue(phoneLockKey, out _));
+    }
+
     private sealed class CapturingReservationNotifier : IAdminReservationNotifier
     {
         public int CallCount { get; private set; }
@@ -153,6 +190,49 @@ public sealed class ReservationServiceDatePolicyTests
         {
             CallCount++;
             return Task.CompletedTask;
+        }
+    }
+
+    private sealed class StubBlockedDateService : IReservationBlockedDateService
+    {
+        private readonly ReservationDatePolicyStatus _status;
+
+        public StubBlockedDateService(ReservationDatePolicyStatus status)
+        {
+            _status = status;
+        }
+
+        public Task<ReservationDatePolicyResult> EvaluateReservationDateAsync(
+            DateOnly reservationDate,
+            DateOnly vietnamToday,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new ReservationDatePolicyResult(_status));
+        }
+
+        public Task<bool> IsBlockedAsync(DateOnly date, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(_status == ReservationDatePolicyStatus.BlockedDate);
+        }
+
+        public Task<IReadOnlyList<DateOnly>> GetActiveBlockedDatesAsync(
+            DateOnly vietnamToday,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyList<DateOnly>>([]);
+        }
+
+        public Task ReplaceActiveBlockedDatesAsync(
+            IReadOnlyCollection<DateOnly> dates,
+            DateOnly vietnamToday,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<int> CleanupPastDatesAsync(DateOnly vietnamToday, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(0);
         }
     }
 

@@ -31,6 +31,21 @@
         </div>
     </div>
 
+    <div class="flex flex-wrap gap-2">
+        <a asp-area="Admin"
+           asp-controller="Reservation"
+           asp-action="Index"
+           class="inline-flex min-h-11 items-center rounded-full border border-brand-red bg-brand-red px-4 py-2 text-sm font-semibold text-white">
+            Danh sách đặt bàn
+        </a>
+        <a asp-area="Admin"
+           asp-controller="Reservation"
+           asp-action="Policy"
+           class="inline-flex min-h-11 items-center rounded-full border border-brand-border bg-white px-4 py-2 text-sm font-semibold text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+            Reservation Policy
+        </a>
+    </div>
+
     <form method="get"
           asp-area="Admin"
           asp-controller="Reservation"
