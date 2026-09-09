@@ -204,6 +204,16 @@ internal static class LayoutFallbacks
                 },
                 new FloatingBrandContactLinkViewModel
                 {
+                    Name = "Seoul Gukbap",
+                    LogoUrl = "/images/general/logo-seoul-gukbap.webp",
+                    FacebookUrl = "https://www.facebook.com/seoul.gukbap.sg",
+                    ZaloUrl = "https://oa.zalo.me/2150196343037356151",
+                    ToggleOpenLabel = "Mở liên hệ nhanh Seoul Gukbap",
+                    ToggleCloseLabel = "Đóng liên hệ nhanh Seoul Gukbap",
+                    LogoClass = "floating-contact-fab__logo floating-contact-fab__logo--seoul"
+                },
+                new FloatingBrandContactLinkViewModel
+                {
                     Name = "Truyền Thuyết Champong",
                     LogoUrl = brandLogoUrl,
                     FacebookUrl = "https://www.facebook.com/champong.official",

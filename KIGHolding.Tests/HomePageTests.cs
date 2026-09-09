@@ -175,6 +175,68 @@ public sealed class HomePageTests
         Assert.Contains("member-tier-tabs.js", memberView, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void HomeView_CulinaryEssence_AppendsSeoulGukbapWithRequiredContentAndAssets()
+    {
+        var view = ReadRepoFile("Views", "Home", "Index.cshtml");
+        var section = ExtractSectionByDataAttribute(view, "culinary-essence");
+
+        Assert.Single(Regex.Matches(section, "SEOUL GUKBAP - 서울 국밥", RegexOptions.CultureInvariant).Cast<Match>());
+        Assert.Contains("SIGNATURE KOREAN RICE SOUP", section, StringComparison.Ordinal);
+        Assert.Contains("CƠM CANH CHUẨN HÀN", section, StringComparison.Ordinal);
+        Assert.Contains("NGUYÊN LIỆU ĐA DẠNG", section, StringComparison.Ordinal);
+        Assert.Contains("NƯỚC CANH ĐẬM ĐÀ", section, StringComparison.Ordinal);
+        Assert.Contains("HƯƠNG VỊ HÀN QUỐC", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/images/SEOUL GUKBAP.png", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/icons/seoul_gukbap_icon_bowl.png", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/icons/seoul_gukbap_icon_leaf.png", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/icons/seoul_gukbap_icon_steam.png", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/icons/seoul_gukbap_icon_korea.png", section, StringComparison.Ordinal);
+
+        var champongIndex = section.IndexOf("Truyền Thuyết ChamPong", StringComparison.Ordinal);
+        var gogiMaruIndex = section.IndexOf("GOGI MARU", StringComparison.Ordinal);
+        var kbbCookIndex = section.IndexOf("KBB COOK", StringComparison.Ordinal);
+        var seoulGukbapIndex = section.IndexOf("SEOUL GUKBAP - 서울 국밥", StringComparison.Ordinal);
+
+        Assert.True(champongIndex >= 0);
+        Assert.True(gogiMaruIndex > champongIndex);
+        Assert.True(kbbCookIndex > gogiMaruIndex);
+        Assert.True(seoulGukbapIndex > kbbCookIndex);
+    }
+
+    [Fact]
+    public void HomeView_MenuTeaser_RendersFourBrandDefinitionsWithSeoulLast()
+    {
+        var view = ReadRepoFile("Views", "Home", "Index.cshtml");
+        var section = ExtractSectionByDataAttribute(view, "menu");
+        var cardsStart = view.IndexOf("var menuBrandCards = new[]", StringComparison.Ordinal);
+        var cardsEnd = view.IndexOf("var homeNewsPosts", cardsStart, StringComparison.Ordinal);
+
+        Assert.True(cardsStart >= 0);
+        Assert.True(cardsEnd > cardsStart);
+
+        var cardDefinitions = view[cardsStart..cardsEnd];
+
+        Assert.Contains("Bốn trải nghiệm vị giác chủ lực", section, StringComparison.Ordinal);
+        Assert.Contains("Khám phá bốn concept ẩm thực nổi bật trong hệ thống KIG Holding.", section, StringComparison.Ordinal);
+        Assert.Equal(4, Regex.Matches(cardDefinitions, "Title:", RegexOptions.CultureInvariant).Count);
+        Assert.Contains("Truyền Thuyết Champong", cardDefinitions, StringComparison.Ordinal);
+        Assert.Contains("GOGI MARU", cardDefinitions, StringComparison.Ordinal);
+        Assert.Contains("KBB COOK", cardDefinitions, StringComparison.Ordinal);
+        Assert.Contains("Seoul Gukbap - 서울 국밥", cardDefinitions, StringComparison.Ordinal);
+        Assert.Contains("/images/home/images/SEOUL GUKBAP.png", cardDefinitions, StringComparison.Ordinal);
+
+        var champongIndex = cardDefinitions.IndexOf("Truyền Thuyết Champong", StringComparison.Ordinal);
+        var gogiMaruIndex = cardDefinitions.IndexOf("GOGI MARU", StringComparison.Ordinal);
+        var kbbCookIndex = cardDefinitions.IndexOf("KBB COOK", StringComparison.Ordinal);
+        var seoulGukbapIndex = cardDefinitions.IndexOf("Seoul Gukbap - 서울 국밥", StringComparison.Ordinal);
+
+        Assert.True(champongIndex >= 0);
+        Assert.True(gogiMaruIndex > champongIndex);
+        Assert.True(kbbCookIndex > gogiMaruIndex);
+        Assert.True(seoulGukbapIndex > kbbCookIndex);
+    }
+
     private static string ExtractTakeHomeSection(string view)
         => ExtractSectionByDataAttribute(view, "take-home");
 

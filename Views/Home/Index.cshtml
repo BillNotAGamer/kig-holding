@@ -14,7 +14,8 @@
             Href: "/thuc-don/nhom/truyen-thuyet-champong",
             ImageUrl: "/images/home/images/truyen-thuyet-champong.webp",
             Alt: "Món Truyền Thuyết Champong",
-            Delay: 0
+            Delay: 0,
+            PreserveArtwork: false
         ),
         (
             Title: "GOGI MARU - 고기마루",
@@ -22,7 +23,8 @@
             Href: "/thuc-don/nhom/gogi-maru",
             ImageUrl: "/images/home/images/gogimaru-img.webp",
             Alt: "Bàn tiệc GOGI MARU",
-            Delay: 120
+            Delay: 120,
+            PreserveArtwork: false
         ),
         (
             Title: "KBB COOK - BUFFET NƯỚNG HÀN QUỐC 한국식 바비큐 뷔페",
@@ -30,7 +32,17 @@
             Href: "/thuc-don/nhom/kbb-cook",
             ImageUrl: "/images/home/images/kbb-cook-img.webp",
             Alt: "Không gian và buffet nướng Hàn Quốc",
-            Delay: 240
+            Delay: 240,
+            PreserveArtwork: false
+        ),
+        (
+            Title: "Seoul Gukbap - 서울 국밥",
+            Description: "Khám phá cơm canh truyền thống Hàn Quốc nóng hổi, đậm đà, dễ ăn và phù hợp cho mọi bữa trong ngày.",
+            Href: "/thuc-don",
+            ImageUrl: "/images/home/images/SEOUL GUKBAP.png",
+            Alt: "Seoul Gukbap - cơm canh truyền thống Hàn Quốc",
+            Delay: 360,
+            PreserveArtwork: true
         )
     };
     var homeNewsPosts = Model.LatestPosts.Take(3).ToList();
@@ -408,6 +420,51 @@
                     </div>
                 </div>
             </article>
+
+            <article class="home-culinary-essence__block grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:gap-14">
+                <div class="lg:order-1">
+                    <div data-uw-reveal="fade-up" data-uw-delay="100">
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-brand-red">SIGNATURE KOREAN RICE SOUP</p>
+                        <h3 class="public-card-title-lg mt-3 uppercase text-brand-red">
+                            SEOUL GUKBAP - 서울 국밥
+                        </h3>
+                    </div>
+
+                    <div class="mt-8 grid gap-5 sm:grid-cols-2">
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="180">
+                            <img src="~/images/home/icons/seoul_gukbap_icon_bowl.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>CƠM CANH CHUẨN HÀN</h4>
+                            <p>Seoul Gukbap mang đến món cơm canh truyền thống Hàn Quốc, nóng hổi, dễ ăn và phù hợp cho mọi bữa trong ngày.</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="260">
+                            <img src="~/images/home/icons/seoul_gukbap_icon_leaf.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>NGUYÊN LIỆU ĐA DẠNG</h4>
+                            <p>Thực đơn đa dạng với cơm canh giá đỗ, thịt bò, thịt heo và lòng bò, mang đến nhiều lựa chọn cho thực khách.</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="340">
+                            <img src="~/images/home/icons/seoul_gukbap_icon_steam.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>NƯỚC CANH ĐẬM ĐÀ</h4>
+                            <p>Nước canh được nấu đậm vị, nóng hổi và tròn vị, tạo nên hương vị đặc trưng khó quên của Seoul Gukbap.</p>
+                        </div>
+                        <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="420">
+                            <img src="~/images/home/icons/seoul_gukbap_icon_korea.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <h4>HƯƠNG VỊ HÀN QUỐC</h4>
+                            <p>Cảm hứng từ bữa ăn truyền thống Hàn Quốc, kết hợp hương vị quen thuộc và sự chỉn chu trong từng tô cơm canh.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="home-culinary-essence__image lg:order-2" data-uw-reveal="fade-up" data-uw-delay="500">
+                    <img src="~/images/home/images/SEOUL GUKBAP.png"
+                         asp-append-version="true"
+                         alt="Seoul Gukbap - cơm canh truyền thống Hàn Quốc"
+                         class="h-full w-full object-contain"
+                         width="1254"
+                         height="1254"
+                         loading="lazy"
+                         decoding="async" />
+                </div>
+            </article>
         </div>
     </div>
 </section>
@@ -418,10 +475,10 @@
             <div class="max-w-3xl" data-uw-reveal="fade-up" data-uw-once="true">
                 <p class="text-xs font-black uppercase tracking-[0.28em] text-brand-red">Thực đơn</p>
                 <h2 class="public-section-title mt-4 text-white">
-                    Ba trải nghiệm vị giác chủ lực
+                    Bốn trải nghiệm vị giác chủ lực
                 </h2>
                 <p class="mt-5 max-w-2xl text-base leading-8 text-white/72 sm:text-lg">
-                    Khám phá ba concept ẩm thực nổi bật trong hệ thống KIG Holding.
+                    Khám phá bốn concept ẩm thực nổi bật trong hệ thống KIG Holding.
                 </p>
             </div>
 
@@ -435,7 +492,7 @@
             </a>
         </div>
 
-        <div class="home-menu-teaser__grid mt-12">
+        <div class="home-menu-teaser__grid mt-12 xl:grid-cols-4">
             @foreach (var card in menuBrandCards)
             {
                 <article class="home-menu-teaser__card"
@@ -445,7 +502,8 @@
                     <div class="home-menu-teaser__media" data-media-parent>
                         <img src="@card.ImageUrl"
                              alt="@card.Alt"
-                             class="home-menu-teaser__image"
+                             class="home-menu-teaser__image@(card.PreserveArtwork ? " object-contain bg-black" : string.Empty)"
+                             style="@(card.PreserveArtwork ? "transform: none;" : null)"
                              loading="lazy"
                              onerror="this.closest('[data-media-parent]')?.classList.add('is-image-missing'); this.remove();" />
                         <div class="home-menu-teaser__overlay" aria-hidden="true"></div>
