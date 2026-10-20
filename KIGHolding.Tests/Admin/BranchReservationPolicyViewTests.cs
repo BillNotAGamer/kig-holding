@@ -44,6 +44,19 @@ public sealed class BranchReservationPolicyViewTests
         Assert.DoesNotContain("BlockedDatesInput", branchView, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void BranchCalendar_ProvidesWeeklyDefaultsQuickCardAndSynchronizedLabels()
+    {
+        var view = ReadRepoFile("Areas", "Admin", "Views", "Reservation", "BranchPolicy.cshtml");
+
+        Assert.Contains("Quy định mặc định theo tuần của chi nhánh", view, StringComparison.Ordinal);
+        Assert.Contains("asp-action=\"UpdateBranchWeeklyDefaults\"", view, StringComparison.Ordinal);
+        Assert.Contains("name=\"weekdayMinGuests\"", view, StringComparison.Ordinal);
+        Assert.Contains("name=\"weekendMinGuests\"", view, StringComparison.Ordinal);
+        Assert.Contains("name=\"applyToAllHcmc\"", view, StringComparison.Ordinal);
+        Assert.Contains("Tối thiểu {weeklyDefaultMin.Value} khách (Mặc định)", view, StringComparison.Ordinal);
+    }
+
     private static string ReadRepoFile(params string[] relativeSegments)
     {
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));

@@ -86,6 +86,12 @@ public sealed class BranchReservationPolicyViewModel
     public int CalendarMonth { get; set; }
     public Guid? SelectedBranchId { get; set; }
     public string? SelectedBranchName { get; set; }
+    public string? SelectedBranchCity { get; set; }
+    public int? BranchWeekdayMinGuests { get; set; }
+    public int? BranchWeekendMinGuests { get; set; }
+    public bool IsSelectedBranchHcmc => !string.IsNullOrWhiteSpace(SelectedBranchCity) &&
+        (SelectedBranchCity.Contains("Hồ Chí Minh", StringComparison.OrdinalIgnoreCase) ||
+         SelectedBranchCity.Contains("HCM", StringComparison.OrdinalIgnoreCase));
     public IReadOnlyList<SelectListItem> BranchOptions { get; set; } = [];
     public IReadOnlyList<BranchReservationPolicyCalendarItemViewModel> Policies { get; set; } = [];
     public IReadOnlySet<DateOnly> GlobalBlockedDates { get; set; } = new HashSet<DateOnly>();

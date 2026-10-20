@@ -124,6 +124,8 @@ public class BranchController : AdminBaseController
             LunchBreakStart = parsedTimes.LunchBreakStart,
             LunchBreakEnd = parsedTimes.LunchBreakEnd,
             LunchBreakAppliesOnWeekend = model.LunchBreakAppliesOnWeekend,
+            WeekdayMinGuests = model.WeekdayMinGuests,
+            WeekendMinGuests = model.WeekendMinGuests,
             Capacity = model.Capacity,
             AreaSquareMeters = model.AreaSquareMeters,
             NumberOfFloors = model.NumberOfFloors,
@@ -177,6 +179,8 @@ public class BranchController : AdminBaseController
             LunchBreakStartText = branch.LunchBreakStart.HasValue ? FormatTime(branch.LunchBreakStart.Value) : null,
             LunchBreakEndText = branch.LunchBreakEnd.HasValue ? FormatTime(branch.LunchBreakEnd.Value) : null,
             LunchBreakAppliesOnWeekend = branch.LunchBreakAppliesOnWeekend,
+            WeekdayMinGuests = branch.WeekdayMinGuests,
+            WeekendMinGuests = branch.WeekendMinGuests,
             Capacity = branch.Capacity,
             AreaSquareMeters = branch.AreaSquareMeters,
             NumberOfFloors = branch.NumberOfFloors,
@@ -245,6 +249,8 @@ public class BranchController : AdminBaseController
         branch.LunchBreakStart = parsedTimes.LunchBreakStart;
         branch.LunchBreakEnd = parsedTimes.LunchBreakEnd;
         branch.LunchBreakAppliesOnWeekend = model.LunchBreakAppliesOnWeekend;
+        branch.WeekdayMinGuests = model.WeekdayMinGuests;
+        branch.WeekendMinGuests = model.WeekendMinGuests;
         branch.Capacity = model.Capacity;
         branch.AreaSquareMeters = model.AreaSquareMeters;
         branch.NumberOfFloors = model.NumberOfFloors;

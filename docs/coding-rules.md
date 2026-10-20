@@ -38,12 +38,12 @@ public class ReservationEditViewModel
 {
     [Required(ErrorMessage = "Vui lòng nhập họ tên của bạn.")]
     [StringLength(100, ErrorMessage = "Họ tên không được vượt quá {1} ký tự.")]
-    public string FullName { get; set; } = string.Empty;
+    public string CustomerName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Vui lòng cung cấp số điện thoại liên hệ.")]
     [Phone(ErrorMessage = "Số điện thoại không đúng định dạng.")]
     [RegularExpression(@"^(0[3|5|7|8|9])+([0-9]{8})$", ErrorMessage = "Số điện thoại Việt Nam không hợp lệ.")]
-    public string Phone { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Vui lòng nhập số lượng khách.")]
     [Range(1, 100, ErrorMessage = "Số lượng khách phải từ {1} đến {2} người.")]
@@ -73,9 +73,9 @@ public async Task<IActionResult> Edit(int id, ReservationEditViewModel model)
 
 ### Localized Timezone Validation
 *   **Clock Localizing Rule**: Developers are strictly prohibited from using raw `DateTime.Today`, `DateTime.Now`, or `DateTime.UtcNow` to assess localized Vietnamese calendar boundaries in business logic layers. Because hosting environments (AWS/Azure/Neon DB) operate on UTC clocks, direct server clock references cause shifting window mismatches.
-*   **Required Provider**: Use `VietnamClock.GetVietnamToday(TimeProvider)` to resolve the active calendar day under the local `Asia/Ho_Chi_Minh` timezone (GMT+7). Production code should receive `TimeProvider` from dependency injection.
-*   **Reservation Date Policy Boundary**: Reservation date bookability must be evaluated through `IReservationBlockedDateService` from `ReservationService`. Do not duplicate blocked-date collections or past-date checks inside controllers, Razor views, or JavaScript.
-*   **Policy Precedence Rule**: Date policy precedence is `PastDate`, `BlockedDate`, then `Allowed`.
+*   **Required Provider**: Use `VietnamClock.GetVietnamToday(TimeProvider)` to resolve the active calendar day and `VietnamClock.GetVietnamNow(TimeProvider)` to resolve current timestamps under the local `Asia/Ho_Chi_Minh` timezone (GMT+7). Production code should receive `TimeProvider` from dependency injection.
+*   **Reservation Date Policy Boundary**: Reservation date bookability must be evaluated through `IReservationBlockedDateService` and `IReservationPolicyEvaluator` from `ReservationService`. Do not duplicate blocked-date collections or past-date checks inside controllers, Razor views, or JavaScript.
+*   **Policy Precedence Rule**: Authoritative policy evaluation precedence is 7-tier: `PastDate` -> `GlobalBlockedDate` -> `InvalidBranch` -> `InvalidGuestCount` -> `BranchClosedDate` -> `MinimumGuestsNotMet` -> `Allowed`.
 *   **DateOnly Integrity Rule**: Submitted reservation calendar dates are `DateOnly` values. Do not transform them through UTC, `DateTimeOffset`, locale-specific parsing, or server-local `.Date` conversions before policy evaluation or persistence.
 *   **Frontend Advisory Rule**: Browser-side reservation date restrictions must consume the server-owned calendar-policy payload and remain advisory. `ReservationService.CreateReservationAsync` is still the final enforcement point when requests bypass JavaScript.
 *   **Blocked Date Rule**: Saturday, Sunday, holidays, and future years are allowed unless the exact date exists in `BlockedReservationDates`. Do not add runtime weekend inference, hard-coded holiday lists, or a maximum open-calendar cap.
@@ -132,8 +132,12 @@ Security checks are enforced to safeguard the site against manipulation, request
 *   **Blog HTML Sanitization Boundary**: `PostContentMode.Visual` content is plain text and must not be treated as HTML. `PostContentMode.Html` content must be sanitized server-side through `IBlogHtmlSanitizer` before persistence. Never store unsanitized HTML as canonical post content, never rely on client-side sanitization, and do not sanitize HTML with regular expressions or string replacements.
 *   **Blog SEO Metadata Rule**: `FocusKeyword` is editorial metadata only. Do not emit it as `<meta name="keywords">`; use explicit SEO fields and Razor encoding for head metadata. JSON-LD must be produced by a JSON serializer with safe escaping before it is written into an `application/ld+json` script.
 
+### Admin Password Security Policy
+*   **Complexity Rules**: Admin credentials must satisfy `AdminPasswordPolicy.Validate`: minimum 12 characters, containing at least one uppercase letter, one lowercase letter, one digit, and one non-alphanumeric special character.
+*   **Credential Bootstrapping**: Historical or newly seeded admin accounts must be managed through `AdminBootstrapSettings` with `RemediateLegacySeed` activated to ensure no unhardened credentials persist in production.
+
 ### Input Normalization Rule
-*   **Identity Normalization**: Raw customer inputs (such as phone numbers) must be normalized prior to executing in-memory cache lockups, database checks, or identity comparisons. Sanitization must run through [IdentityNormalizer.NormalizePhone()](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/IdentityNormalizer.cs) to strip whitespace, drop non-numeric characters, and unify country calling prefixes (e.g. converting `+84` and `84` to local `0` formatting) to prevent rate limit bypasses.
+*   **Identity Normalization**: Raw customer inputs (such as phone numbers and emails) must be normalized prior to executing in-memory cache lookups, database checks, or identity comparisons. Sanitization must run through [IdentityNormalizer.NormalizePhone()](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/IdentityNormalizer.cs) (stripping whitespace, non-digits, and converting `+84` / `84` prefixes to local `0` formatting) and `IdentityNormalizer.NormalizeEmail()` (lowercasing, stripping plus-tags and dots for Gmail) to generate deterministic cache keys (`PhoneLockKey`, `EmailLockKey`) and prevent rate limit bypasses.
 
 ### Real-Time Admin Notification Rule
 *   **SignalR Boundary**: Controllers and business services must not depend directly on `IHubContext`. Use `IAdminReservationNotifier` for Admin reservation notifications.

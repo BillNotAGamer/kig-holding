@@ -342,6 +342,60 @@ public sealed class ReservationServiceDatePolicyTests
             error.Message.Contains("tất cả các ngày trong tuần", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public async Task CreateReservationAsync_BranchWeeklyWeekendMinGuests_RejectsSmallGroups()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        branch.WeekendMinGuests = 10;
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var service = CreateService(dbContext, cache, notifier);
+
+        // 2026-08-09 is Sunday, guest count = 5 < 10
+        var request = CreateRequest(branch.Id, new DateOnly(2026, 8, 9));
+        request.GuestCount = 5;
+
+        var result = await service.CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error =>
+            error.FieldName == nameof(ReservationCreateRequest.GuestCount) &&
+            error.Message.Contains("10", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_SpecificDateOverrideWithLowerMinGuests_AllowsBookingOnWeekend()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        branch.WeekendMinGuests = 10;
+        var date = new DateOnly(2026, 8, 9); // Sunday
+        dbContext.Branches.Add(branch);
+        dbContext.BranchReservationDatePolicies.Add(new BranchReservationDatePolicy
+        {
+            BranchId = branch.Id,
+            Date = date,
+            RuleType = BranchReservationRuleType.MinimumGuests,
+            MinGuests = 2
+        });
+        await dbContext.SaveChangesAsync();
+
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var service = CreateService(dbContext, cache, notifier);
+
+        var request = CreateRequest(branch.Id, date);
+        request.GuestCount = 2;
+
+        var result = await service.CreateReservationAsync(request);
+
+        Assert.True(result.Succeeded);
+    }
+
     private static ReservationService CreateService(
         AppDbContext dbContext,
         IMemoryCache cache,

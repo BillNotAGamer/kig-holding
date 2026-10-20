@@ -227,6 +227,8 @@ public sealed class ReservationPolicyEvaluatorTests
         await using var dbContext = CreateDbContext();
         var branch = CreateBranch();
         branch.City = "TP. Hồ Chí Minh";
+        branch.WeekdayMinGuests = 6;
+        branch.WeekendMinGuests = 10;
         dbContext.Branches.Add(branch);
         await dbContext.SaveChangesAsync();
 
@@ -245,6 +247,8 @@ public sealed class ReservationPolicyEvaluatorTests
         await using var dbContext = CreateDbContext();
         var branch = CreateBranch();
         branch.City = "TP. Hồ Chí Minh";
+        branch.WeekdayMinGuests = 6;
+        branch.WeekendMinGuests = 10;
         dbContext.Branches.Add(branch);
         await dbContext.SaveChangesAsync();
 
@@ -263,6 +267,8 @@ public sealed class ReservationPolicyEvaluatorTests
         await using var dbContext = CreateDbContext();
         var branch = CreateBranch();
         branch.City = "TP. Hồ Chí Minh";
+        branch.WeekdayMinGuests = 6;
+        branch.WeekendMinGuests = 10;
         dbContext.Branches.Add(branch);
         await dbContext.SaveChangesAsync();
 
@@ -281,6 +287,8 @@ public sealed class ReservationPolicyEvaluatorTests
         await using var dbContext = CreateDbContext();
         var branch = CreateBranch();
         branch.City = "TP. Hồ Chí Minh";
+        branch.WeekdayMinGuests = 6;
+        branch.WeekendMinGuests = 10;
         dbContext.Branches.Add(branch);
         await dbContext.SaveChangesAsync();
 
@@ -296,6 +304,8 @@ public sealed class ReservationPolicyEvaluatorTests
         await using var dbContext = CreateDbContext();
         var branch = CreateBranch();
         branch.City = "Hà Nội";
+        branch.WeekdayMinGuests = null;
+        branch.WeekendMinGuests = null;
         dbContext.Branches.Add(branch);
         await dbContext.SaveChangesAsync();
 
@@ -311,6 +321,8 @@ public sealed class ReservationPolicyEvaluatorTests
         await using var dbContext = CreateDbContext();
         var branch = CreateBranch();
         branch.City = "TP. Hồ Chí Minh";
+        branch.WeekdayMinGuests = 6;
+        branch.WeekendMinGuests = 10;
         var date = new DateOnly(2026, 10, 24); // Saturday (normally min 10)
         dbContext.Branches.Add(branch);
         dbContext.BranchReservationDatePolicies.Add(new BranchReservationDatePolicy
@@ -327,6 +339,31 @@ public sealed class ReservationPolicyEvaluatorTests
         // Date policy specifies MinGuests = 25, which should override the default city 10 rule and reject 15
         Assert.Equal(ReservationPolicyEvaluationStatus.MinimumGuestsNotMet, result.Status);
         Assert.Equal(25, result.MinGuests);
+    }
+
+    [Fact]
+    public async Task Evaluate_HcmcBranch_SpecificDatePolicyWithLowerMinGuests_AllowsBooking_ShortCircuitsTier3()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateBranch();
+        branch.City = "TP. Hồ Chí Minh";
+        branch.WeekdayMinGuests = 6;
+        branch.WeekendMinGuests = 10;
+        var date = new DateOnly(2026, 10, 24); // Saturday (normally min 10)
+        dbContext.Branches.Add(branch);
+        dbContext.BranchReservationDatePolicies.Add(new BranchReservationDatePolicy
+        {
+            BranchId = branch.Id,
+            Date = date,
+            RuleType = BranchReservationRuleType.MinimumGuests,
+            MinGuests = 2
+        });
+        await dbContext.SaveChangesAsync();
+
+        // 2 guests on a weekend at an HCMC branch should succeed because Tier 2 override specifies MinGuests = 2
+        var result = await CreateEvaluator(dbContext).EvaluateAsync(branch.Id, date, 2, VietnamToday);
+
+        Assert.Equal(ReservationPolicyEvaluationStatus.Allowed, result.Status);
     }
 
     private static ReservationPolicyEvaluator CreateEvaluator(AppDbContext dbContext)

@@ -1,4 +1,5 @@
 using KIGHolding.Data;
+using KIGHolding.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace KIGHolding.Services;
@@ -59,48 +60,46 @@ public sealed class ReservationPolicyEvaluator : IReservationPolicyEvaluator
             return new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.InvalidGuestCount);
         }
 
-        var branchResult = await _branchPolicyService.EvaluateAsync(
+        // Tier 2: Specific Date Policy Override (Short-Circuiting)
+        var datePolicy = await _branchPolicyService.GetPolicyAsync(
             branchId,
             reservationDate,
-            guestCount,
             cancellationToken);
 
-        if (branchResult.Status != BranchReservationPolicyEvaluationStatus.Allowed)
+        if (datePolicy is not null)
         {
-            return branchResult.Status switch
+            if (datePolicy.RuleType == BranchReservationRuleType.Closed)
             {
-                BranchReservationPolicyEvaluationStatus.InvalidBranch =>
-                    new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.InvalidBranch),
-                BranchReservationPolicyEvaluationStatus.InvalidGuestCount =>
-                    new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.InvalidGuestCount),
-                BranchReservationPolicyEvaluationStatus.BranchClosedDate =>
-                    new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.BranchClosedDate),
-                BranchReservationPolicyEvaluationStatus.MinimumGuestsNotMet =>
-                    new ReservationPolicyEvaluationResult(
-                        ReservationPolicyEvaluationStatus.MinimumGuestsNotMet,
-                        branchResult.MinGuests),
-                _ => throw new InvalidOperationException("Unsupported branch reservation policy evaluation result.")
-            };
-        }
-
-        // Tier 3: City Day-of-Week Policy (HCMC branches only)
-        var isHcmc = !string.IsNullOrWhiteSpace(branch.City) && 
-                     (branch.City.Contains("Hồ Chí Minh", StringComparison.OrdinalIgnoreCase) || 
-                      branch.City.Contains("HCM", StringComparison.OrdinalIgnoreCase));
-
-        if (isHcmc)
-        {
-            var isWeekend = reservationDate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
-            var requiredMinGuests = isWeekend ? 10 : 6;
-
-            if (guestCount < requiredMinGuests)
-            {
-                return new ReservationPolicyEvaluationResult(
-                    ReservationPolicyEvaluationStatus.MinimumGuestsNotMet,
-                    requiredMinGuests);
+                return new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.BranchClosedDate);
             }
+
+            if (datePolicy.RuleType == BranchReservationRuleType.MinimumGuests && datePolicy.MinGuests.HasValue)
+            {
+                if (guestCount < datePolicy.MinGuests.Value)
+                {
+                    return new ReservationPolicyEvaluationResult(
+                        ReservationPolicyEvaluationStatus.MinimumGuestsNotMet,
+                        datePolicy.MinGuests.Value);
+                }
+
+                return new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.Allowed);
+            }
+
+            return new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.Allowed);
         }
 
+        // Tier 3: Branch Weekly Default Policy (Only evaluated when NO specific date policy row exists in Tier 2)
+        var isWeekend = reservationDate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+        var defaultMinGuests = isWeekend ? branch.WeekendMinGuests : branch.WeekdayMinGuests;
+
+        if (defaultMinGuests.HasValue && guestCount < defaultMinGuests.Value)
+        {
+            return new ReservationPolicyEvaluationResult(
+                ReservationPolicyEvaluationStatus.MinimumGuestsNotMet,
+                defaultMinGuests.Value);
+        }
+
+        // Tier 4: Allowed
         return new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.Allowed);
     }
 }

@@ -29,6 +29,8 @@ KIGHolding/
 │       └── Views/            # Razor views for Admin dashboard management
 ├── Controllers/              # Public controllers (Home, About, Branch, Contact, Franchise, Member, Menu, News, Reservation, Seo)
 ├── Data/                     # EF Core DbContext, entity configurations, and DbInitializer
+├── Helpers/                  # Presentation and media URI helpers (MediaUrlHelper.cs)
+├── Hubs/                     # SignalR real-time notification hubs (AdminReservationNotificationHub.cs)
 ├── Migrations/               # PostgreSQL schema migrations
 ├── Models/
 │   ├── Entities/             # C# classes mapped to DB tables (Branch, MenuGroup, MenuPageImage, Reservation, Post, etc.)
@@ -65,14 +67,20 @@ The services configured in `Program.cs` isolate database access and external API
 | `IBranchReservationDatePolicyService` | Scoped | Exact branch/date policy queries, validated optimistic mutations, impact counts, and cleanup |
 | `IReservationPolicyEvaluator` | Scoped | Composes past-date, global, branch, and guest-count rules with global-first precedence |
 | `IReservationPolicyLockService` | Scoped | Transaction-scoped PostgreSQL advisory locks shared by booking and policy writers |
+| `IAdminReservationNotifier` | Scoped | Dispatches post-commit real-time reservation notifications to the admin SignalR hub |
 | `IContactService` | Scoped | Logic for storing franchise and general contact messages |
 | `IEmailService` | Scoped | Dispatches emails via Resend integration for notifications |
 | `IImageStorageService` | Scoped | Orchestrates image uploads/deletes across Cloudflare R2, LocalVolume, and Cloudinary providers |
 | `IImageStorageProvider` implementations | Scoped | Provider-specific upload/delete behavior for LocalVolume, Cloudinary, and Cloudflare R2 |
 | `ICloudflareR2Client` | Singleton | S3-compatible Cloudflare R2 client wrapper; created lazily and used only for R2 operations |
 | `IPasswordHasher<AdminUser>` | Scoped | Secure hashing using PBKDF2 for admin credentials |
+| `AdminBootstrapConfigurationResolver` | Scoped | Resolves and validates startup bootstrap credentials and legacy remediation options |
+| `IAdminLegacyCredentialGuard` | Scoped | Startup guard verifying and remediating historical unhardened admin seed credentials |
+| `DbInitializer` | Scoped | Migrates database schema and seeds initial content and administrator account |
 | `AdminCookieAuthenticationEvents`| Scoped | Validates admin session cookie and security stamp consistency |
-| `IMemoryCache` | Singleton | Bounded memory cache (`SizeLimit = 50_000` in `Program.cs`) for rate limit gating |
+| `ReservationPolicyCleanupHostedService` | HostedService | Background service performing daily physical purge of past policy dates (`Date < VietnamToday`) |
+| `TimeProvider` | Singleton | Abstracted system time provider (`TimeProvider.System`) injected for deterministic clock operations |
+| `IMemoryCache` | Singleton | Bounded memory cache (`options.SizeLimit = 50_000` in `Program.cs`); all cache writers explicitly declare `entry.Size = 1` |
 
 ### Reservation Calendar Policy Boundary
 

@@ -217,7 +217,24 @@ Branch policy `Version` is an application-generated UUID concurrency token, not 
 
 Migration `20261019052426_AddBranchReservationDatePolicies` is created but not applied to staging or production. It must be applied before deploying code that queries the new table, and old/new application versions must not concurrently serve policy-sensitive traffic. The isolated PostgreSQL verification passed all 12 cases; staging migration and production deployment remain separate, unauthorized gates.
 
-The public `GET /dat-ban/policy` endpoint accepts one branch ID, reservation date, and guest count, validates the request, and delegates directly to `IReservationPolicyEvaluator`. Its compact response exposes the semantic status, customer-safe field/message, applicable minimum guest threshold, and when `MinimumGuestsNotMet` occurs, includes `branchName`, `branchHotline`, and `canCallHotline: true` to power the reactive hotline callout on client forms. Tier 3 evaluates city-level capacity rules for HCMC branches (min 6 guests on Mon–Fri, min 10 guests on Sat–Sun), while branches like Tân Phú also enforce weekend lunch breaks via `LunchBreakAppliesOnWeekend`. It is non-cacheable, read-only, and fail-closed: malformed input returns 400 and evaluator/database failure returns a safe 500 response, never `Allowed`. The full form and quick modal recheck this endpoint immediately before their existing POST contracts; the POSTs still rely on `ReservationService` for the authoritative locked evaluation and all operational rules.
+The public `GET /dat-ban/policy` endpoint accepts one branch ID, reservation date, and guest count, validates the request, and delegates directly to `IReservationPolicyEvaluator`. Its compact response exposes the semantic status, customer-safe field/message, applicable minimum guest threshold, and when `MinimumGuestsNotMet` occurs, includes `branchName`, `branchHotline`, and `canCallHotline: true` to power the reactive hotline callout on client forms.
+
+### Reservation Policy Evaluation Hierarchy (4-Tier Precedence)
+
+Policy evaluation adheres to a strict 4-tier hierarchy implemented in `ReservationPolicyEvaluator`:
+
+1. **Tier 1 (Global Blocked Date)**: Checks `_globalPolicyService.IsDateBlockedAsync(reservationDate)`. If blocked, returns `GlobalBlockedDate` (fail-closed, highest priority).
+2. **Tier 2 (Specific Date Override - Short-Circuiting)**: Queries `_branchPolicyService.GetPolicyAsync(branch.Id, reservationDate)`. If an exact date policy exists:
+   * `RuleType == Closed`: Returns `BranchClosedDate`.
+   * `RuleType == MinimumGuests` with `MinGuests.HasValue`: If `guestCount < MinGuests.Value`, returns `MinimumGuestsNotMet(MinGuests.Value)`. If the customer meets the threshold, **it immediately short-circuits and returns `Allowed`**, strictly superseding Tier 3 weekly branch defaults. This guarantees that promotional date overrides (e.g., setting `MinGuests = 2` on an HCMC branch on a Saturday) are honored without falling through.
+3. **Tier 3 (Branch Weekly Default Policy)**: Evaluated strictly when **no** Tier 2 date record exists:
+   * Inspects `isWeekend = reservationDate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday`.
+   * Resolves `defaultMinGuests = isWeekend ? branch.WeekendMinGuests : branch.WeekdayMinGuests`.
+   * If `defaultMinGuests.HasValue && guestCount < defaultMinGuests.Value`, returns `MinimumGuestsNotMet(defaultMinGuests.Value)`.
+   * *Note*: City string matching (e.g. `"HCM"`, `"Hồ Chí Minh"`) is eliminated. Capacity rules are fully entity-driven via `WeekdayMinGuests` (seeded as 6 for HCMC) and `WeekendMinGuests` (seeded as 10 for HCMC) on `Branch`.
+4. **Tier 4 (Unrestricted Booking)**: Returns `Allowed`.
+
+`ReservationService.cs` early capacity validation invokes `_policyEvaluator.EvaluateAsync(branch, ...)` before acquiring PostgreSQL advisory locks, maintaining identical business rule enforcement between pre-lock checks and transactional booking execution. It is non-cacheable, read-only, and fail-closed: malformed input returns 400 and evaluator/database failure returns a safe 500 response, never `Allowed`. The full form and quick modal recheck this endpoint immediately before their existing POST contracts; the POSTs still rely on `ReservationService` for the authoritative locked evaluation and all operational rules.
 
 If an Admin policy update commits before a booking acquires its date lock and performs the final read, the booking observes the new rule. If the booking holds the lock and commits first, a later restriction does not alter that reservation. Lock failures propagate and fail closed. The source protocol does not make older deployed instances participate; mixed-version deployments require a controlled rollout and relational concurrency verification.
 

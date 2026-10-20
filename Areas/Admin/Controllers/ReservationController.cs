@@ -24,6 +24,7 @@ public class ReservationController : AdminBaseController
     private readonly IDataProtector _impactConfirmationProtector;
     private readonly ILogger<ReservationController> _logger;
     private readonly TimeProvider _timeProvider;
+    private readonly IBranchService? _branchService;
 
     public ReservationController(
         AppDbContext dbContext,
@@ -31,7 +32,8 @@ public class ReservationController : AdminBaseController
         IBranchReservationDatePolicyService branchPolicyService,
         IDataProtectionProvider dataProtectionProvider,
         ILogger<ReservationController> logger,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IBranchService? branchService = null)
     {
         _dbContext = dbContext;
         _blockedDateService = blockedDateService;
@@ -40,6 +42,7 @@ public class ReservationController : AdminBaseController
             "KIGHolding.Admin.BranchReservationPolicy.ImpactConfirmation.v1");
         _logger = logger;
         _timeProvider = timeProvider;
+        _branchService = branchService;
     }
 
     [HttpGet]
@@ -336,6 +339,59 @@ public class ReservationController : AdminBaseController
         }
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateBranchWeeklyDefaults(
+        Guid branchId,
+        int? weekdayMinGuests,
+        int? weekendMinGuests,
+        bool applyToAllHcmc,
+        int year,
+        int month,
+        CancellationToken cancellationToken)
+    {
+        if ((weekdayMinGuests.HasValue && weekdayMinGuests.Value is < 1 or > 100) ||
+            (weekendMinGuests.HasValue && weekendMinGuests.Value is < 1 or > 100))
+        {
+            TempData["ErrorMessage"] = "Số khách tối thiểu phải nằm trong khoảng từ 1 đến 100.";
+            return RedirectToAction(nameof(BranchPolicy), new { branchId, year, month });
+        }
+
+        var branch = await _dbContext.Branches.FindAsync([branchId], cancellationToken);
+        if (branch is null)
+        {
+            return NotFound();
+        }
+
+        if (applyToAllHcmc)
+        {
+            var hcmcBranches = await _dbContext.Branches
+                .Where(b => b.IsActive && b.AllowsReservations &&
+                            (b.City.Contains("Hồ Chí Minh") || b.City.Contains("HCM")))
+                .ToListAsync(cancellationToken);
+
+            foreach (var b in hcmcBranches)
+            {
+                b.WeekdayMinGuests = weekdayMinGuests;
+                b.WeekendMinGuests = weekendMinGuests;
+            }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            _branchService?.InvalidateActiveBranchesCache();
+            TempData["SuccessMessage"] = $"Đã cập nhật số khách tối thiểu mặc định cho {hcmcBranches.Count} chi nhánh TP.HCM.";
+        }
+        else
+        {
+            branch.WeekdayMinGuests = weekdayMinGuests;
+            branch.WeekendMinGuests = weekendMinGuests;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            _branchService?.InvalidateActiveBranchesCache();
+            TempData["SuccessMessage"] = $"Đã cập nhật số khách tối thiểu mặc định cho chi nhánh {branch.Name}.";
+        }
+
+        return RedirectToAction(nameof(BranchPolicy), new { branchId, year, month });
+    }
+
     [HttpGet]
     public async Task<IActionResult> Details(
         Guid id,
@@ -512,7 +568,7 @@ public class ReservationController : AdminBaseController
             .Where(branch => branch.IsActive && branch.AllowsReservations)
             .OrderBy(branch => branch.DisplayOrder)
             .ThenBy(branch => branch.Name)
-            .Select(branch => new { branch.Id, branch.Name, branch.City })
+            .Select(branch => new { branch.Id, branch.Name, branch.City, branch.WeekdayMinGuests, branch.WeekendMinGuests })
             .ToListAsync(cancellationToken);
 
         var selectedBranch = requestedBranchId.HasValue
@@ -590,6 +646,9 @@ public class ReservationController : AdminBaseController
             CalendarMonth = month,
             SelectedBranchId = selectedBranch?.Id,
             SelectedBranchName = selectedBranch?.Name,
+            SelectedBranchCity = selectedBranch?.City,
+            BranchWeekdayMinGuests = selectedBranch?.WeekdayMinGuests,
+            BranchWeekendMinGuests = selectedBranch?.WeekendMinGuests,
             BranchOptions = branches.Select(branch => new SelectListItem
             {
                 Value = branch.Id.ToString(),

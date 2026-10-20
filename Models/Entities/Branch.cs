@@ -15,6 +15,8 @@ public class Branch : IUpdatedAtEntity
     public TimeOnly? LunchBreakStart { get; set; }
     public TimeOnly? LunchBreakEnd { get; set; }
     public bool LunchBreakAppliesOnWeekend { get; set; } = false;
+    public int? WeekdayMinGuests { get; set; }
+    public int? WeekendMinGuests { get; set; }
     public int Capacity { get; set; }
     public decimal? AreaSquareMeters { get; set; }
     public int? NumberOfFloors { get; set; }

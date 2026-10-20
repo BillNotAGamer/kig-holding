@@ -54,6 +54,14 @@ public class BranchCreateViewModel
     [Display(Name = "Áp dụng nghỉ trưa vào cuối tuần (Thứ 7 & Chủ Nhật)")]
     public bool LunchBreakAppliesOnWeekend { get; set; } = false;
 
+    [Range(1, 100, ErrorMessage = "Số khách tối thiểu từ 1 đến 100.")]
+    [Display(Name = "Số khách tối thiểu T2 - T6")]
+    public int? WeekdayMinGuests { get; set; }
+
+    [Range(1, 100, ErrorMessage = "Số khách tối thiểu T7 - CN")]
+    [Display(Name = "Số khách tối thiểu T7 - CN")]
+    public int? WeekendMinGuests { get; set; }
+
     [Range(0, int.MaxValue, ErrorMessage = "Sức chứa không hợp lệ.")]
     [Display(Name = "Sức chứa")]
     public int Capacity { get; set; }

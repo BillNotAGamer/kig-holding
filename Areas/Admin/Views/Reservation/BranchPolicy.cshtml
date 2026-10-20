@@ -42,6 +42,18 @@
             @Model.PageMessage
         </div>
     }
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800" role="alert">
+            @successMessage
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800" role="alert">
+            @errorMessage
+        </div>
+    }
 
     @if (Model.BranchOptions.Count == 0)
     {
@@ -68,6 +80,50 @@
             <input type="hidden" name="month" value="@Model.CalendarMonth" />
             <button type="submit" class="btn-secondary min-h-11">Xem lịch chi nhánh</button>
         </form>
+
+        <div class="admin-card p-4 sm:p-5">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-brand-border/60 pb-3">
+                <div>
+                    <h3 class="font-black text-brand-dark">Quy định mặc định theo tuần của chi nhánh</h3>
+                    <p class="text-xs text-brand-gray">Áp dụng cho mọi ngày không có quy định riêng trong tháng. Được tự động kế thừa trên lịch bên dưới.</p>
+                </div>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-light px-3 py-1 text-xs font-bold text-brand-dark">
+                    Chi nhánh: <strong>@Model.SelectedBranchName</strong> (@(string.IsNullOrWhiteSpace(Model.SelectedBranchCity) ? "N/A" : Model.SelectedBranchCity))
+                </span>
+            </div>
+
+            <form method="post" asp-area="Admin" asp-controller="Reservation" asp-action="UpdateBranchWeeklyDefaults" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="branchId" value="@Model.SelectedBranchId" />
+                <input type="hidden" name="year" value="@Model.CalendarYear" />
+                <input type="hidden" name="month" value="@Model.CalendarMonth" />
+
+                <div>
+                    <label class="admin-label mb-1 text-xs font-bold" for="quick-weekday-min">Thứ Hai - Thứ Sáu (Tối thiểu)</label>
+                    <input id="quick-weekday-min" name="weekdayMinGuests" type="number" min="1" max="100" class="admin-field h-10 text-sm" placeholder="Không giới hạn" value="@Model.BranchWeekdayMinGuests" />
+                </div>
+                <div>
+                    <label class="admin-label mb-1 text-xs font-bold" for="quick-weekend-min">Thứ Bảy - Chủ Nhật (Tối thiểu)</label>
+                    <input id="quick-weekend-min" name="weekendMinGuests" type="number" min="1" max="100" class="admin-field h-10 text-sm" placeholder="Không giới hạn" value="@Model.BranchWeekendMinGuests" />
+                </div>
+                @if (Model.IsSelectedBranchHcmc)
+                {
+                    <div class="flex items-center gap-2 pt-2 sm:pt-0">
+                        <label class="admin-post-checkbox-shell text-xs font-semibold text-brand-dark">
+                            <input type="checkbox" name="applyToAllHcmc" value="true" class="admin-checkbox" />
+                            <span>Đồng bộ cho tất cả chi nhánh TP.HCM</span>
+                        </label>
+                    </div>
+                }
+                else
+                {
+                    <div></div>
+                }
+                <div>
+                    <button type="submit" class="btn-primary w-full min-h-10 text-xs font-bold uppercase tracking-wider">Lưu mặc định tuần</button>
+                </div>
+            </form>
+        </div>
 
         <div class="admin-card space-y-5 p-4 sm:p-5">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -108,6 +164,9 @@
                             var isPast = date < Model.VietnamToday;
                             var isGlobalBlocked = Model.GlobalBlockedDates.Contains(date);
                             policies.TryGetValue(date, out var branchPolicy);
+                            var isWeekend = date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+                            var weeklyDefaultMin = isWeekend ? Model.BranchWeekendMinGuests : Model.BranchWeekdayMinGuests;
+
                             var branchRule = branchPolicy?.RuleType switch
                             {
                                 BranchReservationRuleType.Closed => BranchPolicyAdminRuleType.Closed,
@@ -117,8 +176,10 @@
                             var branchLabel = branchPolicy?.RuleType switch
                             {
                                 BranchReservationRuleType.Closed => "Không nhận đặt bàn",
-                                BranchReservationRuleType.MinimumGuests => $"Tối thiểu {branchPolicy.MinGuests} khách",
-                                _ => "Cho phép đặt bàn"
+                                BranchReservationRuleType.MinimumGuests => $"Tối thiểu {branchPolicy.MinGuests} khách (Riêng ngày)",
+                                _ => (weeklyDefaultMin.HasValue && weeklyDefaultMin.Value > 1)
+                                    ? $"Tối thiểu {weeklyDefaultMin.Value} khách (Mặc định)"
+                                    : "Cho phép đặt bàn"
                             };
                             var effectiveLabel = isPast ? "Đã qua" : isGlobalBlocked ? "Khóa toàn hệ thống" : branchLabel;
                             var stateClass = isPast
@@ -127,7 +188,7 @@
                                     ? "branch-policy-state-global"
                                     : branchRule == BranchPolicyAdminRuleType.Closed
                                         ? "branch-policy-state-closed"
-                                        : branchRule == BranchPolicyAdminRuleType.MinimumGuests
+                                        : (branchRule == BranchPolicyAdminRuleType.MinimumGuests || (weeklyDefaultMin.HasValue && weeklyDefaultMin.Value > 1))
                                             ? "branch-policy-state-minimum"
                                             : "branch-policy-state-allowed";
 
@@ -199,15 +260,15 @@
                     <div class="grid gap-3 md:grid-cols-3">
                         <label class="branch-policy-choice">
                             <input asp-for="Editor.RuleType" type="radio" value="Allowed" />
-                            <span><strong>Cho phép đặt bàn</strong><small>Xóa quy định riêng của ngày này.</small></span>
+                            <span><strong>Cho phép đặt bàn (Mặc định tuần)</strong><small>Xóa quy định riêng của ngày này, áp dụng mặc định tuần của chi nhánh.</small></span>
                         </label>
                         <label class="branch-policy-choice">
                             <input asp-for="Editor.RuleType" type="radio" value="Closed" />
-                            <span><strong>Không nhận đặt bàn</strong><small>Chặn mọi lượt đặt bàn mới tại chi nhánh.</small></span>
+                            <span><strong>Không nhận đặt bàn</strong><small>Chặn mọi lượt đặt bàn mới tại chi nhánh cho riêng ngày này.</small></span>
                         </label>
                         <label class="branch-policy-choice">
                             <input asp-for="Editor.RuleType" type="radio" value="MinimumGuests" />
-                            <span><strong>Số khách tối thiểu</strong><small>Chỉ nhận đoàn đạt ngưỡng được nhập.</small></span>
+                            <span><strong>Số khách tối thiểu riêng</strong><small>Ghi đè số khách tối thiểu cho riêng ngày này.</small></span>
                         </label>
                     </div>
                     <span asp-validation-for="Editor.RuleType" class="block text-sm font-semibold text-red-700"></span>

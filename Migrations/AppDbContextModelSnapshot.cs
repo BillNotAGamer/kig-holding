@@ -220,6 +220,12 @@ namespace KIGHolding.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<int?>("WeekdayMinGuests")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("WeekendMinGuests")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Slug")

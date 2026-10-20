@@ -142,15 +142,16 @@ public class ReservationService : IReservationService
             var branchPolicyAllowsRequest = true;
             if (request.GuestCount is >= 1 and <= 100)
             {
-                var branchPolicyResult = await _branchPolicyService.EvaluateAsync(
+                var policyResult = await _policyEvaluator.EvaluateAsync(
                     request.BranchId,
                     request.ReservationDate,
                     request.GuestCount,
+                    today,
                     cancellationToken);
 
-                if (!branchPolicyResult.IsAllowed)
+                if (!policyResult.IsAllowed)
                 {
-                    errors.Add(CreateBranchPolicyError(branchPolicyResult));
+                    errors.Add(CreatePolicyError(policyResult));
                     branchPolicyAllowsRequest = false;
                 }
             }

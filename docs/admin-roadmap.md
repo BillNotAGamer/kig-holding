@@ -127,24 +127,27 @@ Create a database entity in `Models/Entities/` (e.g. `Branch.cs`). Annotate prim
 ```csharp
 namespace KIGHolding.Models.Entities;
 
-public class Branch
+public class Branch : IUpdatedAtEntity
 {
-    public int Id { get; set; }
-    public required string Name { get; set; }
-    public string? Address { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 ```
 
 ### Step 2: Register DbSet & Run Migrations
 1. Open [AppDbContext.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Data/AppDbContext.cs) and expose your new collection:
    ```csharp
-   public DbSet<Branch> Branches { get; set; }
+   public DbSet<Branch> Branches => Set<Branch>();
    ```
 2. Run database migration commands in your terminal:
    ```powershell
-   dotnet ef migrations add AddBranchesTable
-   dotnet ef database update
+   dotnet ef migrations add AddBranchesTable --project KIGHolding.csproj
+   dotnet ef database update --project KIGHolding.csproj
    ```
 
 ### Step 3: Implement Business Logic Layer
@@ -160,37 +163,78 @@ Create ViewModels in `Areas/Admin/ViewModels/` (e.g. `BranchEditViewModel.cs`) c
 > Always apply mandatory `DataAnnotations` (like `[Required]`, `[StringLength]`, `[EmailAddress]`) on ViewModels to assert model integrity before processing database commits.
 
 ### Step 5: Implement Admin Controller
-Create your controller in `Areas/Admin/Controllers/` inheriting from `AdminBaseController` to leverage unified layout bindings:
+Create your controller in `Areas/Admin/Controllers/` inheriting from `AdminBaseController` to leverage unified layout bindings. In the KIG Holding architecture, Admin controllers query `AppDbContext` directly with database-level paging, bypassing public caches while explicitly invalidating public caches on write:
 ```csharp
 using KIGHolding.Areas.Admin.Controllers;
+using KIGHolding.Areas.Admin.ViewModels;
+using KIGHolding.Data;
+using KIGHolding.Models.Entities;
+using KIGHolding.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace KIGHolding.Areas.Admin.Controllers;
 
 public class BranchController : AdminBaseController
 {
+    private const int PageSize = 10;
+    private readonly AppDbContext _dbContext;
     private readonly IBranchService _branchService;
 
-    public BranchController(IBranchService branchService)
+    public BranchController(AppDbContext dbContext, IBranchService branchService)
     {
+        _dbContext = dbContext;
         _branchService = branchService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1)
     {
-        var branches = await _branchService.GetAllAsync();
-        return View(branches);
+        var requestedPage = Math.Max(page, 1);
+        var query = _dbContext.Branches.AsNoTracking();
+        var totalItems = await query.CountAsync();
+        var totalPages = Math.Max(1, (int)Math.Ceiling(totalItems / (double)PageSize));
+        var currentPage = Math.Min(requestedPage, totalPages);
+
+        var branches = await query
+            .OrderBy(x => x.DisplayOrder)
+            .ThenBy(x => x.Name)
+            .Skip((currentPage - 1) * PageSize)
+            .Take(PageSize)
+            .ToListAsync();
+
+        return View(new BranchIndexViewModel
+        {
+            Branches = branches,
+            Page = currentPage,
+            PageSize = PageSize,
+            TotalItems = totalItems,
+            TotalPages = totalPages
+        });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(BranchEditViewModel model)
+    public async Task<IActionResult> Create(BranchCreateViewModel model)
     {
         if (!ModelState.IsValid)
         {
             return View(model);
         }
-        await _branchService.CreateAsync(model);
+
+        var branch = new Branch
+        {
+            Name = model.Name.Trim(),
+            Address = model.Address.Trim(),
+            IsActive = model.IsActive
+        };
+
+        _dbContext.Branches.Add(branch);
+        await _dbContext.SaveChangesAsync();
+
+        // Invalidate public memory cache so website visitors see changes immediately
+        _branchService.InvalidateActiveBranchesCache();
+
         TempData["SuccessMessage"] = "Đã thêm chi nhánh mới!";
         return RedirectToAction(nameof(Index));
     }
@@ -211,3 +255,59 @@ Finally, insert the navigation hook inside [_AdminLayout.cshtml](file:///f:/Codi
     Quản lý Chi nhánh
 </a>
 ```
+
+---
+
+## 5. Admin Credential Bootstrap & Authentication Architecture
+
+To protect production deployments against default or unhardened credentials while guaranteeing zero-touch automated setup, the admin back-office uses a defense-in-depth bootstrapping architecture:
+
+### 5.1 Credential Configuration (`AdminBootstrapSettings`)
+Configured in `appsettings.json` or environment variables under the `AdminBootstrap` section:
+```json
+{
+  "AdminBootstrap": {
+    "Username": "production_admin",
+    "Password": "SuperSecretPassword123!",
+    "Email": "admin@kigholding.vn",
+    "RemediateLegacySeed": true
+  }
+}
+```
+* **Password Policy Enforcement**: Validated by `AdminPasswordPolicy.Validate`: minimum 12 characters, requiring uppercase, lowercase, digit, and a non-alphanumeric special character.
+* **Email Normalization**: Validated and normalized by `AdminEmailNormalizer` (lowercased, trimmed, max 256 characters).
+
+### 5.2 Legacy Seed Remediation Guard (`AdminLegacyCredentialGuard`)
+Migration `20260508052050_AddAdminUserTable` seeded an initial admin record (`Id: 2d7d0dd3-7d9d-4d9b-93d8-8e2d2b8ed9b1`, username `"admin"`, role `"SuperAdmin"`, seed timestamp `2026-05-08 00:00:00 UTC`).
+* **Startup Enforcement**: On every application startup in `Program.cs`, `AdminLegacyCredentialGuard.EnsureSecureAsync()` inspects the database.
+* **Fail-Closed Protection**: If `LegacyAdminSeedFingerprint.IsExactUnremediatedHistoricalSeed(legacyAdmin)` matches and `RemediateLegacySeed` is `false`, the application **aborts startup immediately** with an `InvalidOperationException`.
+* **Automatic Remediation**: When `RemediateLegacySeed` is `true`, the guard updates the seed account with the validated bootstrap credentials, hashes the password via `IPasswordHasher<AdminUser>` (PBKDF2), generates a fresh 32-byte cryptographic security stamp, and persists the changes.
+
+### 5.3 Session Security & Stamp Invalidation (`AdminCookieAuthenticationEvents`)
+* **Sliding Session**: The admin cookie (`KIGHolding.AdminAuth`) is configured with `SlidingExpiration = true` and `ExpireTimeSpan = TimeSpan.FromHours(8)` (extended to 14 days if `RememberMe` is checked).
+* **Cryptographic Security Stamp**: On login, `AdminSecurityStampGenerator.Create()` stamps the user record with 32 secure random bytes formatted as a 64-character hexadecimal string, embedded into the cookie claims via `AdminClaimTypes.SecurityStamp`.
+* **Per-Request Principal Validation**: `AdminCookieAuthenticationEvents.ValidatePrincipal` intercepts every admin request, queries `AppDbContext.AdminUsers.AsNoTracking()`, and verifies `user.IsActive` and `user.SecurityStamp == cookieStamp`. If an administrator deactivates an account or rotates credentials, all active cookie sessions for that user are rejected and signed out immediately.
+
+---
+
+## 6. Branch Reservation Policy & Weekly Defaults Workflow
+
+The Admin portal provides comprehensive capacity and schedule management at `/Admin/Reservation/BranchPolicy` and `/Admin/Branch`.
+
+### 6.1 Synchronized Calendar Visualization
+The branch reservation policy calendar visually reflects the unified 4-tier policy evaluation state for each calendar day:
+* **Specific Date Closed (`Closed`)**: Renders in Red (`.branch-policy-state-closed`) with badge `"Không nhận đặt bàn"`.
+* **Specific Date Minimum Override (`MinimumGuests`)**: Renders in Amber (`.branch-policy-state-minimum`) with badge `"Tối thiểu {X} khách (Riêng ngày)"`.
+* **Inherited Weekly Default (`weeklyDefaultMin > 1`)**: When no date override exists in the database, the calendar automatically calculates `isWeekend ? branch.WeekendMinGuests : branch.WeekdayMinGuests` and renders in Amber (`.branch-policy-state-minimum`) with badge `"Tối thiểu {X} khách (Mặc định)"`.
+* **Unrestricted Default**: Renders in Green (`.branch-policy-state-allowed`) with badge `"Cho phép đặt bàn"`.
+
+### 6.2 Weekly Defaults Quick Configuration & 1-Click HCMC Sync
+A dedicated configuration card is placed directly above the calendar grid on `/Admin/Reservation/BranchPolicy`:
+* Allows immediate viewing and modification of `WeekdayMinGuests` (Mon–Fri) and `WeekendMinGuests` (Sat–Sun) for the selected branch.
+* Form submits via POST `UpdateBranchWeeklyDefaults` with anti-forgery verification.
+* **1-Click Bulk HCMC Sync**: When the selected branch is located in Ho Chi Minh City (`IsSelectedBranchHcmc`), admins can check `"Áp dụng cho tất cả chi nhánh TP.HCM"` to propagate the values to all HCMC branches in a single atomic transaction.
+* Both single-branch and bulk updates trigger `_branchService.InvalidateActiveBranchesCache()` to refresh public caches immediately.
+
+### 6.3 Branch Management Integration
+* `BranchCreateViewModel` and `BranchEditViewModel` include `WeekdayMinGuests` and `WeekendMinGuests` with `[Range(1, 100)]` validation attributes.
+* Fields are editable from `/Admin/Branch/Create` and `/Admin/Branch/Edit`, and automatically persisted to `Branches` on save.

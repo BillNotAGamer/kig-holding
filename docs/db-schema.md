@@ -22,6 +22,7 @@ The database schema has evolved through the following migrations:
 12. **`20260901170736_AddBlockedReservationDatePolicy`**: Creates the DB-backed reservation closure-date table and seeds the 23 remaining future legacy blocked dates. This migration is created for review and has not been applied by implementation work.
 13. **`20261019052426_AddBranchReservationDatePolicies`**: Additively creates the branch/date policy table, its invariants, revision token, restricted Branch FK, and cleanup index.
 14. **`20261020140141_AddBranchWeekendLunchBreakSupport`**: Adds `LunchBreakAppliesOnWeekend` boolean column to `Branches` (default `false`) and activates it for the Tân Phú branch.
+15. **`20261020210843_AddBranchWeeklyGuestCapacityLimits`**: Adds `WeekdayMinGuests` and `WeekendMinGuests` nullable integer columns to `Branches`, with migration SQL setting `WeekdayMinGuests = 6` and `WeekendMinGuests = 10` for existing HCMC branches.
 
 ---
 
@@ -54,6 +55,8 @@ Describes branch locations, active times, and coordinates.
 *   **OpeningTime** / **ClosingTime** (`TimeOnly`): Active working hours.
 *   **LunchBreakStart** / **LunchBreakEnd** (`TimeOnly?`): Optional branch break time windows (defaults to 14:30 - 16:30).
 *   **LunchBreakAppliesOnWeekend** (`bool`): Flag determining whether lunch break hours apply on Saturdays and Sundays (enabled for Tân Phú branch, default `false`).
+*   **WeekdayMinGuests** (`int?`): Minimum guests required for reservations Monday–Friday (e.g., 6 for HCMC branches).
+*   **WeekendMinGuests** (`int?`): Minimum guests required for reservations Saturday–Sunday (e.g., 10 for HCMC branches).
 *   **Capacity** (`int`): Maximum dining capacity.
 *   **AreaSquareMeters** (`decimal?`) / **NumberOfFloors** (`int?`): Structural sizes.
 *   **ThumbnailUrl** (`string`): Cloudinary/Local asset path for index displays.
