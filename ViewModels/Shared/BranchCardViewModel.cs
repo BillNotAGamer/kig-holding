@@ -15,6 +15,10 @@ public class BranchCardViewModel
     public string Hotline { get; set; } = string.Empty;
     public string OpeningHours { get; set; } = string.Empty;
     public string? LunchBreakHours { get; set; }
+    public bool LunchBreakAppliesOnWeekend { get; set; }
+    public string LunchBreakLabel => LunchBreakAppliesOnWeekend
+        ? "GIỜ NGHỈ TRƯA"
+        : "GIỜ NGHỈ TRƯA (TRỪ THỨ BẢY, CHỦ NHẬT)";
     public string GoogleMapUrl { get; set; } = "#";
     public int Capacity { get; set; }
     public decimal? AreaSquareMeters { get; set; }
@@ -36,6 +40,7 @@ public class BranchCardViewModel
             Hotline = branch.Hotline,
             OpeningHours = FormatTimeRange(branch.OpeningTime, branch.ClosingTime),
             LunchBreakHours = FormatLunchBreakHours(branch),
+            LunchBreakAppliesOnWeekend = branch.LunchBreakAppliesOnWeekend,
             GoogleMapUrl = string.IsNullOrWhiteSpace(branch.GoogleMapUrl) ? "#" : branch.GoogleMapUrl,
             Capacity = branch.Capacity,
             AreaSquareMeters = branch.AreaSquareMeters,
