@@ -15,6 +15,7 @@ public class ReservationController : Controller
     private const string DefaultBusinessRecipientEmail = "truyenthuyetchamponghcm@gmail.com";
 
     private readonly IReservationService _reservationService;
+    private readonly IReservationPolicyEvaluator _reservationPolicyEvaluator;
     private readonly IBranchService _branchService;
     private readonly ISiteSettingService _siteSettingService;
     private readonly IEmailService _emailService;
@@ -25,6 +26,7 @@ public class ReservationController : Controller
 
     public ReservationController(
         IReservationService reservationService,
+        IReservationPolicyEvaluator reservationPolicyEvaluator,
         IBranchService branchService,
         ISiteSettingService siteSettingService,
         IEmailService emailService,
@@ -34,6 +36,7 @@ public class ReservationController : Controller
         TimeProvider timeProvider)
     {
         _reservationService = reservationService;
+        _reservationPolicyEvaluator = reservationPolicyEvaluator;
         _branchService = branchService;
         _siteSettingService = siteSettingService;
         _emailService = emailService;
@@ -41,6 +44,102 @@ public class ReservationController : Controller
         _configuration = configuration;
         _logger = logger;
         _timeProvider = timeProvider;
+    }
+
+    [HttpGet("policy")]
+    [Produces("application/json")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> Policy(
+        [FromQuery] Guid? branchId,
+        [FromQuery] DateOnly? reservationDate,
+        [FromQuery] int? guestCount,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            if (ModelState["branchId"] is { Errors.Count: > 0 })
+            {
+                return BadRequest(CreatePolicyPayload(
+                    ReservationPolicyEvaluationStatus.InvalidBranch.ToString(),
+                    nameof(ReservationCreateViewModel.BranchId),
+                    "Chi nh\u00e1nh kh\u00f4ng h\u1ee3p l\u1ec7."));
+            }
+
+            if (ModelState["reservationDate"] is { Errors.Count: > 0 })
+            {
+                return BadRequest(CreatePolicyPayload(
+                    "InvalidRequest",
+                    nameof(ReservationCreateViewModel.ReservationDate),
+                    "Ng\u00e0y \u0111\u1ebfn kh\u00f4ng h\u1ee3p l\u1ec7."));
+            }
+
+            if (ModelState["guestCount"] is { Errors.Count: > 0 })
+            {
+                return BadRequest(CreatePolicyPayload(
+                    ReservationPolicyEvaluationStatus.InvalidGuestCount.ToString(),
+                    nameof(ReservationCreateViewModel.GuestCount),
+                    ReservationPolicyMessages.InvalidGuestCount));
+            }
+
+            return BadRequest(CreatePolicyPayload(
+                "InvalidRequest",
+                null,
+                "Th\u00f4ng tin ki\u1ec3m tra ch\u00ednh s\u00e1ch \u0111\u1eb7t b\u00e0n kh\u00f4ng h\u1ee3p l\u1ec7."));
+        }
+
+        if (!branchId.HasValue || branchId.Value == Guid.Empty)
+        {
+            return BadRequest(CreatePolicyPayload(
+                ReservationPolicyEvaluationStatus.InvalidBranch.ToString(),
+                nameof(ReservationCreateViewModel.BranchId),
+                ReservationPolicyMessages.InvalidBranch));
+        }
+
+        if (!reservationDate.HasValue)
+        {
+            return BadRequest(CreatePolicyPayload(
+                "InvalidRequest",
+                nameof(ReservationCreateViewModel.ReservationDate),
+                "Ng\u00e0y \u0111\u1ebfn kh\u00f4ng h\u1ee3p l\u1ec7."));
+        }
+
+        if (!guestCount.HasValue || guestCount.Value is < 1 or > 100)
+        {
+            return BadRequest(CreatePolicyPayload(
+                ReservationPolicyEvaluationStatus.InvalidGuestCount.ToString(),
+                nameof(ReservationCreateViewModel.GuestCount),
+                ReservationPolicyMessages.InvalidGuestCount));
+        }
+
+        try
+        {
+            var result = await _reservationPolicyEvaluator.EvaluateAsync(
+                branchId.Value,
+                reservationDate.Value,
+                guestCount.Value,
+                VietnamClock.GetVietnamToday(_timeProvider),
+                cancellationToken);
+
+            return Ok(CreatePolicyPayload(
+                result.Status.ToString(),
+                GetPolicyFieldName(result.Status),
+                result.IsAllowed ? null : ReservationPolicyMessages.GetMessage(result),
+                result.MinGuests));
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Unable to evaluate public reservation policy.");
+            return StatusCode(
+                StatusCodes.Status500InternalServerError,
+                CreatePolicyPayload(
+                    "VerificationFailed",
+                    null,
+                    "Kh\u00f4ng th\u1ec3 ki\u1ec3m tra ch\u00ednh s\u00e1ch \u0111\u1eb7t b\u00e0n l\u00fac n\u00e0y. Vui l\u00f2ng th\u1eed l\u1ea1i."));
+        }
     }
 
     [HttpGet("")]
@@ -331,6 +430,35 @@ public class ReservationController : Controller
             ok = false,
             message = "Vui lòng kiểm tra lại thông tin đặt bàn.",
             errors = BuildModelStateErrors(ModelState)
+        };
+    }
+
+    private static object CreatePolicyPayload(
+        string status,
+        string? fieldName,
+        string? message,
+        int? minGuests = null)
+    {
+        return new
+        {
+            status,
+            fieldName,
+            message,
+            minGuests
+        };
+    }
+
+    private static string? GetPolicyFieldName(ReservationPolicyEvaluationStatus status)
+    {
+        return status switch
+        {
+            ReservationPolicyEvaluationStatus.PastDate or
+            ReservationPolicyEvaluationStatus.GlobalBlockedDate or
+            ReservationPolicyEvaluationStatus.BranchClosedDate => nameof(ReservationCreateViewModel.ReservationDate),
+            ReservationPolicyEvaluationStatus.InvalidBranch => nameof(ReservationCreateViewModel.BranchId),
+            ReservationPolicyEvaluationStatus.InvalidGuestCount or
+            ReservationPolicyEvaluationStatus.MinimumGuestsNotMet => nameof(ReservationCreateViewModel.GuestCount),
+            _ => null
         };
     }
 

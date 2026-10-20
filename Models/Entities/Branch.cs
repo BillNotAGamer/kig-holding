@@ -29,5 +29,6 @@ public class Branch : IUpdatedAtEntity
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public ICollection<Reservation> Reservations { get; } = new List<Reservation>();
+    public ICollection<BranchReservationDatePolicy> ReservationDatePolicies { get; } = new List<BranchReservationDatePolicy>();
     public ICollection<Review> Reviews { get; } = new List<Review>();
 }

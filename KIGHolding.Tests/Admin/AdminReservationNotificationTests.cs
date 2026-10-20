@@ -80,11 +80,21 @@ public sealed class AdminReservationNotificationTests
         await using var dbContext = CreateDbContext();
         var notifier = new CapturingReservationNotifier();
         using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var policyLockService = new TestReservationPolicyLockService();
+        var globalPolicyService = new AllowAllReservationBlockedDateService();
+        var branchPolicyService = new BranchReservationDatePolicyService(
+            dbContext,
+            policyLockService,
+            NullLogger<BranchReservationDatePolicyService>.Instance,
+            TimeProvider.System);
         var service = new ReservationService(
             dbContext,
             cache,
             notifier,
-            new AllowAllReservationBlockedDateService(),
+            globalPolicyService,
+            branchPolicyService,
+            new ReservationPolicyEvaluator(dbContext, globalPolicyService, branchPolicyService),
+            policyLockService,
             NullLogger<ReservationService>.Instance,
             TimeProvider.System);
 

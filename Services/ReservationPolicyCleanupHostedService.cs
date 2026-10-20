@@ -47,14 +47,17 @@ public sealed class ReservationPolicyCleanupHostedService : BackgroundService
         {
             using var scope = _scopeFactory.CreateScope();
             var blockedDateService = scope.ServiceProvider.GetRequiredService<IReservationBlockedDateService>();
+            var branchPolicyService = scope.ServiceProvider.GetRequiredService<IBranchReservationDatePolicyService>();
             var vietnamToday = VietnamClock.GetVietnamToday(_timeProvider);
-            var removed = await blockedDateService.CleanupPastDatesAsync(vietnamToday, cancellationToken);
+            var removedGlobal = await blockedDateService.CleanupPastDatesAsync(vietnamToday, cancellationToken);
+            var removedBranch = await branchPolicyService.CleanupPastPoliciesAsync(vietnamToday, cancellationToken);
 
-            if (removed > 0)
+            if (removedGlobal > 0 || removedBranch > 0)
             {
                 _logger.LogInformation(
-                    "Removed {RemovedCount} expired blocked reservation date records before {VietnamToday}.",
-                    removed,
+                    "Removed {GlobalRemovedCount} expired global and {BranchRemovedCount} expired branch reservation policy records before {VietnamToday}.",
+                    removedGlobal,
+                    removedBranch,
                     vietnamToday);
             }
         }
@@ -63,7 +66,7 @@ public sealed class ReservationPolicyCleanupHostedService : BackgroundService
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "Unable to clean expired blocked reservation date records.");
+            _logger.LogWarning(exception, "Unable to clean expired reservation policy records.");
         }
     }
 }

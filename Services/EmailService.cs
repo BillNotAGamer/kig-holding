@@ -1,4 +1,5 @@
 using KIGHolding.Options;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Resend;
 
@@ -10,12 +11,18 @@ public sealed class EmailService : IEmailService
 
     private readonly IResend _resend;
     private readonly ResendSettings _settings;
+    private readonly IHostEnvironment _environment;
     private readonly ILogger<EmailService> _logger;
 
-    public EmailService(IResend resend, IOptions<ResendSettings> settings, ILogger<EmailService> logger)
+    public EmailService(
+        IResend resend,
+        IOptions<ResendSettings> settings,
+        IHostEnvironment environment,
+        ILogger<EmailService> logger)
     {
         _resend = resend;
         _settings = settings.Value;
+        _environment = environment;
         _logger = logger;
     }
 
@@ -98,6 +105,12 @@ public sealed class EmailService : IEmailService
 
     private bool TryValidateConfiguration(string recipientEmail, string subject, string htmlBody, string textBody, out string warning)
     {
+        if (!OutboundEmailDeliveryPolicy.IsLiveDeliveryAuthorized(_environment, _settings))
+        {
+            warning = OutboundEmailDeliveryPolicy.SuppressedPolicyLogMessage;
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(recipientEmail))
         {
             warning = "Recipient email is empty.";

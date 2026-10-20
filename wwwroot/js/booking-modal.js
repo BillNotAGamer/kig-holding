@@ -19,6 +19,8 @@
     const firstField = root.querySelector('#booking-modal-customer-name');
     const antiForgeryField = form?.querySelector('input[name="__RequestVerificationToken"]');
     const reservationDateField = form?.querySelector('[name="ReservationDate"]');
+    const branchField = form?.querySelector('[name="BranchId"]');
+    const guestCountField = form?.querySelector('[name="GuestCount"]');
     const firstCloseButton = closeButtons.find((button) => button instanceof HTMLElement) ?? null;
     const focusableSelector = [
         'a[href]',
@@ -430,6 +432,57 @@
         return false;
     };
 
+    const clearPolicyFeedback = () => {
+        root.querySelectorAll('[data-booking-modal-policy-error="true"]').forEach((element) => {
+            const fieldWrapper = element.closest('.booking-modal__field');
+            element.textContent = '';
+            delete element.dataset.bookingModalPolicyError;
+            fieldWrapper?.classList.remove('is-invalid');
+        });
+
+        if (summary.dataset.bookingModalPolicyError === 'true') {
+            delete summary.dataset.bookingModalPolicyError;
+            clearSummary();
+        }
+
+        [branchField, reservationDateField, guestCountField].forEach((field) => {
+            if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+                field.setCustomValidity('');
+            }
+        });
+    };
+
+    const showPolicyError = (fieldName, message) => {
+        const errorElement = typeof fieldName === 'string' ? getErrorElement(fieldName) : null;
+        const fieldWrapper = typeof fieldName === 'string' ? getFieldWrapper(fieldName) : null;
+        const field = typeof fieldName === 'string' ? form.elements.namedItem(fieldName) : null;
+
+        if (errorElement instanceof HTMLElement && fieldWrapper instanceof HTMLElement) {
+            errorElement.textContent = message;
+            errorElement.dataset.bookingModalPolicyError = 'true';
+            fieldWrapper.classList.add('is-invalid');
+            if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+                field.setCustomValidity(message);
+            }
+            return;
+        }
+
+        showSummaryErrors([message]);
+        summary.dataset.bookingModalPolicyError = 'true';
+    };
+
+    const policyValidator = typeof window.kigCreateReservationPolicyValidator === 'function'
+        ? window.kigCreateReservationPolicyValidator({
+            form,
+            branchField,
+            dateField: reservationDateField,
+            guestCountField,
+            endpoint: form.dataset.reservationPolicyEndpoint,
+            clearPolicyFeedback,
+            showPolicyError
+        })
+        : null;
+
     const renderSuccess = (payload) => {
         markAutoInteracted();
         markAutoShownThisSession();
@@ -601,8 +654,10 @@
         });
 
         if (target.name === 'ReservationDate') {
-            clearFieldErrors();
-            validateReservationDateField();
+            if (!policyValidator) {
+                clearFieldErrors();
+                validateReservationDateField();
+            }
         }
     });
 
@@ -629,6 +684,10 @@
         const action = form.dataset.bookingModalAction || form.action;
 
         try {
+            if (policyValidator && !await policyValidator.validateForSubmit()) {
+                return;
+            }
+
             const response = await fetch(action, {
                 method: 'POST',
                 body: formData,

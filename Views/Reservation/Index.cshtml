@@ -68,7 +68,13 @@
                     </p>
                 </div>
 
-                <form asp-action="Index" asp-controller="Reservation" method="post" class="space-y-5" novalidate>
+                <form asp-action="Index"
+                      asp-controller="Reservation"
+                      method="post"
+                      class="space-y-5"
+                      novalidate
+                      data-reservation-form
+                      data-reservation-policy-endpoint="@Url.Action("Policy", "Reservation")">
                     @Html.AntiForgeryToken()
 
                     @if (!ViewData.ModelState.IsValid)
@@ -115,6 +121,7 @@
                             }
                         </select>
                         <span asp-validation-for="BranchId" class="reservation-page__validation"></span>
+                        <span class="reservation-page__validation" data-reservation-policy-error-for="BranchId" aria-live="polite"></span>
                     </label>
 
                     <div class="grid gap-4 sm:grid-cols-3">
@@ -122,12 +129,14 @@
                             <span class="reservation-page__field-label">Số lượng khách</span>
                             <input asp-for="GuestCount" type="number" min="1" max="100" class="reservation-page__field" />
                             <span asp-validation-for="GuestCount" class="reservation-page__validation"></span>
+                            <span class="reservation-page__validation" data-reservation-policy-error-for="GuestCount" aria-live="polite"></span>
                         </label>
 
                         <label class="reservation-page__field-group">
                             <span class="reservation-page__field-label">Ngày đến</span>
                             <input asp-for="ReservationDate" type="date" asp-format="{0:yyyy-MM-dd}" min="@reservationCalendarMinDate" class="reservation-page__field" />
                             <span asp-validation-for="ReservationDate" class="reservation-page__validation" data-calendar-policy-error-for="ReservationDate"></span>
+                            <span class="reservation-page__validation" data-reservation-policy-error-for="ReservationDate" aria-live="polite"></span>
                         </label>
 
                         <label class="reservation-page__field-group">
@@ -185,9 +194,11 @@
                     </label>
 
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="reservation-page__validation" data-reservation-policy-summary role="status" aria-live="polite" hidden></p>
                         <p class="reservation-page__form-note">Mọi thông tin được tiếp nhận với trạng thái chờ xác nhận từ nhà hàng.</p>
                         <button type="submit"
                                 class="btn-primary reservation-page__submit"
+                                data-reservation-submit
                                 disabled="@(hasReservableBranches ? null : "disabled")"
                                 aria-disabled="@(hasReservableBranches ? "false" : "true")">Hoàn tất đặt bàn</button>
                     </div>
@@ -305,19 +316,106 @@
                 return result.valid;
             };
 
-            if (reservationDateInput instanceof HTMLInputElement) {
-                reservationDateInput.addEventListener('change', validateReservationDate);
-                reservationDateInput.addEventListener('input', validateReservationDate);
+            if (!(reservationForm instanceof HTMLFormElement) || typeof window.kigCreateReservationPolicyValidator !== 'function') {
+                return;
             }
 
-            if (reservationForm instanceof HTMLFormElement) {
-                reservationForm.addEventListener('submit', (event) => {
-                    if (!validateReservationDate()) {
-                        event.preventDefault();
-                        reservationDateInput?.focus();
+            const branchField = reservationForm.querySelector('[name="BranchId"]');
+            const guestCountField = reservationForm.querySelector('[name="GuestCount"]');
+            const submitButton = reservationForm.querySelector('[data-reservation-submit]');
+            const policySummary = reservationForm.querySelector('[data-reservation-policy-summary]');
+            const policyFields = [branchField, reservationDateInput, guestCountField];
+
+            const clearPolicyFeedback = () => {
+                reservationForm.querySelectorAll('[data-reservation-policy-error-for][data-policy-error-active="true"]')
+                    .forEach((element) => {
+                        element.textContent = '';
+                        delete element.dataset.policyErrorActive;
+                    });
+
+                if (policySummary instanceof HTMLElement && policySummary.dataset.policyErrorActive === 'true') {
+                    policySummary.textContent = '';
+                    policySummary.hidden = true;
+                    delete policySummary.dataset.policyErrorActive;
+                }
+
+                policyFields.forEach((field) => {
+                    if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+                        field.setCustomValidity('');
                     }
                 });
-            }
+            };
+
+            const showPolicyError = (fieldName, message) => {
+                const errorElement = typeof fieldName === 'string'
+                    ? reservationForm.querySelector(`[data-reservation-policy-error-for="${fieldName}"]`)
+                    : null;
+                const field = typeof fieldName === 'string' ? reservationForm.elements.namedItem(fieldName) : null;
+
+                if (errorElement instanceof HTMLElement) {
+                    errorElement.textContent = message;
+                    errorElement.dataset.policyErrorActive = 'true';
+                    if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+                        field.setCustomValidity(message);
+                    }
+                    return;
+                }
+
+                if (policySummary instanceof HTMLElement) {
+                    policySummary.textContent = message;
+                    policySummary.hidden = false;
+                    policySummary.dataset.policyErrorActive = 'true';
+                }
+            };
+
+            const policyValidator = window.kigCreateReservationPolicyValidator({
+                form: reservationForm,
+                branchField,
+                dateField: reservationDateInput,
+                guestCountField,
+                endpoint: reservationForm.dataset.reservationPolicyEndpoint,
+                clearPolicyFeedback,
+                showPolicyError
+            });
+
+            let isCheckingPolicy = false;
+            reservationForm.addEventListener('submit', async (event) => {
+                if (!policyValidator || reservationForm.dataset.policyApproved === 'true') {
+                    return;
+                }
+
+                event.preventDefault();
+                if (isCheckingPolicy) {
+                    return;
+                }
+
+                isCheckingPolicy = true;
+                if (submitButton instanceof HTMLButtonElement) {
+                    submitButton.disabled = true;
+                    submitButton.setAttribute('aria-busy', 'true');
+                }
+
+                const isAllowed = await policyValidator.validateForSubmit();
+
+                isCheckingPolicy = false;
+                if (submitButton instanceof HTMLButtonElement) {
+                    submitButton.disabled = false;
+                    submitButton.removeAttribute('aria-busy');
+                }
+
+                if (!isAllowed) {
+                    const invalidField = policyFields.find((field) =>
+                        (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) && !field.validity.valid);
+                    invalidField?.focus();
+                    return;
+                }
+
+                reservationForm.dataset.policyApproved = 'true';
+                reservationForm.requestSubmit();
+                delete reservationForm.dataset.policyApproved;
+            });
+
+            policyValidator?.refresh();
         })();
     </script>
 }

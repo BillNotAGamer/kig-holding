@@ -74,18 +74,19 @@ public async Task<IActionResult> Create(ReservationCreateRequest request)
 
 ### Multi-Tier Server-Side Validation Chain
 Once a request passes the initial `ModelState` gateway, the business service layer ([ReservationService.cs](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/Services/ReservationService.cs)) processes it through a strict sequential validation pipeline:
-1. **Authoritative Date Policy**: Resolves Vietnam-local today through `VietnamClock.GetVietnamToday(timeProvider)`, rejects past dates, then checks the exact submitted `DateOnly` against the `BlockedReservationDates` table through `IReservationBlockedDateService`.
+1. **Preliminary Policy Evaluation**: Resolves Vietnam-local today, rejects past/global blocked dates, validates the selected active/reservable branch, and evaluates its exact `(BranchId, Date)` rule against the submitted `GuestCount`.
 2. **In-Memory Rate Limiting Gate**: Checks the memory cache for active locks on the normalized phone number to block spam submissions within a 10-minute window.
-3. **Database Parameter Validation**: Assures validity of branch IDs, capacity bounds, and session slots prior to storage execution.
-4. **Transaction & Persistence**: Opens the transaction, takes the advisory lock, creates the `Reservation`, saves, commits, stamps the rate-limit success key, and publishes post-commit notifications only after all validation succeeds.
+3. **Database Parameter Validation**: Assures validity of branch IDs, guest-count bounds, and session slots prior to storage execution. Branch capacity is not used as a booking rejection rule.
+4. **Coordinated Final Policy Evaluation**: Opens an explicit `READ COMMITTED` transaction, acquires the policy date advisory lock, and performs fresh `AsNoTracking` global and branch policy reads. A rejection rolls back before the reservation is added or saved.
+5. **Persistence**: Takes the existing phone advisory lock after the policy lock, creates the `Reservation`, saves, commits, stamps the rate-limit success key, and publishes post-commit notifications only after all validation succeeds.
 
-The current date-policy precedence is `PastDate`, `BlockedDate`, then `Allowed`. Saturday and Sunday are allowed by default. Holidays and closure days are not inferred from code; Admin users block any exact date by adding a row to `BlockedReservationDates`.
+The effective precedence is `PastDate`, `GlobalBlockedDate`, `InvalidBranch`, `InvalidGuestCount`, `BranchClosedDate`, `MinimumGuestsNotMet`, then `Allowed`. A global row cannot be overridden. Branch `MinimumGuests` compares directly with the validated/persisted `GuestCount` (1-100). No branch row means Allowed by the branch layer. Saturday, Sunday, holidays, and future years receive no inferred restriction.
 
 The submitted `DateOnly` is evaluated directly and, when allowed, stored unchanged. Frontend date restrictions mirror active database rows for user experience only; the service layer remains authoritative if client-side checks are bypassed.
 
-Rejected date-policy requests return before branch database lookup, branch-hours validation, transaction begin, advisory lock, `Reservations.Add`, `SaveChangesAsync`, rate-limit success stamping, SignalR notification, and controller-owned email dispatch.
+Preliminary failures return early. A rule committed during an in-flight request is caught by the locked final check; final-check rejection rolls back before `Reservations.Add`, reservation `SaveChangesAsync`, rate-limit success stamping, SignalR notification, and controller-owned email dispatch.
 
-`BlockedReservationDates` is the only active reservation closure-date collection. Obsolete handwritten holiday evaluators and configured special-date lists must not be reintroduced. The `AddBlockedReservationDatePolicy` migration seeds the remaining future legacy closure dates as ordinary Admin-managed rows; the migration is created but must be reviewed and applied separately.
+`BlockedReservationDates` remains the global closure collection. `BranchReservationDatePolicies` stores only exceptional branch rules (`Closed` or `MinimumGuests`); Allowed is represented by no row. Neither layer restores handwritten holiday logic. Migration `20261019052426_AddBranchReservationDatePolicies` has passed the disposable PostgreSQL Phase 1 gate but has not been applied to staging or production.
 
 ---
 
@@ -177,6 +178,28 @@ To prevent race conditions where a client submits multiple overlapping reservati
 3. **Serialized Evaluation**: If another request for the same phone number attempts to run concurrently, it is blocked at the database level and must wait until the current transaction commits or rolls back.
 4. **Safe Verification**: Inside the locked window, the service executes `AnyAsync` checks to ensure the database doesn't already contain a reservation for the client on that day.
 5. **Commit and Auto-Release**: On transaction completion, PostgreSQL automatically releases the advisory lock, ensuring zero residual locking overhead on the server.
+
+### Reservation policy coordination
+
+Policy coordination uses the separate two-integer PostgreSQL advisory-lock key space implemented by `IReservationPolicyLockService`:
+
+* Date lock: fixed namespace `1263092560` plus `DateOnly.DayNumber`.
+* Global reconciliation mutex: fixed namespace `1263092563` plus key `1`.
+* Booking order: begin `READ COMMITTED` transaction, date lock, fresh global/branch evaluation, existing phone lock, save, commit.
+* Branch mutation order: begin `READ COMMITTED` transaction, date lock, expected-version check, generate a new UUID revision, write, commit.
+* Global reconciliation order: begin `READ COMMITTED` transaction, global mutex, calculate affected dates, acquire ascending date locks, reconcile rows, commit.
+
+Branch policy `Version` is an application-generated UUID concurrency token, not a counter. Create and every successful update generate a new non-empty value; delete/recreate therefore cannot reuse an earlier policy incarnation's revision. Matching expected revisions participate in EF concurrency predicates, while stale update/delete requests return `Conflict`. The entity identity remains the composite `(BranchId, Date)` key.
+
+Migration `20261019052426_AddBranchReservationDatePolicies` is created but not applied to staging or production. It must be applied before deploying code that queries the new table, and old/new application versions must not concurrently serve policy-sensitive traffic. The isolated PostgreSQL verification passed all 12 cases; staging migration and production deployment remain separate, unauthorized gates.
+
+The public `GET /dat-ban/policy` endpoint accepts one branch ID, reservation date, and guest count, validates the request, and delegates directly to `IReservationPolicyEvaluator`. Its compact response exposes only the semantic status, customer-safe field/message, and applicable minimum guest threshold. It is non-cacheable, read-only, and fail-closed: malformed input returns 400 and evaluator/database failure returns a safe 500 response, never `Allowed`. The full form and quick modal recheck this endpoint immediately before their existing POST contracts; the POSTs still rely on `ReservationService` for the authoritative locked evaluation and all operational rules.
+
+If an Admin policy update commits before a booking acquires its date lock and performs the final read, the booking observes the new rule. If the booking holds the lock and commits first, a later restriction does not alter that reservation. Lock failures propagate and fail closed. The source protocol does not make older deployed instances participate; mixed-version deployments require a controlled rollout and relational concurrency verification.
+
+The Phase 2 Admin editor is exposed separately at `/Admin/Reservation/BranchPolicy`; the global reconciliation endpoint is unchanged. GET month/branch navigation is read-only. POST mutations are anti-forgery protected, validate branch/date/rule/minimum values server-side, and call `IBranchReservationDatePolicyService` for one `(BranchId, Date)` only. A stale UUID maps to a Vietnamese conflict/reload response and is never retried automatically.
+
+Before `Closed` or `MinimumGuests` is applied where reservations already exist, the controller obtains authoritative counts by status and requires an explicit signed confirmation. The protected payload binds the proposed mutation and the count fingerprint. Counts are fetched again on the confirmed POST; a changed snapshot requires confirmation again. This guard is impact acknowledgement only: it never cancels, edits, or deletes an existing reservation, and it does not broaden the established advisory-lock protocol.
 
 ---
 

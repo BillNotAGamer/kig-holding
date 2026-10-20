@@ -38,7 +38,15 @@
            asp-route-year="@Model.CalendarYear"
            asp-route-month="@Model.CalendarMonth"
            class="inline-flex min-h-11 items-center rounded-full border border-brand-red bg-brand-red px-4 py-2 text-sm font-semibold text-white">
-            Chính sách đặt bàn
+            Toàn hệ thống
+        </a>
+        <a asp-area="Admin"
+           asp-controller="Reservation"
+           asp-action="BranchPolicy"
+           asp-route-year="@Model.CalendarYear"
+           asp-route-month="@Model.CalendarMonth"
+           class="inline-flex min-h-11 items-center rounded-full border border-brand-border bg-white px-4 py-2 text-sm font-semibold text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+            Theo chi nhánh
         </a>
     </div>
 

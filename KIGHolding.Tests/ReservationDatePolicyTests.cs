@@ -20,7 +20,7 @@ public sealed class ReservationDatePolicyTests
         var date = DateOnly.ParseExact(dateValue, "yyyy-MM-dd");
         dbContext.BlockedReservationDates.Add(new BlockedReservationDate { Date = date });
         await dbContext.SaveChangesAsync();
-        var service = new ReservationBlockedDateService(dbContext);
+        var service = new ReservationBlockedDateService(dbContext, new TestReservationPolicyLockService());
 
         var result = await service.EvaluateReservationDateAsync(date, AuditToday);
 
@@ -38,7 +38,7 @@ public sealed class ReservationDatePolicyTests
     public async Task EvaluateReservationDate_AllowsFutureDatesWhenDatabaseDoesNotBlockThem(string dateValue)
     {
         await using var dbContext = CreateDbContext();
-        var service = new ReservationBlockedDateService(dbContext);
+        var service = new ReservationBlockedDateService(dbContext, new TestReservationPolicyLockService());
 
         var result = await service.EvaluateReservationDateAsync(
             DateOnly.ParseExact(dateValue, "yyyy-MM-dd"),
@@ -53,7 +53,7 @@ public sealed class ReservationDatePolicyTests
         await using var dbContext = CreateDbContext();
         dbContext.BlockedReservationDates.Add(new BlockedReservationDate { Date = new DateOnly(2026, 8, 31) });
         await dbContext.SaveChangesAsync();
-        var service = new ReservationBlockedDateService(dbContext);
+        var service = new ReservationBlockedDateService(dbContext, new TestReservationPolicyLockService());
 
         var result = await service.EvaluateReservationDateAsync(new DateOnly(2026, 8, 31), AuditToday);
 
@@ -66,7 +66,7 @@ public sealed class ReservationDatePolicyTests
         await using var dbContext = CreateDbContext();
         dbContext.BlockedReservationDates.Add(new BlockedReservationDate { Date = new DateOnly(2026, 9, 2) });
         await dbContext.SaveChangesAsync();
-        var service = new ReservationBlockedDateService(dbContext);
+        var service = new ReservationBlockedDateService(dbContext, new TestReservationPolicyLockService());
         var previousTimezone = Environment.GetEnvironmentVariable("TZ");
 
         try

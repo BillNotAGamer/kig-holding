@@ -20,12 +20,13 @@ The database schema has evolved through the following migrations:
 10. **`20260811075846_AddPostHtmlModeAndSeoMetadata`**: Adds Blog content mode and SEO metadata fields.
 11. **`20260812123110_Update`**: Snapshot alignment migration.
 12. **`20260901170736_AddBlockedReservationDatePolicy`**: Creates the DB-backed reservation closure-date table and seeds the 23 remaining future legacy blocked dates. This migration is created for review and has not been applied by implementation work.
+13. **`20261019052426_AddBranchReservationDatePolicies`**: Additively creates the branch/date policy table, its invariants, revision token, restricted Branch FK, and cleanup index. It was generated for review and was not applied by this task.
 
 ---
 
 ## 2. Active DbSets & Data Dictionary
 
-The `AppDbContext` manages **11 DbSets**:
+The `AppDbContext` manages **12 DbSets**:
 
 ### 1. AdminUsers (`DbSet<AdminUser>`)
 Stores credentials and security markers for the admin back-office dashboard.
@@ -56,7 +57,7 @@ Describes branch locations, active times, and coordinates.
 *   **ThumbnailUrl** (`string`): Cloudinary/Local asset path for index displays.
 *   **GoogleMapUrl** (`string`): Embed map coordinate string.
 *   **IsActive** (`bool`): Toggle display on public branch finders.
-*   *Relationships*: Has Many `Reservations` and `Reviews`.
+*   *Relationships*: Has Many `Reservations`, `Reviews`, and `BranchReservationDatePolicies`.
 
 ### 3. Reservations (`DbSet<Reservation>`)
 Manages table bookings submitted by customers.
@@ -80,6 +81,21 @@ Authoritative Admin-managed reservation closure dates.
 *   **CreatedAt** (`DateTimeOffset`, PostgreSQL `timestamptz`, default `now()`): Audit timestamp for when the blocked date row was created.
 *   **Policy semantics**: Saturday, Sunday, holidays, and future years are allowed unless the exact date exists in this table. The `AddBlockedReservationDatePolicy` migration seeds only the 23 future legacy closure dates at the September 2026 cutover; Admin users may later unblock or add dates through `/Admin/Reservation/Policy`.
 *   **Cleanup**: `ReservationPolicyCleanupHostedService` and Admin policy access/update remove rows where `Date < VietnamToday`. Reservation correctness does not depend on physical cleanup because past dates are rejected before blocked-date lookup.
+
+### 3.2 BranchReservationDatePolicies (`DbSet<BranchReservationDatePolicy>`)
+Optional special-date restrictions scoped to one branch. No row means Allowed at the branch-policy layer.
+
+*   **BranchId** (`Guid`, PostgreSQL `uuid`, composite PK and FK): References `Branches.Id` with `ON DELETE RESTRICT`.
+*   **Date** (`DateOnly`, PostgreSQL `date`, composite PK): Exact reservation date.
+*   **RuleType** (`BranchReservationRuleType`, PostgreSQL `varchar(32)`): Stored as `Closed` or `MinimumGuests`, never as an ordinal.
+*   **MinGuests** (`int?`): Null for `Closed`; required in the inclusive range 1-100 for `MinimumGuests`.
+*   **Version** (`Guid`, PostgreSQL `uuid`, no database default): Application-generated, non-empty EF concurrency token. Every create and successful update receives a new UUID, so a delete/recreate cannot reuse a stale editor's revision.
+*   **CreatedAt / UpdatedAt** (`DateTimeOffset`, PostgreSQL `timestamptz`, default `now()`): Audit timestamps using existing entity conventions.
+*   **CHECK constraint**: Permits only `(Closed, NULL)` or `(MinimumGuests, 1..100)`, thereby rejecting unknown enum strings and malformed threshold combinations at the database boundary.
+*   **Indexes**: Composite primary key `(BranchId, Date)` serves exact booking lookup; `IX_BranchReservationDatePolicies_Date` supports `Date < VietnamToday` cleanup.
+*   **Mutation semantics**: Create requires expected absence; update/delete require a matching UUID `Version`; successful updates replace it with a new UUID; stale or missing expected states return a typed conflict. Mutations use an explicit `READ COMMITTED` transaction and the shared date advisory lock, and never modify reservations.
+*   **Cleanup**: The hosted worker physically deletes only `Date < VietnamToday`. Today's policy is retained, cleanup is idempotent, and booking correctness does not depend on worker execution.
+*   **Deployment state**: Migration `20261019052426_AddBranchReservationDatePolicies` is created and passed the isolated 12-case PostgreSQL verification, but it has not been applied to staging or production. Migration-first deployment and a no-mixed-version policy window are required. Phase 2 Admin UI is implemented for owner QA; Phase 3 public reactive UX is not implemented. Staging migration and production deployment are not authorized.
 
 ### 4. MenuGroups (`DbSet<MenuGroup>`)
 Concept divisions in the restaurant's menu ecosystem (e.g. "Truyền Thuyết Champong", "Gogi Maru", "KBB Cook").

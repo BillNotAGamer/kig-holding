@@ -134,11 +134,11 @@ if (shouldReduceMotion || !supportsObserver || !supportsAnimate) {
 
 ## 3.1 Reservation Calendar Policy UI
 
-The public reservation page (`Views/Reservation/Index.cshtml`) and quick booking modal (`Views/Shared/Partials/_BookingModal.cshtml` with `wwwroot/js/booking-modal.js`) consume the same server-generated calendar-policy payload from `Views/Shared/Partials/_ReservationCalendarPolicy.cshtml`.
+The public reservation page (`Views/Reservation/Index.cshtml`) and quick booking modal (`Views/Shared/Partials/_BookingModal.cshtml` with `wwwroot/js/booking-modal.js`) consume the same server-generated global calendar-policy payload from `Views/Shared/Partials/_ReservationCalendarPolicy.cshtml`. They also share `wwwroot/js/reservation-policy-client.js`, which requests the effective policy from `/dat-ban/policy` whenever branch, date, or guest count changes and immediately before submission.
 
 The payload is emitted as JSON plus a small shared browser helper exposed as `window.kigValidateReservationDate`. It contains the Vietnam-local minimum date, active dates loaded from `BlockedReservationDates`, and Vietnamese validation messages. Date input values are treated as `yyyy-MM-dd` and parsed with `Date.UTC(...)` only to validate calendar shape; JavaScript must not infer weekend, holiday, or maximum-year restrictions.
 
-The frontend policy is advisory. It provides immediate inline feedback and blocks avoidable fetch/form submissions, but `ReservationService.CreateReservationAsync` remains the authoritative server-side enforcement point.
+The effective-policy client owns only its marked inline errors, preserving unrelated validation feedback. It uses accessible live regions, a bounded request timeout, `AbortController`, a monotonic request sequence, and a current-tuple comparison so late responses cannot overwrite newer branch/date/guest state. HTTP errors, malformed responses, timeouts, and network failures render a retryable Vietnamese verification message rather than an Allowed state. The frontend policy is advisory: it blocks avoidable submissions, but `ReservationService.CreateReservationAsync` remains the authoritative server-side enforcement point.
 
 The Admin reservation policy view (`Areas/Admin/Views/Reservation/Policy.cshtml`) uses a native month grid with Monday-through-Sunday columns. White dates are allowed, red dates are blocked, past dates are disabled, and today/future dates can be toggled locally until the Admin submits the update form. The server parses the hidden `yyyy-MM-dd` set, rejects malformed input, ignores past submitted dates, deduplicates values, and reconciles the active DB set in one update.
 

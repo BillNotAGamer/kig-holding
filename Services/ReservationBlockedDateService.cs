@@ -1,3 +1,4 @@
+using System.Data;
 using KIGHolding.Data;
 using KIGHolding.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,14 @@ public sealed class ReservationBlockedDateService : IReservationBlockedDateServi
     public const string BlockedDateMessage = "Nhà hàng không nhận đặt bàn vào ngày này. Vui lòng chọn ngày khác hoặc liên hệ hotline.";
 
     private readonly AppDbContext _dbContext;
+    private readonly IReservationPolicyLockService _policyLockService;
 
-    public ReservationBlockedDateService(AppDbContext dbContext)
+    public ReservationBlockedDateService(
+        AppDbContext dbContext,
+        IReservationPolicyLockService policyLockService)
     {
         _dbContext = dbContext;
+        _policyLockService = policyLockService;
     }
 
     public async Task<ReservationDatePolicyResult> EvaluateReservationDateAsync(
@@ -63,20 +68,31 @@ public sealed class ReservationBlockedDateService : IReservationBlockedDateServi
             .Distinct()
             .ToHashSet();
 
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        await CleanupPastDatesAsync(vietnamToday, cancellationToken);
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(
+            IsolationLevel.ReadCommitted,
+            cancellationToken);
+        await _policyLockService.AcquireGlobalMutationLockAsync(cancellationToken);
 
         var currentRows = await _dbContext.BlockedReservationDates
-            .Where(x => x.Date >= vietnamToday)
             .ToListAsync(cancellationToken);
 
-        var currentDates = currentRows.Select(x => x.Date).ToHashSet();
+        var currentActiveDates = currentRows
+            .Where(x => x.Date >= vietnamToday)
+            .Select(x => x.Date)
+            .ToHashSet();
+        var affectedDates = currentRows
+            .Where(x => x.Date < vietnamToday || !submittedDates.Contains(x.Date))
+            .Select(x => x.Date)
+            .Concat(submittedDates.Where(date => !currentActiveDates.Contains(date)))
+            .ToArray();
+
+        await _policyLockService.AcquireDateLocksAsync(affectedDates, cancellationToken);
+
         var rowsToRemove = currentRows
-            .Where(x => !submittedDates.Contains(x.Date))
+            .Where(x => x.Date < vietnamToday || !submittedDates.Contains(x.Date))
             .ToArray();
         var datesToAdd = submittedDates
-            .Where(date => !currentDates.Contains(date))
+            .Where(date => !currentActiveDates.Contains(date))
             .Select(date => new BlockedReservationDate { Date = date })
             .ToArray();
 
@@ -98,6 +114,13 @@ public sealed class ReservationBlockedDateService : IReservationBlockedDateServi
         DateOnly vietnamToday,
         CancellationToken cancellationToken = default)
     {
+        if (_dbContext.Database.IsRelational())
+        {
+            return await _dbContext.BlockedReservationDates
+                .Where(x => x.Date < vietnamToday)
+                .ExecuteDeleteAsync(cancellationToken);
+        }
+
         var expiredRows = await _dbContext.BlockedReservationDates
             .Where(x => x.Date < vietnamToday)
             .ToListAsync(cancellationToken);

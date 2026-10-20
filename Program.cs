@@ -83,12 +83,8 @@ builder.Services.AddSingleton<IValidateOptions<ImageStorageSettings>, ImageStora
 builder.Services.AddOptions<ImageStorageSettings>()
     .Bind(builder.Configuration.GetSection("ImageStorage"))
     .ValidateOnStart();
-builder.Services.Configure<ResendSettings>(builder.Configuration.GetSection("ResendSettings"));
 builder.Services.Configure<AdminBootstrapSettings>(builder.Configuration.GetSection("AdminBootstrap"));
-builder.Services.AddResend(options =>
-{
-    options.ApiToken = builder.Configuration["ResendSettings:ApiKey"] ?? string.Empty;
-});
+builder.Services.AddConfiguredEmailService(builder.Configuration, builder.Environment);
 builder.Services.AddScoped<AdminBootstrapConfigurationResolver>();
 builder.Services.AddScoped<IAdminLegacyCredentialGuard, AdminLegacyCredentialGuard>();
 builder.Services.AddScoped<DbInitializer>();
@@ -98,10 +94,12 @@ builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IBlogHtmlSanitizer, BlogHtmlSanitizer>();
 builder.Services.AddScoped<IReservationBlockedDateService, ReservationBlockedDateService>();
+builder.Services.AddScoped<IReservationPolicyLockService, ReservationPolicyLockService>();
+builder.Services.AddScoped<IBranchReservationDatePolicyService, BranchReservationDatePolicyService>();
+builder.Services.AddScoped<IReservationPolicyEvaluator, ReservationPolicyEvaluator>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IAdminReservationNotifier, SignalRAdminReservationNotifier>();
 builder.Services.AddScoped<IContactService, ContactService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<ICloudflareR2Client, CloudflareR2Client>();
 builder.Services.AddScoped<IImageStorageProvider, LocalVolumeImageStorageProvider>();
 builder.Services.AddScoped<IImageStorageProvider, CloudinaryImageStorageProvider>();

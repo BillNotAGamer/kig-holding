@@ -1,8 +1,10 @@
 using KIGHolding.Data;
 using KIGHolding.Models.Entities;
+using KIGHolding.Models.Enums;
 using KIGHolding.Services;
 using KIGHolding.Services.Notifications;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -112,17 +114,190 @@ public sealed class ReservationServiceDatePolicyTests
         AssertRateLimitNotStamped(cache, request);
     }
 
+    [Fact]
+    public async Task CreateReservationAsync_BranchClosed_DoesNotPersistOrNotify()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        var date = new DateOnly(2026, 8, 10);
+        dbContext.Branches.Add(branch);
+        dbContext.BranchReservationDatePolicies.Add(new BranchReservationDatePolicy
+        {
+            BranchId = branch.Id,
+            Date = date,
+            RuleType = BranchReservationRuleType.Closed
+        });
+        await dbContext.SaveChangesAsync();
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var request = CreateRequest(branch.Id, date);
+
+        var result = await CreateService(dbContext, cache, notifier).CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error =>
+            error.FieldName == nameof(ReservationCreateRequest.ReservationDate) &&
+            error.Message == ReservationPolicyMessages.BranchClosedDate);
+        Assert.Empty(await dbContext.Reservations.ToListAsync());
+        Assert.Equal(0, notifier.CallCount);
+        AssertRateLimitNotStamped(cache, request);
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_MinimumGuestsNotMet_DoesNotPersistOrNotify()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        var date = new DateOnly(2026, 8, 10);
+        dbContext.Branches.Add(branch);
+        dbContext.BranchReservationDatePolicies.Add(new BranchReservationDatePolicy
+        {
+            BranchId = branch.Id,
+            Date = date,
+            RuleType = BranchReservationRuleType.MinimumGuests,
+            MinGuests = 6
+        });
+        await dbContext.SaveChangesAsync();
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var request = CreateRequest(branch.Id, date);
+        request.GuestCount = 5;
+
+        var result = await CreateService(dbContext, cache, notifier).CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error =>
+            error.FieldName == nameof(ReservationCreateRequest.GuestCount) &&
+            error.Message.Contains("6", StringComparison.Ordinal));
+        Assert.Empty(await dbContext.Reservations.ToListAsync());
+        Assert.Equal(0, notifier.CallCount);
+        AssertRateLimitNotStamped(cache, request);
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_FinalCheckSeesBranchPolicyCommittedBeforeDateLockReturns()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        var date = new DateOnly(2026, 8, 10);
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+        var lockService = new CallbackPolicyLockService(async lockedDate =>
+        {
+            dbContext.BranchReservationDatePolicies.Add(new BranchReservationDatePolicy
+            {
+                BranchId = branch.Id,
+                Date = lockedDate,
+                RuleType = BranchReservationRuleType.Closed
+            });
+            await dbContext.SaveChangesAsync();
+        });
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var request = CreateRequest(branch.Id, date);
+
+        var result = await CreateService(dbContext, cache, notifier, policyLockService: lockService)
+            .CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error => error.Message == ReservationPolicyMessages.BranchClosedDate);
+        Assert.Equal([date], lockService.AcquiredDates);
+        Assert.Empty(await dbContext.Reservations.ToListAsync());
+        Assert.Equal(0, notifier.CallCount);
+        AssertRateLimitNotStamped(cache, request);
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_FinalCheckSeesGlobalPolicyCommittedBeforeDateLockReturns()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        var date = new DateOnly(2026, 8, 10);
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+        var lockService = new CallbackPolicyLockService(async lockedDate =>
+        {
+            dbContext.BlockedReservationDates.Add(new BlockedReservationDate { Date = lockedDate });
+            await dbContext.SaveChangesAsync();
+        });
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var request = CreateRequest(branch.Id, date);
+
+        var result = await CreateService(dbContext, cache, notifier, policyLockService: lockService)
+            .CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error => error.Message == ReservationBlockedDateService.BlockedDateMessage);
+        Assert.Empty(await dbContext.Reservations.ToListAsync());
+        Assert.Equal(0, notifier.CallCount);
+        AssertRateLimitNotStamped(cache, request);
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_FinalCheckSeesNewMinimumGuestsPolicy()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        var date = new DateOnly(2026, 8, 10);
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+        var lockService = new CallbackPolicyLockService(async lockedDate =>
+        {
+            dbContext.BranchReservationDatePolicies.Add(new BranchReservationDatePolicy
+            {
+                BranchId = branch.Id,
+                Date = lockedDate,
+                RuleType = BranchReservationRuleType.MinimumGuests,
+                MinGuests = 6
+            });
+            await dbContext.SaveChangesAsync();
+        });
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var request = CreateRequest(branch.Id, date);
+        request.GuestCount = 5;
+
+        var result = await CreateService(dbContext, cache, notifier, policyLockService: lockService)
+            .CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error =>
+            error.FieldName == nameof(ReservationCreateRequest.GuestCount) &&
+            error.Message.Contains("6", StringComparison.Ordinal));
+        Assert.Empty(await dbContext.Reservations.ToListAsync());
+        Assert.Equal(0, notifier.CallCount);
+        AssertRateLimitNotStamped(cache, request);
+    }
+
     private static ReservationService CreateService(
         AppDbContext dbContext,
         IMemoryCache cache,
         IAdminReservationNotifier notifier,
-        IReservationBlockedDateService? blockedDateService = null)
+        IReservationBlockedDateService? blockedDateService = null,
+        IReservationPolicyLockService? policyLockService = null)
     {
+        policyLockService ??= new TestReservationPolicyLockService();
+        var globalPolicyService = blockedDateService
+            ?? new ReservationBlockedDateService(dbContext, policyLockService);
+        var branchPolicyService = new BranchReservationDatePolicyService(
+            dbContext,
+            policyLockService,
+            NullLogger<BranchReservationDatePolicyService>.Instance,
+            AuditTimeProvider);
+        var policyEvaluator = new ReservationPolicyEvaluator(
+            dbContext,
+            globalPolicyService,
+            branchPolicyService);
+
         return new ReservationService(
             dbContext,
             cache,
             notifier,
-            blockedDateService ?? new ReservationBlockedDateService(dbContext),
+            globalPolicyService,
+            branchPolicyService,
+            policyEvaluator,
+            policyLockService,
             NullLogger<ReservationService>.Instance,
             AuditTimeProvider);
     }
@@ -131,6 +306,7 @@ public sealed class ReservationServiceDatePolicyTests
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString("N"))
+            .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
         return new AppDbContext(options);
@@ -189,6 +365,39 @@ public sealed class ReservationServiceDatePolicyTests
             CancellationToken cancellationToken = default)
         {
             CallCount++;
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class CallbackPolicyLockService : IReservationPolicyLockService
+    {
+        private readonly Func<DateOnly, Task> _onDateLock;
+
+        public CallbackPolicyLockService(Func<DateOnly, Task> onDateLock)
+        {
+            _onDateLock = onDateLock;
+        }
+
+        public List<DateOnly> AcquiredDates { get; } = [];
+
+        public async Task AcquireDateLockAsync(DateOnly date, CancellationToken cancellationToken = default)
+        {
+            AcquiredDates.Add(date);
+            await _onDateLock(date);
+        }
+
+        public async Task AcquireDateLocksAsync(
+            IEnumerable<DateOnly> dates,
+            CancellationToken cancellationToken = default)
+        {
+            foreach (var date in dates.Distinct().OrderBy(date => date))
+            {
+                await AcquireDateLockAsync(date, cancellationToken);
+            }
+        }
+
+        public Task AcquireGlobalMutationLockAsync(CancellationToken cancellationToken = default)
+        {
             return Task.CompletedTask;
         }
     }

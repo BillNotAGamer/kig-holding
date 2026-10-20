@@ -6,4 +6,5 @@ public sealed class ResendSettings
     public string FromEmail { get; set; } = string.Empty;
     public string FromName { get; set; } = "Truyền Thuyết Champong";
     public string BusinessRecipientEmail { get; set; } = "truyenthuyetchamponghcm@gmail.com";
+    public bool EnableOutboundEmail { get; set; } = false;
 }

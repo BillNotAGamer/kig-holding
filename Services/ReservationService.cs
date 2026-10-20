@@ -1,3 +1,4 @@
+using System.Data;
 using KIGHolding.Data;
 using KIGHolding.Models.Entities;
 using KIGHolding.Models.Enums;
@@ -15,6 +16,9 @@ public class ReservationService : IReservationService
     private readonly IMemoryCache _cache;
     private readonly IAdminReservationNotifier _adminReservationNotifier;
     private readonly IReservationBlockedDateService _blockedDateService;
+    private readonly IBranchReservationDatePolicyService _branchPolicyService;
+    private readonly IReservationPolicyEvaluator _policyEvaluator;
+    private readonly IReservationPolicyLockService _policyLockService;
     private readonly ILogger<ReservationService> _logger;
     private readonly TimeProvider _timeProvider;
 
@@ -23,6 +27,9 @@ public class ReservationService : IReservationService
         IMemoryCache cache,
         IAdminReservationNotifier adminReservationNotifier,
         IReservationBlockedDateService blockedDateService,
+        IBranchReservationDatePolicyService branchPolicyService,
+        IReservationPolicyEvaluator policyEvaluator,
+        IReservationPolicyLockService policyLockService,
         ILogger<ReservationService> logger,
         TimeProvider timeProvider)
     {
@@ -30,6 +37,9 @@ public class ReservationService : IReservationService
         _cache = cache;
         _adminReservationNotifier = adminReservationNotifier;
         _blockedDateService = blockedDateService;
+        _branchPolicyService = branchPolicyService;
+        _policyEvaluator = policyEvaluator;
+        _policyLockService = policyLockService;
         _logger = logger;
         _timeProvider = timeProvider;
     }
@@ -124,26 +134,47 @@ public class ReservationService : IReservationService
             errors.Add(new ReservationServiceError
             {
                 FieldName = nameof(request.BranchId),
-                Message = "Chi nhánh này hiện không nhận đặt bàn. Vui lòng chọn chi nhánh khác."
+                Message = ReservationPolicyMessages.InvalidBranch
             });
         }
-        else if (!IsWithinOpeningHours(request.ReservationTime, branch.OpeningTime, branch.ClosingTime))
+        else
         {
-            errors.Add(new ReservationServiceError
+            var branchPolicyAllowsRequest = true;
+            if (request.GuestCount is >= 1 and <= 100)
             {
-                FieldName = nameof(request.ReservationTime),
-                Message = $"Giờ đến phải nằm trong khung {branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm} của chi nhánh này."
-            });
-        }
-        else if (IsWeekday(request.ReservationDate)
-            && TryGetValidLunchBreak(branch, out var lunchBreakStart, out var lunchBreakEnd)
-            && IsWithinLunchBreak(request.ReservationTime, lunchBreakStart, lunchBreakEnd))
-        {
-            errors.Add(new ReservationServiceError
+                var branchPolicyResult = await _branchPolicyService.EvaluateAsync(
+                    request.BranchId,
+                    request.ReservationDate,
+                    request.GuestCount,
+                    cancellationToken);
+
+                if (!branchPolicyResult.IsAllowed)
+                {
+                    errors.Add(CreateBranchPolicyError(branchPolicyResult));
+                    branchPolicyAllowsRequest = false;
+                }
+            }
+
+            if (branchPolicyAllowsRequest &&
+                !IsWithinOpeningHours(request.ReservationTime, branch.OpeningTime, branch.ClosingTime))
             {
-                FieldName = nameof(request.ReservationTime),
-                Message = "Chi nhánh tạm nghỉ trưa trong khung giờ này từ Thứ Hai đến Thứ Sáu. Vui lòng chọn thời gian khác."
-            });
+                errors.Add(new ReservationServiceError
+                {
+                    FieldName = nameof(request.ReservationTime),
+                    Message = $"Giờ đến phải nằm trong khung {branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm} của chi nhánh này."
+                });
+            }
+            else if (branchPolicyAllowsRequest &&
+                IsWeekday(request.ReservationDate) &&
+                TryGetValidLunchBreak(branch, out var lunchBreakStart, out var lunchBreakEnd) &&
+                IsWithinLunchBreak(request.ReservationTime, lunchBreakStart, lunchBreakEnd))
+            {
+                errors.Add(new ReservationServiceError
+                {
+                    FieldName = nameof(request.ReservationTime),
+                    Message = "Chi nhánh tạm nghỉ trưa trong khung giờ này từ Thứ Hai đến Thứ Sáu. Vui lòng chọn thời gian khác."
+                });
+            }
         }
 
         if (errors.Count > 0)
@@ -174,7 +205,26 @@ public class ReservationService : IReservationService
         // ── Gate 2: PostgreSQL advisory transaction lock ───────────────────────────
         // pg_advisory_xact_lock serialises concurrent DB sessions for the same phone
         // hash, making AnyAsync-level races impossible within the transaction scope.
-        await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync(
+            IsolationLevel.ReadCommitted,
+            cancellationToken);
+
+        // The date lock coordinates reservation creation with both global and branch
+        // policy writers. The authoritative policy read must happen after this lock.
+        await _policyLockService.AcquireDateLockAsync(request.ReservationDate, cancellationToken);
+
+        var finalPolicyResult = await _policyEvaluator.EvaluateAsync(
+            request.BranchId,
+            request.ReservationDate,
+            request.GuestCount,
+            today,
+            cancellationToken);
+
+        if (!finalPolicyResult.IsAllowed)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return ReservationCreateResult.Failed([CreatePolicyError(finalPolicyResult)]);
+        }
 
         await _dbContext.Database.ExecuteSqlRawAsync(
             "SELECT pg_advisory_xact_lock(hashtext({0}))",
@@ -269,5 +319,43 @@ public class ReservationService : IReservationService
     private static string? NormalizeOptionalText(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static ReservationServiceError CreateBranchPolicyError(
+        BranchReservationPolicyEvaluationResult result)
+    {
+        var evaluationResult = result.Status switch
+        {
+            BranchReservationPolicyEvaluationStatus.InvalidBranch =>
+                new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.InvalidBranch),
+            BranchReservationPolicyEvaluationStatus.InvalidGuestCount =>
+                new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.InvalidGuestCount),
+            BranchReservationPolicyEvaluationStatus.BranchClosedDate =>
+                new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.BranchClosedDate),
+            BranchReservationPolicyEvaluationStatus.MinimumGuestsNotMet =>
+                new ReservationPolicyEvaluationResult(
+                    ReservationPolicyEvaluationStatus.MinimumGuestsNotMet,
+                    result.MinGuests),
+            _ => throw new InvalidOperationException("Allowed branch policy results do not produce errors.")
+        };
+
+        return CreatePolicyError(evaluationResult);
+    }
+
+    private static ReservationServiceError CreatePolicyError(ReservationPolicyEvaluationResult result)
+    {
+        var fieldName = result.Status switch
+        {
+            ReservationPolicyEvaluationStatus.InvalidBranch => nameof(ReservationCreateRequest.BranchId),
+            ReservationPolicyEvaluationStatus.InvalidGuestCount or
+                ReservationPolicyEvaluationStatus.MinimumGuestsNotMet => nameof(ReservationCreateRequest.GuestCount),
+            _ => nameof(ReservationCreateRequest.ReservationDate)
+        };
+
+        return new ReservationServiceError
+        {
+            FieldName = fieldName,
+            Message = ReservationPolicyMessages.GetMessage(result)
+        };
     }
 }

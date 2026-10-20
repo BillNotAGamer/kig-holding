@@ -1,0 +1,364 @@
+@using System.Globalization
+@model KIGHolding.Areas.Admin.ViewModels.BranchReservationPolicyViewModel
+
+@{
+    ViewData["Title"] = "Chính sách đặt bàn theo chi nhánh";
+    var firstOfMonth = new DateOnly(Model.CalendarYear, Model.CalendarMonth, 1);
+    var daysInMonth = DateTime.DaysInMonth(Model.CalendarYear, Model.CalendarMonth);
+    var firstOffset = ((int)firstOfMonth.DayOfWeek + 6) % 7;
+    var previousMonth = firstOfMonth.AddMonths(-1);
+    var nextMonth = firstOfMonth.AddMonths(1);
+    var policies = Model.Policies.ToDictionary(policy => policy.Date);
+    var selectedDate = Model.Editor.Date;
+    var selectedIsGlobalBlocked = selectedDate != default && Model.GlobalBlockedDates.Contains(selectedDate);
+}
+
+<section class="admin-page" data-branch-policy-page>
+    <div class="admin-page-header flex flex-col gap-3 p-4 sm:p-5 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+            <p class="admin-page-kicker">Reservation Ops</p>
+            <h1 class="admin-page-title">Chính sách đặt bàn</h1>
+            <p class="admin-help">Thiết lập quy định riêng cho từng chi nhánh theo ngày. Quy định toàn hệ thống luôn có quyền ưu tiên cao nhất.</p>
+        </div>
+    </div>
+
+    <nav class="flex flex-wrap gap-2" aria-label="Khu vực chính sách đặt bàn">
+        <a asp-area="Admin" asp-controller="Reservation" asp-action="Policy"
+           asp-route-year="@Model.CalendarYear" asp-route-month="@Model.CalendarMonth"
+           class="inline-flex min-h-11 items-center rounded-full border border-brand-border bg-white px-4 py-2 text-sm font-semibold text-brand-dark transition hover:border-brand-red hover:text-brand-red">
+            Toàn hệ thống
+        </a>
+        <a asp-area="Admin" asp-controller="Reservation" asp-action="BranchPolicy"
+           asp-route-branchId="@Model.SelectedBranchId" asp-route-year="@Model.CalendarYear" asp-route-month="@Model.CalendarMonth"
+           aria-current="page"
+           class="inline-flex min-h-11 items-center rounded-full border border-brand-red bg-brand-red px-4 py-2 text-sm font-semibold text-white">
+            Theo chi nhánh
+        </a>
+    </nav>
+
+    @if (!string.IsNullOrWhiteSpace(Model.PageMessage))
+    {
+        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800" role="alert">
+            @Model.PageMessage
+        </div>
+    }
+
+    @if (Model.BranchOptions.Count == 0)
+    {
+        <div class="admin-card p-5">
+            <h2 class="admin-card-title">Chưa có chi nhánh phù hợp</h2>
+            <p class="mt-2 text-sm leading-6 text-brand-gray">Không có chi nhánh đang hoạt động và cho phép đặt bàn để cấu hình.</p>
+        </div>
+    }
+    else
+    {
+        <form method="get" asp-area="Admin" asp-controller="Reservation" asp-action="BranchPolicy"
+              class="admin-card grid gap-4 p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
+              data-branch-policy-selector>
+            <div>
+                <label for="branch-policy-branch" class="admin-label mb-2">Chi nhánh đang chỉnh sửa</label>
+                <select id="branch-policy-branch" name="branchId" class="admin-select" data-branch-policy-branch-select>
+                    @foreach (var option in Model.BranchOptions)
+                    {
+                        <option value="@option.Value" selected="@(option.Selected ? "selected" : null)">@option.Text</option>
+                    }
+                </select>
+            </div>
+            <input type="hidden" name="year" value="@Model.CalendarYear" />
+            <input type="hidden" name="month" value="@Model.CalendarMonth" />
+            <button type="submit" class="btn-secondary min-h-11">Xem lịch chi nhánh</button>
+        </form>
+
+        <div class="admin-card space-y-5 p-4 sm:p-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <a asp-area="Admin" asp-controller="Reservation" asp-action="BranchPolicy"
+                   asp-route-branchId="@Model.SelectedBranchId" asp-route-year="@previousMonth.Year" asp-route-month="@previousMonth.Month"
+                   class="btn-secondary min-h-11">&lt; Tháng trước</a>
+                <div class="text-center">
+                    <p class="text-sm font-semibold text-brand-gray">@Model.SelectedBranchName</p>
+                    <h2 class="text-xl font-black text-brand-dark">Tháng @Model.CalendarMonth / @Model.CalendarYear</h2>
+                </div>
+                <a asp-area="Admin" asp-controller="Reservation" asp-action="BranchPolicy"
+                   asp-route-branchId="@Model.SelectedBranchId" asp-route-year="@nextMonth.Year" asp-route-month="@nextMonth.Month"
+                   class="btn-secondary min-h-11">Tháng sau &gt;</a>
+            </div>
+
+            <div class="flex flex-wrap gap-3 text-sm text-brand-gray" aria-label="Chú thích trạng thái">
+                <span class="inline-flex items-center gap-2"><span class="branch-policy-swatch branch-policy-state-allowed"></span>Cho phép đặt bàn</span>
+                <span class="inline-flex items-center gap-2"><span class="branch-policy-swatch branch-policy-state-closed"></span>Không nhận đặt bàn</span>
+                <span class="inline-flex items-center gap-2"><span class="branch-policy-swatch branch-policy-state-minimum"></span>Tối thiểu khách</span>
+                <span class="inline-flex items-center gap-2"><span class="branch-policy-swatch branch-policy-state-global"></span>Khóa toàn hệ thống</span>
+                <span class="inline-flex items-center gap-2"><span class="branch-policy-swatch branch-policy-state-past"></span>Ngày đã qua</span>
+            </div>
+
+            <div class="overflow-x-auto" tabindex="0" aria-label="Lịch chính sách theo tháng">
+                <div class="branch-policy-calendar">
+                    <div class="branch-policy-weekdays" aria-hidden="true">
+                        <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                    </div>
+                    <div class="branch-policy-calendar-grid">
+                        @for (var offset = 0; offset < firstOffset; offset++)
+                        {
+                            <span class="branch-policy-day branch-policy-day-empty"></span>
+                        }
+                        @for (var day = 1; day <= daysInMonth; day++)
+                        {
+                            var date = new DateOnly(Model.CalendarYear, Model.CalendarMonth, day);
+                            var dateValue = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                            var isPast = date < Model.VietnamToday;
+                            var isGlobalBlocked = Model.GlobalBlockedDates.Contains(date);
+                            policies.TryGetValue(date, out var branchPolicy);
+                            var branchRule = branchPolicy?.RuleType switch
+                            {
+                                BranchReservationRuleType.Closed => BranchPolicyAdminRuleType.Closed,
+                                BranchReservationRuleType.MinimumGuests => BranchPolicyAdminRuleType.MinimumGuests,
+                                _ => BranchPolicyAdminRuleType.Allowed
+                            };
+                            var branchLabel = branchPolicy?.RuleType switch
+                            {
+                                BranchReservationRuleType.Closed => "Không nhận đặt bàn",
+                                BranchReservationRuleType.MinimumGuests => $"Tối thiểu {branchPolicy.MinGuests} khách",
+                                _ => "Cho phép đặt bàn"
+                            };
+                            var effectiveLabel = isPast ? "Đã qua" : isGlobalBlocked ? "Khóa toàn hệ thống" : branchLabel;
+                            var stateClass = isPast
+                                ? "branch-policy-state-past"
+                                : isGlobalBlocked
+                                    ? "branch-policy-state-global"
+                                    : branchRule == BranchPolicyAdminRuleType.Closed
+                                        ? "branch-policy-state-closed"
+                                        : branchRule == BranchPolicyAdminRuleType.MinimumGuests
+                                            ? "branch-policy-state-minimum"
+                                            : "branch-policy-state-allowed";
+
+                            <button type="button"
+                                    class="branch-policy-day @stateClass @(date == selectedDate ? "is-selected" : null)"
+                                    data-branch-policy-date="@dateValue"
+                                    data-rule="@branchRule"
+                                    data-min-guests="@branchPolicy?.MinGuests"
+                                    data-version="@branchPolicy?.Version"
+                                    data-global-blocked="@isGlobalBlocked.ToString().ToLowerInvariant()"
+                                    data-underlying-label="@branchLabel"
+                                    aria-pressed="@(date == selectedDate ? "true" : "false")"
+                                    aria-label="Ngày @day tháng @Model.CalendarMonth năm @Model.CalendarYear - @effectiveLabel"
+                                    disabled="@(isPast ? "disabled" : null)">
+                                <span class="branch-policy-day-number">@day</span>
+                                <span class="branch-policy-day-label">@effectiveLabel</span>
+                                @if (isGlobalBlocked && branchPolicy is not null)
+                                {
+                                    <span class="branch-policy-day-underlying">Quy định chi nhánh: @branchLabel</span>
+                                }
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Editor.Date != default)
+        {
+            <form method="post" asp-area="Admin" asp-controller="Reservation" asp-action="BranchPolicy"
+                  class="admin-card space-y-5 p-4 sm:p-5" data-branch-policy-editor>
+                @Html.AntiForgeryToken()
+                <input asp-for="Editor.BranchId" type="hidden" />
+                <input asp-for="Editor.Date" type="hidden" data-editor-date />
+                <input asp-for="Editor.ExpectedVersion" type="hidden" data-editor-version />
+                <input asp-for="Editor.CalendarYear" type="hidden" />
+                <input asp-for="Editor.CalendarMonth" type="hidden" />
+                <input asp-for="Editor.ImpactConfirmationToken" type="hidden" data-impact-token />
+
+                <div asp-validation-summary="ModelOnly" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-800"></div>
+                <span asp-validation-for="Editor.BranchId" class="block text-sm font-semibold text-red-700"></span>
+                <span asp-validation-for="Editor.Date" class="block text-sm font-semibold text-red-700"></span>
+
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="admin-page-kicker">Ngày đang chọn</p>
+                        <h2 class="admin-card-title mt-1" data-editor-heading>
+                            @Model.Editor.Date.ToString("dd/MM/yyyy") — @Model.SelectedBranchName
+                        </h2>
+                    </div>
+                    @if (Model.HasConcurrencyConflict)
+                    {
+                        <a asp-area="Admin" asp-controller="Reservation" asp-action="BranchPolicy"
+                           asp-route-branchId="@Model.SelectedBranchId" asp-route-year="@Model.CalendarYear"
+                           asp-route-month="@Model.CalendarMonth" asp-route-date="@Model.Editor.Date.ToString("yyyy-MM-dd")"
+                           class="btn-secondary min-h-11">Tải lại trạng thái hiện tại</a>
+                    }
+                </div>
+
+                <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 @(selectedIsGlobalBlocked ? null : "hidden")"
+                     data-global-overlay-warning>
+                    <strong>Ngày này đang bị khóa toàn hệ thống.</strong>
+                    Quy định chi nhánh không thể mở lại ngày này. Quy định bên dưới vẫn được lưu và sẽ có hiệu lực nếu khóa toàn hệ thống được gỡ.
+                    <span class="block font-semibold" data-underlying-rule></span>
+                </div>
+
+                <fieldset class="space-y-3">
+                    <legend class="admin-label">Quy định của chi nhánh</legend>
+                    <div class="grid gap-3 md:grid-cols-3">
+                        <label class="branch-policy-choice">
+                            <input asp-for="Editor.RuleType" type="radio" value="Allowed" />
+                            <span><strong>Cho phép đặt bàn</strong><small>Xóa quy định riêng của ngày này.</small></span>
+                        </label>
+                        <label class="branch-policy-choice">
+                            <input asp-for="Editor.RuleType" type="radio" value="Closed" />
+                            <span><strong>Không nhận đặt bàn</strong><small>Chặn mọi lượt đặt bàn mới tại chi nhánh.</small></span>
+                        </label>
+                        <label class="branch-policy-choice">
+                            <input asp-for="Editor.RuleType" type="radio" value="MinimumGuests" />
+                            <span><strong>Số khách tối thiểu</strong><small>Chỉ nhận đoàn đạt ngưỡng được nhập.</small></span>
+                        </label>
+                    </div>
+                    <span asp-validation-for="Editor.RuleType" class="block text-sm font-semibold text-red-700"></span>
+                </fieldset>
+
+                <div data-minimum-guests-field hidden="@(Model.Editor.RuleType == BranchPolicyAdminRuleType.MinimumGuests ? null : "hidden")">
+                    <label asp-for="Editor.MinGuests" class="admin-label mb-2">Số khách tối thiểu</label>
+                    <input asp-for="Editor.MinGuests" type="number" min="1" max="100" inputmode="numeric"
+                           class="admin-field h-12" data-minimum-guests-input />
+                    <p class="mt-2 text-sm text-brand-gray">Giá trị hợp lệ từ 1 đến 100 khách.</p>
+                    <span asp-validation-for="Editor.MinGuests" class="block text-sm font-semibold text-red-700"></span>
+                </div>
+
+                @if (Model.RequiresImpactConfirmation)
+                {
+                    <section class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900" data-impact-confirmation>
+                        <h3 class="font-black">Có @Model.ExistingReservationTotal lượt đặt bàn hiện tại</h3>
+                        <ul class="mt-2 space-y-1 text-sm">
+                            @foreach (var count in Model.ExistingReservationCounts)
+                            {
+                                <li>@count.Label: <strong>@count.Count</strong></li>
+                            }
+                        </ul>
+                        <p class="mt-3 text-sm leading-6">Các lượt đặt bàn hiện có sẽ được giữ nguyên, không tự động hủy hoặc thay đổi.</p>
+                        <label class="mt-3 flex items-start gap-3 font-semibold">
+                            <input asp-for="Editor.ConfirmExistingReservations" class="mt-1 size-4" data-impact-checkbox />
+                            <span>Tôi đã kiểm tra số lượt đặt bàn và xác nhận áp dụng quy định mới.</span>
+                        </label>
+                        <span asp-validation-for="Editor.ConfirmExistingReservations" class="mt-2 block text-sm font-semibold text-red-700"></span>
+                    </section>
+                }
+
+                <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                    <button type="button" class="btn-secondary min-h-11" data-editor-cancel>Hủy thay đổi</button>
+                    <button type="submit" class="btn-primary min-h-11" data-editor-submit>Lưu quy định</button>
+                </div>
+            </form>
+        }
+    }
+</section>
+
+@section Styles {
+    <style>
+        .branch-policy-calendar { min-width: 42rem; }
+        .branch-policy-weekdays, .branch-policy-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .5rem; }
+        .branch-policy-weekdays { margin-bottom: .5rem; text-align: center; color: #6b7280; font-size: .75rem; font-weight: 800; }
+        .branch-policy-day { min-height: 6.5rem; border: 1px solid #d9d5ce; border-radius: .75rem; padding: .65rem; text-align: left; transition: box-shadow .15s ease, transform .15s ease; }
+        .branch-policy-day:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(17,24,39,.10); }
+        .branch-policy-day:focus-visible { outline: 3px solid rgba(185,28,28,.32); outline-offset: 2px; }
+        .branch-policy-day.is-selected { box-shadow: 0 0 0 3px #111827; }
+        .branch-policy-day:disabled { cursor: not-allowed; opacity: .62; }
+        .branch-policy-day-empty { border-color: transparent; }
+        .branch-policy-day-number { display: block; font-size: 1.05rem; font-weight: 900; }
+        .branch-policy-day-label { display: block; margin-top: .45rem; font-size: .72rem; font-weight: 800; line-height: 1.25; }
+        .branch-policy-day-underlying { display: block; margin-top: .35rem; font-size: .64rem; line-height: 1.25; opacity: .82; }
+        .branch-policy-state-allowed { border-color: #a7f3d0; background: #ecfdf5; color: #065f46; }
+        .branch-policy-state-closed { border-color: #dc2626; background: #dc2626; color: #fff; }
+        .branch-policy-state-minimum { border-color: #f59e0b; background: #fef3c7; color: #78350f; }
+        .branch-policy-state-global { border-color: #111827; background: #111827; color: #fff; }
+        .branch-policy-state-past { border-color: #e5e7eb; background: #f3f4f6; color: #6b7280; }
+        .branch-policy-swatch { display: inline-block; width: .8rem; height: .8rem; border-radius: .2rem; }
+        .branch-policy-choice { display: flex; min-height: 5.5rem; gap: .75rem; align-items: flex-start; border: 1px solid #d9d5ce; border-radius: .75rem; padding: 1rem; cursor: pointer; }
+        .branch-policy-choice:has(input:checked) { border-color: #b91c1c; box-shadow: 0 0 0 2px rgba(185,28,28,.14); }
+        .branch-policy-choice input { margin-top: .2rem; }
+        .branch-policy-choice strong, .branch-policy-choice small { display: block; }
+        .branch-policy-choice small { margin-top: .3rem; color: #6b7280; line-height: 1.4; }
+        @@media (max-width: 640px) { .branch-policy-calendar { min-width: 38.5rem; } .branch-policy-day { min-height: 5.75rem; padding: .5rem; } }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        (() => {
+            const page = document.querySelector('[data-branch-policy-page]');
+            if (!(page instanceof HTMLElement)) return;
+
+            const selectorForm = page.querySelector('[data-branch-policy-selector]');
+            const branchSelect = page.querySelector('[data-branch-policy-branch-select]');
+            if (selectorForm instanceof HTMLFormElement && branchSelect instanceof HTMLSelectElement) {
+                branchSelect.addEventListener('change', () => selectorForm.submit());
+            }
+
+            const editor = page.querySelector('[data-branch-policy-editor]');
+            if (!(editor instanceof HTMLFormElement)) return;
+
+            const dateInput = editor.querySelector('[data-editor-date]');
+            const versionInput = editor.querySelector('[data-editor-version]');
+            const heading = editor.querySelector('[data-editor-heading]');
+            const minimumField = editor.querySelector('[data-minimum-guests-field]');
+            const minimumInput = editor.querySelector('[data-minimum-guests-input]');
+            const globalWarning = editor.querySelector('[data-global-overlay-warning]');
+            const underlyingRule = editor.querySelector('[data-underlying-rule]');
+            const impactToken = editor.querySelector('[data-impact-token]');
+            const impactConfirmation = editor.querySelector('[data-impact-confirmation]');
+            const impactCheckbox = editor.querySelector('[data-impact-checkbox]');
+            const submitButton = editor.querySelector('[data-editor-submit]');
+            const cancelButton = editor.querySelector('[data-editor-cancel]');
+            const ruleInputs = Array.from(editor.querySelectorAll('input[name="Editor.RuleType"]'));
+            const dayButtons = Array.from(page.querySelectorAll('[data-branch-policy-date]'));
+
+            const selectedRule = () => ruleInputs.find(input => input instanceof HTMLInputElement && input.checked)?.value || 'Allowed';
+            const renderRuleFields = () => {
+                const showMinimum = selectedRule() === 'MinimumGuests';
+                if (minimumField instanceof HTMLElement) minimumField.hidden = !showMinimum;
+                if (!showMinimum && minimumInput instanceof HTMLInputElement) minimumInput.value = '';
+            };
+            const clearImpactConfirmation = () => {
+                if (impactToken instanceof HTMLInputElement) impactToken.value = '';
+                if (impactCheckbox instanceof HTMLInputElement) impactCheckbox.checked = false;
+                if (impactConfirmation instanceof HTMLElement) impactConfirmation.hidden = true;
+            };
+            const formatDate = value => {
+                const parts = value.split('-');
+                return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : value;
+            };
+            const chooseDate = button => {
+                if (!(button instanceof HTMLButtonElement) || button.disabled) return;
+                dayButtons.forEach(candidate => {
+                    candidate.classList.toggle('is-selected', candidate === button);
+                    candidate.setAttribute('aria-pressed', candidate === button ? 'true' : 'false');
+                });
+                if (dateInput instanceof HTMLInputElement) dateInput.value = button.dataset.branchPolicyDate || '';
+                if (versionInput instanceof HTMLInputElement) versionInput.value = button.dataset.version || '';
+                const rule = button.dataset.rule || 'Allowed';
+                ruleInputs.forEach(input => {
+                    if (input instanceof HTMLInputElement) input.checked = input.value === rule;
+                });
+                if (minimumInput instanceof HTMLInputElement) minimumInput.value = button.dataset.minGuests || '';
+                if (heading instanceof HTMLElement) heading.textContent = `${formatDate(button.dataset.branchPolicyDate || '')} — @Model.SelectedBranchName`;
+                const globalBlocked = button.dataset.globalBlocked === 'true';
+                if (globalWarning instanceof HTMLElement) globalWarning.classList.toggle('hidden', !globalBlocked);
+                if (underlyingRule instanceof HTMLElement) underlyingRule.textContent = globalBlocked ? `Quy định đang lưu: ${button.dataset.underlyingLabel || 'Cho phép đặt bàn'}.` : '';
+                clearImpactConfirmation();
+                renderRuleFields();
+                editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                window.setTimeout(() => ruleInputs[0]?.focus(), 250);
+            };
+
+            dayButtons.forEach(button => button.addEventListener('click', () => chooseDate(button)));
+            ruleInputs.forEach(input => input.addEventListener('change', () => { clearImpactConfirmation(); renderRuleFields(); }));
+            cancelButton?.addEventListener('click', () => {
+                const selected = dayButtons.find(button => button.classList.contains('is-selected'));
+                if (selected) chooseDate(selected);
+            });
+            editor.addEventListener('submit', () => {
+                if (submitButton instanceof HTMLButtonElement) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Đang lưu...';
+                }
+            });
+            renderRuleFields();
+        })();
+    </script>
+}

@@ -78,3 +78,58 @@ public class ReservationPolicyViewModel
     public bool PolicyPayloadPresent { get; set; }
     public bool ConfirmClearAllBlockedDates { get; set; }
 }
+
+public sealed class BranchReservationPolicyViewModel
+{
+    public DateOnly VietnamToday { get; set; }
+    public int CalendarYear { get; set; }
+    public int CalendarMonth { get; set; }
+    public Guid? SelectedBranchId { get; set; }
+    public string? SelectedBranchName { get; set; }
+    public IReadOnlyList<SelectListItem> BranchOptions { get; set; } = [];
+    public IReadOnlyList<BranchReservationPolicyCalendarItemViewModel> Policies { get; set; } = [];
+    public IReadOnlySet<DateOnly> GlobalBlockedDates { get; set; } = new HashSet<DateOnly>();
+    public BranchReservationPolicyEditViewModel Editor { get; set; } = new();
+    public bool RequiresImpactConfirmation { get; set; }
+    public IReadOnlyList<ReservationStatusCountViewModel> ExistingReservationCounts { get; set; } = [];
+    public int ExistingReservationTotal => ExistingReservationCounts.Sum(item => item.Count);
+    public bool HasConcurrencyConflict { get; set; }
+    public string? PageMessage { get; set; }
+}
+
+public sealed class BranchReservationPolicyCalendarItemViewModel
+{
+    public DateOnly Date { get; set; }
+    public BranchReservationRuleType RuleType { get; set; }
+    public int? MinGuests { get; set; }
+    public Guid Version { get; set; }
+}
+
+public sealed class BranchReservationPolicyEditViewModel
+{
+    public Guid BranchId { get; set; }
+    public DateOnly Date { get; set; }
+    public BranchPolicyAdminRuleType RuleType { get; set; }
+    public int? MinGuests { get; set; }
+    public Guid? ExpectedVersion { get; set; }
+    public int CalendarYear { get; set; }
+    public int CalendarMonth { get; set; }
+    public bool ConfirmExistingReservations { get; set; }
+
+    [StringLength(4096)]
+    public string? ImpactConfirmationToken { get; set; }
+}
+
+public enum BranchPolicyAdminRuleType
+{
+    Allowed,
+    Closed,
+    MinimumGuests
+}
+
+public sealed class ReservationStatusCountViewModel
+{
+    public ReservationStatus Status { get; set; }
+    public string Label { get; set; } = string.Empty;
+    public int Count { get; set; }
+}

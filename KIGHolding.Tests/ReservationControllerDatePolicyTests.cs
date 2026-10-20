@@ -17,6 +17,127 @@ public sealed class ReservationControllerDatePolicyTests
     private static readonly TimeProvider AuditTimeProvider =
         new FixedTimeProvider(DateTimeOffset.Parse("2026-08-05T17:00:00+00:00"));
 
+    [Theory]
+    [InlineData(ReservationPolicyEvaluationStatus.PastDate, "ReservationDate")]
+    [InlineData(ReservationPolicyEvaluationStatus.GlobalBlockedDate, "ReservationDate")]
+    [InlineData(ReservationPolicyEvaluationStatus.InvalidBranch, "BranchId")]
+    [InlineData(ReservationPolicyEvaluationStatus.InvalidGuestCount, "GuestCount")]
+    [InlineData(ReservationPolicyEvaluationStatus.BranchClosedDate, "ReservationDate")]
+    [InlineData(ReservationPolicyEvaluationStatus.MinimumGuestsNotMet, "GuestCount")]
+    public async Task Policy_DeniedResult_ReturnsStableFieldSpecificPayload(
+        ReservationPolicyEvaluationStatus status,
+        string expectedFieldName)
+    {
+        var evaluator = new CapturingPolicyEvaluator(
+            new ReservationPolicyEvaluationResult(
+                status,
+                status == ReservationPolicyEvaluationStatus.MinimumGuestsNotMet ? 6 : null));
+        var controller = CreateController(new CapturingReservationService(), new CapturingEmailService(), evaluator);
+
+        var result = await controller.Policy(
+            Guid.NewGuid(),
+            new DateOnly(2026, 8, 9),
+            5,
+            CancellationToken.None);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var payload = JsonSerializer.SerializeToElement(okResult.Value);
+        Assert.Equal(status.ToString(), payload.GetProperty("status").GetString());
+        Assert.Equal(expectedFieldName, payload.GetProperty("fieldName").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(payload.GetProperty("message").GetString()));
+        Assert.Equal(status == ReservationPolicyEvaluationStatus.MinimumGuestsNotMet ? 6 : null, GetNullableInt(payload, "minGuests"));
+    }
+
+    [Fact]
+    public async Task Policy_AllowedAtExactThreshold_ReturnsAllowedWithoutCreatingReservationOrSendingEmail()
+    {
+        var reservationService = new CapturingReservationService();
+        var emailService = new CapturingEmailService();
+        var evaluator = new CapturingPolicyEvaluator((_, _, guestCount, _, _) =>
+            Task.FromResult(new ReservationPolicyEvaluationResult(
+                guestCount >= 6
+                    ? ReservationPolicyEvaluationStatus.Allowed
+                    : ReservationPolicyEvaluationStatus.MinimumGuestsNotMet,
+                guestCount >= 6 ? null : 6)));
+        var controller = CreateController(reservationService, emailService, evaluator);
+        var branchId = Guid.NewGuid();
+        var reservationDate = new DateOnly(2026, 8, 9);
+
+        var result = await controller.Policy(branchId, reservationDate, 6, CancellationToken.None);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var payload = JsonSerializer.SerializeToElement(okResult.Value);
+        Assert.Equal("Allowed", payload.GetProperty("status").GetString());
+        Assert.Equal(JsonValueKind.Null, payload.GetProperty("message").ValueKind);
+        Assert.Equal(branchId, evaluator.LastBranchId);
+        Assert.Equal(reservationDate, evaluator.LastReservationDate);
+        Assert.Equal(6, evaluator.LastGuestCount);
+        Assert.Equal(0, reservationService.CreateCallCount);
+        Assert.Equal(0, emailService.ReservationNotificationCallCount);
+    }
+
+    [Fact]
+    public async Task Policy_InvalidGuestCount_ReturnsBadRequestWithoutCallingEvaluator()
+    {
+        var evaluator = new CapturingPolicyEvaluator(
+            new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.Allowed));
+        var controller = CreateController(new CapturingReservationService(), new CapturingEmailService(), evaluator);
+
+        var result = await controller.Policy(
+            Guid.NewGuid(),
+            new DateOnly(2026, 8, 9),
+            101,
+            CancellationToken.None);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        var payload = JsonSerializer.SerializeToElement(badRequest.Value);
+        Assert.Equal("InvalidGuestCount", payload.GetProperty("status").GetString());
+        Assert.Equal(0, evaluator.CallCount);
+    }
+
+    [Fact]
+    public async Task Policy_MalformedBranchBinding_ReturnsSafeFieldErrorWithoutCallingEvaluator()
+    {
+        var evaluator = new CapturingPolicyEvaluator(
+            new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.Allowed));
+        var controller = CreateController(new CapturingReservationService(), new CapturingEmailService(), evaluator);
+        controller.ModelState.AddModelError("branchId", "raw binder detail");
+
+        var result = await controller.Policy(
+            null,
+            new DateOnly(2026, 8, 9),
+            2,
+            CancellationToken.None);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        var payload = JsonSerializer.SerializeToElement(badRequest.Value);
+        Assert.Equal("InvalidBranch", payload.GetProperty("status").GetString());
+        Assert.Equal("BranchId", payload.GetProperty("fieldName").GetString());
+        Assert.DoesNotContain("raw binder detail", JsonSerializer.Serialize(badRequest.Value), StringComparison.Ordinal);
+        Assert.Equal(0, evaluator.CallCount);
+    }
+
+    [Fact]
+    public async Task Policy_EvaluatorFailure_ReturnsFailClosedResponseWithoutInternalDetails()
+    {
+        var evaluator = new CapturingPolicyEvaluator((_, _, _, _, _) =>
+            throw new InvalidOperationException("provider-secret-detail"));
+        var controller = CreateController(new CapturingReservationService(), new CapturingEmailService(), evaluator);
+
+        var result = await controller.Policy(
+            Guid.NewGuid(),
+            new DateOnly(2026, 8, 9),
+            2,
+            CancellationToken.None);
+
+        var errorResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(StatusCodes.Status500InternalServerError, errorResult.StatusCode);
+        var json = JsonSerializer.Serialize(errorResult.Value);
+        Assert.Contains("VerificationFailed", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("provider-secret-detail", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("Allowed", json, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task IndexPost_ServiceBlockedDate_RendersFormWithDateErrorAndNoEmail()
     {
@@ -130,6 +251,61 @@ public sealed class ReservationControllerDatePolicyTests
         Assert.Equal(0, emailService.ReservationNotificationCallCount);
     }
 
+    [Fact]
+    public async Task IndexPost_BranchClosed_RendersDateErrorAndDoesNotSendEmail()
+    {
+        var reservationService = new CapturingReservationService(ReservationCreateResult.Failed(
+        [
+            new ReservationServiceError
+            {
+                FieldName = nameof(ReservationCreateRequest.ReservationDate),
+                Message = ReservationPolicyMessages.BranchClosedDate
+            }
+        ]));
+        var emailService = new CapturingEmailService();
+        var controller = CreateController(reservationService, emailService);
+
+        var result = await controller.Index(CreateValidModel(new DateOnly(2026, 8, 10)), CancellationToken.None);
+
+        Assert.IsType<ViewResult>(result);
+        Assert.Contains(
+            controller.ModelState[nameof(ReservationCreateViewModel.ReservationDate)]!.Errors,
+            error => error.ErrorMessage == ReservationPolicyMessages.BranchClosedDate);
+        Assert.Equal(0, emailService.ReservationNotificationCallCount);
+    }
+
+    [Fact]
+    public async Task QuickPost_MinimumGuestsFailure_ReturnsGuestCountErrorAndDoesNotSendEmail()
+    {
+        var minimumGuestsMessage = "Chi nhánh chỉ nhận đặt bàn từ 6 khách trở lên vào ngày này.";
+        var reservationService = new CapturingReservationService(ReservationCreateResult.Failed(
+        [
+            new ReservationServiceError
+            {
+                FieldName = nameof(ReservationCreateRequest.GuestCount),
+                Message = minimumGuestsMessage
+            }
+        ]));
+        var emailService = new CapturingEmailService();
+        var controller = CreateController(reservationService, emailService);
+
+        var result = await controller.Quick(CreateValidModel(new DateOnly(2026, 8, 10)), CancellationToken.None);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        var json = JsonSerializer.Serialize(badRequest.Value);
+        using var document = JsonDocument.Parse(json);
+        var guestCountErrors = document
+            .RootElement
+            .GetProperty("errors")
+            .GetProperty(nameof(ReservationCreateViewModel.GuestCount))
+            .EnumerateArray()
+            .Select(error => error.GetString())
+            .ToArray();
+
+        Assert.Contains(minimumGuestsMessage, guestCountErrors);
+        Assert.Equal(0, emailService.ReservationNotificationCallCount);
+    }
+
     private static ReservationCreateResult CreateDatePolicyFailure()
     {
         return ReservationCreateResult.Failed(
@@ -144,7 +320,8 @@ public sealed class ReservationControllerDatePolicyTests
 
     private static ReservationController CreateController(
         CapturingReservationService reservationService,
-        CapturingEmailService emailService)
+        CapturingEmailService emailService,
+        IReservationPolicyEvaluator? policyEvaluator = null)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -155,6 +332,8 @@ public sealed class ReservationControllerDatePolicyTests
 
         var controller = new ReservationController(
             reservationService,
+            policyEvaluator ?? new CapturingPolicyEvaluator(
+                new ReservationPolicyEvaluationResult(ReservationPolicyEvaluationStatus.Allowed)),
             new StubBranchService(),
             new StubSiteSettingService(),
             emailService,
@@ -169,6 +348,12 @@ public sealed class ReservationControllerDatePolicyTests
         };
 
         return controller;
+    }
+
+    private static int? GetNullableInt(JsonElement payload, string propertyName)
+    {
+        var property = payload.GetProperty(propertyName);
+        return property.ValueKind == JsonValueKind.Null ? null : property.GetInt32();
     }
 
     private static ReservationCreateViewModel CreateValidModel(DateOnly reservationDate)
@@ -206,6 +391,41 @@ public sealed class ReservationControllerDatePolicyTests
         public Task<Reservation?> GetReservationByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return Task.FromResult<Reservation?>(null);
+        }
+    }
+
+    private sealed class CapturingPolicyEvaluator : IReservationPolicyEvaluator
+    {
+        private readonly Func<Guid, DateOnly, int, DateOnly, CancellationToken, Task<ReservationPolicyEvaluationResult>> _evaluate;
+
+        public CapturingPolicyEvaluator(ReservationPolicyEvaluationResult result)
+            : this((_, _, _, _, _) => Task.FromResult(result))
+        {
+        }
+
+        public CapturingPolicyEvaluator(
+            Func<Guid, DateOnly, int, DateOnly, CancellationToken, Task<ReservationPolicyEvaluationResult>> evaluate)
+        {
+            _evaluate = evaluate;
+        }
+
+        public int CallCount { get; private set; }
+        public Guid LastBranchId { get; private set; }
+        public DateOnly LastReservationDate { get; private set; }
+        public int LastGuestCount { get; private set; }
+
+        public Task<ReservationPolicyEvaluationResult> EvaluateAsync(
+            Guid branchId,
+            DateOnly reservationDate,
+            int guestCount,
+            DateOnly vietnamToday,
+            CancellationToken cancellationToken = default)
+        {
+            CallCount++;
+            LastBranchId = branchId;
+            LastReservationDate = reservationDate;
+            LastGuestCount = guestCount;
+            return _evaluate(branchId, reservationDate, guestCount, vietnamToday, cancellationToken);
         }
     }
 

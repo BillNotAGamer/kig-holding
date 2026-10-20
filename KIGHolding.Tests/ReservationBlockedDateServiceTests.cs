@@ -21,7 +21,7 @@ public sealed class ReservationBlockedDateServiceTests
             new BlockedReservationDate { Date = new DateOnly(2026, 9, 2) },
             new BlockedReservationDate { Date = new DateOnly(2027, 1, 1) });
         await dbContext.SaveChangesAsync();
-        var service = new ReservationBlockedDateService(dbContext);
+        var service = new ReservationBlockedDateService(dbContext, new TestReservationPolicyLockService());
 
         var firstCleanupCount = await service.CleanupPastDatesAsync(VietnamToday);
         var secondCleanupCount = await service.CleanupPastDatesAsync(VietnamToday);
@@ -49,7 +49,8 @@ public sealed class ReservationBlockedDateServiceTests
             new BlockedReservationDate { Date = new DateOnly(2026, 9, 2) },
             new BlockedReservationDate { Date = new DateOnly(2027, 1, 1) });
         await dbContext.SaveChangesAsync();
-        var service = new ReservationBlockedDateService(dbContext);
+        var policyLock = new TestReservationPolicyLockService();
+        var service = new ReservationBlockedDateService(dbContext, policyLock);
 
         await service.ReplaceActiveBlockedDatesAsync(
             [
@@ -69,6 +70,10 @@ public sealed class ReservationBlockedDateServiceTests
                 .OrderBy(x => x.Date)
                 .Select(x => x.Date)
                 .ToListAsync());
+        Assert.Equal(1, policyLock.GlobalMutationLockCount);
+        Assert.Equal(
+            [new DateOnly(2026, 8, 31), new DateOnly(2026, 9, 3), new DateOnly(2027, 1, 1)],
+            policyLock.AcquiredDates);
     }
 
     private static AppDbContext CreateDbContext()

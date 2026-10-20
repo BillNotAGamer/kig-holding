@@ -99,7 +99,12 @@ Configure these through Railway Variables:
 
 ```text
 ConnectionStrings__DefaultConnection
-ResendSettings__ApiKey
+ASPNETCORE_ENVIRONMENT=Production
+ResendSettings__EnableOutboundEmail=true
+ResendSettings__ApiKey=<secure runtime secret>
+ResendSettings__FromEmail=<configured sender email>
+ResendSettings__FromName=<optional display name>
+ResendSettings__BusinessRecipientEmail=<fallback recipient email>
 AdminBootstrap__Username
 AdminBootstrap__Password
 AdminBootstrap__Email
@@ -108,6 +113,24 @@ CloudinarySettings__CloudName
 CloudinarySettings__ApiKey
 CloudinarySettings__ApiSecret
 ```
+
+### Outbound Email Delivery Policy (Strict Production Opt-In)
+
+Live outbound email dispatch is authorized **strictly** when all three conditions are met at runtime:
+1. `ASPNETCORE_ENVIRONMENT=Production`
+2. `ResendSettings__EnableOutboundEmail=true`
+3. Valid `ResendSettings__ApiKey` and `ResendSettings__FromEmail` are configured.
+
+In all other environments (Development, Staging, QA, Automated Tests) or whenever `EnableOutboundEmail` is missing or false, the application safely binds `NoOpEmailService`.
+
+> [!WARNING]
+> If `ResendSettings__EnableOutboundEmail` is missing, false, or set in a non-production environment, customer booking and contact submission workflows remain 100% functional, but outbound email delivery is safely suppressed by the configured delivery policy.
+
+Before deploying this change to production, the project owner must coordinate:
+1. **Resend Key Rotation:** Revoke any previously exposed API key in the Resend dashboard and create a new restricted key.
+2. **Railway Secrets Update:** Update `ResendSettings__ApiKey` with the rotated secret.
+3. **Explicit Opt-in:** Add `ResendSettings__EnableOutboundEmail=true` to Railway Variables.
+4. **Production Smoke Verification:** Verify that test bookings receive confirmation and admin notification emails.
 
 Cloudinary settings are needed only when uploading through Cloudinary or deleting recognized legacy Cloudinary assets.
 

@@ -4,11 +4,13 @@ using KIGHolding.Data;
 using KIGHolding.Models.Entities;
 using KIGHolding.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KIGHolding.Tests.Admin;
 
@@ -299,7 +301,14 @@ public sealed class ReservationPolicyControllerTests
 
         return new AdminReservationController(
             dbContext,
-            new ReservationBlockedDateService(dbContext),
+            new ReservationBlockedDateService(dbContext, new TestReservationPolicyLockService()),
+            new BranchReservationDatePolicyService(
+                dbContext,
+                new TestReservationPolicyLockService(),
+                NullLogger<BranchReservationDatePolicyService>.Instance,
+                AuditTimeProvider),
+            new EphemeralDataProtectionProvider(),
+            NullLogger<AdminReservationController>.Instance,
             AuditTimeProvider)
         {
             ControllerContext = new ControllerContext

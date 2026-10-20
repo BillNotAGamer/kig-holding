@@ -317,6 +317,16 @@ public class BranchController : AdminBaseController
             return RedirectToAdminIndex(page);
         }
 
+        var hasReservationPolicies = await _dbContext.BranchReservationDatePolicies
+            .AsNoTracking()
+            .AnyAsync(x => x.BranchId == id, cancellationToken);
+
+        if (hasReservationPolicies)
+        {
+            SetErrorMessage("Không thể xóa vĩnh viễn chi nhánh vì đang có chính sách đặt bàn theo ngày. Hãy sử dụng Xóa mềm để bảo toàn cấu hình.");
+            return RedirectToAdminIndex(page);
+        }
+
         var branchName = branch.Name;
         var thumbnailUrl = branch.ThumbnailUrl;
 

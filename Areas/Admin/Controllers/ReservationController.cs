@@ -1,7 +1,9 @@
+using System.Text.Json;
 using KIGHolding.Areas.Admin.ViewModels;
 using KIGHolding.Data;
 using KIGHolding.Models.Enums;
 using KIGHolding.Services;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,18 +13,32 @@ namespace KIGHolding.Areas.Admin.Controllers;
 public class ReservationController : AdminBaseController
 {
     private const int PageSize = 10;
+    private const string BranchPolicyConflictMessage =
+        "Quy định đặt bàn đã được quản trị viên khác thay đổi. Vui lòng tải lại dữ liệu trước khi tiếp tục.";
+    private const string BranchPolicyPersistenceMessage =
+        "Không thể cập nhật quy định đặt bàn lúc này. Vui lòng tải lại trang và thử lại.";
 
     private readonly AppDbContext _dbContext;
     private readonly IReservationBlockedDateService _blockedDateService;
+    private readonly IBranchReservationDatePolicyService _branchPolicyService;
+    private readonly IDataProtector _impactConfirmationProtector;
+    private readonly ILogger<ReservationController> _logger;
     private readonly TimeProvider _timeProvider;
 
     public ReservationController(
         AppDbContext dbContext,
         IReservationBlockedDateService blockedDateService,
+        IBranchReservationDatePolicyService branchPolicyService,
+        IDataProtectionProvider dataProtectionProvider,
+        ILogger<ReservationController> logger,
         TimeProvider timeProvider)
     {
         _dbContext = dbContext;
         _blockedDateService = blockedDateService;
+        _branchPolicyService = branchPolicyService;
+        _impactConfirmationProtector = dataProtectionProvider.CreateProtector(
+            "KIGHolding.Admin.BranchReservationPolicy.ImpactConfirmation.v1");
+        _logger = logger;
         _timeProvider = timeProvider;
     }
 
@@ -161,6 +177,163 @@ public class ReservationController : AdminBaseController
 
         TempData["SuccessMessage"] = "Da cap nhat chinh sach dat ban.";
         return RedirectToAction(nameof(Policy), new { year = model.CalendarYear, month = model.CalendarMonth });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> BranchPolicy(
+        Guid? branchId = null,
+        int? year = null,
+        int? month = null,
+        DateOnly? date = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var model = await BuildBranchPolicyViewModelAsync(
+                branchId,
+                year,
+                month,
+                date,
+                cancellationToken);
+            return View(model);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            _logger.LogError(exception, "Unable to load the Admin branch reservation policy calendar.");
+            var vietnamToday = VietnamClock.GetVietnamToday(_timeProvider);
+            return View(new BranchReservationPolicyViewModel
+            {
+                VietnamToday = vietnamToday,
+                CalendarYear = vietnamToday.Year,
+                CalendarMonth = vietnamToday.Month,
+                PageMessage = BranchPolicyPersistenceMessage
+            });
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> BranchPolicy(
+        [Bind(Prefix = nameof(BranchReservationPolicyViewModel.Editor))]
+        BranchReservationPolicyEditViewModel editor,
+        CancellationToken cancellationToken)
+    {
+        var vietnamToday = VietnamClock.GetVietnamToday(_timeProvider);
+
+        try
+        {
+            await ValidateBranchPolicyEditorAsync(editor, vietnamToday, cancellationToken);
+            if (!ModelState.IsValid)
+            {
+                return View(await BuildBranchPolicyViewModelAsync(
+                    editor.BranchId == Guid.Empty ? null : editor.BranchId,
+                    editor.CalendarYear,
+                    editor.CalendarMonth,
+                    editor.Date == default ? null : editor.Date,
+                    cancellationToken,
+                    editor));
+            }
+
+            IReadOnlyList<ReservationStatusCount> impactCounts = [];
+            if (editor.RuleType is BranchPolicyAdminRuleType.Closed or BranchPolicyAdminRuleType.MinimumGuests)
+            {
+                impactCounts = await _branchPolicyService.GetExistingReservationCountsAsync(
+                    editor.BranchId,
+                    editor.Date,
+                    cancellationToken);
+            }
+
+            if (impactCounts.Sum(item => item.Count) > 0 &&
+                (!editor.ConfirmExistingReservations ||
+                 !IsValidImpactConfirmation(editor, impactCounts)))
+            {
+                var attemptedConfirmation = editor.ConfirmExistingReservations ||
+                    !string.IsNullOrWhiteSpace(editor.ImpactConfirmationToken);
+                var confirmationKey =
+                    $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.ConfirmExistingReservations)}";
+                ModelState.Remove(confirmationKey);
+                ModelState.Remove(
+                    $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.ImpactConfirmationToken)}");
+                ModelState.AddModelError(
+                    confirmationKey,
+                    attemptedConfirmation
+                        ? "Số lượt đặt bàn hiện tại đã thay đổi hoặc xác nhận không còn hợp lệ. Vui lòng kiểm tra và xác nhận lại."
+                        : "Vui lòng xác nhận sau khi kiểm tra các lượt đặt bàn hiện có.");
+
+                editor.ConfirmExistingReservations = false;
+                editor.ImpactConfirmationToken = CreateImpactConfirmation(editor, impactCounts);
+                var confirmationModel = await BuildBranchPolicyViewModelAsync(
+                    editor.BranchId,
+                    editor.CalendarYear,
+                    editor.CalendarMonth,
+                    editor.Date,
+                    cancellationToken,
+                    editor);
+                confirmationModel.RequiresImpactConfirmation = true;
+                confirmationModel.ExistingReservationCounts = BuildReservationStatusCounts(impactCounts);
+                return View(confirmationModel);
+            }
+
+            var mutationResult = await ApplyBranchPolicyMutationAsync(editor, cancellationToken);
+            if (mutationResult.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Đã cập nhật quy định đặt bàn theo chi nhánh.";
+                return RedirectToAction(nameof(BranchPolicy), new
+                {
+                    branchId = editor.BranchId,
+                    year = editor.CalendarYear,
+                    month = editor.CalendarMonth,
+                    date = editor.Date.ToString("yyyy-MM-dd")
+                });
+            }
+
+            if (mutationResult.Status is BranchReservationPolicyMutationStatus.Conflict or
+                BranchReservationPolicyMutationStatus.PolicyNotFound)
+            {
+                ModelState.Clear();
+                ModelState.AddModelError(string.Empty, BranchPolicyConflictMessage);
+                var conflictModel = await BuildBranchPolicyViewModelAsync(
+                    editor.BranchId,
+                    editor.CalendarYear,
+                    editor.CalendarMonth,
+                    editor.Date,
+                    cancellationToken);
+                conflictModel.HasConcurrencyConflict = true;
+                return View(conflictModel);
+            }
+
+            var resultMessage = mutationResult.Status switch
+            {
+                BranchReservationPolicyMutationStatus.BranchNotFound => "Không tìm thấy chi nhánh.",
+                BranchReservationPolicyMutationStatus.BranchNotReservable =>
+                    "Chi nhánh không hoạt động hoặc hiện không nhận đặt bàn.",
+                BranchReservationPolicyMutationStatus.ValidationFailed =>
+                    "Quy định đặt bàn không hợp lệ. Vui lòng kiểm tra lại.",
+                _ => BranchPolicyPersistenceMessage
+            };
+            ModelState.AddModelError(string.Empty, resultMessage);
+            return View(await BuildBranchPolicyViewModelAsync(
+                editor.BranchId,
+                editor.CalendarYear,
+                editor.CalendarMonth,
+                editor.Date,
+                cancellationToken,
+                editor));
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "Unexpected Admin branch reservation policy failure for branch {BranchId} and date {PolicyDate}.",
+                editor.BranchId,
+                editor.Date);
+            ModelState.AddModelError(string.Empty, BranchPolicyPersistenceMessage);
+            return View(await BuildBranchPolicyFailureViewModelAsync(editor, cancellationToken));
+        }
     }
 
     [HttpGet]
@@ -321,6 +494,335 @@ public class ReservationController : AdminBaseController
         options.AddRange(branchItems);
         return options;
     }
+
+    private async Task<BranchReservationPolicyViewModel> BuildBranchPolicyViewModelAsync(
+        Guid? requestedBranchId,
+        int? requestedYear,
+        int? requestedMonth,
+        DateOnly? requestedDate,
+        CancellationToken cancellationToken,
+        BranchReservationPolicyEditViewModel? editorOverride = null)
+    {
+        var vietnamToday = VietnamClock.GetVietnamToday(_timeProvider);
+        var (year, month) = NormalizeCalendarMonth(requestedYear, requestedMonth, vietnamToday);
+        var firstOfMonth = new DateOnly(year, month, 1);
+        var lastOfMonth = firstOfMonth.AddMonths(1).AddDays(-1);
+        var branches = await _dbContext.Branches
+            .AsNoTracking()
+            .Where(branch => branch.IsActive && branch.AllowsReservations)
+            .OrderBy(branch => branch.DisplayOrder)
+            .ThenBy(branch => branch.Name)
+            .Select(branch => new { branch.Id, branch.Name, branch.City })
+            .ToListAsync(cancellationToken);
+
+        var selectedBranch = requestedBranchId.HasValue
+            ? branches.FirstOrDefault(branch => branch.Id == requestedBranchId.Value)
+            : branches.FirstOrDefault();
+        if (requestedBranchId.HasValue && selectedBranch is null)
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(BranchReservationPolicyEditViewModel.BranchId)}",
+                "Chi nhánh không hợp lệ, không hoạt động hoặc hiện không nhận đặt bàn.");
+        }
+
+        IReadOnlyList<BranchReservationPolicyCalendarItemViewModel> policies = [];
+        if (selectedBranch is not null)
+        {
+            policies = (await _branchPolicyService.GetPoliciesAsync(
+                    selectedBranch.Id,
+                    firstOfMonth,
+                    lastOfMonth,
+                    cancellationToken))
+                .Select(policy => new BranchReservationPolicyCalendarItemViewModel
+                {
+                    Date = policy.Date,
+                    RuleType = policy.RuleType,
+                    MinGuests = policy.MinGuests,
+                    Version = policy.Version
+                })
+                .ToArray();
+        }
+
+        var globalBlockedDates = (await _blockedDateService.GetActiveBlockedDatesAsync(
+                vietnamToday,
+                cancellationToken))
+            .Where(date => date >= firstOfMonth && date <= lastOfMonth)
+            .ToHashSet();
+
+        DateOnly? selectedDate = requestedDate;
+        if (!selectedDate.HasValue ||
+            selectedDate.Value < firstOfMonth ||
+            selectedDate.Value > lastOfMonth ||
+            selectedDate.Value < vietnamToday)
+        {
+            selectedDate = lastOfMonth < vietnamToday
+                ? null
+                : firstOfMonth < vietnamToday
+                    ? vietnamToday
+                    : firstOfMonth;
+        }
+
+        var currentPolicy = selectedDate.HasValue
+            ? policies.FirstOrDefault(policy => policy.Date == selectedDate.Value)
+            : null;
+        var editor = editorOverride ?? new BranchReservationPolicyEditViewModel
+        {
+            BranchId = selectedBranch?.Id ?? Guid.Empty,
+            Date = selectedDate ?? default,
+            RuleType = currentPolicy?.RuleType switch
+            {
+                BranchReservationRuleType.Closed => BranchPolicyAdminRuleType.Closed,
+                BranchReservationRuleType.MinimumGuests => BranchPolicyAdminRuleType.MinimumGuests,
+                _ => BranchPolicyAdminRuleType.Allowed
+            },
+            MinGuests = currentPolicy?.MinGuests,
+            ExpectedVersion = currentPolicy?.Version,
+            CalendarYear = year,
+            CalendarMonth = month
+        };
+        editor.CalendarYear = year;
+        editor.CalendarMonth = month;
+
+        return new BranchReservationPolicyViewModel
+        {
+            VietnamToday = vietnamToday,
+            CalendarYear = year,
+            CalendarMonth = month,
+            SelectedBranchId = selectedBranch?.Id,
+            SelectedBranchName = selectedBranch?.Name,
+            BranchOptions = branches.Select(branch => new SelectListItem
+            {
+                Value = branch.Id.ToString(),
+                Text = string.IsNullOrWhiteSpace(branch.City) ? branch.Name : $"{branch.Name} - {branch.City}",
+                Selected = selectedBranch?.Id == branch.Id
+            }).ToArray(),
+            Policies = policies,
+            GlobalBlockedDates = globalBlockedDates,
+            Editor = editor
+        };
+    }
+
+    private async Task<BranchReservationPolicyViewModel> BuildBranchPolicyFailureViewModelAsync(
+        BranchReservationPolicyEditViewModel editor,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await BuildBranchPolicyViewModelAsync(
+                editor.BranchId == Guid.Empty ? null : editor.BranchId,
+                editor.CalendarYear,
+                editor.CalendarMonth,
+                editor.Date == default ? null : editor.Date,
+                cancellationToken,
+                editor);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            _logger.LogError(
+                exception,
+                "Unable to reload the Admin branch reservation policy calendar after a failed mutation.");
+            var vietnamToday = VietnamClock.GetVietnamToday(_timeProvider);
+            var (year, month) = NormalizeCalendarMonth(
+                editor.CalendarYear,
+                editor.CalendarMonth,
+                vietnamToday);
+            editor.CalendarYear = year;
+            editor.CalendarMonth = month;
+            return new BranchReservationPolicyViewModel
+            {
+                VietnamToday = vietnamToday,
+                CalendarYear = year,
+                CalendarMonth = month,
+                Editor = editor,
+                PageMessage = BranchPolicyPersistenceMessage
+            };
+        }
+    }
+
+    private async Task ValidateBranchPolicyEditorAsync(
+        BranchReservationPolicyEditViewModel editor,
+        DateOnly vietnamToday,
+        CancellationToken cancellationToken)
+    {
+        if (editor.BranchId == Guid.Empty)
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.BranchId)}",
+                "Vui lòng chọn chi nhánh.");
+        }
+        else if (!await _dbContext.Branches.AsNoTracking().AnyAsync(
+                     branch => branch.Id == editor.BranchId && branch.IsActive && branch.AllowsReservations,
+                     cancellationToken))
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.BranchId)}",
+                "Chi nhánh không hợp lệ, không hoạt động hoặc hiện không nhận đặt bàn.");
+        }
+
+        if (editor.Date == default)
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.Date)}",
+                "Ngày áp dụng không hợp lệ.");
+        }
+        else if (editor.Date < vietnamToday)
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.Date)}",
+                "Không thể thay đổi quy định của ngày đã qua.");
+        }
+
+        if (!Enum.IsDefined(editor.RuleType))
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.RuleType)}",
+                "Loại quy định không hợp lệ.");
+        }
+        else if (editor.RuleType == BranchPolicyAdminRuleType.MinimumGuests &&
+                 editor.MinGuests is null or < 1 or > 100)
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.MinGuests)}",
+                "Số khách tối thiểu phải từ 1 đến 100.");
+        }
+        else if (editor.RuleType != BranchPolicyAdminRuleType.MinimumGuests && editor.MinGuests is not null)
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.MinGuests)}",
+                "Chỉ quy định số khách tối thiểu mới được nhập giá trị này.");
+        }
+
+        if (editor.ExpectedVersion == Guid.Empty)
+        {
+            ModelState.AddModelError(
+                $"{nameof(BranchReservationPolicyViewModel.Editor)}.{nameof(editor.ExpectedVersion)}",
+                "Phiên bản quy định không hợp lệ.");
+        }
+
+        if (editor.CalendarMonth is < 1 or > 12 || editor.CalendarYear is < 1 or > 9999)
+        {
+            ModelState.AddModelError(string.Empty, "Tháng hiển thị không hợp lệ.");
+        }
+    }
+
+    private async Task<BranchReservationPolicyMutationResult> ApplyBranchPolicyMutationAsync(
+        BranchReservationPolicyEditViewModel editor,
+        CancellationToken cancellationToken)
+    {
+        if (editor.RuleType == BranchPolicyAdminRuleType.Allowed)
+        {
+            if (!editor.ExpectedVersion.HasValue)
+            {
+                var current = await _branchPolicyService.GetPolicyAsync(
+                    editor.BranchId,
+                    editor.Date,
+                    cancellationToken);
+                return current is null
+                    ? new BranchReservationPolicyMutationResult(BranchReservationPolicyMutationStatus.Succeeded)
+                    : new BranchReservationPolicyMutationResult(BranchReservationPolicyMutationStatus.Conflict);
+            }
+
+            return await _branchPolicyService.RemovePolicyAsync(
+                editor.BranchId,
+                editor.Date,
+                editor.ExpectedVersion.Value,
+                cancellationToken);
+        }
+
+        var ruleType = editor.RuleType == BranchPolicyAdminRuleType.Closed
+            ? BranchReservationRuleType.Closed
+            : BranchReservationRuleType.MinimumGuests;
+        return await _branchPolicyService.SetPolicyAsync(
+            new BranchReservationPolicyMutation(
+                editor.BranchId,
+                editor.Date,
+                ruleType,
+                editor.MinGuests,
+                editor.ExpectedVersion),
+            cancellationToken);
+    }
+
+    private string CreateImpactConfirmation(
+        BranchReservationPolicyEditViewModel editor,
+        IReadOnlyList<ReservationStatusCount> counts)
+    {
+        var payload = new BranchPolicyImpactConfirmationPayload(
+            editor.BranchId,
+            editor.Date,
+            editor.RuleType,
+            editor.MinGuests,
+            editor.ExpectedVersion,
+            BuildImpactFingerprint(counts));
+        return _impactConfirmationProtector.Protect(JsonSerializer.Serialize(payload));
+    }
+
+    private bool IsValidImpactConfirmation(
+        BranchReservationPolicyEditViewModel editor,
+        IReadOnlyList<ReservationStatusCount> counts)
+    {
+        if (string.IsNullOrWhiteSpace(editor.ImpactConfirmationToken))
+        {
+            return false;
+        }
+
+        try
+        {
+            var payload = JsonSerializer.Deserialize<BranchPolicyImpactConfirmationPayload>(
+                _impactConfirmationProtector.Unprotect(editor.ImpactConfirmationToken));
+            return payload is not null &&
+                   payload.BranchId == editor.BranchId &&
+                   payload.Date == editor.Date &&
+                   payload.RuleType == editor.RuleType &&
+                   payload.MinGuests == editor.MinGuests &&
+                   payload.ExpectedVersion == editor.ExpectedVersion &&
+                   string.Equals(payload.ImpactFingerprint, BuildImpactFingerprint(counts), StringComparison.Ordinal);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string BuildImpactFingerprint(IReadOnlyList<ReservationStatusCount> counts)
+    {
+        return string.Join(
+            ";",
+            counts.OrderBy(item => item.Status).Select(item => $"{(int)item.Status}:{item.Count}"));
+    }
+
+    private static IReadOnlyList<ReservationStatusCountViewModel> BuildReservationStatusCounts(
+        IReadOnlyList<ReservationStatusCount> counts)
+    {
+        return counts
+            .OrderBy(item => item.Status)
+            .Select(item => new ReservationStatusCountViewModel
+            {
+                Status = item.Status,
+                Label = GetStatusLabel(item.Status),
+                Count = item.Count
+            })
+            .ToArray();
+    }
+
+    private static (int Year, int Month) NormalizeCalendarMonth(
+        int? requestedYear,
+        int? requestedMonth,
+        DateOnly vietnamToday)
+    {
+        var year = requestedYear.GetValueOrDefault(vietnamToday.Year);
+        var month = requestedMonth.GetValueOrDefault(vietnamToday.Month);
+        return year is >= 1 and <= 9999 && month is >= 1 and <= 12
+            ? (year, month)
+            : (vietnamToday.Year, vietnamToday.Month);
+    }
+
+    private sealed record BranchPolicyImpactConfirmationPayload(
+        Guid BranchId,
+        DateOnly Date,
+        BranchPolicyAdminRuleType RuleType,
+        int? MinGuests,
+        Guid? ExpectedVersion,
+        string ImpactFingerprint);
 
     private async Task<ReservationPolicyViewModel> BuildPolicyViewModelAsync(
         DateOnly vietnamToday,

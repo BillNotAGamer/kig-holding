@@ -232,6 +232,47 @@ namespace KIGHolding.Migrations
                         });
                 });
 
+            modelBuilder.Entity("KIGHolding.Models.Entities.BranchReservationDatePolicy", b =>
+                {
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<int?>("MinGuests")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RuleType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("BranchId", "Date");
+
+                    b.HasIndex("Date")
+                        .HasDatabaseName("IX_BranchReservationDatePolicies_Date");
+
+                    b.ToTable("BranchReservationDatePolicies", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_BranchReservationDatePolicies_Rule", "(\"RuleType\" = 'Closed' AND \"MinGuests\" IS NULL) OR (\"RuleType\" = 'MinimumGuests' AND \"MinGuests\" IS NOT NULL AND \"MinGuests\" BETWEEN 1 AND 100)");
+                        });
+                });
+
             modelBuilder.Entity("KIGHolding.Models.Entities.ContactMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -772,6 +813,17 @@ namespace KIGHolding.Migrations
                     b.ToTable("SiteSettings", (string)null);
                 });
 
+            modelBuilder.Entity("KIGHolding.Models.Entities.BranchReservationDatePolicy", b =>
+                {
+                    b.HasOne("KIGHolding.Models.Entities.Branch", "Branch")
+                        .WithMany("ReservationDatePolicies")
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Branch");
+                });
+
             modelBuilder.Entity("KIGHolding.Models.Entities.MenuPageImage", b =>
                 {
                     b.HasOne("KIGHolding.Models.Entities.MenuGroup", "MenuGroup")
@@ -806,6 +858,8 @@ namespace KIGHolding.Migrations
 
             modelBuilder.Entity("KIGHolding.Models.Entities.Branch", b =>
                 {
+                    b.Navigation("ReservationDatePolicies");
+
                     b.Navigation("Reservations");
 
                     b.Navigation("Reviews");
