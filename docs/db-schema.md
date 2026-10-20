@@ -15,12 +15,13 @@ The database schema has evolved through the following migrations:
 5.  **`20260608082004_AddReservationDiningOptions`**: Integrates dining occasion checkboxes (such as Occasion/Celebration).
 6.  **`20260608104636_RemoveReservationDiningGroupOptions`**: Refactors dining options to use delimited strings, avoiding junction tables.
 7.  **`20260613073215_AddAdminAccountSecurityFoundation`**: Adds account lockouts, failed attempts tracking, and password timestamps.
-8.  **`20260617210701_AddBranchLunchBreakHours`**: Introduces optional `LunchBreakStart` and `LunchBreakEnd` times for individual branches.
+8.  **`20260617210701_AddBranchLunchBreakHours`**: Introduces optional `LunchBreakStart` and `LunchBreakEnd` times for individual branches. (Note: Handcrafted migration; intentionally does not have a companion `.Designer.cs` file).
 9.  **`20260710204624_AddBranchAllowsReservations`**: Adds per-branch online reservation availability.
 10. **`20260811075846_AddPostHtmlModeAndSeoMetadata`**: Adds Blog content mode and SEO metadata fields.
 11. **`20260812123110_Update`**: Snapshot alignment migration.
 12. **`20260901170736_AddBlockedReservationDatePolicy`**: Creates the DB-backed reservation closure-date table and seeds the 23 remaining future legacy blocked dates. This migration is created for review and has not been applied by implementation work.
-13. **`20261019052426_AddBranchReservationDatePolicies`**: Additively creates the branch/date policy table, its invariants, revision token, restricted Branch FK, and cleanup index. It was generated for review and was not applied by this task.
+13. **`20261019052426_AddBranchReservationDatePolicies`**: Additively creates the branch/date policy table, its invariants, revision token, restricted Branch FK, and cleanup index.
+14. **`20261020140141_AddBranchWeekendLunchBreakSupport`**: Adds `LunchBreakAppliesOnWeekend` boolean column to `Branches` (default `false`) and activates it for the Tân Phú branch.
 
 ---
 
@@ -51,7 +52,8 @@ Describes branch locations, active times, and coordinates.
 *   **District** / **City** (`string`): Location segmentation values.
 *   **Hotline** / **Email** (`string`): Branch specific contacts.
 *   **OpeningTime** / **ClosingTime** (`TimeOnly`): Active working hours.
-*   **LunchBreakStart** / **LunchBreakEnd** (`TimeOnly?`): Optional branch break time windows.
+*   **LunchBreakStart** / **LunchBreakEnd** (`TimeOnly?`): Optional branch break time windows (defaults to 14:30 - 16:30).
+*   **LunchBreakAppliesOnWeekend** (`bool`): Flag determining whether lunch break hours apply on Saturdays and Sundays (enabled for Tân Phú branch, default `false`).
 *   **Capacity** (`int`): Maximum dining capacity.
 *   **AreaSquareMeters** (`decimal?`) / **NumberOfFloors** (`int?`): Structural sizes.
 *   **ThumbnailUrl** (`string`): Cloudinary/Local asset path for index displays.
@@ -68,8 +70,8 @@ Manages table bookings submitted by customers.
 *   **GuestCount** (`int`): Number of seats reserved (validated in range 1-100).
 *   **ReservationDate** (`DateOnly`): Reserved date. The service rejects dates before Vietnam-local today and rejects exact dates stored in `BlockedReservationDates`.
 *   **ReservationTime** (`TimeOnly`): Reserved time.
-*   **DiningOccasionCodes** (`string?`): Comma-delimited strings representing celebration categories (e.g. `Occasion_Birthday,Occasion_Meeting`).
-*   **DiningOccasionOtherNote** (`string?`): Text filled when "Other" is selected.
+*   **DiningOccasionCodes** (`string?`, max 256): Semicolon-delimited string (e.g. `family;birthday`) storing normalized semantic dining occasion codes (`family`, `friends`, `business`, `couple`, `birthday`, `anniversary`, `other`). Stored and parsed via `ReservationOptionCatalog`.
+*   **DiningOccasionOtherNote** (`string?`, max 200): Customer explanation text required when `DiningOccasionCodes` contains `"other"`; cleared to `null` otherwise.
 *   **Note** (`string?`): Additional customer remarks.
 *   **Status** (`Enum`): Booking status (Pending, Confirmed, Seated, Cancelled, Completed).
 *   **Source** (`Enum`): Origin of booking (Website, Backoffice).
@@ -95,7 +97,7 @@ Optional special-date restrictions scoped to one branch. No row means Allowed at
 *   **Indexes**: Composite primary key `(BranchId, Date)` serves exact booking lookup; `IX_BranchReservationDatePolicies_Date` supports `Date < VietnamToday` cleanup.
 *   **Mutation semantics**: Create requires expected absence; update/delete require a matching UUID `Version`; successful updates replace it with a new UUID; stale or missing expected states return a typed conflict. Mutations use an explicit `READ COMMITTED` transaction and the shared date advisory lock, and never modify reservations.
 *   **Cleanup**: The hosted worker physically deletes only `Date < VietnamToday`. Today's policy is retained, cleanup is idempotent, and booking correctness does not depend on worker execution.
-*   **Deployment state**: Migration `20261019052426_AddBranchReservationDatePolicies` is created and passed the isolated 12-case PostgreSQL verification, but it has not been applied to staging or production. Migration-first deployment and a no-mixed-version policy window are required. Phase 2 Admin UI is implemented for owner QA; Phase 3 public reactive UX is not implemented. Staging migration and production deployment are not authorized.
+*   **Deployment state**: Migration `20261019052426_AddBranchReservationDatePolicies` is created and passed the isolated 12-case PostgreSQL verification, but it has not been applied to staging or production. Migration-first deployment and a no-mixed-version policy window are required. Phase 2 Admin UI is implemented for owner QA; Phase 3 public reactive UX is fully operational via `reservation-policy-client.js` on both `/dat-ban` and `_BookingModal.cshtml`. Staging migration and production deployment are not authorized.
 
 ### 4. MenuGroups (`DbSet<MenuGroup>`)
 Concept divisions in the restaurant's menu ecosystem (e.g. "Truyền Thuyết Champong", "Gogi Maru", "KBB Cook").

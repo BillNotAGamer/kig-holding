@@ -46,6 +46,11 @@ public sealed class ReservationControllerDatePolicyTests
         Assert.Equal(expectedFieldName, payload.GetProperty("fieldName").GetString());
         Assert.False(string.IsNullOrWhiteSpace(payload.GetProperty("message").GetString()));
         Assert.Equal(status == ReservationPolicyEvaluationStatus.MinimumGuestsNotMet ? 6 : null, GetNullableInt(payload, "minGuests"));
+        if (status == ReservationPolicyEvaluationStatus.MinimumGuestsNotMet)
+        {
+            Assert.True(payload.GetProperty("canCallHotline").GetBoolean());
+            Assert.False(string.IsNullOrWhiteSpace(payload.GetProperty("branchHotline").GetString()));
+        }
     }
 
     [Fact]

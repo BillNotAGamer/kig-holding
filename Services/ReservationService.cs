@@ -164,16 +164,20 @@ public class ReservationService : IReservationService
                     Message = $"Giờ đến phải nằm trong khung {branch.OpeningTime:HH\\:mm} - {branch.ClosingTime:HH\\:mm} của chi nhánh này."
                 });
             }
-            else if (branchPolicyAllowsRequest &&
-                IsWeekday(request.ReservationDate) &&
-                TryGetValidLunchBreak(branch, out var lunchBreakStart, out var lunchBreakEnd) &&
-                IsWithinLunchBreak(request.ReservationTime, lunchBreakStart, lunchBreakEnd))
+            else if (branchPolicyAllowsRequest)
             {
-                errors.Add(new ReservationServiceError
+                var appliesLunchBreak = IsWeekday(request.ReservationDate) || branch.LunchBreakAppliesOnWeekend;
+                if (appliesLunchBreak &&
+                    TryGetValidLunchBreak(branch, out var lunchBreakStart, out var lunchBreakEnd) &&
+                    IsWithinLunchBreak(request.ReservationTime, lunchBreakStart, lunchBreakEnd))
                 {
-                    FieldName = nameof(request.ReservationTime),
-                    Message = "Chi nhánh tạm nghỉ trưa trong khung giờ này từ Thứ Hai đến Thứ Sáu. Vui lòng chọn thời gian khác."
-                });
+                    var scopeText = branch.LunchBreakAppliesOnWeekend ? "tất cả các ngày trong tuần" : "từ Thứ Hai đến Thứ Sáu";
+                    errors.Add(new ReservationServiceError
+                    {
+                        FieldName = nameof(request.ReservationTime),
+                        Message = $"Chi nhánh tạm nghỉ trưa trong khung giờ {lunchBreakStart:HH\\:mm} - {lunchBreakEnd:HH\\:mm} ({scopeText}). Vui lòng chọn thời gian khác."
+                    });
+                }
             }
         }
 
@@ -226,10 +230,13 @@ public class ReservationService : IReservationService
             return ReservationCreateResult.Failed([CreatePolicyError(finalPolicyResult)]);
         }
 
-        await _dbContext.Database.ExecuteSqlRawAsync(
-            "SELECT pg_advisory_xact_lock(hashtext({0}))",
-            [normalizedPhone],
-            cancellationToken);
+        if (_dbContext.Database.IsRelational())
+        {
+            await _dbContext.Database.ExecuteSqlRawAsync(
+                "SELECT pg_advisory_xact_lock(hashtext({0}))",
+                [normalizedPhone],
+                cancellationToken);
+        }
 
         _dbContext.Reservations.Add(reservation);
         await _dbContext.SaveChangesAsync(cancellationToken);
@@ -295,18 +302,13 @@ public class ReservationService : IReservationService
         return reservationDate.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday;
     }
 
+    private static readonly TimeOnly DefaultLunchBreakStart = new(14, 30);
+    private static readonly TimeOnly DefaultLunchBreakEnd = new(16, 30);
+
     private static bool TryGetValidLunchBreak(Branch branch, out TimeOnly start, out TimeOnly end)
     {
-        start = default;
-        end = default;
-
-        if (!branch.LunchBreakStart.HasValue || !branch.LunchBreakEnd.HasValue)
-        {
-            return false;
-        }
-
-        start = branch.LunchBreakStart.Value;
-        end = branch.LunchBreakEnd.Value;
+        start = branch.LunchBreakStart ?? DefaultLunchBreakStart;
+        end = branch.LunchBreakEnd ?? DefaultLunchBreakEnd;
 
         return start < end;
     }

@@ -14,6 +14,7 @@ public class DbInitializer
     private static readonly Guid BranchDistrict1Id = Guid.Parse("965000c5-709a-4bea-a592-7a6910ce0ede");
     private static readonly Guid BranchGoVapId = Guid.Parse("16ffa04e-a45f-4c4d-bd85-f7ffd40afa47");
     private static readonly Guid BranchCauGiayId = Guid.Parse("d329b911-5bf2-4fb1-96f6-ffb09b3c7c33");
+    private static readonly Guid BranchTanPhuId = Guid.Parse("e8b91a23-4c5d-6e7f-8a9b-0c1d2e3f4a5b");
 
     private static readonly Guid ChampongMenuGroupId = Guid.Parse("a0d8dd4e-7d90-4282-bb9e-a3ca66a78c56");
     private static readonly Guid GogimaruMenuGroupId = Guid.Parse("2a8ec6cf-7707-4d3c-bf74-0c4a20cd5f70");
@@ -148,6 +149,9 @@ public class DbInitializer
                 Email = "quan1@truyenthuyetchampong.vn",
                 OpeningTime = new TimeOnly(10, 0),
                 ClosingTime = new TimeOnly(22, 30),
+                LunchBreakStart = new TimeOnly(14, 30),
+                LunchBreakEnd = new TimeOnly(16, 30),
+                LunchBreakAppliesOnWeekend = false,
                 Capacity = 86,
                 AreaSquareMeters = 180,
                 NumberOfFloors = 2,
@@ -174,6 +178,9 @@ public class DbInitializer
                 Email = "govap@truyenthuyetchampong.vn",
                 OpeningTime = new TimeOnly(10, 0),
                 ClosingTime = new TimeOnly(23, 0),
+                LunchBreakStart = new TimeOnly(14, 30),
+                LunchBreakEnd = new TimeOnly(16, 30),
+                LunchBreakAppliesOnWeekend = false,
                 Capacity = 120,
                 AreaSquareMeters = 240,
                 NumberOfFloors = 3,
@@ -200,6 +207,9 @@ public class DbInitializer
                 Email = "caugiay@truyenthuyetchampong.vn",
                 OpeningTime = new TimeOnly(10, 30),
                 ClosingTime = new TimeOnly(22, 30),
+                LunchBreakStart = new TimeOnly(14, 30),
+                LunchBreakEnd = new TimeOnly(16, 30),
+                LunchBreakAppliesOnWeekend = false,
                 Capacity = 96,
                 AreaSquareMeters = 210,
                 NumberOfFloors = 2,
@@ -211,6 +221,35 @@ public class DbInitializer
                 IsActive = true,
                 AllowsReservations = true,
                 DisplayOrder = 3,
+                CreatedAt = SeedTime,
+                UpdatedAt = SeedTime
+            },
+            new Branch
+            {
+                Id = BranchTanPhuId,
+                Name = "Truyền Thuyết Champong Tân Phú",
+                Slug = "champong-tan-phu",
+                Address = "30 Bờ Bao Tân Thắng, Phường Sơn Kỳ",
+                District = "Tân Phú",
+                City = "TP. Hồ Chí Minh",
+                Hotline = "0909 888 704",
+                Email = "tanphu@truyenthuyetchampong.vn",
+                OpeningTime = new TimeOnly(10, 0),
+                ClosingTime = new TimeOnly(22, 30),
+                LunchBreakStart = new TimeOnly(14, 30),
+                LunchBreakEnd = new TimeOnly(16, 30),
+                LunchBreakAppliesOnWeekend = true,
+                Capacity = 100,
+                AreaSquareMeters = 200,
+                NumberOfFloors = 2,
+                Description = "Chi nhánh Tân Phú phục vụ mì cay Hàn Quốc, BBQ và lẩu với không gian rộng rãi.",
+                ThumbnailUrl = "/images/branches/champong-tan-phu.webp",
+                GoogleMapUrl = "https://maps.google.com/?q=Truyen+Thuyet+Champong+Tan+Phu",
+                SeoTitle = "Truyền Thuyết Champong Tân Phú",
+                SeoDescription = "Chi nhánh Truyền Thuyết Champong Tân Phú phục vụ mì cay, BBQ và món Hàn.",
+                IsActive = true,
+                AllowsReservations = true,
+                DisplayOrder = 4,
                 CreatedAt = SeedTime,
                 UpdatedAt = SeedTime
             }

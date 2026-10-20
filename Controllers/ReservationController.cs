@@ -120,11 +120,29 @@ public class ReservationController : Controller
                 VietnamClock.GetVietnamToday(_timeProvider),
                 cancellationToken);
 
+            string? branchName = null;
+            string? branchHotline = null;
+            var canCallHotline = false;
+
+            if (result.Status == ReservationPolicyEvaluationStatus.MinimumGuestsNotMet)
+            {
+                var branches = await LoadBranchesAsync(cancellationToken);
+                var branch = branches.FirstOrDefault(b => b.Id == branchId.Value);
+                branchName = branch?.Name;
+                branchHotline = !string.IsNullOrWhiteSpace(branch?.Hotline)
+                    ? branch.Hotline
+                    : await LoadHotlineAsync(cancellationToken);
+                canCallHotline = true;
+            }
+
             return Ok(CreatePolicyPayload(
                 result.Status.ToString(),
                 GetPolicyFieldName(result.Status),
                 result.IsAllowed ? null : ReservationPolicyMessages.GetMessage(result),
-                result.MinGuests));
+                result.MinGuests,
+                branchName,
+                branchHotline,
+                canCallHotline));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -437,14 +455,20 @@ public class ReservationController : Controller
         string status,
         string? fieldName,
         string? message,
-        int? minGuests = null)
+        int? minGuests = null,
+        string? branchName = null,
+        string? branchHotline = null,
+        bool canCallHotline = false)
     {
         return new
         {
             status,
             fieldName,
             message,
-            minGuests
+            minGuests,
+            branchName,
+            branchHotline,
+            canCallHotline
         };
     }
 

@@ -123,6 +123,7 @@ public class BranchController : AdminBaseController
             ClosingTime = parsedTimes.ClosingTime!.Value,
             LunchBreakStart = parsedTimes.LunchBreakStart,
             LunchBreakEnd = parsedTimes.LunchBreakEnd,
+            LunchBreakAppliesOnWeekend = model.LunchBreakAppliesOnWeekend,
             Capacity = model.Capacity,
             AreaSquareMeters = model.AreaSquareMeters,
             NumberOfFloors = model.NumberOfFloors,
@@ -175,6 +176,7 @@ public class BranchController : AdminBaseController
             ClosingTimeText = FormatTime(branch.ClosingTime),
             LunchBreakStartText = branch.LunchBreakStart.HasValue ? FormatTime(branch.LunchBreakStart.Value) : null,
             LunchBreakEndText = branch.LunchBreakEnd.HasValue ? FormatTime(branch.LunchBreakEnd.Value) : null,
+            LunchBreakAppliesOnWeekend = branch.LunchBreakAppliesOnWeekend,
             Capacity = branch.Capacity,
             AreaSquareMeters = branch.AreaSquareMeters,
             NumberOfFloors = branch.NumberOfFloors,
@@ -242,6 +244,7 @@ public class BranchController : AdminBaseController
         branch.ClosingTime = parsedTimes.ClosingTime!.Value;
         branch.LunchBreakStart = parsedTimes.LunchBreakStart;
         branch.LunchBreakEnd = parsedTimes.LunchBreakEnd;
+        branch.LunchBreakAppliesOnWeekend = model.LunchBreakAppliesOnWeekend;
         branch.Capacity = model.Capacity;
         branch.AreaSquareMeters = model.AreaSquareMeters;
         branch.NumberOfFloors = model.NumberOfFloors;

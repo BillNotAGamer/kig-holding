@@ -51,6 +51,9 @@ public class BranchCreateViewModel
     [Display(Name = "Kết thúc nghỉ trưa")]
     public string? LunchBreakEndText { get; set; }
 
+    [Display(Name = "Áp dụng nghỉ trưa vào cuối tuần (Thứ 7 & Chủ Nhật)")]
+    public bool LunchBreakAppliesOnWeekend { get; set; } = false;
+
     [Range(0, int.MaxValue, ErrorMessage = "Sức chứa không hợp lệ.")]
     [Display(Name = "Sức chứa")]
     public int Capacity { get; set; }

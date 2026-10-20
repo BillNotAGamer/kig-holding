@@ -270,6 +270,78 @@ public sealed class ReservationServiceDatePolicyTests
         AssertRateLimitNotStamped(cache, request);
     }
 
+    [Fact]
+    public async Task CreateReservationAsync_WeekdayDuringLunchBreak_FailsWithLunchBreakError()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var service = CreateService(dbContext, cache, notifier);
+
+        // 2026-08-10 is a Monday (weekday)
+        var request = CreateRequest(branch.Id, new DateOnly(2026, 8, 10));
+        request.ReservationTime = new TimeOnly(15, 0); // inside 14:30 - 16:30
+
+        var result = await service.CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error =>
+            error.FieldName == nameof(ReservationCreateRequest.ReservationTime) &&
+            error.Message.Contains("nghỉ trưa", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_WeekendDuringLunchBreak_NormalBranch_Succeeds()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        branch.LunchBreakAppliesOnWeekend = false;
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var service = CreateService(dbContext, cache, notifier);
+
+        // 2026-08-09 is a Sunday (weekend)
+        var request = CreateRequest(branch.Id, new DateOnly(2026, 8, 9));
+        request.ReservationTime = new TimeOnly(15, 0); // 15:00 on weekend for normal branch is allowed
+
+        var result = await service.CreateReservationAsync(request);
+
+        Assert.True(result.Succeeded);
+    }
+
+    [Fact]
+    public async Task CreateReservationAsync_WeekendDuringLunchBreak_BranchWithLunchBreakAppliesOnWeekend_Fails()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateReservableBranch();
+        branch.LunchBreakAppliesOnWeekend = true;
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var notifier = new CapturingReservationNotifier();
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 50_000 });
+        var service = CreateService(dbContext, cache, notifier);
+
+        // 2026-08-09 is a Sunday (weekend)
+        var request = CreateRequest(branch.Id, new DateOnly(2026, 8, 9));
+        request.ReservationTime = new TimeOnly(15, 0); // 15:00 on weekend for branch with weekend lunch break must fail
+
+        var result = await service.CreateReservationAsync(request);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains(result.Errors, error =>
+            error.FieldName == nameof(ReservationCreateRequest.ReservationTime) &&
+            error.Message.Contains("nghỉ trưa", StringComparison.OrdinalIgnoreCase) &&
+            error.Message.Contains("tất cả các ngày trong tuần", StringComparison.OrdinalIgnoreCase));
+    }
+
     private static ReservationService CreateService(
         AppDbContext dbContext,
         IMemoryCache cache,

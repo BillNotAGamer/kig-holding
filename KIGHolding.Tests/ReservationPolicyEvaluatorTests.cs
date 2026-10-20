@@ -218,6 +218,117 @@ public sealed class ReservationPolicyEvaluatorTests
         Assert.Equal(ReservationPolicyEvaluationStatus.BranchClosedDate, result.Status);
     }
 
+    [Theory]
+    [InlineData("2026-10-20", 1)] // Tuesday, 1 guest
+    [InlineData("2026-10-20", 5)] // Tuesday, 5 guests
+    [InlineData("2026-10-23", 4)] // Friday, 4 guests
+    public async Task Evaluate_HcmcBranch_WeekdayUnderSixGuests_RejectsWithMinSix(string dateValue, int guestCount)
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateBranch();
+        branch.City = "TP. Hồ Chí Minh";
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var date = DateOnly.ParseExact(dateValue, "yyyy-MM-dd");
+        var result = await CreateEvaluator(dbContext).EvaluateAsync(branch.Id, date, guestCount, VietnamToday);
+
+        Assert.Equal(ReservationPolicyEvaluationStatus.MinimumGuestsNotMet, result.Status);
+        Assert.Equal(6, result.MinGuests);
+    }
+
+    [Theory]
+    [InlineData("2026-10-20", 6)] // Tuesday, exact 6
+    [InlineData("2026-10-20", 8)] // Tuesday, 8 guests
+    public async Task Evaluate_HcmcBranch_WeekdaySixOrMoreGuests_ReturnsAllowed(string dateValue, int guestCount)
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateBranch();
+        branch.City = "TP. Hồ Chí Minh";
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var date = DateOnly.ParseExact(dateValue, "yyyy-MM-dd");
+        var result = await CreateEvaluator(dbContext).EvaluateAsync(branch.Id, date, guestCount, VietnamToday);
+
+        Assert.Equal(ReservationPolicyEvaluationStatus.Allowed, result.Status);
+    }
+
+    [Theory]
+    [InlineData("2026-10-24", 9)] // Saturday, 9 guests
+    [InlineData("2026-10-25", 6)] // Sunday, 6 guests
+    [InlineData("2026-10-25", 2)] // Sunday, 2 guests
+    public async Task Evaluate_HcmcBranch_WeekendUnderTenGuests_RejectsWithMinTen(string dateValue, int guestCount)
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateBranch();
+        branch.City = "TP. Hồ Chí Minh";
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var date = DateOnly.ParseExact(dateValue, "yyyy-MM-dd");
+        var result = await CreateEvaluator(dbContext).EvaluateAsync(branch.Id, date, guestCount, VietnamToday);
+
+        Assert.Equal(ReservationPolicyEvaluationStatus.MinimumGuestsNotMet, result.Status);
+        Assert.Equal(10, result.MinGuests);
+    }
+
+    [Theory]
+    [InlineData("2026-10-24", 10)] // Saturday, exact 10
+    [InlineData("2026-10-25", 15)] // Sunday, 15 guests
+    public async Task Evaluate_HcmcBranch_WeekendTenOrMoreGuests_ReturnsAllowed(string dateValue, int guestCount)
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateBranch();
+        branch.City = "TP. Hồ Chí Minh";
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var date = DateOnly.ParseExact(dateValue, "yyyy-MM-dd");
+        var result = await CreateEvaluator(dbContext).EvaluateAsync(branch.Id, date, guestCount, VietnamToday);
+
+        Assert.Equal(ReservationPolicyEvaluationStatus.Allowed, result.Status);
+    }
+
+    [Fact]
+    public async Task Evaluate_NonHcmcBranch_SmallGroupAllowedOnWeekend()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateBranch();
+        branch.City = "Hà Nội";
+        dbContext.Branches.Add(branch);
+        await dbContext.SaveChangesAsync();
+
+        var date = new DateOnly(2026, 10, 24); // Saturday
+        var result = await CreateEvaluator(dbContext).EvaluateAsync(branch.Id, date, 2, VietnamToday);
+
+        Assert.Equal(ReservationPolicyEvaluationStatus.Allowed, result.Status);
+    }
+
+    [Fact]
+    public async Task Evaluate_HcmcBranch_SpecificDatePolicyOverridesCityPolicy()
+    {
+        await using var dbContext = CreateDbContext();
+        var branch = CreateBranch();
+        branch.City = "TP. Hồ Chí Minh";
+        var date = new DateOnly(2026, 10, 24); // Saturday (normally min 10)
+        dbContext.Branches.Add(branch);
+        dbContext.BranchReservationDatePolicies.Add(new BranchReservationDatePolicy
+        {
+            BranchId = branch.Id,
+            Date = date,
+            RuleType = BranchReservationRuleType.MinimumGuests,
+            MinGuests = 25
+        });
+        await dbContext.SaveChangesAsync();
+
+        var result = await CreateEvaluator(dbContext).EvaluateAsync(branch.Id, date, 15, VietnamToday);
+
+        // Date policy specifies MinGuests = 25, which should override the default city 10 rule and reject 15
+        Assert.Equal(ReservationPolicyEvaluationStatus.MinimumGuestsNotMet, result.Status);
+        Assert.Equal(25, result.MinGuests);
+    }
+
     private static ReservationPolicyEvaluator CreateEvaluator(AppDbContext dbContext)
     {
         var lockService = new TestReservationPolicyLockService();

@@ -193,6 +193,21 @@
                         <span asp-validation-for="Note" class="reservation-page__validation"></span>
                     </label>
 
+                    <div id="booking-policy-hotline-callout" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 shadow-sm transition-all" hidden aria-live="polite">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xl">📞</span>
+                            <div class="text-sm">
+                                <p class="font-bold">Đặt bàn nhóm dưới <span data-policy-min-guests>6</span> khách</p>
+                                <p class="mt-1 text-amber-800">Chi nhánh tạm thời ưu tiên nhận đặt bàn trực tuyến từ <span data-policy-min-guests>6</span> khách trở lên. Để được hỗ trợ chu đáo nhất, quý khách vui lòng liên hệ trực tiếp hotline:</p>
+                                <div class="mt-2">
+                                    <a href="#" data-policy-hotline-link class="inline-flex items-center gap-1.5 rounded-lg bg-brand-red px-3 py-1.5 font-bold text-white shadow hover:bg-brand-charcoal transition">
+                                        Gọi ngay: <span data-policy-hotline-text>@Model.Hotline</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <p class="reservation-page__validation" data-reservation-policy-summary role="status" aria-live="polite" hidden></p>
                         <p class="reservation-page__form-note">Mọi thông tin được tiếp nhận với trạng thái chờ xác nhận từ nhà hàng.</p>

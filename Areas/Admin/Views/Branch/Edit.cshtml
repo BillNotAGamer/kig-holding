@@ -140,6 +140,13 @@
                                 <span asp-validation-for="LunchBreakEndText" class="admin-validation"></span>
                             </div>
                         </div>
+                        <div class="mt-3">
+                            <label class="admin-post-checkbox-shell">
+                                <input asp-for="LunchBreakAppliesOnWeekend" type="checkbox" class="admin-checkbox" />
+                                <span>@Html.DisplayNameFor(x => x.LunchBreakAppliesOnWeekend)</span>
+                            </label>
+                            <p class="mt-1 text-xs text-brand-gray">Mặc định nghỉ trưa chỉ áp dụng từ Thứ Hai đến Thứ Sáu. Chọn mục này nếu chi nhánh cũng nghỉ trưa vào Thứ Bảy và Chủ Nhật (ví dụ: Tân Phú).</p>
+                        </div>
                     </div>
                 </div>
 

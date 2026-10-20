@@ -31,6 +31,7 @@ public class BranchConfiguration : IEntityTypeConfiguration<Branch>
         builder.Property(x => x.ClosingTime).HasColumnType("time without time zone");
         builder.Property(x => x.LunchBreakStart).HasColumnType("time without time zone");
         builder.Property(x => x.LunchBreakEnd).HasColumnType("time without time zone");
+        builder.Property(x => x.LunchBreakAppliesOnWeekend).IsRequired().HasDefaultValue(false);
         builder.Property(x => x.AreaSquareMeters).HasPrecision(8, 2);
         builder.Property(x => x.Description).IsRequired();
         builder.Property(x => x.ThumbnailUrl).HasMaxLength(500).IsRequired();

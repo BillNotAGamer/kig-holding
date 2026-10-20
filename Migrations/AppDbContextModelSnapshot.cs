@@ -175,6 +175,11 @@ namespace KIGHolding.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("LunchBreakAppliesOnWeekend")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<TimeOnly?>("LunchBreakEnd")
                         .HasColumnType("time without time zone");
 

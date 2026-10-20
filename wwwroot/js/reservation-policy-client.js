@@ -56,7 +56,50 @@
 
         const isCurrentTuple = (key) => getTupleKey(getTuple()) === key;
 
+        const getHotlineCallout = () => {
+            if (options?.hotlineCallout instanceof HTMLElement) {
+                return options.hotlineCallout;
+            }
+            return form.querySelector('#booking-policy-hotline-callout') ||
+                   form.querySelector('[data-booking-policy-hotline-callout]') ||
+                   document.getElementById('booking-policy-hotline-callout');
+        };
+
+        const hideHotlineCallout = () => {
+            const callout = getHotlineCallout();
+            if (callout instanceof HTMLElement) {
+                callout.hidden = true;
+            }
+        };
+
+        const showHotlineCallout = (payload) => {
+            const callout = getHotlineCallout();
+            if (!(callout instanceof HTMLElement)) {
+                return;
+            }
+
+            const minGuests = payload?.minGuests || 6;
+            const hotline = payload?.branchHotline || '0922 055 755';
+
+            callout.querySelectorAll('[data-policy-min-guests]').forEach((el) => {
+                el.textContent = minGuests;
+            });
+
+            const link = callout.querySelector('[data-policy-hotline-link]');
+            if (link instanceof HTMLAnchorElement) {
+                link.href = `tel:${hotline.replace(/\s+/g, '')}`;
+            }
+
+            const text = callout.querySelector('[data-policy-hotline-text]');
+            if (text instanceof HTMLElement) {
+                text.textContent = hotline;
+            }
+
+            callout.hidden = false;
+        };
+
         const clearPolicyFeedback = () => {
+            hideHotlineCallout();
             if (typeof options.clearPolicyFeedback === 'function') {
                 options.clearPolicyFeedback();
             }
@@ -197,6 +240,10 @@
                 if (typeof payload.message !== 'string' || !payload.message.trim()) {
                     showPolicyError(null, genericFailureMessage, 'VerificationFailed');
                     return false;
+                }
+
+                if (payload.status === 'MinimumGuestsNotMet') {
+                    showHotlineCallout(payload);
                 }
 
                 showPolicyError(
