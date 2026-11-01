@@ -205,6 +205,31 @@ public sealed class HomePageTests
     }
 
     [Fact]
+    public void HomeView_KbbCook_RendersOnlyTheStandard278KPackageWithoutSliderMarkup()
+    {
+        var view = ReadRepoFile("Views", "Home", "Index.cshtml");
+        var section = ExtractSectionByDataAttribute(view, "culinary-essence");
+
+        Assert.Contains("KBB COOK - BUFFET NƯỚNG HÀN QUỐC", section, StringComparison.Ordinal);
+        Assert.Contains("Gói tiêu chuẩn", section, StringComparison.Ordinal);
+        Assert.Contains("278K", section, StringComparison.Ordinal);
+        Assert.Contains("Bao gồm tất cả các món tại quầy line.", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/images/kbb-cook-img.webp", section, StringComparison.Ordinal);
+        Assert.Contains("kbb-single", section, StringComparison.Ordinal);
+        Assert.Contains("~/css/kbb-cook-single.css", view, StringComparison.Ordinal);
+
+        Assert.DoesNotContain("Gói khởi đầu", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("Gói thịnh soạn", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("Gói thượng hạng", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("178K", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("378K", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("458K", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-kbb-cook-slider", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-kbb-cook-slide", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("~/js/kbb-cook-slider.js", view, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void HomeView_MenuTeaser_RendersFourBrandDefinitionsWithSeoulLast()
     {
         var view = ReadRepoFile("Views", "Home", "Index.cshtml");

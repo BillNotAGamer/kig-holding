@@ -57,7 +57,7 @@ The core home page layout centers on the three main dining concepts under KIG Ho
 2.  **Gogi Maru (Dry Aged BBQ)**:
     *   Visual text details Gogi Maru's 15-day meat fermentation processes alongside a **3-column feature grid** (`sm:grid-cols-3`) detailing banchan tables and outdoor sky bar options.
 3.  **KBB Cook (Buffet & Hotpot)**:
-    *   Integrates an interactive, lightweight custom slider driven by [kbb-cook-slider.js](file:///f:/Coding/Web%20development/KIG%20Holding/KIGHolding/wwwroot/js/kbb-cook-slider.js), showcasing promotional dining price packages (e.g. 178K, 278K, 378K packages).
+    *   Presents one compact KBB Cook buffet package: Gói tiêu chuẩn (278K), with a single existing restaurant image.
 
 ---
 

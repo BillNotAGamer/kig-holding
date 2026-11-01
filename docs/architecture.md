@@ -44,7 +44,7 @@ KIGHolding/
 ├── Views/                    # Razor Views for public routes (Home, Menu, News, Reservation, Branch, Contact, Shared)
 └── wwwroot/                  # Client-side assets
     ├── css/                  # input.css (source) and site.css (Tailwind compiled output)
-    ├── js/                   # Site scripts (site.js, uw-reveal.js, kbb-cook-slider.js, etc.)
+    ├── js/                   # Site scripts (site.js, uw-reveal.js, etc.)
     └── uploads/              # Legacy/local uploaded files served through /uploads when present
 ```
 
