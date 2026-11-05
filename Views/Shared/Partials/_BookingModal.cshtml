@@ -251,12 +251,24 @@
                 </div>
             </div>
 
-            <div class="booking-modal__success" data-booking-modal-success hidden aria-live="polite">
+            <div class="booking-modal__success booking-modal__success--compact"
+                 data-booking-modal-success
+                 hidden
+                 role="status"
+                 aria-live="polite"
+                 aria-labelledby="booking-modal-success-title"
+                 aria-describedby="booking-modal-success-description">
+                <button type="button"
+                        class="booking-modal__success-dismiss"
+                        aria-label="Đóng thông báo đặt bàn"
+                        data-booking-modal-close>
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <div class="booking-modal__success-body" data-booking-modal-success-body></div>
                 <button type="button"
                         class="booking-modal__success-close"
                         data-booking-modal-close>
-                    Đóng
+                    Hoàn tất
                 </button>
             </div>
         </form>

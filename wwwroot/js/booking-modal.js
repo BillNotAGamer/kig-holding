@@ -6,6 +6,8 @@
 
     const body = document.body;
     const panel = root.querySelector('[data-booking-modal-panel]');
+    const initialPanelLabelledBy = panel?.getAttribute('aria-labelledby') || null;
+    const initialPanelDescribedBy = panel?.getAttribute('aria-describedby') || null;
     const closeButtons = Array.from(root.querySelectorAll('[data-booking-modal-close]'));
     const triggers = document.querySelectorAll('[data-booking-modal-trigger]');
     const backdrop = root.querySelector('[data-booking-modal-backdrop]');
@@ -192,6 +194,24 @@
     const clearSuccessState = (resetValues) => {
         success.hidden = true;
         successBody.replaceChildren();
+        root.classList.remove('has-success');
+
+        if (panel instanceof HTMLElement) {
+            if (initialPanelLabelledBy) {
+                panel.setAttribute('aria-labelledby', initialPanelLabelledBy);
+            }
+            else {
+                panel.removeAttribute('aria-labelledby');
+            }
+
+            if (initialPanelDescribedBy) {
+                panel.setAttribute('aria-describedby', initialPanelDescribedBy);
+            }
+            else {
+                panel.removeAttribute('aria-describedby');
+            }
+        }
+
         form.dataset.completed = 'false';
 
         if (formBody) {
@@ -489,42 +509,89 @@
         clearAutoTimers();
 
         const summaryData = payload?.summary || {};
-        const summaryItems = [
-            ['Họ tên', summaryData.customerName],
-            ['Số điện thoại', summaryData.phoneNumber],
-            ['Số khách', summaryData.guestCount],
-            ['Ngày đến', summaryData.reservationDate],
-            ['Giờ đến', summaryData.reservationTime],
-            ['Chi nhánh', summaryData.branchName],
-            ['Ghi chú', summaryData.note]
-        ].filter(([, value]) => value !== null && value !== undefined && `${value}`.trim().length > 0);
+        const hasValue = (value) => value !== null && value !== undefined && `${value}`.trim().length > 0;
+        const createSummaryItem = (label, value, modifier = '') => {
+            if (!hasValue(value)) {
+                return null;
+            }
+
+            const item = document.createElement('div');
+            item.className = `booking-modal__success-item${modifier ? ` ${modifier}` : ''}`;
+
+            const key = document.createElement('span');
+            key.textContent = label;
+
+            const content = document.createElement('strong');
+            content.textContent = `${value}`;
+
+            item.append(key, content);
+            return item;
+        };
 
         successBody.replaceChildren();
 
-        const title = document.createElement('p');
+        const intro = document.createElement('div');
+        intro.className = 'booking-modal__success-intro';
+
+        const icon = document.createElement('span');
+        icon.className = 'booking-modal__success-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = '✓';
+
+        const title = document.createElement('h3');
+        title.id = 'booking-modal-success-title';
         title.className = 'booking-modal__success-title';
-        title.textContent = payload?.message || 'Yêu cầu đặt bàn đã được ghi nhận.';
-        successBody.appendChild(title);
+        title.textContent = 'Đã ghi nhận yêu cầu đặt bàn';
 
-        if (summaryItems.length) {
-            const list = document.createElement('div');
-            list.className = 'booking-modal__success-list';
+        const description = document.createElement('p');
+        description.id = 'booking-modal-success-description';
+        description.className = 'booking-modal__success-description';
+        description.textContent = 'Nhà hàng sẽ kiểm tra và liên hệ khi cần xác nhận thêm.';
 
-            summaryItems.forEach(([label, value]) => {
-                const item = document.createElement('div');
-                item.className = 'booking-modal__success-item';
+        intro.append(icon, title, description);
+        successBody.appendChild(intro);
 
-                const key = document.createElement('span');
-                key.textContent = label;
+        const branch = createSummaryItem('Chi nhánh', summaryData.branchName, 'booking-modal__success-item--branch');
+        if (branch) {
+            successBody.appendChild(branch);
+        }
 
-                const strong = document.createElement('strong');
-                strong.textContent = `${value}`;
+        const visitGrid = document.createElement('div');
+        visitGrid.className = 'booking-modal__success-grid';
+        [
+            ['Ngày đến', summaryData.reservationDate],
+            ['Giờ đến', summaryData.reservationTime],
+            ['Số khách', hasValue(summaryData.guestCount) ? `${summaryData.guestCount} khách` : null]
+        ].forEach(([label, value]) => {
+            const item = createSummaryItem(label, value);
+            if (item) {
+                visitGrid.appendChild(item);
+            }
+        });
 
-                item.append(key, strong);
-                list.appendChild(item);
-            });
+        if (visitGrid.childElementCount) {
+            successBody.appendChild(visitGrid);
+        }
 
-            successBody.appendChild(list);
+        const guestGrid = document.createElement('div');
+        guestGrid.className = 'booking-modal__success-grid booking-modal__success-grid--secondary';
+        [
+            ['Khách hàng', summaryData.customerName],
+            ['Số điện thoại', summaryData.phoneNumber]
+        ].forEach(([label, value]) => {
+            const item = createSummaryItem(label, value);
+            if (item) {
+                guestGrid.appendChild(item);
+            }
+        });
+
+        if (guestGrid.childElementCount) {
+            successBody.appendChild(guestGrid);
+        }
+
+        const note = createSummaryItem('Ghi chú', summaryData.note, 'booking-modal__success-item--note');
+        if (note) {
+            successBody.appendChild(note);
         }
 
         clearSummary();
@@ -536,10 +603,17 @@
         }
 
         success.hidden = false;
+        root.classList.add('has-success');
+
+        if (panel instanceof HTMLElement) {
+            panel.setAttribute('aria-labelledby', 'booking-modal-success-title');
+            panel.setAttribute('aria-describedby', 'booking-modal-success-description');
+        }
+
         form.reset();
         syncConditionalFields();
 
-        const successCloseButton = success.querySelector('[data-booking-modal-close]');
+        const successCloseButton = success.querySelector('.booking-modal__success-close');
         if (successCloseButton instanceof HTMLElement) {
             successCloseButton.focus();
         }

@@ -137,6 +137,32 @@ public sealed class ReservationFrontendPolicyTests
     }
 
     [Fact]
+    public void QuickReservationSuccessDialog_IsCompactAndPreservesSuccessStateAccessibility()
+    {
+        var layout = ReadRepoFile("Views", "Shared", "_Layout.cshtml");
+        var modal = ReadRepoFile("Views", "Shared", "Partials", "_BookingModal.cshtml");
+        var script = ReadRepoFile("wwwroot", "js", "booking-modal.js");
+        var css = ReadRepoFile("wwwroot", "css", "booking-modal-success.css");
+
+        Assert.Contains("~/css/booking-modal-success.css", layout, StringComparison.Ordinal);
+        Assert.Contains("booking-modal__success--compact", modal, StringComparison.Ordinal);
+        Assert.Contains("booking-modal-success-title", modal, StringComparison.Ordinal);
+        Assert.Contains("booking-modal-success-description", modal, StringComparison.Ordinal);
+        Assert.Contains("Đóng thông báo đặt bàn", modal, StringComparison.Ordinal);
+        Assert.Contains("Hoàn tất", modal, StringComparison.Ordinal);
+        Assert.Contains("Đã ghi nhận yêu cầu đặt bàn", script, StringComparison.Ordinal);
+        Assert.Contains("root.classList.add('has-success')", script, StringComparison.Ordinal);
+        Assert.Contains("root.classList.remove('has-success')", script, StringComparison.Ordinal);
+        Assert.Contains("panel.setAttribute('aria-labelledby', 'booking-modal-success-title')", script, StringComparison.Ordinal);
+        Assert.Contains("panel.setAttribute('aria-describedby', 'booking-modal-success-description')", script, StringComparison.Ordinal);
+        Assert.Contains("booking-modal__success-item--branch", script, StringComparison.Ordinal);
+        Assert.Contains("booking-modal__success-grid--secondary", script, StringComparison.Ordinal);
+        Assert.Contains(".booking-modal.has-success", css, StringComparison.Ordinal);
+        Assert.Contains("@media (max-width: 420px)", css, StringComparison.Ordinal);
+        Assert.DoesNotContain(".admin-", css, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void AdminPolicyCalendar_UsesSevenColumnsAndDatabaseBackedBlockedState()
     {
         var policyView = ReadRepoFile("Areas", "Admin", "Views", "Reservation", "Policy.cshtml");
