@@ -627,6 +627,12 @@ namespace KIGHolding.Migrations
                         .HasMaxLength(160)
                         .HasColumnType("character varying(160)");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedByAdminUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("DiningOccasionCodes")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -641,6 +647,11 @@ namespace KIGHolding.Migrations
 
                     b.Property<int>("GuestCount")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Note")
                         .HasMaxLength(1000)
@@ -676,13 +687,22 @@ namespace KIGHolding.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedAt");
 
+                    b.HasIndex("DeletedByAdminUserId");
+
                     b.HasIndex("Status");
 
                     b.HasIndex("BranchId", "ReservationDate", "ReservationTime");
+
+                    b.HasIndex("IsDeleted", "ReservationDate", "ReservationTime");
 
                     b.ToTable("Reservations", null, t =>
                         {
@@ -854,7 +874,14 @@ namespace KIGHolding.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("KIGHolding.Models.Entities.AdminUser", "DeletedByAdminUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedByAdminUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Branch");
+
+                    b.Navigation("DeletedByAdminUser");
                 });
 
             modelBuilder.Entity("KIGHolding.Models.Entities.Review", b =>

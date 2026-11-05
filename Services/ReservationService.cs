@@ -203,6 +203,7 @@ public class ReservationService : IReservationService
             Note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note.Trim(),
             Status = ReservationStatus.Pending,
             Source = ReservationSource.Website,
+            Version = Guid.NewGuid(),
             CreatedAt = now,
             UpdatedAt = now
         };

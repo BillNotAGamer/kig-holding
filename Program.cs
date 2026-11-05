@@ -98,6 +98,7 @@ builder.Services.AddScoped<IReservationPolicyLockService, ReservationPolicyLockS
 builder.Services.AddScoped<IBranchReservationDatePolicyService, BranchReservationDatePolicyService>();
 builder.Services.AddScoped<IReservationPolicyEvaluator, ReservationPolicyEvaluator>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IHistoricalReservationDeletionService, HistoricalReservationDeletionService>();
 builder.Services.AddScoped<IAdminReservationNotifier, SignalRAdminReservationNotifier>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddSingleton<ICloudflareR2Client, CloudflareR2Client>();

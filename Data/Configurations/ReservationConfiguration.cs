@@ -19,6 +19,7 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
         builder.HasIndex(x => new { x.BranchId, x.ReservationDate, x.ReservationTime });
         builder.HasIndex(x => x.Status);
         builder.HasIndex(x => x.CreatedAt);
+        builder.HasIndex(x => new { x.IsDeleted, x.ReservationDate, x.ReservationTime });
 
         builder.Property(x => x.CustomerName).HasMaxLength(160).IsRequired();
         builder.Property(x => x.PhoneNumber).HasMaxLength(32).IsRequired();
@@ -34,6 +35,11 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
             .HasConversion<string>()
             .HasMaxLength(32)
             .HasDefaultValue(ReservationSource.Website);
+        builder.Property(x => x.Version)
+            .IsConcurrencyToken()
+            .HasDefaultValueSql("gen_random_uuid()");
+        builder.Property(x => x.IsDeleted)
+            .HasDefaultValue(false);
         builder.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
         builder.Property(x => x.UpdatedAt).HasDefaultValueSql("now()");
 
@@ -42,5 +48,13 @@ public class ReservationConfiguration : IEntityTypeConfiguration<Reservation>
             .WithMany(x => x.Reservations)
             .HasForeignKey(x => x.BranchId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(x => x.DeletedByAdminUser)
+            .WithMany()
+            .HasForeignKey(x => x.DeletedByAdminUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(x => !x.IsDeleted);
     }
 }

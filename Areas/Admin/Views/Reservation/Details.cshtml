@@ -108,6 +108,7 @@
                   class="mt-4 space-y-4">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Version" />
                 <input type="hidden" name="page" value="@reservationListPage" />
                 <input type="hidden" name="searchQuery" value="@reservationListSearchQuery" />
                 <input type="hidden" name="statusFilter" value="@reservationListStatusFilter" />
@@ -136,6 +137,34 @@
                    asp-route-BranchFilter="@reservationListBranchFilter"
                    class="btn-secondary w-full justify-center">Quay lại danh sách</a>
             </form>
+
+            @if (Model.CanSoftDelete)
+            {
+                <form asp-area="Admin"
+                      asp-controller="Reservation"
+                      asp-action="DeleteHistorical"
+                      method="post"
+                      class="mt-6 border-t border-red-200 pt-5">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    <input type="hidden" name="ExpectedVersion" value="@Model.Version" />
+                    <input type="hidden" name="page" value="@reservationListPage" />
+                    <input type="hidden" name="searchQuery" value="@reservationListSearchQuery" />
+                    <input type="hidden" name="statusFilter" value="@reservationListStatusFilter" />
+                    <input type="hidden" name="branchFilter" value="@reservationListBranchFilter" />
+
+                    <p class="text-sm font-semibold text-brand-dark">Xóa lịch sử đặt bàn</p>
+                    <p class="mt-2 text-sm leading-6 text-brand-gray">
+                        @Model.BranchName — @Model.ReservationDate.ToString("dd/MM/yyyy") @Model.ReservationTime.ToString("HH:mm") — @Model.StatusLabel.
+                        Bản ghi sẽ được xóa khỏi danh sách quản lý nhưng không bị xóa vật lý.
+                    </p>
+                    <button type="submit"
+                            class="mt-4 w-full rounded-md border border-red-600 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+                            onclick="return confirm('Xóa lịch sử đặt bàn này khỏi danh sách quản lý? Bản ghi vẫn được lưu để phục hồi có kiểm soát.');">
+                        Xóa lịch sử đặt bàn
+                    </button>
+                </form>
+            }
         </div>
     </div>
 </section>

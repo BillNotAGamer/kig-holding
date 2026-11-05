@@ -62,10 +62,18 @@ public class ReservationDetailViewModel
 
     [Display(Name = "Tình trạng")]
     public ReservationStatus? Status { get; set; }
+    public Guid Version { get; set; }
+    public bool CanSoftDelete { get; set; }
 
     public IReadOnlyList<SelectListItem> StatusOptions { get; set; } = [];
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+}
+
+public sealed class HistoricalReservationDeletionViewModel
+{
+    public Guid Id { get; set; }
+    public Guid ExpectedVersion { get; set; }
 }
 
 public class ReservationPolicyViewModel

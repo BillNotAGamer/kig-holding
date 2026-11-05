@@ -1,9 +1,11 @@
 using System.Text.Json;
+using System.Security.Claims;
 using KIGHolding.Areas.Admin.ViewModels;
 using KIGHolding.Data;
 using KIGHolding.Models.Enums;
 using KIGHolding.Services;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,7 @@ public class ReservationController : AdminBaseController
     private readonly ILogger<ReservationController> _logger;
     private readonly TimeProvider _timeProvider;
     private readonly IBranchService? _branchService;
+    private readonly IHistoricalReservationDeletionService? _historicalDeletionService;
 
     public ReservationController(
         AppDbContext dbContext,
@@ -33,7 +36,8 @@ public class ReservationController : AdminBaseController
         IDataProtectionProvider dataProtectionProvider,
         ILogger<ReservationController> logger,
         TimeProvider timeProvider,
-        IBranchService? branchService = null)
+        IBranchService? branchService = null,
+        IHistoricalReservationDeletionService? historicalDeletionService = null)
     {
         _dbContext = dbContext;
         _blockedDateService = blockedDateService;
@@ -43,6 +47,7 @@ public class ReservationController : AdminBaseController
         _logger = logger;
         _timeProvider = timeProvider;
         _branchService = branchService;
+        _historicalDeletionService = historicalDeletionService;
     }
 
     [HttpGet]
@@ -409,6 +414,8 @@ public class ReservationController : AdminBaseController
             return NotFound();
         }
 
+        await PopulateHistoricalDeletionEligibilityAsync(model, HttpContext.RequestAborted);
+
         return View(model);
     }
 
@@ -445,6 +452,15 @@ public class ReservationController : AdminBaseController
             ModelState.AddModelError(nameof(model.Status), message);
         }
 
+        if (model.Version == Guid.Empty)
+        {
+            ModelState.AddModelError(nameof(model.Version), "Dữ liệu phiên bản đặt bàn không hợp lệ. Vui lòng tải lại trang.");
+        }
+        else if (model.Version != reservation.Version)
+        {
+            ModelState.AddModelError(string.Empty, "Đặt bàn đã được thay đổi bởi quản trị viên khác. Vui lòng tải lại dữ liệu trước khi tiếp tục.");
+        }
+
         if (!ModelState.IsValid)
         {
             var detailModel = await BuildReservationDetailViewModelAsync(reservation.Id, model.Status, model.Note);
@@ -453,6 +469,7 @@ public class ReservationController : AdminBaseController
                 return NotFound();
             }
 
+            await PopulateHistoricalDeletionEligibilityAsync(detailModel, HttpContext.RequestAborted);
             SetReservationListState(normalizedPage, normalizedSearchQuery, statusFilter, branchFilter);
             return View("Details", detailModel);
         }
@@ -464,8 +481,25 @@ public class ReservationController : AdminBaseController
 
         reservation.Note = string.IsNullOrWhiteSpace(model.Note) ? null : model.Note.Trim();
         reservation.UpdatedAt = DateTimeOffset.UtcNow;
+        reservation.Version = Guid.NewGuid();
 
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            var detailModel = await BuildReservationDetailViewModelAsync(reservation.Id, model.Status, model.Note);
+            if (detailModel is null)
+            {
+                return NotFound();
+            }
+
+            ModelState.AddModelError(string.Empty, "Đặt bàn đã được thay đổi bởi quản trị viên khác. Vui lòng tải lại dữ liệu trước khi tiếp tục.");
+            await PopulateHistoricalDeletionEligibilityAsync(detailModel, HttpContext.RequestAborted);
+            SetReservationListState(normalizedPage, normalizedSearchQuery, statusFilter, branchFilter);
+            return View("Details", detailModel);
+        }
 
         TempData["SuccessMessage"] = "Cập nhật trạng thái đặt bàn thành công.";
         return RedirectToAction(
@@ -479,6 +513,66 @@ public class ReservationController : AdminBaseController
                 StatusFilter = statusFilter,
                 BranchFilter = branchFilter
             });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "SuperAdmin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteHistorical(
+        HistoricalReservationDeletionViewModel model,
+        int page = 1,
+        string? searchQuery = null,
+        ReservationStatus? statusFilter = null,
+        Guid? branchFilter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var (normalizedPage, normalizedSearchQuery) = NormalizeReservationListState(page, searchQuery);
+        if (!TryGetCurrentAdminUserId(out var actorAdminUserId) ||
+            model.Id == Guid.Empty ||
+            model.ExpectedVersion == Guid.Empty ||
+            _historicalDeletionService is null)
+        {
+            TempData["ErrorMessage"] = "Không thể xóa lịch sử đặt bàn lúc này. Vui lòng tải lại trang và thử lại.";
+            return RedirectToAction(nameof(Index), new
+            {
+                page = normalizedPage,
+                SearchQuery = normalizedSearchQuery,
+                StatusFilter = statusFilter,
+                BranchFilter = branchFilter
+            });
+        }
+
+        var result = await _historicalDeletionService.SoftDeleteAsync(
+            new HistoricalReservationDeletionRequest(model.Id, model.ExpectedVersion, actorAdminUserId),
+            cancellationToken);
+
+        if (result.Succeeded)
+        {
+            TempData["SuccessMessage"] = "Đã xóa lịch sử đặt bàn khỏi danh sách quản lý.";
+            return RedirectToAction(nameof(Index), new
+            {
+                page = normalizedPage,
+                SearchQuery = normalizedSearchQuery,
+                StatusFilter = statusFilter,
+                BranchFilter = branchFilter
+            });
+        }
+
+        TempData["ErrorMessage"] = result.Status switch
+        {
+            HistoricalReservationDeletionStatus.Conflict => "Đặt bàn đã được thay đổi bởi quản trị viên khác. Vui lòng tải lại dữ liệu trước khi tiếp tục.",
+            HistoricalReservationDeletionStatus.NotEligible => "Chỉ có thể xóa lịch sử đặt bàn đã xử lý sau thời gian đến dự kiến.",
+            HistoricalReservationDeletionStatus.AlreadyDeleted => "Lịch sử đặt bàn này đã được xóa khỏi danh sách quản lý.",
+            _ => "Không thể xóa lịch sử đặt bàn lúc này. Vui lòng tải lại trang và thử lại."
+        };
+
+        return RedirectToAction(nameof(Index), new
+        {
+            page = normalizedPage,
+            SearchQuery = normalizedSearchQuery,
+            StatusFilter = statusFilter,
+            BranchFilter = branchFilter
+        });
     }
 
     private async Task<ReservationDetailViewModel?> BuildReservationDetailViewModelAsync(
@@ -505,6 +599,7 @@ public class ReservationController : AdminBaseController
                 CurrentStatus = x.Status,
                 StatusLabel = GetStatusLabel(x.Status),
                 Status = GetDefaultSelectedStatus(x.Status),
+                Version = x.Version,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt
             })
@@ -528,6 +623,25 @@ public class ReservationController : AdminBaseController
         model.DiningOccasionDisplay = ReservationOptionCatalog.FormatDiningOccasionCodesForDisplay(model.DiningOccasionCodes);
         model.StatusOptions = BuildAllowedStatusOptions(model.CurrentStatus);
         return model;
+    }
+
+    private async Task PopulateHistoricalDeletionEligibilityAsync(
+        ReservationDetailViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (_historicalDeletionService is null || !TryGetCurrentAdminUserId(out var actorAdminUserId) || !User.IsInRole("SuperAdmin"))
+        {
+            model.CanSoftDelete = false;
+            return;
+        }
+
+        var eligibility = await _historicalDeletionService.GetEligibilityAsync(model.Id, actorAdminUserId, cancellationToken);
+        model.CanSoftDelete = eligibility.IsEligible;
+    }
+
+    private bool TryGetCurrentAdminUserId(out Guid adminUserId)
+    {
+        return Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out adminUserId);
     }
 
     private async Task<IReadOnlyList<SelectListItem>> BuildBranchOptionsAsync()

@@ -17,8 +17,13 @@ public class Reservation : IUpdatedAtEntity
     public string? Note { get; set; }
     public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
     public ReservationSource Source { get; set; } = ReservationSource.Website;
+    public Guid Version { get; set; } = Guid.NewGuid();
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
+    public Guid? DeletedByAdminUserId { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public Branch Branch { get; set; } = null!;
+    public AdminUser? DeletedByAdminUser { get; set; }
 }
