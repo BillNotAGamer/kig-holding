@@ -533,13 +533,17 @@ public class ReservationController : AdminBaseController
             _historicalDeletionService is null)
         {
             TempData["ErrorMessage"] = "Không thể xóa lịch sử đặt bàn lúc này. Vui lòng tải lại trang và thử lại.";
-            return RedirectToAction(nameof(Index), new
-            {
-                page = normalizedPage,
-                SearchQuery = normalizedSearchQuery,
-                StatusFilter = statusFilter,
-                BranchFilter = branchFilter
-            });
+            return RedirectToAction(
+                nameof(Index),
+                "Reservation",
+                new
+                {
+                    area = "Admin",
+                    page = normalizedPage,
+                    SearchQuery = normalizedSearchQuery,
+                    StatusFilter = statusFilter,
+                    BranchFilter = branchFilter
+                });
         }
 
         var result = await _historicalDeletionService.SoftDeleteAsync(
@@ -549,13 +553,17 @@ public class ReservationController : AdminBaseController
         if (result.Succeeded)
         {
             TempData["SuccessMessage"] = "Đã xóa lịch sử đặt bàn khỏi danh sách quản lý.";
-            return RedirectToAction(nameof(Index), new
-            {
-                page = normalizedPage,
-                SearchQuery = normalizedSearchQuery,
-                StatusFilter = statusFilter,
-                BranchFilter = branchFilter
-            });
+            return RedirectToAction(
+                nameof(Index),
+                "Reservation",
+                new
+                {
+                    area = "Admin",
+                    page = normalizedPage,
+                    SearchQuery = normalizedSearchQuery,
+                    StatusFilter = statusFilter,
+                    BranchFilter = branchFilter
+                });
         }
 
         TempData["ErrorMessage"] = result.Status switch
@@ -566,13 +574,17 @@ public class ReservationController : AdminBaseController
             _ => "Không thể xóa lịch sử đặt bàn lúc này. Vui lòng tải lại trang và thử lại."
         };
 
-        return RedirectToAction(nameof(Index), new
-        {
-            page = normalizedPage,
-            SearchQuery = normalizedSearchQuery,
-            StatusFilter = statusFilter,
-            BranchFilter = branchFilter
-        });
+        return RedirectToAction(
+            nameof(Index),
+            "Reservation",
+            new
+            {
+                area = "Admin",
+                page = normalizedPage,
+                SearchQuery = normalizedSearchQuery,
+                StatusFilter = statusFilter,
+                BranchFilter = branchFilter
+            });
     }
 
     private async Task<ReservationDetailViewModel?> BuildReservationDetailViewModelAsync(
