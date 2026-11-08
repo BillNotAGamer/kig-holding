@@ -329,29 +329,105 @@
                 </div>
             </article>
 
-            <article class="kbb-single" data-uw-reveal="fade-up">
-                <div class="kbb-single__media" data-uw-reveal="fade-up" data-uw-delay="0">
-                    <img src="~/images/home/images/kbb-cook-img.webp"
-                         asp-append-version="true"
-                         alt="Không gian và món nướng KBB Cook"
-                         class="kbb-single__image"
-                         loading="lazy"
-                         decoding="async" />
+            <article class="home-culinary-essence__block kbb-slider grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:gap-14" data-uw-reveal="fade-up">
+                <div class="home-culinary-essence__image kbb-slider__media" data-uw-reveal="fade-up" data-uw-delay="100">
+                    <div id="kbb-cook-package-slider"
+                         class="kbb-slider__viewport"
+                         data-kbb-cook-slider
+                         tabindex="0"
+                         role="region"
+                         aria-roledescription="carousel"
+                         aria-label="Hình ảnh các gói buffet KBB Cook">
+                        <figure class="kbb-slider__slide is-active"
+                                data-kbb-cook-slide
+                                data-kbb-cook-slide-active="true"
+                                data-kbb-cook-package-index="0">
+                            <img src="~/images/home/images/278k-package.webp"
+                                 asp-append-version="true"
+                                 alt="Gói buffet KBB Cook tiêu chuẩn 278K"
+                                 loading="lazy"
+                                 decoding="async" />
+                        </figure>
+                        <figure class="kbb-slider__slide"
+                                data-kbb-cook-slide
+                                data-kbb-cook-package-index="1"
+                                aria-hidden="true">
+                            <img src="~/images/home/images/458k-package.webp"
+                                 asp-append-version="true"
+                                 alt="Gói buffet KBB Cook thượng hạng 458K"
+                                 loading="lazy"
+                                 decoding="async" />
+                        </figure>
+
+                        <button type="button"
+                                class="kbb-slider__control kbb-slider__control--previous"
+                                data-kbb-cook-slider-previous
+                                aria-label="Xem gói buffet trước">
+                            <span aria-hidden="true">‹</span>
+                        </button>
+                        <button type="button"
+                                class="kbb-slider__control kbb-slider__control--next"
+                                data-kbb-cook-slider-next
+                                aria-label="Xem gói buffet tiếp theo">
+                            <span aria-hidden="true">›</span>
+                        </button>
+
+                        <div class="kbb-slider__dots" role="group" aria-label="Chọn gói buffet">
+                            <button type="button"
+                                    class="kbb-slider__dot is-active"
+                                    data-kbb-cook-slider-dot="0"
+                                    aria-label="Xem gói tiêu chuẩn 278K"
+                                    aria-current="true"></button>
+                            <button type="button"
+                                    class="kbb-slider__dot"
+                                    data-kbb-cook-slider-dot="1"
+                                    aria-label="Xem gói thượng hạng 458K"></button>
+                        </div>
+                    </div>
+                    <p class="kbb-slider__status" data-kbb-cook-slider-status aria-live="polite">
+                        Đang xem gói tiêu chuẩn 278K
+                    </p>
                 </div>
 
-                <div class="kbb-single__content">
-                    <div data-uw-reveal="fade-up" data-uw-delay="80">
-                        <p class="kbb-single__eyebrow">KOREAN BUFFET TABLE</p>
-                        <h3 class="kbb-single__title">
-                            KBB COOK - BUFFET NƯỚNG HÀN QUỐC
-                            한국식 바비큐 뷔페
+                <div class="kbb-slider__content">
+                    <div data-uw-reveal="fade-up" data-uw-delay="180">
+                        <p class="text-xs font-black uppercase tracking-[0.28em] text-brand-red">KOREAN BUFFET TABLE</p>
+                        <h3 class="public-card-title-lg mt-3 uppercase text-brand-red">
+                            <span class="kbb-slider__heading-line">KBB COOK —</span>
+                            <span class="kbb-slider__heading-line">BUFFET NƯỚNG HÀN QUỐC</span>
                         </h3>
+                        <p class="kbb-slider__subtitle" lang="ko">한국식 바비큐 뷔페</p>
                     </div>
-                    <div class="kbb-single__package" data-uw-reveal="fade-up" data-uw-delay="160">
-                        <img src="~/images/home/icons/fresh-ingredients-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="kbb-single__icon" />
-                        <h4 class="kbb-single__package-name">Gói tiêu chuẩn</h4>
-                        <p class="kbb-single__price">278K</p>
-                        <p class="kbb-single__description">Bao gồm tất cả các món tại quầy line.</p>
+
+                    <div class="kbb-slider__packages mt-8"
+                         role="group"
+                         aria-label="Chọn gói buffet KBB Cook"
+                         data-uw-reveal="fade-up"
+                         data-uw-delay="260">
+                        <button type="button"
+                                class="kbb-slider__package is-active"
+                                data-kbb-cook-package
+                                data-kbb-cook-package-index="0"
+                                aria-controls="kbb-cook-package-slider"
+                                aria-pressed="true">
+                            <span class="kbb-slider__package-row">
+                                <span class="kbb-slider__package-name">Gói tiêu chuẩn</span>
+                                <span class="kbb-slider__price">278K</span>
+                            </span>
+                            <span class="kbb-slider__description">Bao gồm tất cả các món tại quầy line.</span>
+                        </button>
+                        <button type="button"
+                                class="kbb-slider__package"
+                                data-kbb-cook-package
+                                data-kbb-cook-package-index="1"
+                                aria-controls="kbb-cook-package-slider"
+                                aria-pressed="false">
+                            <span class="kbb-slider__package-row">
+                                <span class="kbb-slider__package-name">Gói thượng hạng</span>
+                                <span class="kbb-slider__price">458K</span>
+                            </span>
+                            <span class="kbb-slider__description">Trọn vẹn lựa chọn tại quầy line cùng các món cao cấp.</span>
+                        </button>
                     </div>
                 </div>
             </article>
@@ -787,9 +863,10 @@
 
 @section Scripts {
     <script src="~/js/home-hero-slider.js" asp-append-version="true"></script>
+    <script src="~/js/kbb-cook-slider.js" asp-append-version="true"></script>
     <script src="~/js/home-app-modal.js" asp-append-version="true"></script>
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/kbb-cook-single.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/kbb-cook-slider.css" asp-append-version="true" />
 }

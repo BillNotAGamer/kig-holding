@@ -57,7 +57,7 @@ The core home page layout centers on the three main dining concepts under KIG Ho
 2.  **Gogi Maru (Dry Aged BBQ)**:
     *   Visual text details Gogi Maru's 15-day meat fermentation processes alongside a **3-column feature grid** (`sm:grid-cols-3`) detailing banchan tables and outdoor sky bar options.
 3.  **KBB Cook (Buffet & Hotpot)**:
-    *   Presents one compact KBB Cook buffet package: Gói tiêu chuẩn (278K), with a single existing restaurant image.
+    *   Presents Gói tiêu chuẩn (278K) and Gói thượng hạng (458K) inside the same alternating image-left/content-right editorial grid used by the neighboring restaurant concepts. The homepage-scoped, keyboard-operable carousel preserves each square poster in full while two compact package rows keep the active poster and summary synchronized without affecting other brand sliders.
 
 ---
 

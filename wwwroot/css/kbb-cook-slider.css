@@ -1,0 +1,254 @@
+/* Homepage-only KBB Cook carousel and package-row interaction. */
+.kbb-slider {
+  width: 100%;
+}
+
+.kbb-slider__media,
+.kbb-slider__content {
+  min-width: 0;
+}
+
+.kbb-slider__media {
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+}
+
+.kbb-slider__media::after {
+  display: none;
+}
+
+.kbb-slider__viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0b0b0b;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.kbb-slider__viewport:focus-visible {
+  outline: 3px solid #e50914;
+  outline-offset: 4px;
+}
+
+.kbb-slider__slide {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.kbb-slider__slide.is-active {
+  z-index: 1;
+  opacity: 1;
+}
+
+.kbb-slider__slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.kbb-slider__control {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.9rem;
+  line-height: 1;
+  transform: translateY(-50%);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.kbb-slider__control:hover,
+.kbb-slider__control:focus-visible {
+  border-color: #e50914;
+  background: #e50914;
+  outline: none;
+}
+
+.kbb-slider__control--previous {
+  left: 0.85rem;
+}
+
+.kbb-slider__control--next {
+  right: 0.85rem;
+}
+
+.kbb-slider__dots {
+  position: absolute;
+  z-index: 3;
+  bottom: 0.9rem;
+  left: 50%;
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.42rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.52);
+  transform: translateX(-50%);
+}
+
+.kbb-slider__dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.kbb-slider__dot.is-active,
+.kbb-slider__dot:hover,
+.kbb-slider__dot:focus-visible {
+  border-color: #e50914;
+  background: #e50914;
+  outline: none;
+}
+
+.kbb-slider__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.kbb-slider__heading-line {
+  display: block;
+}
+
+.kbb-slider__subtitle {
+  margin: 0.65rem 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.kbb-slider__packages {
+  display: grid;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.kbb-slider__package {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 1.2rem 0.25rem;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background-color 180ms ease, box-shadow 180ms ease, padding 180ms ease;
+}
+
+.kbb-slider__package:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.kbb-slider__package:focus-visible {
+  outline: 3px solid rgba(229, 9, 20, 0.8);
+  outline-offset: 3px;
+}
+
+.kbb-slider__package.is-active {
+  padding-inline: 1rem;
+  background: rgba(229, 9, 20, 0.07);
+  box-shadow: inset 3px 0 0 #e50914;
+}
+
+.kbb-slider__package-row {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.kbb-slider__package-name {
+  color: #fff;
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.kbb-slider__price {
+  flex: 0 0 auto;
+  color: #e50914;
+  font-size: clamp(1.55rem, 2.8vw, 2rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.kbb-slider__description {
+  max-width: 34rem;
+  margin-top: 0.55rem;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 559px) {
+  .kbb-slider__package-row {
+    gap: 0.65rem;
+  }
+}
+
+@media (max-width: 350px) {
+  .kbb-slider__control {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .kbb-slider__control--previous {
+    left: 0.55rem;
+  }
+
+  .kbb-slider__control--next {
+    right: 0.55rem;
+  }
+
+  .kbb-slider__package-row {
+    display: block;
+  }
+
+  .kbb-slider__price {
+    display: block;
+    margin-top: 0.45rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kbb-slider__slide,
+  .kbb-slider__package,
+  .kbb-slider__control {
+    transition-duration: 0ms;
+  }
+}

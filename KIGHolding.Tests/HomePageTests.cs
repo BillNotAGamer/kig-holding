@@ -205,28 +205,81 @@ public sealed class HomePageTests
     }
 
     [Fact]
-    public void HomeView_KbbCook_RendersOnlyTheStandard278KPackageWithoutSliderMarkup()
+    public void HomeView_KbbCook_RendersExactlyTheStandardAndPremiumPackagesWithTwoSlideSliderMarkup()
     {
         var view = ReadRepoFile("Views", "Home", "Index.cshtml");
         var section = ExtractSectionByDataAttribute(view, "culinary-essence");
 
-        Assert.Contains("KBB COOK - BUFFET NƯỚNG HÀN QUỐC", section, StringComparison.Ordinal);
+        Assert.Contains("home-culinary-essence__block kbb-slider grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:gap-14", section, StringComparison.Ordinal);
+        Assert.Contains("home-culinary-essence__image kbb-slider__media", section, StringComparison.Ordinal);
+        Assert.Contains("<span class=\"kbb-slider__heading-line\">KBB COOK —</span>", section, StringComparison.Ordinal);
+        Assert.Contains("<span class=\"kbb-slider__heading-line\">BUFFET NƯỚNG HÀN QUỐC</span>", section, StringComparison.Ordinal);
         Assert.Contains("Gói tiêu chuẩn", section, StringComparison.Ordinal);
         Assert.Contains("278K", section, StringComparison.Ordinal);
         Assert.Contains("Bao gồm tất cả các món tại quầy line.", section, StringComparison.Ordinal);
-        Assert.Contains("~/images/home/images/kbb-cook-img.webp", section, StringComparison.Ordinal);
-        Assert.Contains("kbb-single", section, StringComparison.Ordinal);
-        Assert.Contains("~/css/kbb-cook-single.css", view, StringComparison.Ordinal);
+        Assert.Contains("Gói thượng hạng", section, StringComparison.Ordinal);
+        Assert.Contains("458K", section, StringComparison.Ordinal);
+        Assert.Contains("Trọn vẹn lựa chọn tại quầy line cùng các món cao cấp.", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/images/278k-package.webp", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/images/458k-package.webp", section, StringComparison.Ordinal);
+        Assert.Contains("kbb-slider", section, StringComparison.Ordinal);
+        Assert.Contains("~/css/kbb-cook-slider.css", view, StringComparison.Ordinal);
+        Assert.Contains("~/js/kbb-cook-slider.js", view, StringComparison.Ordinal);
 
-        Assert.DoesNotContain("Gói khởi đầu", section, StringComparison.Ordinal);
-        Assert.DoesNotContain("Gói thịnh soạn", section, StringComparison.Ordinal);
-        Assert.DoesNotContain("Gói thượng hạng", section, StringComparison.Ordinal);
         Assert.DoesNotContain("178K", section, StringComparison.Ordinal);
         Assert.DoesNotContain("378K", section, StringComparison.Ordinal);
-        Assert.DoesNotContain("458K", section, StringComparison.Ordinal);
-        Assert.DoesNotContain("data-kbb-cook-slider", section, StringComparison.Ordinal);
-        Assert.DoesNotContain("data-kbb-cook-slide", section, StringComparison.Ordinal);
-        Assert.DoesNotContain("~/js/kbb-cook-slider.js", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("Gói khởi đầu", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("Gói thịnh soạn", section, StringComparison.Ordinal);
+        Assert.Single(Regex.Matches(section, "data-kbb-cook-slider(?=[\\s>])", RegexOptions.CultureInvariant).Cast<Match>());
+        Assert.Equal(2, Regex.Matches(section, "data-kbb-cook-slide(?=[\\s>])", RegexOptions.CultureInvariant).Count);
+        Assert.Equal(2, Regex.Matches(section, "data-kbb-cook-package(?=[\\s>])", RegexOptions.CultureInvariant).Count);
+        Assert.Equal(2, Regex.Matches(section, "data-kbb-cook-package-index=\"0\"", RegexOptions.CultureInvariant).Count);
+        Assert.Equal(2, Regex.Matches(section, "data-kbb-cook-package-index=\"1\"", RegexOptions.CultureInvariant).Count);
+
+        var mediaIndex = section.IndexOf("kbb-slider__media", StringComparison.Ordinal);
+        var contentIndex = section.IndexOf("kbb-slider__content", StringComparison.Ordinal);
+        Assert.True(mediaIndex >= 0);
+        Assert.True(contentIndex > mediaIndex);
+        Assert.DoesNotContain("kbb-slider__header", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("kbb-slider__showcase", section, StringComparison.Ordinal);
+        Assert.DoesNotContain("kbb-slider__selection", section, StringComparison.Ordinal);
+
+        var stylesheet = ReadRepoFile("wwwroot", "css", "kbb-cook-slider.css");
+        Assert.Contains("object-fit: contain", stylesheet, StringComparison.Ordinal);
+        Assert.DoesNotContain("grid-template-rows", stylesheet, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void HomeView_KbbCookSlider_SynchronizesCarouselNavigationAndPackageButtons()
+    {
+        var script = ReadRepoFile("wwwroot", "js", "kbb-cook-slider.js");
+
+        Assert.Contains("const packages = section", script, StringComparison.Ordinal);
+        Assert.Contains("packageElement.addEventListener('click', () => selectManually(index))", script, StringComparison.Ordinal);
+        Assert.Contains("packageElement.classList.toggle('is-active', isActive)", script, StringComparison.Ordinal);
+        Assert.Contains("packageElement.setAttribute('aria-pressed', isActive ? 'true' : 'false')", script, StringComparison.Ordinal);
+        Assert.Contains("previousButton?.addEventListener('click', () => moveManually(-1))", script, StringComparison.Ordinal);
+        Assert.Contains("nextButton?.addEventListener('click', () => moveManually(1))", script, StringComparison.Ordinal);
+        Assert.Contains("event.key === 'ArrowLeft'", script, StringComparison.Ordinal);
+        Assert.Contains("event.key === 'ArrowRight'", script, StringComparison.Ordinal);
+        Assert.Contains("root.dataset.kbbCookSliderInitialized === 'true'", script, StringComparison.Ordinal);
+        Assert.Contains("root.dataset.kbbCookSliderInitialized = 'true'", script, StringComparison.Ordinal);
+        Assert.Contains("const autoplayDelay = 6000", script, StringComparison.Ordinal);
+        Assert.Contains("autoplayId = window.setTimeout", script, StringComparison.Ordinal);
+        Assert.Contains("setActive(currentIndex + 1, false)", script, StringComparison.Ordinal);
+        Assert.Contains("currentIndex = (index + slides.length) % slides.length", script, StringComparison.Ordinal);
+        Assert.Contains("clearAutoplay();", script, StringComparison.Ordinal);
+        Assert.Contains("scheduleAutoplay();", script, StringComparison.Ordinal);
+        Assert.Contains("section.addEventListener('mouseenter'", script, StringComparison.Ordinal);
+        Assert.Contains("section.addEventListener('mouseleave'", script, StringComparison.Ordinal);
+        Assert.Contains("section.addEventListener('focusin'", script, StringComparison.Ordinal);
+        Assert.Contains("section.addEventListener('focusout'", script, StringComparison.Ordinal);
+        Assert.Contains("document.addEventListener('visibilitychange'", script, StringComparison.Ordinal);
+        Assert.Contains("isDocumentVisible = !document.hidden", script, StringComparison.Ordinal);
+        Assert.Contains("window.matchMedia('(prefers-reduced-motion: reduce)')", script, StringComparison.Ordinal);
+        Assert.Contains("!reducedMotionQuery.matches", script, StringComparison.Ordinal);
+        Assert.Contains("if (status && announce)", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("setInterval", script, StringComparison.Ordinal);
     }
 
     [Fact]
