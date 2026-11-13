@@ -47,7 +47,7 @@ public class AboutController : Controller
         {
             SiteSetting = siteSetting,
             FeaturedBranches = branches.Take(3).Select(BranchCardViewModel.FromBranch).ToList(),
-            SeoTitle = "Giới thiệu KIG Holding VN",
+            SeoTitle = "Giới thiệu KIG Holding VN - Hệ thống nhà hàng Hàn Quốc",
             SeoDescription = "Khám phá KIG Holding VN, hệ thống nhà hàng ẩm thực Hàn Quốc tại Việt Nam với Truyền Thuyết Champong, Gogi Maru, KBB COOK và hành trình phát triển từ năm 2019."
         };
 

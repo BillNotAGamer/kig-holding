@@ -68,9 +68,9 @@ public class NewsController : Controller
             TotalPages = postsPage.TotalPages,
             HasPreviousPage = postsPage.HasPreviousPage,
             HasNextPage = postsPage.HasNextPage,
-            SeoTitle = string.IsNullOrWhiteSpace(selectedCategoryName) ? "Tin tức & ưu đãi" : $"{selectedCategoryName} - Tin tức",
+            SeoTitle = string.IsNullOrWhiteSpace(selectedCategoryName) ? "Tin tức, khuyến mãi nhà hàng Hàn Quốc" : $"{selectedCategoryName} - Tin tức",
             SeoDescription = string.IsNullOrWhiteSpace(selectedCategoryName)
-                ? "Cập nhật món mới, khuyến mãi và câu chuyện ẩm thực Hàn Quốc tại Truyền Thuyết Champong."
+                ? "Cập nhật món mới, khuyến mãi, ưu đãi buffet nướng và câu chuyện ẩm thực Hàn Quốc tại Truyền Thuyết Champong, Gogi Maru, KBB Cook."
                 : $"Cập nhật {selectedCategoryName} mới nhất từ Truyền Thuyết Champong."
         };
 

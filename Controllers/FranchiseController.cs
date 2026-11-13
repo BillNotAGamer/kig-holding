@@ -171,7 +171,7 @@ public class FranchiseController : Controller
 
     private void SetPageMetadata()
     {
-        ViewData["Title"] = "Liên hệ nhượng quyền";
-        ViewData["MetaDescription"] = "Trao đổi cơ hội hợp tác phát triển cùng KIG Holding VN: chủ mặt bằng, nhà đầu tư và doanh nghiệp đồng hành cùng hệ thống nhà hàng Hàn Quốc được vận hành bài bản.";
+        ViewData["Title"] = "Nhượng quyền nhà hàng Hàn Quốc - KIG Holding";
+        ViewData["MetaDescription"] = "Nhượng quyền, hợp tác mở nhà hàng Hàn Quốc cùng KIG Holding VN (Truyền Thuyết Champong, Gogi Maru, KBB Cook) dành cho chủ mặt bằng, nhà đầu tư và doanh nghiệp.";
     }
 }

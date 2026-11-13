@@ -2,8 +2,8 @@
 @using KIGHolding.Services
 
 @{
-    ViewData["Title"] = "Liên hệ";
-    ViewData["MetaDescription"] = "Liên hệ Truyền Thuyết Champong để góp ý, đặt tiệc, hợp tác và nhượng quyền.";
+    ViewData["Title"] = "Liên hệ đặt tiệc, hợp tác nhà hàng Hàn Quốc";
+    ViewData["MetaDescription"] = "Liên hệ Truyền Thuyết Champong, Gogi Maru, KBB Cook để đặt tiệc sinh nhật, tiệc công ty, góp ý dịch vụ, hợp tác và nhượng quyền nhà hàng Hàn Quốc.";
 
     var hotlineHref = $"tel:{Model.Hotline.Replace(" ", string.Empty)}";
     var hasFacebook = !string.IsNullOrWhiteSpace(Model.FacebookUrl) && !string.Equals(Model.FacebookUrl, "#", StringComparison.Ordinal);

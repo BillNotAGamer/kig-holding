@@ -1,8 +1,52 @@
 ﻿@model HomeIndexViewModel
 
 @{
-    ViewData["Title"] = "Truyền Thuyết Champong - Trải nghiệm ẩm thực Hàn Quốc đậm vị và hiện đại";
-    ViewData["MetaDescription"] = "Khám phá câu chuyện thương hiệu, tinh hoa ẩm thực và những điểm nhấn tạo nên trải nghiệm dùng bữa đậm vị, sum vầy và hiện đại tại Champong.";
+    ViewData["Title"] = "Truyền Thuyết Champong - Nhà hàng Hàn Quốc: mì cay champong, buffet nướng";
+    ViewData["MetaDescription"] = "Hệ thống nhà hàng Hàn Quốc KIG Holding: Truyền Thuyết Champong mì cay hải sản, mì tương đen; Gogi Maru thịt nướng Hàn Quốc; KBB Cook buffet nướng không giới hạn. Đặt bàn online.";
+
+    var homeFaqs = new[]
+    {
+        (
+            Question: "KIG Holding có những thương hiệu nhà hàng Hàn Quốc nào?",
+            Answer: "KIG Holding VN phát triển hệ thống nhà hàng Hàn Quốc tại Việt Nam từ năm 2019 với các thương hiệu: Truyền Thuyết Champong (mì cay hải sản champong, mì tương đen), Gogi Maru (thịt nướng Hàn Quốc), KBB Cook (buffet nướng Hàn Quốc) và Seoul Gukbap (cơm canh truyền thống Hàn Quốc)."
+        ),
+        (
+            Question: "Truyền Thuyết Champong có món gì nổi bật?",
+            Answer: "Món signature là champong - mì tươi dai ngon trong nước súp hải sản cay nồng đậm vị. Bên cạnh đó là mì tương đen chuẩn vị Hàn, các món lẩu và bánh gạo truyền thống, phù hợp cho bữa ăn gia đình và nhóm bạn."
+        ),
+        (
+            Question: "Buffet nướng Hàn Quốc KBB Cook giá bao nhiêu?",
+            Answer: "KBB Cook có gói buffet nướng tiêu chuẩn 278K bao gồm tất cả các món tại quầy line và gói thượng hạng 458K kèm các món cao cấp. Giá có thể thay đổi theo thời điểm, vui lòng xem thực đơn KBB Cook hoặc liên hệ chi nhánh để cập nhật mới nhất."
+        ),
+        (
+            Question: "Gogi Maru có gì khác so với quán nướng Hàn Quốc thông thường?",
+            Answer: "Gogi Maru tập trung vào thịt nướng Hàn Quốc ủ dry-aged, kết hợp kỹ thuật lên men thịt heo và các phần bò nướng thượng hạng trên bếp than hồng, mang đến hương vị đậm đà trong từng lát cắt."
+        ),
+        (
+            Question: "Làm sao để đặt bàn nhà hàng Truyền Thuyết Champong, Gogi Maru, KBB Cook?",
+            Answer: "Bạn có thể đặt bàn online trên trang Đặt bàn: chọn chi nhánh, ngày giờ và số khách để giữ chỗ trước. Hệ thống hiện có 19 chi nhánh, xem địa chỉ và hotline từng chi nhánh tại trang Chi nhánh."
+        ),
+        (
+            Question: "KIG Holding có nhận nhượng quyền nhà hàng Hàn Quốc không?",
+            Answer: "KIG Holding VN chào đón chủ mặt bằng, nhà đầu tư và doanh nghiệp muốn hợp tác phát triển hệ thống nhà hàng Hàn Quốc. Vui lòng để lại thông tin tại trang Liên hệ nhượng quyền để được tư vấn."
+        )
+    };
+
+    var homeFaqJson = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "FAQPage",
+        ["mainEntity"] = homeFaqs.Select(faq => new Dictionary<string, object?>
+        {
+            ["@type"] = "Question",
+            ["name"] = faq.Question,
+            ["acceptedAnswer"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "Answer",
+                ["text"] = faq.Answer
+            }
+        }).ToArray()
+    });
 
     ViewData["AutoOpenBookingModal"] = true;
 
@@ -13,7 +57,7 @@
             Description: "Khám phá hương vị Hàn Quốc nguyên bản qua mì tương đen chuẩn vị trứ danh và những món ăn làm nên tên tuổi thương hiệu.",
             Href: "/thuc-don/nhom/truyen-thuyet-champong",
             ImageUrl: "/images/home/images/truyen-thuyet-champong.webp",
-            Alt: "Món Truyền Thuyết Champong",
+            Alt: "Mì cay hải sản champong và mì tương đen tại nhà hàng Truyền Thuyết Champong",
             Delay: 0,
             PreserveArtwork: false
         ),
@@ -22,7 +66,7 @@
             Description: "Thưởng thức thịt nướng cao cấp theo phong cách Hàn Quốc, nổi bật với kỹ thuật dry-aged và hương vị được chăm chút trong từng lát cắt.",
             Href: "/thuc-don/nhom/gogi-maru",
             ImageUrl: "/images/home/images/gogimaru-img.webp",
-            Alt: "Bàn tiệc GOGI MARU",
+            Alt: "Thịt nướng Hàn Quốc dry-aged tại nhà hàng Gogi Maru",
             Delay: 120,
             PreserveArtwork: false
         ),
@@ -31,7 +75,7 @@
             Description: "Buffet nướng Hàn Quốc đa dạng với thực đơn phong phú, không gian trẻ trung và những khoảnh khắc sum vầy trọn vẹn bên bàn tiệc.",
             Href: "/thuc-don/nhom/kbb-cook",
             ImageUrl: "/images/home/images/kbb-cook-img.webp",
-            Alt: "Không gian và buffet nướng Hàn Quốc",
+            Alt: "Buffet nướng Hàn Quốc không giới hạn tại KBB Cook",
             Delay: 240,
             PreserveArtwork: false
         ),
@@ -63,9 +107,9 @@
                     <span data-champong-hero-reveal class="champong-hero__eyebrow champong-hero__layer" data-champong-hero-delay="0">
                         Truyền Thuyết Champong - 전설의짬뽕
                     </span>
-                    <h2 data-champong-hero-reveal class="champong-hero__title champong-hero__layer" data-champong-hero-delay="140">
+                    <h1 data-champong-hero-reveal class="champong-hero__title champong-hero__layer" data-champong-hero-delay="140">
                         Tuyệt tác ẩm thực Hàn cho bữa ăn trọn vị
-                    </h2>
+                    </h1>
                     <p data-champong-hero-reveal class="champong-hero__description champong-hero__layer" data-champong-hero-delay="280">
                         Thưởng thức sợi mì tươi dai ngon quyện cùng nước súp hải sản cay nồng đậm vị, kết hợp các món lẩu và bánh gạo truyền thống. Điểm hẹn hoàn hảo cho tín đồ sành ăn chuẩn Hàn.
                     </p>
@@ -258,7 +302,7 @@
         <div class="mt-14 space-y-14 lg:mt-20 lg:space-y-20">
             <article class="home-culinary-essence__block grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:gap-14">
                 <div class="home-culinary-essence__image" data-uw-reveal="fade-up" data-uw-delay="100">
-                    <img src="~/images/home/images/truyen-thuyet-champong.webp" asp-append-version="true" alt="Món Truyền Thuyết Champong" class="h-full w-full object-cover" />
+                    <img src="~/images/home/images/truyen-thuyet-champong.webp" asp-append-version="true" alt="Mì cay hải sản champong - món signature của Truyền Thuyết Champong" class="h-full w-full object-cover" />
                 </div>
 
                 <div>
@@ -325,7 +369,7 @@
                 </div>
 
                 <div class="home-culinary-essence__image lg:order-2" data-uw-reveal="fade-up" data-uw-delay="420">
-                    <img src="~/images/home/images/gogimaru-img.webp" asp-append-version="true" alt="Bàn tiệc Gogimaru" class="h-full w-full object-cover" />
+                    <img src="~/images/home/images/gogimaru-img.webp" asp-append-version="true" alt="Bàn tiệc thịt nướng Hàn Quốc tại Gogi Maru" class="h-full w-full object-cover" />
                 </div>
             </article>
 
@@ -755,6 +799,40 @@
     </div>
 </section>
 
+<section class="home-faq section-shell" data-home-section="faq" aria-labelledby="home-faq-title">
+    <div class="container-page">
+        <div class="home-faq__header" data-uw-reveal="fade-up">
+            <p class="home-faq__eyebrow">Câu hỏi thường gặp</p>
+            <h2 id="home-faq-title" class="public-section-title mt-4 text-white">
+                Nhà hàng Hàn Quốc Champong, Gogi Maru, KBB Cook
+            </h2>
+            <p class="home-faq__intro">
+                Những thông tin thực khách hay hỏi về mì cay champong, mì tương đen, thịt nướng Hàn Quốc và buffet nướng không giới hạn trong hệ thống KIG Holding.
+            </p>
+        </div>
+
+        <div class="home-faq__list" data-uw-reveal="fade-up" data-uw-delay="100">
+            @foreach (var faq in homeFaqs)
+            {
+                <details class="home-faq__item">
+                    <summary class="home-faq__question">@faq.Question</summary>
+                    <p class="home-faq__answer">@faq.Answer</p>
+                </details>
+            }
+        </div>
+
+        <nav class="home-faq__links" aria-label="Liên kết nhanh">
+            <a class="home-faq__link" href="/thuc-don/nhom/truyen-thuyet-champong">Thực đơn Truyền Thuyết Champong</a>
+            <a class="home-faq__link" href="/thuc-don/nhom/gogi-maru">Thực đơn Gogi Maru</a>
+            <a class="home-faq__link" href="/thuc-don/nhom/kbb-cook">Buffet nướng KBB Cook</a>
+            <a class="home-faq__link" href="/chi-nhanh">Chi nhánh gần bạn</a>
+            <a class="home-faq__link" href="/dat-ban">Đặt bàn online</a>
+        </nav>
+    </div>
+</section>
+
+<script type="application/ld+json">@Html.Raw(homeFaqJson)</script>
+
 <section data-home-section="booking"
          class="home-booking-cta"
          data-uw-reveal="fade-up"
@@ -869,4 +947,5 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/kbb-cook-slider.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/home-faq.css" asp-append-version="true" />
 }

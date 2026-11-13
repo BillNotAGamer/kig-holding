@@ -1,8 +1,8 @@
 @model MenuGroupLandingViewModel
 
 @{
-    ViewData["Title"] = "Thực đơn";
-    ViewData["MetaDescription"] = "Khám phá các nhóm thực đơn Truyền Thuyết Champong, Gogimaru và KBB Cook.";
+    ViewData["Title"] = "Thực đơn Truyền Thuyết Champong, Gogi Maru, KBB Cook";
+    ViewData["MetaDescription"] = "Xem thực đơn món Hàn Quốc: mì cay hải sản champong, mì tương đen Truyền Thuyết Champong, thịt nướng Hàn Quốc Gogi Maru và buffet nướng không giới hạn KBB Cook.";
 
     var groups = Model.Groups;
     var countLabel = groups.Count == 1 ? "1 nhóm thực đơn" : $"{groups.Count} nhóm thực đơn";
@@ -15,7 +15,7 @@
                 THỰC ĐƠN
             </span>
             <h1 class="public-page-title mt-6 text-white">
-                Khám phá thực đơn
+                Thực đơn món Hàn Quốc
             </h1>
             <p class="mx-auto mt-5 max-w-2xl text-base leading-8 text-white/70 sm:text-lg">
                 Chọn thương hiệu để xem thực đơn chi tiết, hình ảnh món ăn và các lựa chọn phù hợp cho bữa ăn của bạn.

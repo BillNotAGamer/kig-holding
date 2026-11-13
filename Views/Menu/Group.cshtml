@@ -7,8 +7,30 @@
         .ThenBy(img => img.DisplayOrder)
         .ToArray();
 
-    ViewData["Title"] = $"{Model.Name} - Thực đơn";
-    ViewData["MetaDescription"] = Model.ShortDescription;
+    var brandSeo = (Model.Slug ?? string.Empty).ToLowerInvariant() switch
+    {
+        "truyen-thuyet-champong" => (
+            Title: "Thực đơn Truyền Thuyết Champong - Mì cay hải sản, mì tương đen",
+            Description: "Thực đơn Truyền Thuyết Champong: mì cay hải sản champong, mì tương đen chuẩn vị Hàn, lẩu và bánh gạo Hàn Quốc. Xem giá món và đặt bàn online."),
+        "gogi-maru" => (
+            Title: "Thực đơn Gogi Maru - Thịt nướng Hàn Quốc dry-aged",
+            Description: "Thực đơn Gogi Maru: thịt nướng Hàn Quốc ủ dry-aged, thịt heo lên men và bò nướng thượng hạng trên bếp than hồng. Xem giá món và đặt bàn online."),
+        "kbb-cook" => (
+            Title: "Thực đơn KBB Cook - Buffet nướng Hàn Quốc không giới hạn",
+            Description: "Thực đơn KBB Cook buffet nướng Hàn Quốc không giới hạn: gói tiêu chuẩn 278K, gói thượng hạng 458K, quầy line đa dạng. Xem chi tiết và đặt bàn online."),
+        _ => (Title: (string?)null, Description: (string?)null)
+    };
+
+    ViewData["Title"] = brandSeo.Title ?? $"{Model.Name} - Thực đơn món Hàn Quốc";
+    ViewData["MetaDescription"] = brandSeo.Description
+        ?? (string.IsNullOrWhiteSpace(Model.ShortDescription)
+            ? $"Xem thực đơn {Model.Name} - món Hàn Quốc trong hệ thống nhà hàng KIG Holding. Đặt bàn online nhanh chóng."
+            : Model.ShortDescription);
+    ViewData["CanonicalUrl"] = string.IsNullOrWhiteSpace(Model.GroupUrl) ? null : Model.GroupUrl;
+    if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl ?? Model.FirstImageUrl))
+    {
+        ViewData["OgImage"] = Model.CoverImageUrl ?? Model.FirstImageUrl;
+    }
 
     var pageCountLabel = Model.TotalPages == 1
         ? "1 trang menu"

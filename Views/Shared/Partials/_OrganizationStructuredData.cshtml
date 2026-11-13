@@ -1,14 +1,27 @@
 @using System.Text.Json
 @{
+    const string siteUrl = "https://kigholding.vn/";
+    const string organizationId = "https://kigholding.vn/#organization";
+
+    object BrandNode(string name, string alternateName, string description, string url) => new Dictionary<string, object?>
+    {
+        ["@type"] = "Brand",
+        ["name"] = name,
+        ["alternateName"] = alternateName,
+        ["description"] = description,
+        ["url"] = url
+    };
+
     var organization = new Dictionary<string, object?>
     {
-        ["@context"] = "https://schema.org",
         ["@type"] = "Organization",
-        ["@id"] = "https://kigholding.vn/#organization",
+        ["@id"] = organizationId,
         ["name"] = "KIG Holding",
         ["legalName"] = "CÔNG TY TNHH KIG HOLDING",
-        ["alternateName"] = "Truyền Thuyết Champong",
-        ["url"] = "https://kigholding.vn/",
+        ["alternateName"] = new[] { "KIG Holding VN", "Truyền Thuyết Champong" },
+        ["description"] = "KIG Holding VN là hệ thống nhà hàng ẩm thực Hàn Quốc tại Việt Nam từ năm 2019, sở hữu các thương hiệu Truyền Thuyết Champong, Gogi Maru, KBB Cook và Seoul Gukbap.",
+        ["foundingDate"] = "2019",
+        ["url"] = siteUrl,
         ["logo"] = new Dictionary<string, object?>
         {
             ["@type"] = "ImageObject",
@@ -16,9 +29,32 @@
             ["contentUrl"] = "https://kigholding.vn/images/general/kig-no-bg-logo.png",
             ["width"] = 1080,
             ["height"] = 1080
+        },
+        ["brand"] = new[]
+        {
+            BrandNode("Truyền Thuyết Champong", "전설의짬뽕", "Nhà hàng mì Hàn Quốc với mì cay hải sản champong và mì tương đen.", "https://kigholding.vn/thuc-don/nhom/truyen-thuyet-champong"),
+            BrandNode("Gogi Maru", "고기마루", "Nhà hàng thịt nướng Hàn Quốc, thịt ủ dry-aged nướng trên bếp than hồng.", "https://kigholding.vn/thuc-don/nhom/gogi-maru"),
+            BrandNode("KBB Cook", "한국식 바비큐 뷔페", "Buffet nướng Hàn Quốc không giới hạn.", "https://kigholding.vn/thuc-don/nhom/kbb-cook"),
+            BrandNode("Seoul Gukbap", "서울 국밥", "Cơm canh truyền thống Hàn Quốc.", "https://kigholding.vn/thuc-don")
         }
     };
 
-    var organizationJson = JsonSerializer.Serialize(organization);
+    var website = new Dictionary<string, object?>
+    {
+        ["@type"] = "WebSite",
+        ["@id"] = "https://kigholding.vn/#website",
+        ["url"] = siteUrl,
+        ["name"] = "Truyền Thuyết Champong - KIG Holding",
+        ["inLanguage"] = "vi-VN",
+        ["publisher"] = new Dictionary<string, object?> { ["@id"] = organizationId }
+    };
+
+    var graph = new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@graph"] = new object[] { organization, website }
+    };
+
+    var organizationJson = JsonSerializer.Serialize(graph);
 }
 <script type="application/ld+json">@Html.Raw(organizationJson)</script>

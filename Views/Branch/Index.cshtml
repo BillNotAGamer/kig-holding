@@ -21,6 +21,68 @@
         district = branch.District,
         hotline = branch.Hotline
     });
+
+    const string seoSiteUrl = "https://kigholding.vn";
+    string ToAbsoluteUrl(string url) => url.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+        ? url
+        : $"{seoSiteUrl}/{url.TrimStart('~', '/')}";
+
+    var restaurantNodes = Model.Branches.Select((branch, index) =>
+    {
+        var node = new Dictionary<string, object?>
+        {
+            ["@type"] = "Restaurant",
+            ["name"] = branch.Name,
+            ["url"] = $"{seoSiteUrl}/chi-nhanh#{branch.Slug}",
+            ["image"] = ToAbsoluteUrl(branch.ImageUrl),
+            ["servesCuisine"] = new[] { "Korean", "Món Hàn Quốc" },
+            ["acceptsReservations"] = branch.AllowsReservations,
+            ["parentOrganization"] = new Dictionary<string, object?> { ["@id"] = "https://kigholding.vn/#organization" },
+            ["address"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "PostalAddress",
+                ["streetAddress"] = branch.Address,
+                ["addressLocality"] = string.IsNullOrWhiteSpace(branch.District) ? null : branch.District,
+                ["addressRegion"] = string.IsNullOrWhiteSpace(branch.City) ? null : branch.City,
+                ["addressCountry"] = "VN"
+            }.Where(entry => entry.Value is not null).ToDictionary(entry => entry.Key, entry => entry.Value)
+        };
+
+        if (!string.IsNullOrWhiteSpace(branch.Hotline))
+        {
+            node["telephone"] = branch.Hotline;
+        }
+
+        if (!string.IsNullOrWhiteSpace(branch.OpeningHours))
+        {
+            node["openingHours"] = $"Mo-Su {branch.OpeningHours.Replace(" ", string.Empty)}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(branch.GoogleMapUrl) && branch.GoogleMapUrl != "#")
+        {
+            node["hasMap"] = branch.GoogleMapUrl;
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["@type"] = "ListItem",
+            ["position"] = index + 1,
+            ["item"] = node
+        };
+    }).ToArray();
+
+    var branchListJson = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "ItemList",
+        ["name"] = "Hệ thống nhà hàng Hàn Quốc Truyền Thuyết Champong, Gogi Maru, KBB Cook",
+        ["itemListElement"] = restaurantNodes
+    });
+}
+
+@if (restaurantNodes.Length > 0)
+{
+    <script type="application/ld+json">@Html.Raw(branchListJson)</script>
 }
 
 <div class="branch-locator branch-locator--dark relative isolate overflow-hidden pb-16 text-white" data-branch-locator>
@@ -29,7 +91,7 @@
             <div class="mx-auto max-w-4xl text-center" data-uw-reveal="fade-up">
                 <p class="text-kicker font-black uppercase text-brand-red">HỆ THỐNG CHI NHÁNH</p>
                 <h1 class="public-page-title mt-3 text-white">
-                    Tìm Champong gần bạn
+                    Tìm nhà hàng Champong gần bạn
                 </h1>
                 <p class="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-base">
                     Chọn khu vực hoặc tìm theo tên chi nhánh, địa chỉ, quận để gọi ngay, chỉ đường hoặc đặt bàn.

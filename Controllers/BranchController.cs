@@ -72,10 +72,10 @@ public class BranchController : Controller
             FilteredCount = filteredBranches.Count,
             CityCounts = cityCounts,
             MainMapUrl = mapBranch?.GoogleMapUrl,
-            SeoTitle = string.IsNullOrWhiteSpace(selectedCity) ? "Hệ thống chi nhánh" : $"Chi nhánh {selectedCity}",
+            SeoTitle = string.IsNullOrWhiteSpace(selectedCity) ? "Chi nhánh Truyền Thuyết Champong, Gogi Maru, KBB Cook" : $"Truyền Thuyết Champong tại {selectedCity} - Nhà hàng Hàn Quốc",
             SeoDescription = string.IsNullOrWhiteSpace(selectedCity)
-                ? "Tìm chi nhánh Truyền Thuyết Champong gần bạn nhất và đặt bàn trước cho bữa ăn Hàn Quốc cay nóng."
-                : $"Tìm chi nhánh Truyền Thuyết Champong tại {selectedCity} và đặt bàn trước."
+                ? $"Tìm nhà hàng Hàn Quốc gần bạn: {(activeBranches.Count > 0 ? $"{activeBranches.Count} chi nhánh " : "chi nhánh ")}Truyền Thuyết Champong, Gogi Maru, KBB Cook. Xem địa chỉ, giờ mở cửa, hotline và đặt bàn online."
+                : $"Danh sách nhà hàng Hàn Quốc Truyền Thuyết Champong tại {selectedCity}: địa chỉ, giờ mở cửa, hotline. Đặt bàn online nhanh chóng."
         };
 
         return View(model);

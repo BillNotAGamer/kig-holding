@@ -1,0 +1,108 @@
+/* Home FAQ section (plain CSS so it does not depend on a Tailwind rebuild). */
+.home-faq {
+  background: linear-gradient(135deg, #131313 0%, #1b1b1b 50%, #0b0b0b 100%);
+  color: #fff;
+}
+
+.home-faq__header {
+  max-width: 46rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.home-faq__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #e50914;
+}
+
+.home-faq__intro {
+  margin-top: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.home-faq__list {
+  max-width: 52rem;
+  margin: 2.5rem auto 0;
+  display: grid;
+  gap: 0.875rem;
+}
+
+.home-faq__item {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.home-faq__item[open] {
+  border-color: rgba(229, 9, 20, 0.45);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.home-faq__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.35rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.home-faq__question::-webkit-details-marker {
+  display: none;
+}
+
+.home-faq__question::after {
+  content: "+";
+  flex-shrink: 0;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #e50914;
+  transition: transform 0.2s ease;
+}
+
+.home-faq__item[open] .home-faq__question::after {
+  transform: rotate(45deg);
+}
+
+.home-faq__answer {
+  padding: 0 1.35rem 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.home-faq__links {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.home-faq__link {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.home-faq__link:hover {
+  border-color: #e50914;
+  background: rgba(229, 9, 20, 0.12);
+}

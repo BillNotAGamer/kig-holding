@@ -3,8 +3,8 @@
 @inject TimeProvider TimeProvider
 
 @{
-    ViewData["Title"] = "Đặt bàn";
-    ViewData["MetaDescription"] = "Đặt bàn trước tại Truyền Thuyết Champong. Chọn chi nhánh, thời gian và số khách để giữ bàn nhanh chóng.";
+    ViewData["Title"] = "Đặt bàn Truyền Thuyết Champong, Gogi Maru, KBB Cook";
+    ViewData["MetaDescription"] = "Đặt bàn online tại Truyền Thuyết Champong, Gogi Maru, KBB Cook. Chọn chi nhánh, giờ và số khách để giữ bàn ăn mì cay, thịt nướng, buffet nướng Hàn Quốc."; ViewData["CanonicalUrl"] = "/dat-ban";
     var selectedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(Model.DiningOccasionCode);
     var showDiningOccasionOther = string.Equals(selectedDiningOccasionCode, ReservationOptionCatalog.OtherCode, StringComparison.Ordinal);
     var hasReservableBranches = Model.Branches.Count > 0;

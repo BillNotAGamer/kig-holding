@@ -81,6 +81,8 @@ public class SeoController : Controller
         var content = new StringBuilder()
             .AppendLine("User-agent: *")
             .AppendLine("Allow: /")
+            .AppendLine("Disallow: /admin")
+            .AppendLine("Disallow: /dat-ban/thanh-cong")
             .AppendLine($"Sitemap: {BuildAbsoluteUrl("/sitemap.xml", baseUrl)}")
             .ToString();
 
