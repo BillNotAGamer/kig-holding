@@ -38,7 +38,7 @@
     var ogImage = BuildAbsoluteUrl(
         ViewData["OgImage"]?.ToString()
             ?? (string.IsNullOrWhiteSpace(siteSetting?.LogoUrl) ? null : siteSetting!.LogoUrl)
-            ?? "/images/placeholders/champong-hero.webp",
+            ?? "/images/og/kig-holding-og.jpg",
         baseUrl);
     var ogType = ViewData["OgType"]?.ToString() ?? "website";
     var robots = ViewData["Robots"]?.ToString();

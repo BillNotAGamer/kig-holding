@@ -6156,7 +6156,7 @@
     background:
       radial-gradient(ellipse at 50% 12%, rgba(229, 9, 20, 0.11), transparent 26rem),
       linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(8, 7, 6, 0.95)),
-      url("/images/home/images/texture.png"),
+      url("/images/home/images/texture.webp"),
       url("/images/home/images/about-bg.png");
     background-size: auto, auto, 20rem auto, cover;
     background-position: center, center, center, center;
@@ -6186,7 +6186,7 @@
     width: min(64rem, 104vw);
     height: 6.15rem;
     transform: translateX(-50%);
-    background-image: url("/images/home/images/hoavan.png");
+    background-image: none;
     background-repeat: repeat-x;
     background-position: center;
     background-size: auto 6.15rem;

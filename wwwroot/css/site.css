@@ -8082,7 +8082,7 @@
     background:
       radial-gradient(at 50% 12%, #e509141c, #0000 26rem) 50%,
       linear-gradient(#000000e6, #080706f2) 50%,
-      url(/images/home/images/texture.png) 50%/20rem,
+      url(/images/home/images/texture.webp) 50%/20rem,
       url(/images/home/images/about-bg.png) 50% / cover;
   }
   .home-culinary-essence .container-page {
@@ -8103,7 +8103,7 @@
     opacity: 0.62;
     mix-blend-mode: screen;
     pointer-events: none;
-    background-image: url(/images/home/images/hoavan.png);
+    background-image: none;
     background-position: 50%;
     background-repeat: repeat-x;
     background-size: auto 6.15rem;
