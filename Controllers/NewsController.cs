@@ -192,32 +192,10 @@ public class NewsController : Controller
             && !connectionString.Contains("your_password", StringComparison.OrdinalIgnoreCase);
     }
 
-    private string GetBaseUrl()
-    {
-        var configuredBaseUrl = _configuration["AppSettings:AppBaseUrl"];
-        if (!string.IsNullOrWhiteSpace(configuredBaseUrl))
-        {
-            return configuredBaseUrl.TrimEnd('/');
-        }
-
-        return $"{Request.Scheme}://{Request.Host}".TrimEnd('/');
-    }
+    private string GetBaseUrl() => KIGHolding.Helpers.SeoUrlHelper.GetBaseUrl(_configuration, Request);
 
     private static string BuildAbsoluteUrl(string? url, string baseUrl)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            return baseUrl;
-        }
-
-        if (Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
-        {
-            return absoluteUri.ToString();
-        }
-
-        var relativeUrl = url.StartsWith('/') ? url : $"/{url}";
-        return $"{baseUrl.TrimEnd('/')}{relativeUrl}";
-    }
+        => KIGHolding.Helpers.SeoUrlHelper.BuildAbsoluteUrl(url, baseUrl);
 
     private static string FirstNonWhiteSpace(params string?[] values)
     {

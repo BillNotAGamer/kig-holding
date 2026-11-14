@@ -169,29 +169,8 @@
     }
 
     private static string GetConfiguredBaseUrl(IConfiguration configuration, HttpRequest request)
-    {
-        var configuredBaseUrl = configuration["AppSettings:AppBaseUrl"];
-        if (!string.IsNullOrWhiteSpace(configuredBaseUrl))
-        {
-            return configuredBaseUrl.TrimEnd('/');
-        }
-
-        return $"{request.Scheme}://{request.Host}".TrimEnd('/');
-    }
+        => SeoUrlHelper.GetBaseUrl(configuration, request);
 
     private static string BuildAbsoluteUrl(string? url, string baseUrl)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            return baseUrl;
-        }
-
-        if (Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
-        {
-            return absoluteUri.ToString();
-        }
-
-        var relativeUrl = url.StartsWith('/') ? url : $"/{url}";
-        return $"{baseUrl.TrimEnd('/')}{relativeUrl}";
-    }
+        => SeoUrlHelper.BuildAbsoluteUrl(url, baseUrl);
 }

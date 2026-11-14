@@ -22,7 +22,7 @@
         hotline = branch.Hotline
     });
 
-    const string seoSiteUrl = "https://kigholding.vn";
+    const string seoSiteUrl = "https://www.kigholding.vn";
     string ToAbsoluteUrl(string url) => url.StartsWith("http", StringComparison.OrdinalIgnoreCase)
         ? url
         : $"{seoSiteUrl}/{url.TrimStart('~', '/')}";
@@ -37,7 +37,7 @@
             ["image"] = ToAbsoluteUrl(branch.ImageUrl),
             ["servesCuisine"] = new[] { "Korean", "Món Hàn Quốc" },
             ["acceptsReservations"] = branch.AllowsReservations,
-            ["parentOrganization"] = new Dictionary<string, object?> { ["@id"] = "https://kigholding.vn/#organization" },
+            ["parentOrganization"] = new Dictionary<string, object?> { ["@id"] = "https://www.kigholding.vn/#organization" },
             ["address"] = new Dictionary<string, object?>
             {
                 ["@type"] = "PostalAddress",

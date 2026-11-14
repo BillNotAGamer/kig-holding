@@ -102,16 +102,7 @@ public class SeoController : Controller
         }
     }
 
-    private string GetBaseUrl()
-    {
-        var configuredBaseUrl = _configuration["AppSettings:AppBaseUrl"];
-        if (!string.IsNullOrWhiteSpace(configuredBaseUrl))
-        {
-            return configuredBaseUrl.TrimEnd('/');
-        }
-
-        return $"{Request.Scheme}://{Request.Host}".TrimEnd('/');
-    }
+    private string GetBaseUrl() => KIGHolding.Helpers.SeoUrlHelper.GetBaseUrl(_configuration, Request);
 
     private bool HasConfiguredDatabase()
     {
@@ -124,15 +115,7 @@ public class SeoController : Controller
     }
 
     private static string BuildAbsoluteUrl(string route, string baseUrl)
-    {
-        if (Uri.TryCreate(route, UriKind.Absolute, out var absoluteUri))
-        {
-            return absoluteUri.ToString();
-        }
-
-        var relativeRoute = route.StartsWith('/') ? route : $"/{route}";
-        return $"{baseUrl.TrimEnd('/')}{relativeRoute}";
-    }
+        => KIGHolding.Helpers.SeoUrlHelper.BuildAbsoluteUrl(route, baseUrl);
 
     private static string BuildSitemapXml(IReadOnlyList<SitemapUrl> urls)
     {
