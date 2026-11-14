@@ -7,25 +7,8 @@
     var allCategoriesActive = string.IsNullOrWhiteSpace(Model.SelectedCategorySlug);
     var posts = Model.Posts.ToList();
     var leadPost = posts.FirstOrDefault();
-    var secondaryPosts = posts.Skip(1).Take(4).ToList();
-    var standardPosts = posts.Skip(5).ToList();
-    var editorialCount = Math.Min(posts.Count, 5);
-    var remainingCount = standardPosts.Count;
-    var editorialModifier = editorialCount switch
-    {
-        1 => "news-editorial--count-1",
-        2 => "news-editorial--count-2",
-        3 => "news-editorial--count-3",
-        4 => "news-editorial--count-4",
-        _ => "news-editorial--count-5"
-    };
-    var secondaryModifier = secondaryPosts.Count switch
-    {
-        1 => "news-editorial__secondary--count-1",
-        2 => "news-editorial__secondary--count-2",
-        3 => "news-editorial__secondary--count-3",
-        _ => "news-editorial__secondary--count-4"
-    };
+    var latestPosts = posts.Skip(1).Take(4).ToList();
+    var gridPosts = posts.Skip(5).ToList();
 
     string BuildNewsUrl(string? categorySlug, int? page = null)
     {
@@ -46,8 +29,45 @@
             : $"/tin-tuc?{string.Join("&", query)}";
     }
 
+    var brands = new[]
+    {
+        (Name: "Truyền Thuyết Champong", Cuisine: "Mì cay · mì tương đen", Logo: "/images/general/kig-no-bg-logo.png", Url: "/thuc-don/nhom/truyen-thuyet-champong"),
+        (Name: "Gogi Maru", Cuisine: "Thịt nướng Hàn Quốc", Logo: "/images/general/logo-gogi-maru.webp", Url: "/thuc-don/nhom/gogi-maru"),
+        (Name: "KBB Cook", Cuisine: "Buffet nướng không giới hạn", Logo: "/images/general/logo-kbbcook.webp", Url: "/thuc-don/nhom/kbb-cook"),
+        (Name: "Seoul Gukbap", Cuisine: "Cơm canh Hàn Quốc", Logo: "/images/general/logo-seoul-gukbap.webp", Url: "/thuc-don/nhom/seoul-gukbap")
+    };
+
+    // Unique, visible copy per category (helps each category URL rank for its own topic).
+    var categoryAbout = (Model.SelectedCategorySlug ?? string.Empty) switch
+    {
+        "khuyen-mai-uu-dai" => (Heading: "Khuyến mãi nhà hàng Hàn Quốc đang áp dụng",
+            Text: "Tổng hợp ưu đãi mới nhất tại Truyền Thuyết Champong, Gogi Maru, KBB Cook và Seoul Gukbap: combo nhóm, giờ vàng, voucher ứng dụng, ưu đãi ngân hàng và quà tặng theo hóa đơn. Mỗi bài ghi rõ thời gian áp dụng và chi nhánh tham gia."),
+        "menu-mon-moi" => (Heading: "Món mới và thực đơn Hàn Quốc",
+            Text: "Cập nhật món mới ra mắt: mì cay hải sản champong, mì tương đen jajangmyeon, gà chiên sốt cay, thịt nướng Hàn Quốc ủ lên men và các món theo mùa trong hệ thống KIG Holding."),
+        "su-kien-hoat-dong" => (Heading: "Sự kiện tại các chi nhánh",
+            Text: "Hoạt động, sự kiện và những buổi gặp gỡ thực khách tại các nhà hàng Truyền Thuyết Champong, Gogi Maru, KBB Cook và Seoul Gukbap trên khắp TP.HCM và các tỉnh."),
+        "he-thong-chi-nhanh" => (Heading: "Chi nhánh mới và lịch khai trương",
+            Text: "Thông tin khai trương, địa chỉ chi nhánh mới và thay đổi giờ mở cửa của hệ thống nhà hàng Hàn Quốc KIG Holding tại TP.HCM, Bình Dương, Đồng Nai, Đà Lạt và Nha Trang."),
+        "nhuong-quyen-hop-tac" => (Heading: "Nhượng quyền và hợp tác",
+            Text: "Tin tức về chương trình nhượng quyền nhà hàng Hàn Quốc, hợp tác mặt bằng và phát triển chi nhánh cùng KIG Holding VN."),
+        "tin-tuc-thong-bao" => (Heading: "Thông báo từ KIG Holding",
+            Text: "Thông báo chính thức, thay đổi giờ phục vụ, chính sách thành viên và tin tức mới từ hệ thống nhà hàng Hàn Quốc KIG Holding."),
+        _ => (Heading: "Tin tức nhà hàng Hàn Quốc của KIG Holding",
+            Text: "Đây là nơi KIG Holding cập nhật mọi tin tức từ hệ thống nhà hàng Hàn Quốc tại Việt Nam: chương trình khuyến mãi, combo và voucher, món mới, sự kiện tại chi nhánh và lịch khai trương. Mỗi bài viết đều ghi rõ thời gian áp dụng và chi nhánh tham gia.")
+    };
+
     const string newsSiteUrl = "https://www.kigholding.vn";
     var currentNewsUrl = newsSiteUrl + BuildNewsUrl(Model.SelectedCategorySlug, Model.Page);
+    var breadcrumbItems = new List<object>
+    {
+        new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Trang chủ", ["item"] = newsSiteUrl + "/" },
+        new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 2, ["name"] = "Tin tức", ["item"] = newsSiteUrl + "/tin-tuc" }
+    };
+    if (!allCategoriesActive)
+    {
+        breadcrumbItems.Add(new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 3, ["name"] = Model.SelectedCategoryName, ["item"] = newsSiteUrl + BuildNewsUrl(Model.SelectedCategorySlug) });
+    }
+
     var newsJsonLd = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
     {
         ["@context"] = "https://schema.org",
@@ -77,302 +97,290 @@
             new Dictionary<string, object?>
             {
                 ["@type"] = "BreadcrumbList",
-                ["itemListElement"] = new object[]
-                {
-                    new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Trang chủ", ["item"] = newsSiteUrl + "/" },
-                    new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 2, ["name"] = "Tin tức", ["item"] = newsSiteUrl + "/tin-tuc" }
-                }
+                ["itemListElement"] = breadcrumbItems.ToArray()
             }
         }
     });
 }
 
+@section Head {
+    @if (Model.HasPreviousPage)
+    {
+        <link rel="prev" href="@(newsSiteUrl + BuildNewsUrl(Model.SelectedCategorySlug, Model.Page - 1))" />
+    }
+    @if (Model.HasNextPage)
+    {
+        <link rel="next" href="@(newsSiteUrl + BuildNewsUrl(Model.SelectedCategorySlug, Model.Page + 1))" />
+    }
+}
+
 <script type="application/ld+json">@Html.Raw(newsJsonLd)</script>
 
-<div class="news-index news-index--dark news-index--editorial relative isolate overflow-hidden pb-20 text-white" data-news-page="index">
-    <section class="section-shell relative z-10">
-        <div class="container-page relative z-10">
-            <div class="mx-auto max-w-4xl px-6 py-10 text-center sm:px-8 lg:px-12" data-uw-reveal="fade-up">
-                <p class="text-kicker font-black uppercase tracking-[0.34em] text-brand-red">TIN TỨC &amp; CẬP NHẬT</p>
-                <h1 class="public-page-title mt-5 text-white">
-                    @(string.IsNullOrWhiteSpace(Model.SelectedCategoryName) ? "Tin tức & ưu đãi nhà hàng Hàn Quốc" : Model.SelectedCategoryName)
-                </h1>
-                <p class="mx-auto mt-5 max-w-3xl text-lead text-white/65">
-                    Cập nhật khuyến mãi, món mới và sự kiện từ hệ thống <a href="/thuc-don/nhom/truyen-thuyet-champong" class="news-index__intro-link">Truyền Thuyết Champong</a> (mì cay champong, mì tương đen),
-                    <a href="/thuc-don/nhom/gogi-maru" class="news-index__intro-link">Gogi Maru</a> (thịt nướng Hàn Quốc),
-                    <a href="/thuc-don/nhom/kbb-cook" class="news-index__intro-link">KBB Cook</a> (buffet nướng không giới hạn) và
-                    <a href="/thuc-don/nhom/seoul-gukbap" class="news-index__intro-link">Seoul Gukbap</a> (cơm canh Hàn Quốc), cùng tin khai trương chi nhánh mới.
-                </p>
-            </div>
-
-            <div class="news-index__filter-shell mt-10 flex flex-wrap gap-3 rounded-[1.6rem] border border-white/10 p-3 backdrop-blur" data-uw-reveal="fade-up" data-uw-delay="100">
-                <a href="/tin-tuc"
-                   class="inline-flex items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition duration-200 @(allCategoriesActive ? "border-brand-red bg-brand-red text-white shadow-[0_14px_34px_rgba(229,9,20,0.24)]" : "border-white/10 bg-white/[0.04] text-white/75 hover:border-brand-red/60 hover:text-white")"
-                   aria-current="@(allCategoriesActive ? "page" : null)">
-                    Tất cả
-                </a>
-                @foreach (var category in Model.Categories)
+<div class="news-hub" data-news-page="index">
+    <section class="news-hub__hero">
+        <div class="news-hub__container">
+            <nav class="news-hub__crumbs" aria-label="Breadcrumb">
+                <a href="/">Trang chủ</a>
+                <span aria-hidden="true">/</span>
+                @if (allCategoriesActive)
                 {
-                    <a href="@BuildNewsUrl(category.Slug)"
-                       class="inline-flex items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition duration-200 @(category.IsActive ? "border-brand-red bg-brand-red text-white shadow-[0_14px_34px_rgba(229,9,20,0.24)]" : "border-white/10 bg-white/[0.04] text-white/75 hover:border-brand-red/60 hover:text-white")"
-                       aria-current="@(category.IsActive ? "page" : null)">
-                        @category.Name
-                    </a>
+                    <span aria-current="page">Tin tức</span>
                 }
-            </div>
+                else
+                {
+                    <a href="/tin-tuc">Tin tức</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">@Model.SelectedCategoryName</span>
+                }
+            </nav>
 
-            @if (posts.Count > 0 && leadPost is not null)
-            {
-                <div class="news-index__summary-row mt-10" data-uw-reveal="fade-up" data-uw-delay="150">
-                    <div class="news-index__summary-copy">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Tổng quan chuyên mục</p>
-                        <h2 class="mt-2 text-[clamp(2rem,3vw,2.8rem)] font-black leading-tight text-white">
-                            @(string.IsNullOrWhiteSpace(Model.SelectedCategoryName) ? "Tất cả tin tức" : Model.SelectedCategoryName)
-                        </h2>
-                        <p class="mt-3 max-w-2xl text-sm leading-7 text-white/58">
-                            Theo dõi các cập nhật mới nhất theo chủ đề, từ ưu đãi, sự kiện đến hệ thống chi nhánh và món mới.
-                        </p>
-                        <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
-                            <span class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-white/72">
-                                @Model.TotalItems bài viết
-                            </span>
-                            <span class="rounded-full border border-brand-red/20 bg-brand-red/10 px-4 py-2 text-brand-red">
-                                @editorialCount nổi bật
-                            </span>
-                            @if (Model.TotalPages > 1)
-                            {
-                                <span class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-white/72">
-                                    Trang @Model.Page / @Model.TotalPages
-                                </span>
-                            }
-                        </div>
+            <div class="news-hub__hero-grid">
+                <div>
+                    <p class="news-hub__kicker">KIG Holding Newsroom</p>
+                    <h1 class="news-hub__title">
+                        @if (allCategoriesActive)
+                        {
+                            @:Tin tức &amp; ưu đãi <em>nhà hàng Hàn Quốc</em>
+                        }
+                        else
+                        {
+                            @Model.SelectedCategoryName
+                        }
+                    </h1>
+                    <p class="news-hub__lead">
+                        Khuyến mãi, món mới và sự kiện từ
+                        <a href="/thuc-don/nhom/truyen-thuyet-champong">Truyền Thuyết Champong</a>,
+                        <a href="/thuc-don/nhom/gogi-maru">Gogi Maru</a>,
+                        <a href="/thuc-don/nhom/kbb-cook">KBB Cook</a> và
+                        <a href="/thuc-don/nhom/seoul-gukbap">Seoul Gukbap</a>
+                        — cập nhật mỗi tuần, cùng tin khai trương chi nhánh mới.
+                    </p>
+                    <div class="news-hub__stats">
+                        <div class="news-hub__stat"><strong>@Model.TotalItems</strong><span>Bài viết</span></div>
+                        <div class="news-hub__stat"><strong>@Model.Categories.Count</strong><span>Chuyên mục</span></div>
+                        <div class="news-hub__stat"><strong>@brands.Length</strong><span>Thương hiệu</span></div>
                     </div>
-
-                    @await Component.InvokeAsync("SuggestedPostCategories", new { mode = "News", limit = 6, poolSize = 10, rotateWithinRecentPool = false })
                 </div>
 
-                <section class="mt-10" aria-labelledby="news-featured-heading">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-uw-reveal="fade-up" data-uw-delay="180">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand-red">Nổi bật</p>
-                            <h2 id="news-featured-heading" class="mt-2 text-2xl font-black text-white sm:text-[2rem]">
-                                Dòng tin nổi bật hôm nay
-                            </h2>
-                        </div>
-                        <p class="max-w-2xl text-sm leading-7 text-white/60 sm:text-right">
-                            Những bài viết quan trọng nhất được đặt ở đầu trang để tạo nhịp đọc rõ ràng hơn trước khi đi vào danh sách đầy đủ.
-                        </p>
-                    </div>
+                <div class="news-hub__brands">
+                    @foreach (var brand in brands)
+                    {
+                        <a class="news-hub__brand" href="@brand.Url">
+                            <img src="@brand.Logo" asp-append-version="true" alt="Logo @brand.Name" width="42" height="42" loading="lazy" decoding="async" />
+                            <div>
+                                <strong>@brand.Name</strong>
+                                <span>@brand.Cuisine</span>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
 
-                    <div class="news-editorial @editorialModifier mt-8">
-                        <article class="news-card news-card--lead group" data-uw-reveal="fade-up" data-uw-delay="220">
-                            <a href="@leadPost.Url" class="news-card__link" aria-label="@leadPost.Title">
-                                <div class="news-card__media news-card__media--lead news-card__media--fit">
-                                    <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(leadPost.ImageUrl)" alt="" aria-hidden="true" class="news-card__backdrop" loading="eager" decoding="async" />
+    <div class="news-hub__tabs-bar">
+        <div class="news-hub__container">
+            <nav class="news-hub__tabs" aria-label="Chuyên mục tin tức">
+                <a class="news-hub__tab" href="/tin-tuc" aria-current="@(allCategoriesActive ? "page" : null)">Tất cả</a>
+                @foreach (var category in Model.Categories)
+                {
+                    <a class="news-hub__tab" href="@BuildNewsUrl(category.Slug)" aria-current="@(category.IsActive ? "page" : null)">@category.Name</a>
+                }
+            </nav>
+        </div>
+    </div>
+
+    <div class="news-hub__container">
+        @if (leadPost is not null)
+        {
+            <section class="news-hub__section" aria-labelledby="news-hub-featured">
+                <div class="news-hub__section-head">
+                    <div>
+                        <p class="news-hub__eyebrow">Tiêu điểm</p>
+                        <h2 id="news-hub-featured" class="news-hub__h2">Câu chuyện nổi bật</h2>
+                    </div>
+                </div>
+
+                <div class="news-hub__featured">
+                    <article>
+                        <a class="news-hub__lead-card" href="@leadPost.Url">
+                            <div style="position: relative;">
+                                <div class="news-hub__media" data-news-media>
+                                    <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(leadPost.ImageUrl)" alt="" aria-hidden="true" class="news-hub__backdrop" decoding="async" />
                                     <img src="@MediaUrlHelper.GetNewsFeatureImageUrl(leadPost.ImageUrl)"
                                          alt="@leadPost.Title"
-                                         class="news-card__image"
-                                         loading="eager"
+                                         class="news-hub__img"
                                          fetchpriority="high"
                                          decoding="async"
-                                         onerror="this.parentElement?.querySelectorAll('img').forEach(function (img) { img.remove(); });" />
-                                    <div class="news-card__media-meta news-card__media-meta--lead">
-                                        <span class="news-card__category news-card__category--solid">
-                                            @leadPost.Category
-                                        </span>
-                                        @if (leadPost.PublishedAt.HasValue)
-                                        {
-                                            <time datetime="@leadPost.PublishedAt.Value.ToString("yyyy-MM-dd")"
-                                                  class="news-card__date-pill">
-                                                @leadPost.PublishedAt.Value.ToString("dd/MM/yyyy")
-                                            </time>
-                                        }
-                                    </div>
+                                         onerror="var m=this.closest('[data-news-media]');m.classList.add('is-image-missing');m.querySelectorAll('img').forEach(function(i){i.remove();});" />
                                 </div>
-
-                                <div class="news-card__content news-card__content--lead">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">Bài dẫn đầu</p>
-                                    <h3 class="news-card__title news-card__title--lead">
-                                        @leadPost.Title
-                                    </h3>
-                                    @if (!string.IsNullOrWhiteSpace(leadPost.Excerpt))
-                                    {
-                                        <p class="news-card__excerpt news-card__excerpt--lead line-clamp-4">
-                                            @leadPost.Excerpt
-                                        </p>
-                                    }
-                                    <span class="news-card__cta news-card__readmore">
-                                        Đọc tiếp
-                                        <span aria-hidden="true">&rarr;</span>
-                                    </span>
-                                </div>
-                            </a>
-                        </article>
-
-                        @if (secondaryPosts.Count > 0)
-                        {
-                            <div class="news-editorial__secondary @secondaryModifier">
-                                @for (var index = 0; index < secondaryPosts.Count; index++)
+                                @if (!string.IsNullOrWhiteSpace(leadPost.Category))
                                 {
-                                    var post = secondaryPosts[index];
-                                    var delay = 260 + (index * 60);
-
-                                    <article class="news-card news-card--secondary group" data-uw-reveal="fade-up" data-uw-delay="@delay">
-                                        <a href="@post.Url" class="news-card__link" aria-label="@post.Title">
-                                            <div class="news-card__media news-card__media--secondary news-card__media--fit">
-                                                <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)" alt="" aria-hidden="true" class="news-card__backdrop" loading="lazy" decoding="async" />
-                                                <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
-                                                     alt="@post.Title"
-                                                     class="news-card__image"
-                                                     loading="lazy"
-                                                     decoding="async"
-                                                     onerror="this.parentElement?.querySelectorAll('img').forEach(function (img) { img.remove(); });" />
-                                                <span class="news-card__category news-card__category--floating">
-                                                    @post.Category
-                                                </span>
-                                            </div>
-
-                                            <div class="news-card__content news-card__content--secondary">
-                                                @if (post.PublishedAt.HasValue)
-                                                {
-                                                    <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="news-card__date">
-                                                        @post.PublishedAt.Value.ToString("dd/MM/yyyy")
-                                                    </time>
-                                                }
-                                                <h3 class="news-card__title news-card__title--secondary line-clamp-3">
-                                                    @post.Title
-                                                </h3>
-                                                @if (!string.IsNullOrWhiteSpace(post.Excerpt))
-                                                {
-                                                    <p class="news-card__excerpt news-card__excerpt--secondary line-clamp-2">
-                                                        @post.Excerpt
-                                                    </p>
-                                                }
-                                                <span class="news-card__cta news-card__readmore">
-                                                    Đọc tiếp
-                                                    <span aria-hidden="true">&rarr;</span>
-                                                </span>
-                                            </div>
-                                        </a>
-                                    </article>
+                                    <span class="news-hub__chip news-hub__chip--solid">@leadPost.Category</span>
                                 }
                             </div>
+                            <div class="news-hub__lead-body">
+                                @if (leadPost.PublishedAt.HasValue)
+                                {
+                                    <time class="news-hub__date" datetime="@leadPost.PublishedAt.Value.ToString("yyyy-MM-dd")">@leadPost.PublishedAt.Value.ToString("dd/MM/yyyy")</time>
+                                }
+                                <h3 class="news-hub__lead-title">@leadPost.Title</h3>
+                                @if (!string.IsNullOrWhiteSpace(leadPost.Excerpt))
+                                {
+                                    <p class="news-hub__excerpt">@leadPost.Excerpt</p>
+                                }
+                                <span class="news-hub__more">Đọc bài viết <span aria-hidden="true">&rarr;</span></span>
+                            </div>
+                        </a>
+                    </article>
+
+                    @if (latestPosts.Count > 0)
+                    {
+                        <aside class="news-hub__latest" aria-labelledby="news-hub-latest">
+                            <h3 id="news-hub-latest" class="news-hub__latest-title">Mới cập nhật <small>Tin mới</small></h3>
+                            <ol>
+                                @foreach (var post in latestPosts)
+                                {
+                                    <li>
+                                        <a class="news-hub__row" href="@post.Url">
+                                            <div class="news-hub__media" data-news-media>
+                                                <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)" alt="" aria-hidden="true" class="news-hub__backdrop" loading="lazy" decoding="async" />
+                                                <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
+                                                     alt="@post.Title"
+                                                     class="news-hub__img"
+                                                     loading="lazy"
+                                                     decoding="async"
+                                                     onerror="var m=this.closest('[data-news-media]');m.classList.add('is-image-missing');m.querySelectorAll('img').forEach(function(i){i.remove();});" />
+                                            </div>
+                                            <div>
+                                                @if (!string.IsNullOrWhiteSpace(post.Category))
+                                                {
+                                                    <div class="news-hub__row-meta"><span class="news-hub__chip">@post.Category</span></div>
+                                                }
+                                                <h4 class="news-hub__row-title">@post.Title</h4>
+                                                @if (post.PublishedAt.HasValue)
+                                                {
+                                                    <time class="news-hub__date" datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")">@post.PublishedAt.Value.ToString("dd/MM/yyyy")</time>
+                                                }
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                            </ol>
+                        </aside>
+                    }
+                </div>
+            </section>
+
+            <aside class="news-hub__cta" aria-label="Đặt bàn">
+                <div>
+                    <h2 class="news-hub__cta-title">Thèm món Hàn? Giữ bàn trước, tới là có chỗ.</h2>
+                    <p class="news-hub__cta-text">Đặt bàn online tại các chi nhánh Truyền Thuyết Champong, Gogi Maru, KBB Cook và Seoul Gukbap — nhà hàng xác nhận nhanh qua điện thoại.</p>
+                </div>
+                <div class="news-hub__cta-actions">
+                    <a class="news-hub__btn news-hub__btn--primary" href="/dat-ban">Đặt bàn ngay</a>
+                    <a class="news-hub__btn news-hub__btn--ghost" href="/chi-nhanh">Tìm chi nhánh</a>
+                </div>
+            </aside>
+
+            @if (gridPosts.Count > 0)
+            {
+                <section class="news-hub__section" aria-labelledby="news-hub-all">
+                    <div class="news-hub__section-head">
+                        <div>
+                            <p class="news-hub__eyebrow">Bài viết</p>
+                            <h2 id="news-hub-all" class="news-hub__h2">@(allCategoriesActive ? "Tất cả tin tức" : "Thêm bài viết " + Model.SelectedCategoryName)</h2>
+                        </div>
+                        <p class="news-hub__count">Trang @Model.Page / @Math.Max(1, Model.TotalPages) · @Model.TotalItems bài viết</p>
+                    </div>
+
+                    <div class="news-hub__grid">
+                        @foreach (var post in gridPosts)
+                        {
+                            <article>
+                                <a class="news-hub__card" href="@post.Url">
+                                    <div class="news-hub__media" data-news-media>
+                                        <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)" alt="" aria-hidden="true" class="news-hub__backdrop" loading="lazy" decoding="async" />
+                                        <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
+                                             alt="@post.Title"
+                                             class="news-hub__img"
+                                             loading="lazy"
+                                             decoding="async"
+                                             onerror="var m=this.closest('[data-news-media]');m.classList.add('is-image-missing');m.querySelectorAll('img').forEach(function(i){i.remove();});" />
+                                    </div>
+                                    <div class="news-hub__card-body">
+                                        <div class="news-hub__card-meta">
+                                            @if (!string.IsNullOrWhiteSpace(post.Category))
+                                            {
+                                                <span class="news-hub__chip">@post.Category</span>
+                                            }
+                                            @if (post.PublishedAt.HasValue)
+                                            {
+                                                <time class="news-hub__date" datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")">@post.PublishedAt.Value.ToString("dd/MM/yyyy")</time>
+                                            }
+                                        </div>
+                                        <h3 class="news-hub__card-title">@post.Title</h3>
+                                        @if (!string.IsNullOrWhiteSpace(post.Excerpt))
+                                        {
+                                            <p class="news-hub__excerpt">@post.Excerpt</p>
+                                        }
+                                        <span class="news-hub__more">Đọc tiếp <span aria-hidden="true">&rarr;</span></span>
+                                    </div>
+                                </a>
+                            </article>
                         }
                     </div>
                 </section>
-
-                @if (remainingCount > 0)
-                {
-                    <section class="mt-16" aria-labelledby="news-latest-heading">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-uw-reveal="fade-up" data-uw-delay="420">
-                            <div>
-                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">Bài viết mới nhất</p>
-                                <h2 id="news-latest-heading" class="mt-2 text-2xl font-black text-white sm:text-[2rem]">
-                                    Các bài viết khác
-                                </h2>
-                            </div>
-                            <span class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/70">
-                                @remainingCount bài viết
-                            </span>
-                        </div>
-
-                        <div class="news-standard-grid mt-6">
-                            @for (var index = 0; index < standardPosts.Count; index++)
-                            {
-                                var post = standardPosts[index];
-                                var delay = 460 + ((index % 6) * 60);
-
-                                <article class="news-card news-card--standard group" data-uw-reveal="fade-up" data-uw-delay="@delay">
-                                    <a href="@post.Url" class="news-card__link" aria-label="@post.Title">
-                                        <div class="news-card__media news-card__media--standard news-card__media--fit">
-                                            <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)" alt="" aria-hidden="true" class="news-card__backdrop" loading="lazy" decoding="async" />
-                                            <img src="@MediaUrlHelper.GetNewsCardImageUrl(post.ImageUrl)"
-                                                 alt="@post.Title"
-                                                 class="news-card__image"
-                                                 loading="lazy"
-                                                 decoding="async"
-                                                 onerror="this.parentElement?.querySelectorAll('img').forEach(function (img) { img.remove(); });" />
-                                            <span class="news-card__category news-card__category--floating">
-                                                @post.Category
-                                            </span>
-                                        </div>
-
-                                        <div class="news-card__content news-card__content--standard">
-                                            @if (post.PublishedAt.HasValue)
-                                            {
-                                                <time datetime="@post.PublishedAt.Value.ToString("yyyy-MM-dd")" class="news-card__date">
-                                                    @post.PublishedAt.Value.ToString("dd/MM/yyyy")
-                                                </time>
-                                            }
-                                            <h3 class="news-card__title news-card__title--standard line-clamp-3">
-                                                @post.Title
-                                            </h3>
-                                            @if (!string.IsNullOrWhiteSpace(post.Excerpt))
-                                            {
-                                                <p class="news-card__excerpt news-card__excerpt--standard line-clamp-3">
-                                                    @post.Excerpt
-                                                </p>
-                                            }
-                                            <span class="news-card__cta news-card__readmore">
-                                                Đọc tiếp
-                                                <span aria-hidden="true">&rarr;</span>
-                                            </span>
-                                        </div>
-                                    </a>
-                                </article>
-                            }
-                        </div>
-                    </section>
-                }
-
-                @if (Model.TotalPages > 1)
-                {
-                    <nav class="mt-12 flex flex-wrap items-center justify-center gap-2 sm:gap-3" aria-label="Phân trang tin tức" data-uw-reveal="fade-up" data-uw-delay="520">
-                        <a href="@BuildNewsUrl(Model.SelectedCategorySlug, Model.Page - 1)"
-                           class="inline-flex min-w-[3.4rem] items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition duration-200 @(Model.HasPreviousPage ? "border-white/10 bg-white/[0.04] text-white/70 hover:border-brand-red/50 hover:text-white" : "pointer-events-none border-white/10 bg-white/[0.04] text-white/35 opacity-40")"
-                           aria-disabled="@(!Model.HasPreviousPage)">
-                            Trước
-                        </a>
-
-                        @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
-                        {
-                            <a href="@BuildNewsUrl(Model.SelectedCategorySlug, pageNumber)"
-                               class="inline-flex size-11 items-center justify-center rounded-full border text-sm font-semibold transition duration-200 @(pageNumber == Model.Page ? "border-brand-red bg-brand-red text-white shadow-[0_14px_34px_rgba(229,9,20,0.24)]" : "border-white/10 bg-white/[0.04] text-white/70 hover:border-brand-red/50 hover:text-white")"
-                               aria-current="@(pageNumber == Model.Page ? "page" : null)">
-                                @pageNumber
-                            </a>
-                        }
-
-                        <a href="@BuildNewsUrl(Model.SelectedCategorySlug, Model.Page + 1)"
-                           class="inline-flex min-w-[3.4rem] items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition duration-200 @(Model.HasNextPage ? "border-white/10 bg-white/[0.04] text-white/70 hover:border-brand-red/50 hover:text-white" : "pointer-events-none border-white/10 bg-white/[0.04] text-white/35 opacity-40")"
-                           aria-disabled="@(!Model.HasNextPage)">
-                            Sau
-                        </a>
-                    </nav>
-                }
             }
-            else
+
+            @if (Model.TotalPages > 1)
             {
-                <div class="mx-auto mt-12 max-w-3xl rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-8 text-center shadow-panel backdrop-blur sm:p-10" data-uw-reveal="fade-up" data-uw-delay="160">
-                    <p class="text-kicker font-black uppercase tracking-[0.22em] text-brand-red">Chưa có nội dung</p>
-                    <h2 class="mt-4 text-3xl font-black text-white">Chưa có bài viết phù hợp với bộ lọc hiện tại.</h2>
-                    <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/65">
-                        Hãy quay lại tất cả tin tức để tiếp tục xem các cập nhật mới nhất từ Truyền Thuyết Champong.
-                    </p>
-                    <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                        <a href="/tin-tuc" class="inline-flex items-center justify-center rounded-full bg-brand-red px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-[0_16px_34px_rgba(229,9,20,0.24)] transition duration-200 hover:bg-brand-redDark">
-                            Xem tất cả tin tức
-                        </a>
-                        <a href="/lien-he" class="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white/80 transition duration-200 hover:border-brand-red/60 hover:text-white">
-                            Liên hệ
-                        </a>
-                    </div>
-                </div>
+                <nav class="news-hub__pager" aria-label="Phân trang tin tức">
+                    <a class="news-hub__page"
+                       href="@(Model.HasPreviousPage ? BuildNewsUrl(Model.SelectedCategorySlug, Model.Page - 1) : null)"
+                       aria-disabled="@(Model.HasPreviousPage ? null : "true")">Trước</a>
+                    @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+                    {
+                        <a class="news-hub__page"
+                           href="@BuildNewsUrl(Model.SelectedCategorySlug, pageNumber)"
+                           aria-current="@(pageNumber == Model.Page ? "page" : null)">@pageNumber</a>
+                    }
+                    <a class="news-hub__page"
+                       href="@(Model.HasNextPage ? BuildNewsUrl(Model.SelectedCategorySlug, Model.Page + 1) : null)"
+                       aria-disabled="@(Model.HasNextPage ? null : "true")">Sau</a>
+                </nav>
             }
-        </div>
-    </section>
+        }
+        else
+        {
+            <div class="news-hub__empty">
+                <p class="news-hub__eyebrow">Chưa có nội dung</p>
+                <h2 class="news-hub__h2">Chưa có bài viết trong chuyên mục này.</h2>
+                <p class="news-hub__lead" style="margin-inline: auto;">Xem tất cả tin tức để cập nhật ưu đãi và món mới từ hệ thống nhà hàng Hàn Quốc KIG Holding.</p>
+                <div class="news-hub__cta-actions" style="justify-content: center; margin-top: 1.5rem;">
+                    <a class="news-hub__btn news-hub__btn--primary" href="/tin-tuc">Xem tất cả tin tức</a>
+                </div>
+            </div>
+        }
+
+        <section class="news-hub__about" aria-labelledby="news-hub-about">
+            <h2 id="news-hub-about">@categoryAbout.Heading</h2>
+            <div>
+                <p>@categoryAbout.Text</p>
+                <p>
+                    Bạn đang tìm <a href="/thuc-don/nhom/truyen-thuyet-champong">mì cay champong</a>,
+                    <a href="/thuc-don/nhom/gogi-maru">thịt nướng Hàn Quốc</a> hay
+                    <a href="/thuc-don/nhom/kbb-cook">buffet nướng không giới hạn</a>?
+                    Xem thực đơn từng thương hiệu, <a href="/chi-nhanh">tìm chi nhánh gần bạn</a> hoặc
+                    <a href="/dat-ban">đặt bàn online</a> để giữ chỗ trước.
+                </p>
+            </div>
+        </section>
+    </div>
 </div>
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/news-cards.css" asp-append-version="true" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet"></noscript>
+    <link rel="stylesheet" href="~/css/news-hub.css" asp-append-version="true" />
 }
