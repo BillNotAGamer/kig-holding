@@ -187,7 +187,7 @@ public sealed class HomePageTests
         Assert.Contains("NGUYÊN LIỆU ĐA DẠNG", section, StringComparison.Ordinal);
         Assert.Contains("NƯỚC CANH ĐẬM ĐÀ", section, StringComparison.Ordinal);
         Assert.Contains("HƯƠNG VỊ HÀN QUỐC", section, StringComparison.Ordinal);
-        Assert.Contains("~/images/home/images/SEOUL GUKBAP.png", section, StringComparison.Ordinal);
+        Assert.Contains("~/images/home/images/seoul-gukbap.jpg", section, StringComparison.Ordinal);
         Assert.Contains("~/images/home/icons/seoul_gukbap_icon_bowl.png", section, StringComparison.Ordinal);
         Assert.Contains("~/images/home/icons/seoul_gukbap_icon_leaf.png", section, StringComparison.Ordinal);
         Assert.Contains("~/images/home/icons/seoul_gukbap_icon_steam.png", section, StringComparison.Ordinal);
@@ -302,7 +302,7 @@ public sealed class HomePageTests
         Assert.Contains("GOGI MARU", cardDefinitions, StringComparison.Ordinal);
         Assert.Contains("KBB COOK", cardDefinitions, StringComparison.Ordinal);
         Assert.Contains("Seoul Gukbap - 서울 국밥", cardDefinitions, StringComparison.Ordinal);
-        Assert.Contains("/images/home/images/SEOUL GUKBAP.png", cardDefinitions, StringComparison.Ordinal);
+        Assert.Contains("/images/home/images/seoul-gukbap.jpg", cardDefinitions, StringComparison.Ordinal);
 
         var champongIndex = cardDefinitions.IndexOf("Truyền Thuyết Champong", StringComparison.Ordinal);
         var gogiMaruIndex = cardDefinitions.IndexOf("GOGI MARU", StringComparison.Ordinal);

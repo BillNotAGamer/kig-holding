@@ -83,7 +83,7 @@
             Title: "Seoul Gukbap - 서울 국밥",
             Description: "Khám phá cơm canh truyền thống Hàn Quốc nóng hổi, đậm đà, dễ ăn và phù hợp cho mọi bữa trong ngày.",
             Href: "/thuc-don",
-            ImageUrl: "/images/home/images/SEOUL GUKBAP.png",
+            ImageUrl: "/images/home/images/seoul-gukbap.jpg",
             Alt: "Seoul Gukbap - cơm canh truyền thống Hàn Quốc",
             Delay: 360,
             PreserveArtwork: true
@@ -251,7 +251,7 @@
                         var item = storyItems[i];
 
                         <article class="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3" data-uw-reveal="fade-up" data-uw-delay="@(160 + (i * 60))">
-                            <img src="@item.Item1" asp-append-version="true" alt="@item.Item2" class="mt-0.5 h-11 w-11 shrink-0 object-contain" />
+                            <img src="@item.Item1" asp-append-version="true" loading="lazy" decoding="async" alt="@item.Item2" class="mt-0.5 h-11 w-11 shrink-0 object-contain" />
                             <div>
                                 <p class="text-sm font-black uppercase tracking-[0.08em] text-brand-red sm:text-base">@item.Item2</p>
                                 <p class="mt-1 text-sm leading-7 text-white/70">@item.Item3</p>
@@ -268,7 +268,7 @@
                 <div class="absolute bottom-[12%] right-[10%] size-24 rounded-full border border-brand-goldSoft/12 bg-brand-goldSoft/10" aria-hidden="true"></div>
 
                 <div class="relative mx-auto w-full max-w-[38rem]">
-                    <img src="~/images/home/images/korean-food-no-bg.png" asp-append-version="true" alt="Món ăn Hàn Quốc đặc trưng của Truyền Thuyết Champong" class="relative z-10 w-full object-contain drop-shadow-[0_28px_60px_rgba(0,0,0,0.45)]" />
+                    <img src="~/images/home/images/korean-food-no-bg.png" asp-append-version="true" loading="lazy" decoding="async" alt="Món ăn Hàn Quốc đặc trưng của Truyền Thuyết Champong" class="relative z-10 w-full object-contain drop-shadow-[0_28px_60px_rgba(0,0,0,0.45)]" />
                 </div>
             </div>
         </div>
@@ -279,10 +279,10 @@
     <div class="home-culinary-essence__pattern" aria-hidden="true"></div>
     <div class="container-page relative z-10">
         <div class="relative mx-auto max-w-5xl text-center">
-            <img src="~/images/home/images/soyu-bottle-img.png" asp-append-version="true" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--soyu hidden w-20 sm:block lg:w-28" />
-            <img src="~/images/home/images/kimchi-img.png" asp-append-version="true" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--kimchi hidden w-24 sm:block lg:w-32" />
-            <img src="~/images/home/images/spicy-noodle-img.png" asp-append-version="true" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--noodle hidden w-28 sm:block lg:w-40z" />
-            <img src="~/images/home/images/chilli-img.png" asp-append-version="true" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--chilli hidden w-16 sm:block lg:w-24" />
+            <img src="~/images/home/images/soyu-bottle-img.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--soyu hidden w-20 sm:block lg:w-28" />
+            <img src="~/images/home/images/kimchi-img.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--kimchi hidden w-24 sm:block lg:w-32" />
+            <img src="~/images/home/images/spicy-noodle-img.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--noodle hidden w-28 sm:block lg:w-40z" />
+            <img src="~/images/home/images/chilli-img.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="home-culinary-essence__float home-culinary-essence__float--chilli hidden w-16 sm:block lg:w-24" />
 
             <div class="mx-auto max-w-[46rem]" data-uw-reveal="fade-up">
                 <p class="text-xs font-black uppercase tracking-[0.34em] text-white/60">Korean dining spirit</p>
@@ -302,7 +302,7 @@
         <div class="mt-14 space-y-14 lg:mt-20 lg:space-y-20">
             <article class="home-culinary-essence__block grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:gap-14">
                 <div class="home-culinary-essence__image" data-uw-reveal="fade-up" data-uw-delay="100">
-                    <img src="~/images/home/images/truyen-thuyet-champong.webp" asp-append-version="true" alt="Mì cay hải sản champong - món signature của Truyền Thuyết Champong" class="h-full w-full object-cover" />
+                    <img src="~/images/home/images/truyen-thuyet-champong.webp" asp-append-version="true" loading="lazy" decoding="async" alt="Mì cay hải sản champong - món signature của Truyền Thuyết Champong" class="h-full w-full object-cover" />
                 </div>
 
                 <div>
@@ -316,22 +316,22 @@
 
                     <div class="mt-8 grid gap-5 sm:grid-cols-2">
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="260">
-                            <img src="~/images/home/icons/team-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/team-icon.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>Phù hợp đi theo nhóm</h4>
                             <p>Với mỗi phần ăn có thể phục vụ cho 2-3 người, Truyền thuyết Champong là nơi lý tưởng để họp mặt gia đình , bạn bè, đồng nghiệp.</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="340">
-                            <img src="~/images/home/icons/vegetable-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/vegetable-icon.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>Nguyên liệu đa dạng</h4>
                             <p>Nguồn nguyên liệu tươi mới mỗi ngày và đa dạng : bò, heo, mực, ghẹ biển, bạch tuộc, ốc móng tay, vẹm...</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="420">
-                            <img src="~/images/home/icons/noodle-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/noodle-icon.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>Sợi mì tươi tự làm</h4>
                             <p>Mì tươi do chính đầu bếp người hàn thực hiện từ những khâu nhỏ nhất, đảm bảo không chất bảo quản.</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="500">
-                            <img src="~/images/home/icons/korea-icon-symbol.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/korea-icon-symbol.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>Hương vị chuẩn Hàn</h4>
                             <p>Với các gia vị hầu hết nhập khẩu chính gốc từ Hàn, đem đến hương vị chuẩn chỉnh đúng nguyên bản, khó tìm được hương vị này ở nơi khác.</p>
                         </div>
@@ -351,17 +351,17 @@
 
                     <div class="mt-8 grid gap-5 sm:grid-cols-3 lg:grid-cols-3">
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="180">
-                            <img src="~/images/home/icons/korea-icon-symbol.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/korea-icon-symbol.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>Đúng chuẩn Hàn Quốc</h4>
                                 <p>Thưởng thức bữa thịt nướng trọn vẹn, đúng chuẩn bản xứ khi ăn cùng với nhiều loại panchan và các món như trứng hấp, mì lạnh,...</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="260">
-                            <img src="~/images/home/icons/meat-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/meat-icon.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>Thịt nướng chọn lọc</h4>
                                 <p>Thịt tươi không tẩm ướp gia vị sẽ được các đầu bếp ủ lên men theo công thức đặc biệt trong 15 ngày trước khi phục vụ thực khách</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="340">
-                            <img src="~/images/home/icons/space-icon.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/space-icon.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>Không gian cực chill</h4>
                             <p>Nhà hàng sân thượng cực chill để bạn thưởng thức đặc biệt nướng ngoài trời lý tưởng, tạo nên bữa tối hoàn hảo.</p>
                         </div>
@@ -369,7 +369,7 @@
                 </div>
 
                 <div class="home-culinary-essence__image lg:order-2" data-uw-reveal="fade-up" data-uw-delay="420">
-                    <img src="~/images/home/images/gogimaru-img.webp" asp-append-version="true" alt="Bàn tiệc thịt nướng Hàn Quốc tại Gogi Maru" class="h-full w-full object-cover" />
+                    <img src="~/images/home/images/gogimaru-img.webp" asp-append-version="true" loading="lazy" decoding="async" alt="Bàn tiệc thịt nướng Hàn Quốc tại Gogi Maru" class="h-full w-full object-cover" />
                 </div>
             </article>
 
@@ -487,22 +487,22 @@
 
                     <div class="mt-8 grid gap-5 sm:grid-cols-2">
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="180">
-                            <img src="~/images/home/icons/seoul_gukbap_icon_bowl.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/seoul_gukbap_icon_bowl.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>CƠM CANH CHUẨN HÀN</h4>
                             <p>Seoul Gukbap mang đến món cơm canh truyền thống Hàn Quốc, nóng hổi, dễ ăn và phù hợp cho mọi bữa trong ngày.</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="260">
-                            <img src="~/images/home/icons/seoul_gukbap_icon_leaf.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/seoul_gukbap_icon_leaf.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>NGUYÊN LIỆU ĐA DẠNG</h4>
                             <p>Thực đơn đa dạng với cơm canh giá đỗ, thịt bò, thịt heo và lòng bò, mang đến nhiều lựa chọn cho thực khách.</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="340">
-                            <img src="~/images/home/icons/seoul_gukbap_icon_steam.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/seoul_gukbap_icon_steam.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>NƯỚC CANH ĐẬM ĐÀ</h4>
                             <p>Nước canh được nấu đậm vị, nóng hổi và tròn vị, tạo nên hương vị đặc trưng khó quên của Seoul Gukbap.</p>
                         </div>
                         <div class="home-culinary-essence__feature" data-uw-reveal="fade-up" data-uw-delay="420">
-                            <img src="~/images/home/icons/seoul_gukbap_icon_korea.png" asp-append-version="true" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
+                            <img src="~/images/home/icons/seoul_gukbap_icon_korea.png" asp-append-version="true" loading="lazy" decoding="async" alt="" aria-hidden="true" class="h-11 w-11 object-contain" />
                             <h4>HƯƠNG VỊ HÀN QUỐC</h4>
                             <p>Cảm hứng từ bữa ăn truyền thống Hàn Quốc, kết hợp hương vị quen thuộc và sự chỉn chu trong từng tô cơm canh.</p>
                         </div>
@@ -510,12 +510,12 @@
                 </div>
 
                 <div class="home-culinary-essence__image lg:order-2" data-uw-reveal="fade-up" data-uw-delay="500">
-                    <img src="~/images/home/images/SEOUL GUKBAP.png"
+                    <img src="~/images/home/images/seoul-gukbap.jpg"
                          asp-append-version="true"
                          alt="Seoul Gukbap - cơm canh truyền thống Hàn Quốc"
                          class="h-full w-full object-contain"
-                         width="1254"
-                         height="1254"
+                         width="900"
+                         height="900"
                          loading="lazy"
                          decoding="async" />
                 </div>
@@ -556,6 +556,8 @@
                          data-uw-once="true">
                     <div class="home-menu-teaser__media" data-media-parent>
                         <img src="@card.ImageUrl"
+                             asp-append-version="true"
+                             decoding="async"
                              alt="@card.Alt"
                              class="home-menu-teaser__image@(card.PreserveArtwork ? " object-contain bg-black" : string.Empty)"
                              style="@(card.PreserveArtwork ? "transform: none;" : null)"
@@ -946,6 +948,7 @@
 }
 
 @section Styles {
+    <link rel="preload" as="image" href="/images/home/images/banner1.webp" type="image/webp" fetchpriority="high" />
     <link rel="stylesheet" href="~/css/kbb-cook-slider.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/home-faq.css" asp-append-version="true" />
 }
