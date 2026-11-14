@@ -41,6 +41,7 @@ public sealed class ImageWebpMigrationService : IImageWebpMigrationService
 {
     private const string OptimizedSuffix = "-opt";
     private const long LargeWebpThresholdBytes = 400 * 1024;
+    private static readonly TimeSpan MaxBatchDuration = TimeSpan.FromSeconds(60);
     private static readonly string[] RasterExtensions = [".png", ".jpg", ".jpeg"];
 
     private readonly AppDbContext _dbContext;
@@ -107,7 +108,9 @@ public sealed class ImageWebpMigrationService : IImageWebpMigrationService
 
         var urls = await CollectR2UrlsAsync(cancellationToken);
         var candidates = await GetCandidatesAsync(urls, cancellationToken);
-        var batch = candidates.Take(Math.Clamp(maxImages, 1, 50)).ToList();
+        var batchLimit = Math.Clamp(maxImages, 1, 50);
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var attempted = 0;
 
         var replacements = new Dictionary<string, string>(StringComparer.Ordinal);
         var converted = 0;
@@ -118,9 +121,18 @@ public sealed class ImageWebpMigrationService : IImageWebpMigrationService
         var httpClient = _httpClientFactory.CreateClient(nameof(ImageWebpMigrationService));
         httpClient.Timeout = TimeSpan.FromSeconds(90);
 
-        foreach (var url in batch)
+        // Walk the whole candidate list: images that fail (e.g. objects already deleted from R2)
+        // must not occupy the batch, otherwise they would block every later image forever.
+        foreach (var url in candidates)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (replacements.Count >= batchLimit || stopwatch.Elapsed > MaxBatchDuration)
+            {
+                break;
+            }
+
+            attempted++;
 
             try
             {
@@ -188,7 +200,7 @@ public sealed class ImageWebpMigrationService : IImageWebpMigrationService
             : 0;
 
         return new ImageMigrationResult(
-            batch.Count,
+            attempted,
             converted,
             keptFormat,
             failed,
