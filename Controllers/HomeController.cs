@@ -39,7 +39,7 @@ public class HomeController : Controller
                 "site settings");
 
             latestPosts = await TryLoadAsync(
-                () => _newsService.GetPublishedPostCardsAsync(3, cancellationToken),
+                () => _newsService.GetPublishedPostCardsAsync(10, cancellationToken),
                 "latest posts") ?? [];
         }
 
