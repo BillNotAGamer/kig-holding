@@ -251,6 +251,18 @@
         }
     }
 
+    function showImmediately(element, state, config, observer) {
+        cancelAnimation(state);
+        state.token += 1;
+        clearInlineStyles(element);
+        state.visible = true;
+        state.phase = 'visible';
+
+        if (config.once && observer) {
+            observer.unobserve(element);
+        }
+    }
+
     function animateOut(element, state, config) {
         cancelAnimation(state);
         state.token += 1;
@@ -311,6 +323,14 @@
                     return;
                 }
 
+                // Already well inside the screen (fast scroll, jump link, back navigation):
+                // show it at once instead of animating from a blank state.
+                const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                if (entry.boundingClientRect.top < viewportHeight * 0.7) {
+                    showImmediately(element, state, config, observer);
+                    return;
+                }
+
                 animateIn(element, state, config, observer);
                 return;
             }
@@ -337,7 +357,7 @@
                 const state = getState(element);
                 const config = state.config;
 
-                if (isInViewport(element)) {
+                if (isInViewport(element) && state.phase !== 'visible' && state.phase !== 'entering') {
                     animateIn(element, state, config, observer);
                 }
             });
