@@ -1,0 +1,109 @@
+/* Brand menu pages: readable intro + FAQ under the image flipbook. */
+.menu-seo {
+  display: grid;
+  gap: 2rem;
+  margin-top: 3rem;
+  padding: 2rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.menu-seo__title {
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  font-weight: 900;
+  line-height: 1.25;
+  color: #fff;
+}
+
+.menu-seo__title--small {
+  font-size: 1.25rem;
+}
+
+.menu-seo__text {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.menu-seo__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.menu-seo__tags li {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  border-radius: 9999px;
+  background: rgba(229, 9, 20, 0.08);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.menu-seo__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  margin-top: 1.25rem;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.menu-seo__links a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(229, 9, 20, 0.6);
+  text-underline-offset: 3px;
+}
+
+.menu-seo__item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menu-seo__item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.menu-seo__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu-seo__item summary::after {
+  content: "+";
+  flex-shrink: 0;
+  font-size: 1.3rem;
+  color: #e50914;
+}
+
+.menu-seo__item[open] summary::after {
+  content: "−";
+}
+
+.menu-seo__item p {
+  padding-bottom: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (min-width: 1024px) {
+  .menu-seo {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 3rem;
+    padding: 2.5rem;
+  }
+}

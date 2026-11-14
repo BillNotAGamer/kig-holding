@@ -64,9 +64,94 @@
                 pageIndex = index
             }))
         : "[]";
+
+    // Readable text for search engines: the menu itself is images, so Google cannot read dish names from it.
+    var brandContent = (Model.Slug ?? string.Empty).ToLowerInvariant() switch
+    {
+        "truyen-thuyet-champong" => new
+        {
+            Heading = "Truyền Thuyết Champong – nhà hàng mì cay Hàn Quốc",
+            Paragraphs = new[]
+            {
+                "Truyền Thuyết Champong (전설의짬뽕) là thương hiệu mì Hàn Quốc của KIG Holding. Món signature là champong – mì tươi dai ngon trong nước súp hải sản cay nồng, đậm vị. Bên cạnh đó là mì tương đen (jajangmyeon) chuẩn vị Hàn, các món lẩu và bánh gạo truyền thống.",
+                "Thực đơn phù hợp cho bữa trưa văn phòng, buổi tối cùng gia đình hay tụ tập nhóm bạn. Hệ thống có nhiều chi nhánh tại TP.HCM và các tỉnh, đặt bàn online để giữ chỗ trước."
+            },
+            Highlights = new[] { "Mì cay hải sản champong", "Mì tương đen jajangmyeon", "Lẩu Hàn Quốc", "Bánh gạo tteokbokki" },
+            Faqs = new[]
+            {
+                (Q: "Champong là món gì?", A: "Champong là mì cay hải sản kiểu Hàn: sợi mì tươi trong nước súp hải sản cay nồng. Đây là món signature của Truyền Thuyết Champong."),
+                (Q: "Truyền Thuyết Champong có mì tương đen không?", A: "Có. Mì tương đen (jajangmyeon) với sốt jajang đậm đà là một trong những món được gọi nhiều nhất tại Truyền Thuyết Champong."),
+                (Q: "Làm sao đặt bàn Truyền Thuyết Champong?", A: "Bạn đặt bàn online trên trang Đặt bàn: chọn chi nhánh, ngày giờ và số khách, nhà hàng sẽ xác nhận qua điện thoại.")
+            }
+        },
+        "gogi-maru" => new
+        {
+            Heading = "Gogi Maru – thịt nướng Hàn Quốc ủ dry-aged",
+            Paragraphs = new[]
+            {
+                "Gogi Maru (고기마루) là nhà hàng thịt nướng Hàn Quốc của KIG Holding, chuyên thịt ủ dry-aged. Thực đơn kết hợp kỹ thuật lên men thịt heo và các phần bò nướng thượng hạng trên bếp than hồng, cho hương vị đậm đà trong từng lát cắt.",
+                "Không gian phù hợp cho nhóm bạn, gia đình và tiệc công ty. Xem chi nhánh Gogi Maru và đặt bàn online để giữ chỗ trước."
+            },
+            Highlights = new[] { "Thịt nướng Hàn Quốc dry-aged", "Thịt heo lên men", "Bò nướng thượng hạng", "Nướng trên bếp than hồng" },
+            Faqs = new[]
+            {
+                (Q: "Thịt dry-aged ở Gogi Maru là gì?", A: "Dry-aged là kỹ thuật ủ khô thịt trong điều kiện kiểm soát, giúp thịt mềm và đậm vị hơn khi nướng."),
+                (Q: "Gogi Maru có phù hợp đi nhóm đông không?", A: "Có. Gogi Maru phù hợp cho nhóm bạn, gia đình và tiệc công ty; nên đặt bàn trước với nhóm đông."),
+                (Q: "Gogi Maru ở đâu?", A: "Xem địa chỉ, giờ mở cửa và hotline của từng chi nhánh Gogi Maru tại trang Chi nhánh.")
+            }
+        },
+        "kbb-cook" => new
+        {
+            Heading = "KBB Cook – buffet nướng Hàn Quốc không giới hạn",
+            Paragraphs = new[]
+            {
+                "KBB Cook (한국식 바비큐 뷔페) là buffet nướng Hàn Quốc không giới hạn của KIG Holding. Gói tiêu chuẩn 278K bao gồm tất cả món tại quầy line; gói thượng hạng 458K có thêm các món cao cấp, với dòng thịt premium ủ lên men 360 giờ.",
+                "Quầy line đa dạng cùng menu mì truyền thống, phù hợp cho nhóm bạn, sinh viên và tiệc sinh nhật. Đặt bàn online để giữ chỗ trước, nhất là cuối tuần."
+            },
+            Highlights = new[] { "Buffet nướng 278K", "Buffet premium 458K", "Thịt ủ lên men 360 giờ", "Quầy line đa dạng" },
+            Faqs = new[]
+            {
+                (Q: "Buffet KBB Cook giá bao nhiêu?", A: "KBB Cook có gói tiêu chuẩn 278K và gói thượng hạng 458K. Giá có thể thay đổi theo thời điểm, xem thông báo mới nhất trong mục Tin tức."),
+                (Q: "Gói 458K khác gì gói 278K?", A: "Gói thượng hạng 458K gồm toàn bộ món tại quầy line cùng các món cao cấp như thịt premium ủ lên men."),
+                (Q: "Có cần đặt bàn KBB Cook trước không?", A: "Nên đặt bàn online trước, đặc biệt vào buổi tối và cuối tuần.")
+            }
+        },
+        "seoul-gukbap" => new
+        {
+            Heading = "Seoul Gukbap – cơm canh truyền thống Hàn Quốc",
+            Paragraphs = new[]
+            {
+                "Seoul Gukbap (서울 국밥) phục vụ cơm canh thịt truyền thống Hàn Quốc: nước dùng nóng hổi, đậm đà, ăn kèm cơm và kim chi. Món dễ ăn, phù hợp bữa trưa văn phòng lẫn bữa tối.",
+                "Seoul Gukbap nằm trong hệ thống nhà hàng Hàn Quốc của KIG Holding. Xem chi nhánh gần bạn và đặt bàn online."
+            },
+            Highlights = new[] { "Cơm canh thịt Hàn Quốc", "Nước dùng nóng, đậm đà", "Ăn kèm kim chi", "Bữa trưa văn phòng" },
+            Faqs = new[]
+            {
+                (Q: "Gukbap là món gì?", A: "Gukbap là cơm canh Hàn Quốc: cơm ăn cùng nước canh thịt hầm nóng, thường kèm kim chi và rau."),
+                (Q: "Seoul Gukbap có chi nhánh ở đâu?", A: "Xem địa chỉ và giờ mở cửa các chi nhánh Seoul Gukbap tại trang Chi nhánh.")
+            }
+        },
+        _ => null
+    };
+
+    var brandFaqJson = brandContent is null ? null : System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "FAQPage",
+        ["mainEntity"] = brandContent.Faqs.Select(f => new Dictionary<string, object?>
+        {
+            ["@type"] = "Question",
+            ["name"] = f.Q,
+            ["acceptedAnswer"] = new Dictionary<string, object?> { ["@type"] = "Answer", ["text"] = f.A }
+        }).ToArray()
+    });
 }
 
 <script type="application/ld+json">@Html.Raw(breadcrumbJson)</script>
+@if (brandFaqJson is not null)
+{
+    <script type="application/ld+json">@Html.Raw(brandFaqJson)</script>
+}
 
 <section class="menu-group-viewer menu-group-viewer--dark relative overflow-hidden py-12 text-white sm:py-16 lg:py-20"
          data-menu-group-viewer>
@@ -97,7 +182,7 @@
                     Thực đơn
                 </span>
                 <h1 class="public-page-title mt-3 text-white">
-                    @Model.Name
+                    Thực đơn @Model.Name
                 </h1>
                 @if (!string.IsNullOrWhiteSpace(Model.ShortDescription) && !string.Equals(Model.ShortDescription.Trim(), Model.Name.Trim(), StringComparison.OrdinalIgnoreCase))
                 {
@@ -260,6 +345,45 @@
             </div>
         </section>
 
+        @if (brandContent is not null)
+        {
+            <section class="menu-seo" aria-labelledby="menu-seo-heading">
+                <div class="menu-seo__intro">
+                    <h2 id="menu-seo-heading" class="menu-seo__title">@brandContent.Heading</h2>
+                    @foreach (var paragraph in brandContent.Paragraphs)
+                    {
+                        <p class="menu-seo__text">@paragraph</p>
+                    }
+                    <ul class="menu-seo__tags" aria-label="Món nổi bật">
+                        @foreach (var highlight in brandContent.Highlights)
+                        {
+                            <li>@highlight</li>
+                        }
+                    </ul>
+                    <p class="menu-seo__links">
+                        <a href="/chi-nhanh">Xem chi nhánh gần bạn</a>
+                        <span aria-hidden="true">·</span>
+                        <a href="/dat-ban">Đặt bàn online</a>
+                        <span aria-hidden="true">·</span>
+                        <a href="/tin-tuc?category=khuyen-mai-uu-dai">Khuyến mãi đang áp dụng</a>
+                        <span aria-hidden="true">·</span>
+                        <a href="/thuc-don">Thực đơn các thương hiệu khác</a>
+                    </p>
+                </div>
+
+                <div class="menu-seo__faq">
+                    <h2 class="menu-seo__title menu-seo__title--small">Câu hỏi thường gặp</h2>
+                    @foreach (var faq in brandContent.Faqs)
+                    {
+                        <details class="menu-seo__item">
+                            <summary>@faq.Q</summary>
+                            <p>@faq.A</p>
+                        </details>
+                    }
+                </div>
+            </section>
+        }
+
         @if (Model.HasImages)
         {
             <noscript>
@@ -294,4 +418,8 @@
         <script src="~/lib/page-flip/page-flip.browser.js" asp-append-version="true"></script>
         <script src="~/js/menu-flipbook.js" asp-append-version="true"></script>
     }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/menu-seo.css" asp-append-version="true" />
 }
