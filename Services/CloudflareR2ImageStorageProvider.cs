@@ -9,16 +9,19 @@ public sealed class CloudflareR2ImageStorageProvider : IImageStorageProvider
     private readonly ICloudflareR2Client _client;
     private readonly ILogger<CloudflareR2ImageStorageProvider> _logger;
     private readonly ImageUploadValidator _uploadValidator;
+    private readonly IImageOptimizer? _imageOptimizer;
 
     public CloudflareR2ImageStorageProvider(
         IOptions<ImageStorageSettings> settings,
         ICloudflareR2Client client,
-        ILogger<CloudflareR2ImageStorageProvider> logger)
+        ILogger<CloudflareR2ImageStorageProvider> logger,
+        IImageOptimizer? imageOptimizer = null)
     {
         _settings = settings.Value;
         _client = client;
         _logger = logger;
         _uploadValidator = new ImageUploadValidator(_settings);
+        _imageOptimizer = imageOptimizer;
     }
 
     public ImageStorageProviderKind Provider => ImageStorageProviderKind.CloudflareR2;
@@ -31,20 +34,45 @@ public sealed class CloudflareR2ImageStorageProvider : IImageStorageProvider
     public async Task<string> UploadAsync(IFormFile file, ImageCategory category, string? storageScope, CancellationToken cancellationToken = default)
     {
         var validated = _uploadValidator.Validate(file);
+        var extension = validated.Extension;
+        var contentType = validated.ContentType;
+        byte[]? optimizedContent = null;
+
+        if (_imageOptimizer is not null)
+        {
+            byte[] original;
+            await using (var input = file.OpenReadStream())
+            using (var buffer = new MemoryStream())
+            {
+                await input.CopyToAsync(buffer, cancellationToken);
+                original = buffer.ToArray();
+            }
+
+            var optimized = _imageOptimizer.TryOptimize(original, extension, SkiaImageOptimizer.MaxDimensionFor(category));
+            if (optimized is not null)
+            {
+                optimizedContent = optimized.Content;
+                extension = SkiaImageOptimizer.WebpExtension;
+                contentType = SkiaImageOptimizer.WebpContentType;
+            }
+        }
+
         var objectKey = CloudflareR2ObjectKeyBuilder.BuildObjectKey(
             _settings,
             category,
             file.FileName,
-            validated.Extension,
+            extension,
             storageScope);
 
         try
         {
-            await using var stream = file.OpenReadStream();
+            await using var stream = optimizedContent is not null
+                ? new MemoryStream(optimizedContent, writable: false)
+                : file.OpenReadStream();
             await _client.PutObjectAsync(
                 _settings.BucketName.Trim(),
                 objectKey,
-                validated.ContentType,
+                contentType,
                 stream,
                 cancellationToken);
 

@@ -1,0 +1,78 @@
+@model KIGHolding.Services.ImageMigrationPreview
+
+@{
+    ViewData["Title"] = "Tối ưu ảnh WebP";
+    var remaining = Model.PngJpgCandidates + Model.LargeWebpCandidates;
+}
+
+<section class="admin-page">
+    <div class="admin-card">
+        <div>
+            <p class="admin-page-kicker">Image Optimization</p>
+            <h2 class="admin-card-title mt-2">Tối ưu ảnh WebP</h2>
+            <p class="admin-help mt-2">
+                Ảnh upload mới đã tự động được thu nhỏ và chuyển sang WebP. Trang này chuyển các ảnh cũ trên Cloudflare R2
+                (PNG, JPG và WebP lớn hơn 400KB) sang WebP và cập nhật đường dẫn trong bài viết, chi nhánh, thực đơn.
+                Ảnh gốc vẫn được giữ trên R2.
+            </p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            @successMessage
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            @errorMessage
+        </div>
+    }
+
+    <div class="admin-form-section">
+        @if (!Model.IsAvailable)
+        {
+            <p class="admin-help">@Model.UnavailableReason</p>
+        }
+        else
+        {
+            <p class="admin-page-kicker">Tình trạng ảnh trên R2</p>
+            <div class="admin-form-grid mt-5">
+                <div>
+                    <p class="admin-label">Tổng ảnh đang dùng</p>
+                    <p class="admin-card-title mt-1">@Model.TotalR2Images</p>
+                </div>
+                <div>
+                    <p class="admin-label">PNG / JPG cần chuyển</p>
+                    <p class="admin-card-title mt-1">@Model.PngJpgCandidates</p>
+                </div>
+                <div>
+                    <p class="admin-label">WebP lớn cần nén lại</p>
+                    <p class="admin-card-title mt-1">@Model.LargeWebpCandidates</p>
+                </div>
+                <div>
+                    <p class="admin-label">Đã tối ưu</p>
+                    <p class="admin-card-title mt-1">@Model.AlreadyOptimized</p>
+                </div>
+            </div>
+
+            @if (remaining > 0)
+            {
+                <form asp-action="Run" method="post" class="mt-6">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-primary w-full sm:w-auto">
+                        Chuyển 15 ảnh tiếp theo sang WebP
+                    </button>
+                    <p class="admin-help mt-2">Mỗi lần xử lý 15 ảnh (khoảng 30–60 giây). Bấm lại cho tới khi còn 0 ảnh.</p>
+                </form>
+            }
+            else
+            {
+                <p class="admin-help mt-6">Tất cả ảnh đã được tối ưu.</p>
+            }
+        }
+    </div>
+</section>
