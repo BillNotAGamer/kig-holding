@@ -18,8 +18,24 @@
         "kbb-cook" => (
             Title: "Thực đơn KBB Cook - Buffet nướng Hàn Quốc không giới hạn",
             Description: "Thực đơn KBB Cook buffet nướng Hàn Quốc không giới hạn: gói tiêu chuẩn 278K, gói thượng hạng 458K, quầy line đa dạng. Xem chi tiết và đặt bàn online."),
+        "seoul-gukbap" => (
+            Title: "Thực đơn Seoul Gukbap - Cơm canh truyền thống Hàn Quốc",
+            Description: "Thực đơn Seoul Gukbap: cơm canh thịt truyền thống Hàn Quốc nóng hổi, đậm đà, dễ ăn, phù hợp bữa trưa và bữa tối. Xem món và đặt bàn online."),
         _ => (Title: (string?)null, Description: (string?)null)
     };
+
+    const string breadcrumbSiteUrl = "https://www.kigholding.vn";
+    var breadcrumbJson = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "BreadcrumbList",
+        ["itemListElement"] = new object[]
+        {
+            new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Trang chủ", ["item"] = $"{breadcrumbSiteUrl}/" },
+            new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 2, ["name"] = "Thực đơn", ["item"] = $"{breadcrumbSiteUrl}/thuc-don" },
+            new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 3, ["name"] = Model.Name, ["item"] = $"{breadcrumbSiteUrl}/thuc-don/nhom/{Model.Slug}" }
+        }
+    });
 
     ViewData["Title"] = brandSeo.Title ?? $"{Model.Name} - Thực đơn món Hàn Quốc";
     ViewData["MetaDescription"] = brandSeo.Description
@@ -49,6 +65,8 @@
             }))
         : "[]";
 }
+
+<script type="application/ld+json">@Html.Raw(breadcrumbJson)</script>
 
 <section class="menu-group-viewer menu-group-viewer--dark relative overflow-hidden py-12 text-white sm:py-16 lg:py-20"
          data-menu-group-viewer>
