@@ -1,0 +1,53 @@
+/* News cards: show the whole post image (no cropped poster corners) on a blurred copy of itself. */
+.news-card__media--fit {
+  overflow: hidden;
+  background: #141414;
+}
+
+/* The dark bottom gradient hid the text at the foot of square posters. */
+.news-card__media--fit::after {
+  background: none;
+}
+
+.news-card__backdrop {
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  width: 120%;
+  height: 120%;
+  max-width: none;
+  object-fit: cover;
+  filter: blur(20px) brightness(0.5) saturate(1.15);
+  pointer-events: none;
+}
+
+.news-card__media--fit .news-card__image {
+  position: relative;
+  z-index: 1;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Standard grid cards get a taller frame so square posters are not shrunk too far. */
+.news-card__media--standard.news-card__media--fit {
+  aspect-ratio: 4 / 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-card__media--fit .news-card__image {
+    transition: none;
+  }
+}
+
+/* Brand links in the news page intro. */
+.news-index__intro-link {
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.news-index__intro-link:hover {
+  text-decoration-color: #e50914;
+}

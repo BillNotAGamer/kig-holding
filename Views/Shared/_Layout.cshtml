@@ -20,15 +20,22 @@
 
     var brandName = string.IsNullOrWhiteSpace(siteSetting?.BrandName) ? "Truyền Thuyết Champong" : siteSetting!.BrandName;
     var pageTitle = ViewData["Title"]?.ToString();
+    // Search results show roughly 60-65 characters of a title: only append the brand when it still fits.
+    const int maxTitleLength = 65;
     var fullTitle = string.IsNullOrWhiteSpace(pageTitle)
         ? brandName
         : pageTitle.Contains(brandName, StringComparison.OrdinalIgnoreCase)
-            ? pageTitle
-            : $"{pageTitle} - {brandName}";
+          || pageTitle.Trim().Length + brandName.Length + 3 > maxTitleLength
+            ? pageTitle.Trim()
+            : $"{pageTitle.Trim()} - {brandName}";
 
-    var metaDescription = ViewData["MetaDescription"]?.ToString()
-        ?? (string.IsNullOrWhiteSpace(siteSetting?.Slogan) ? null : siteSetting!.Slogan)
-        ?? "Truyền Thuyết Champong - ẩm thực Hàn Quốc cay nóng trong không gian tối hiện đại.";
+    var rawMetaDescription = ViewData["MetaDescription"]?.ToString();
+    var metaDescription = !string.IsNullOrWhiteSpace(rawMetaDescription)
+        ? rawMetaDescription
+        : !string.IsNullOrWhiteSpace(siteSetting?.Slogan)
+            ? siteSetting!.Slogan
+            : "Truyền Thuyết Champong - nhà hàng Hàn Quốc: mì cay champong, mì tương đen, thịt nướng Gogi Maru, buffet nướng KBB Cook.";
+    metaDescription = TrimForSnippet(metaDescription, 160);
 
     var baseUrl = GetConfiguredBaseUrl(Configuration, Context.Request);
     var currentPath = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
@@ -165,4 +172,22 @@
 
     private static string BuildAbsoluteUrl(string? url, string baseUrl)
         => SeoUrlHelper.BuildAbsoluteUrl(url, baseUrl);
+
+    /// <summary>Collapses whitespace and cuts long descriptions at a word boundary for search snippets.</summary>
+    private static string TrimForSnippet(string value, int maxLength)
+    {
+        var normalized = System.Text.RegularExpressions.Regex.Replace(value ?? string.Empty, @"\s+", " ").Trim();
+        if (normalized.Length <= maxLength)
+        {
+            return normalized;
+        }
+
+        var cut = normalized.LastIndexOf(' ', maxLength - 1);
+        if (cut < maxLength / 2)
+        {
+            cut = maxLength - 1;
+        }
+
+        return normalized[..cut].TrimEnd(',', ';', ':', '-', ' ') + "…";
+    }
 }

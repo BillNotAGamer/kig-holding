@@ -12,7 +12,8 @@ namespace KIGHolding.Controllers;
 [Route("tin-tuc")]
 public class NewsController : Controller
 {
-    private const int DefaultPageSize = 9;
+    // 5 editorial cards + 6 cards (two full rows of three) in "Các bài viết khác".
+    private const int DefaultPageSize = 11;
 
     private readonly INewsService _newsService;
     private readonly IConfiguration _configuration;
@@ -68,10 +69,14 @@ public class NewsController : Controller
             TotalPages = postsPage.TotalPages,
             HasPreviousPage = postsPage.HasPreviousPage,
             HasNextPage = postsPage.HasNextPage,
-            SeoTitle = string.IsNullOrWhiteSpace(selectedCategoryName) ? "Tin tức, khuyến mãi nhà hàng Hàn Quốc" : $"{selectedCategoryName} - Tin tức",
-            SeoDescription = string.IsNullOrWhiteSpace(selectedCategoryName)
-                ? "Cập nhật món mới, khuyến mãi, ưu đãi buffet nướng và câu chuyện ẩm thực Hàn Quốc tại Truyền Thuyết Champong, Gogi Maru, KBB Cook."
-                : $"Cập nhật {selectedCategoryName} mới nhất từ Truyền Thuyết Champong."
+            SeoTitle = (string.IsNullOrWhiteSpace(selectedCategoryName)
+                    ? "Tin tức, khuyến mãi nhà hàng Hàn Quốc"
+                    : $"{selectedCategoryName} - Tin tức nhà hàng Hàn Quốc")
+                + (postsPage.Page > 1 ? $" - Trang {postsPage.Page}" : string.Empty),
+            SeoDescription = (string.IsNullOrWhiteSpace(selectedCategoryName)
+                    ? "Tin tức, khuyến mãi và món mới tại Truyền Thuyết Champong, Gogi Maru, KBB Cook: mì cay champong, mì tương đen, thịt nướng và buffet nướng Hàn Quốc."
+                    : $"{selectedCategoryName} mới nhất từ hệ thống nhà hàng Hàn Quốc Truyền Thuyết Champong, Gogi Maru, KBB Cook. Xem ưu đãi, món mới và đặt bàn online.")
+                + (postsPage.Page > 1 ? $" Trang {postsPage.Page}." : string.Empty)
         };
 
         return View(model);

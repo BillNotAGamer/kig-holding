@@ -27,14 +27,17 @@
     const supportsAnimate = typeof Element !== 'undefined'
         && typeof Element.prototype.animate === 'function';
 
-    const defaultEnterDuration = 850;
-    const defaultDistance = 56;
+    // Short, single-run reveals: long or repeating animations left blank gaps while scrolling.
+    const defaultEnterDuration = 520;
+    const maxDelay = 200;
+    const defaultDistance = 22;
     const enterEasing = 'cubic-bezier(0.22, 1, 0.36, 1)';
     const exitEasing = 'cubic-bezier(0.4, 0, 0.2, 1)';
     const observerOptions = {
         root: null,
-        threshold: [0, 0.15, 0.35],
-        rootMargin: '0px 0px -10% 0px'
+        threshold: 0,
+        // Start revealing slightly before an element scrolls into view.
+        rootMargin: '0px 0px 15% 0px'
     };
 
     const stateMap = new WeakMap();
@@ -47,10 +50,11 @@
     function getConfig(element) {
         return {
             type: element.getAttribute('data-uw-reveal') || 'fade-up',
-            delay: parseNumber(element.getAttribute('data-uw-delay'), 0),
-            duration: parseNumber(element.getAttribute('data-uw-duration'), defaultEnterDuration),
-            distance: parseNumber(element.getAttribute('data-uw-distance'), defaultDistance),
-            once: element.getAttribute('data-uw-once') === 'true'
+            delay: Math.min(maxDelay, parseNumber(element.getAttribute('data-uw-delay'), 0)),
+            duration: Math.min(defaultEnterDuration, parseNumber(element.getAttribute('data-uw-duration'), defaultEnterDuration)),
+            distance: Math.min(defaultDistance, parseNumber(element.getAttribute('data-uw-distance'), defaultDistance)),
+            // Reveal once by default; hiding again on scroll-out caused flicker and blank areas.
+            once: element.getAttribute('data-uw-once') !== 'false'
         };
     }
 
