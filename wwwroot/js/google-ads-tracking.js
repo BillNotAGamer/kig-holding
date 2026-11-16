@@ -3,7 +3,8 @@
     const conversionId = 'AW-17917718766';
     const labels = {
         reservation: 'nMG0COGkz_MbEO7h6t9C', // TechSol - Form đặt bàn 22118
-        messenger: 'wdgjCOnM3PMbEO7h6t9C'    // TechSol - Messenger 8597
+        messenger: 'wdgjCOnM3PMbEO7h6t9C',   // TechSol - Messenger 8597
+        zalo: 'hCduCK7fubkdEO7h6t9C'         // KIG - Click Zalo (kigholding.vn)
     };
     const trackedOnLoadAttribute = 'data-gads-onload-tracked';
 
@@ -37,7 +38,7 @@
         });
     };
 
-    // Messenger buttons (floating contact FAB).
+    // Messenger and Zalo buttons (floating contact FAB, footer, contact page).
     document.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) {
             return;
@@ -46,6 +47,12 @@
         const messengerLink = event.target.closest('[data-tiktok-label="Messenger"], a[href*="m.me/"], a[href*="messenger.com"]');
         if (messengerLink instanceof HTMLElement) {
             window.kigGadsConversion('messenger');
+            return;
+        }
+
+        const zaloLink = event.target.closest('[data-tiktok-label*="Zalo"], a[href*="zalo.me"]');
+        if (zaloLink instanceof HTMLElement) {
+            window.kigGadsConversion('zalo');
         }
     });
 
