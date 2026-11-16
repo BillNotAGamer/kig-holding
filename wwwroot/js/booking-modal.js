@@ -783,6 +783,10 @@
                     });
                 }
 
+                if (typeof window.kigGadsConversion === 'function') {
+                    window.kigGadsConversion('reservation');
+                }
+
                 renderSuccess(payload);
                 return;
             }
