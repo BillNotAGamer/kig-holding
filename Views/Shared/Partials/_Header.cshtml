@@ -64,7 +64,69 @@
             </div>
         </div>
 
-        <div class="hidden shrink-0 items-center lg:flex">
+        <div class="hidden shrink-0 items-center gap-3 lg:flex">
+            <div class="header-app">
+                <a href="/thanh-vien"
+                   class="header-app__button"
+                   aria-haspopup="true"
+                   data-tiktok-event="ClickButton"
+                   data-tiktok-label="Header App Download CTA"
+                   data-tiktok-content-type="header_navigation">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="6" y="2.5" width="12" height="19" rx="2.5"></rect>
+                        <path d="M10.5 18h3"></path>
+                    </svg>
+                    <span class="header-app__label-full">Tải ứng dụng</span>
+                    <span class="header-app__label-short">Tải app</span>
+                </a>
+
+                <div class="header-app__popover" role="group" aria-label="Tải ứng dụng Truyền Thuyết Champong">
+                    <p class="header-app__title">Đăng ký thành viên trên app Champong</p>
+                    <p class="header-app__copy">Dùng ứng dụng QR để quét mã, hoặc tải ứng dụng từ Google Play hoặc App Store.</p>
+
+                    <div class="header-app__body">
+                        <div class="header-app__stores">
+                            <a href="https://apps.apple.com/vn/app/truy%E1%BB%81n-thuy%E1%BA%BFt-champong-%EC%A0%88%EC%84%A4%EC%9D%98%EC%A7%AC%EB%BD%BB/id6753157313?l=vi"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="Tải ứng dụng trên App Store"
+                               class="header-app__store-link"
+                               data-tiktok-event="ClickButton"
+                               data-tiktok-label="Header App Store"
+                               data-tiktok-content-type="header_app_download">
+                                <img src="~/images/general/icons/app-store-download.svg"
+                                     alt="Tải ứng dụng trên App Store"
+                                     class="header-app__store-badge"
+                                     loading="lazy"
+                                     asp-append-version="true" />
+                            </a>
+                            <a href="https://play.google.com/store/apps/details?id=com.eggstech.champong.app&pcampaignid=web_share"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               aria-label="Tải ứng dụng trên Google Play"
+                               class="header-app__store-link"
+                               data-tiktok-event="ClickButton"
+                               data-tiktok-label="Header Google Play"
+                               data-tiktok-content-type="header_app_download">
+                                <img src="~/images/general/icons/google-play-download.svg"
+                                     alt="Tải ứng dụng trên Google Play"
+                                     class="header-app__store-badge"
+                                     loading="lazy"
+                                     asp-append-version="true" />
+                            </a>
+                        </div>
+
+                        <img src="~/images/general/kig-holding-qr-app.webp"
+                             alt="Quét mã QR để tải ứng dụng Truyền Thuyết Champong"
+                             class="header-app__qr"
+                             loading="lazy"
+                             decoding="async" />
+                    </div>
+
+                    <a href="/thanh-vien" class="header-app__member-link">Xem quyền lợi thành viên →</a>
+                </div>
+            </div>
+
             <a href="@Model.ReservationUrl"
                data-booking-modal-trigger
                data-tiktok-event="ClickButton"
