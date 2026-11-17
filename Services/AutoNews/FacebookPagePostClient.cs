@@ -11,7 +11,8 @@ public sealed record FacebookPagePost(
     string Message,
     DateTimeOffset CreatedTime,
     string? PictureUrl,
-    string? PermalinkUrl);
+    string? PermalinkUrl,
+    IReadOnlyList<string> PhotoIds);
 
 /// <summary>Reads recent posts of the brand Fanpage through the Facebook Graph API.</summary>
 public sealed class FacebookPagePostClient
@@ -43,7 +44,7 @@ public sealed class FacebookPagePostClient
 
         var version = string.IsNullOrWhiteSpace(_settings.GraphApiVersion) ? "v21.0" : _settings.GraphApiVersion.Trim();
         var url = $"https://graph.facebook.com/{version}/{Uri.EscapeDataString(_settings.FacebookPageId.Trim())}/posts" +
-                  $"?fields=id,message,created_time,full_picture,permalink_url&limit={Math.Clamp(limit, 1, 50)}" +
+                  $"?fields=id,message,created_time,full_picture,permalink_url,attachments{type,target{id},subattachments{type,target{id}}}&limit={Math.Clamp(limit, 1, 50)}" +
                   $"&access_token={Uri.EscapeDataString(_settings.FacebookAccessToken.Trim())}";
 
         try
@@ -80,7 +81,8 @@ public sealed class FacebookPagePostClient
                     message,
                     ParseFacebookTime(GetString(item, "created_time")),
                     NullIfEmpty(GetString(item, "full_picture")),
-                    NullIfEmpty(GetString(item, "permalink_url"))));
+                    NullIfEmpty(GetString(item, "permalink_url")),
+                    CollectPhotoIds(item)));
             }
 
             return posts;
@@ -124,6 +126,101 @@ public sealed class FacebookPagePostClient
         {
             _logger.LogWarning(exception, "Could not download Fanpage image.");
             return null;
+        }
+    }
+
+    /// <summary>Largest available version of a Fanpage photo (Graph "images" list), capped at 2048px wide.</summary>
+    public async Task<string?> GetBestPhotoUrlAsync(string photoId, CancellationToken cancellationToken)
+    {
+        if (!IsConfigured || string.IsNullOrWhiteSpace(photoId))
+        {
+            return null;
+        }
+
+        var version = string.IsNullOrWhiteSpace(_settings.GraphApiVersion) ? "v21.0" : _settings.GraphApiVersion.Trim();
+        var url = $"https://graph.facebook.com/{version}/{Uri.EscapeDataString(photoId)}?fields=images" +
+                  $"&access_token={Uri.EscapeDataString(_settings.FacebookAccessToken.Trim())}";
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(30);
+            using var response = await client.GetAsync(url, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
+            if (!document.RootElement.TryGetProperty("images", out var images) || images.ValueKind != JsonValueKind.Array)
+            {
+                return null;
+            }
+
+            string? best = null;
+            var bestWidth = 0;
+            foreach (var image in images.EnumerateArray())
+            {
+                var source = GetString(image, "source");
+                var width = image.TryGetProperty("width", out var w) && w.ValueKind == JsonValueKind.Number ? w.GetInt32() : 0;
+                if (!string.IsNullOrWhiteSpace(source) && width > bestWidth && width <= 2048)
+                {
+                    best = source;
+                    bestWidth = width;
+                }
+            }
+
+            return best;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "Could not read Fanpage photo sizes.");
+            return null;
+        }
+    }
+
+    private static IReadOnlyList<string> CollectPhotoIds(JsonElement post)
+    {
+        var ids = new List<string>();
+        if (!post.TryGetProperty("attachments", out var attachments) ||
+            !attachments.TryGetProperty("data", out var data) ||
+            data.ValueKind != JsonValueKind.Array)
+        {
+            return ids;
+        }
+
+        foreach (var attachment in data.EnumerateArray())
+        {
+            AddPhotoId(attachment, ids);
+            if (attachment.TryGetProperty("subattachments", out var sub) &&
+                sub.TryGetProperty("data", out var subData) &&
+                subData.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in subData.EnumerateArray())
+                {
+                    AddPhotoId(item, ids);
+                }
+            }
+        }
+
+        return ids;
+    }
+
+    private static void AddPhotoId(JsonElement attachment, List<string> ids)
+    {
+        var type = GetString(attachment, "type") ?? string.Empty;
+        if (!type.Contains("photo", StringComparison.OrdinalIgnoreCase) || !attachment.TryGetProperty("target", out var target))
+        {
+            return;
+        }
+
+        var id = GetString(target, "id");
+        if (!string.IsNullOrWhiteSpace(id) && !ids.Contains(id))
+        {
+            ids.Add(id);
         }
     }
 
