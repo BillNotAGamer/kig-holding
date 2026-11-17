@@ -228,3 +228,26 @@
         width: 100%;
     }
 }
+
+/* Tablet / small laptop: keep the QR clear of the fixed brand buttons on the right edge. */
+@media (min-width: 640px) and (max-width: 1279px) {
+    .member-app-hero {
+        padding-right: 5rem;
+    }
+
+    .member-app-hero__row {
+        gap: 1.5rem;
+    }
+
+    .member-app-hero__qr {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+    .member-app-hero__row {
+        justify-content: flex-start;
+        gap: 2.5rem;
+    }
+}
