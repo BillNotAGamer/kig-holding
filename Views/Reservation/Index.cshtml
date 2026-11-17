@@ -4,7 +4,7 @@
 
 @{
     ViewData["Title"] = "Đặt bàn Truyền Thuyết Champong, Gogi Maru, KBB Cook";
-    ViewData["MetaDescription"] = "Đặt bàn online tại Truyền Thuyết Champong, Gogi Maru, KBB Cook. Chọn chi nhánh, giờ và số khách để giữ bàn ăn mì cay, thịt nướng, buffet nướng Hàn Quốc."; ViewData["CanonicalUrl"] = "/dat-ban";
+    ViewData["MetaDescription"] = "Đặt bàn online tại Truyền Thuyết Champong, Gogi Maru, KBB Cook. Chọn chi nhánh, giờ và số khách để giữ bàn ăn mì tương đen, mì champong, thịt nướng, buffet nướng Hàn Quốc."; ViewData["CanonicalUrl"] = "/dat-ban";
     var selectedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(Model.DiningOccasionCode);
     var showDiningOccasionOther = string.Equals(selectedDiningOccasionCode, ReservationOptionCatalog.OtherCode, StringComparison.Ordinal);
     var hasReservableBranches = Model.Branches.Count > 0;
@@ -210,7 +210,7 @@
 
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <p class="reservation-page__validation" data-reservation-policy-summary role="status" aria-live="polite" hidden></p>
-                        <p class="reservation-page__form-note">Mọi thông tin được tiếp nhận với trạng thái chờ xác nhận từ nhà hàng.</p>
+                        <p class="reservation-page__form-note"><strong class="booking-conditions__label">Điều kiện đặt bàn:</strong> Thứ 2 – Thứ 6 tối thiểu 6 khách · Thứ 7 – Chủ nhật tối thiểu 10 khách · Từ 20 khách cần đặt cọc giữ bàn. Mọi yêu cầu được nhà hàng liên hệ xác nhận.</p>
                         <button type="submit"
                                 class="btn-primary reservation-page__submit"
                                 data-reservation-submit

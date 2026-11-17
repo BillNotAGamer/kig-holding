@@ -74,7 +74,7 @@ public class NewsController : Controller
                     : $"{selectedCategoryName} - Tin tức nhà hàng Hàn Quốc")
                 + (postsPage.Page > 1 ? $" - Trang {postsPage.Page}" : string.Empty),
             SeoDescription = (string.IsNullOrWhiteSpace(selectedCategoryName)
-                    ? "Tin tức, khuyến mãi và món mới tại Truyền Thuyết Champong, Gogi Maru, KBB Cook: mì cay champong, mì tương đen, thịt nướng và buffet nướng Hàn Quốc."
+                    ? "Tin tức, khuyến mãi và món mới tại Truyền Thuyết Champong, Gogi Maru, KBB Cook: mì tương đen, mì champong, thịt nướng và buffet nướng Hàn Quốc."
                     : $"{selectedCategoryName} mới nhất từ hệ thống nhà hàng Hàn Quốc Truyền Thuyết Champong, Gogi Maru, KBB Cook. Xem ưu đãi, món mới và đặt bàn online.")
                 + (postsPage.Page > 1 ? $" Trang {postsPage.Page}." : string.Empty)
         };

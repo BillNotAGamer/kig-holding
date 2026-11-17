@@ -148,7 +148,7 @@ internal static class LayoutFallbacks
         return new FooterViewModel
         {
             BrandName = string.IsNullOrWhiteSpace(setting?.BrandName) ? "KIG Holding" : setting!.BrandName,
-            Description = string.IsNullOrWhiteSpace(setting?.Slogan) ? "Mì cay Hàn Quốc, BBQ nóng lửa và không gian tối hiện đại cho những bữa ăn đậm vị." : setting!.Slogan,
+            Description = string.IsNullOrWhiteSpace(setting?.Slogan) ? "Mì tương đen Hàn Quốc, BBQ nóng lửa và không gian tối hiện đại cho những bữa ăn đậm vị." : setting!.Slogan,
             LogoUrl = string.IsNullOrWhiteSpace(setting?.LogoUrl) ? string.Empty : setting!.LogoUrl,
             FooterLogoUrl = "/images/general/kig-no-bg-logo.png",
             Address = string.IsNullOrWhiteSpace(setting?.Address) ? "366/3 Phạm Hữu Lầu, Nhà Bè, Hồ Chí Minh, Việt Nam" : setting!.Address,

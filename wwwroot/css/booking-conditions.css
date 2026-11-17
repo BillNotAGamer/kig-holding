@@ -1,0 +1,109 @@
+/* Booking conditions note, branch brand filter, mobile tap-target tweaks. Plain CSS (no Tailwind rebuild). */
+.booking-conditions-note {
+    margin: 0.6rem 0 0;
+    max-width: 100%;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.booking-conditions__label {
+    font-weight: 700;
+    color: inherit;
+}
+
+.booking-conditions-hint {
+    display: block;
+    margin: 0.4rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    font-weight: 500;
+    opacity: 0.75;
+}
+
+.booking-conditions-hint.is-deposit {
+    opacity: 1;
+    color: #f5b544;
+}
+
+/* Branch locator: brand chips */
+.branch-brand-filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.branch-brand-filter__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    padding: 0 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.branch-brand-filter__chip:hover {
+    border-color: rgba(229, 9, 20, 0.6);
+    color: #ffffff;
+}
+
+.branch-brand-filter__chip[aria-pressed="true"] {
+    border-color: #e50914;
+    background: #e50914;
+    color: #ffffff;
+}
+
+.branch-brand-filter__logo {
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.branch-brand-filter__count {
+    font-size: 0.7rem;
+    opacity: 0.75;
+}
+
+[data-branch-brand][hidden],
+[data-branch-group][hidden] {
+    display: none !important;
+}
+
+/* Mobile/tablet: bigger touch targets, no sideways scroll */
+@media (pointer: coarse), (max-width: 1023px) {
+    .branch-card__value[href^="tel:"] {
+        min-height: 2.25rem;
+        align-items: center;
+    }
+}
+
+@media (max-width: 639px) {
+    .branch-brand-filter {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .branch-brand-filter::-webkit-scrollbar {
+        display: none;
+    }
+
+    .branch-brand-filter__chip {
+        flex: 0 0 auto;
+    }
+}

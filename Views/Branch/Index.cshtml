@@ -22,6 +22,27 @@
         hotline = branch.Hotline
     });
 
+    static string BrandKey(string? name)
+    {
+        var value = (name ?? string.Empty).ToLowerInvariant();
+        if (value.Contains("gogi")) return "gogi-maru";
+        if (value.Contains("kbb")) return "kbb-cook";
+        if (value.Contains("gukbap")) return "seoul-gukbap";
+        if (value.Contains("champong")) return "truyen-thuyet-champong";
+        return "khac";
+    }
+
+    var brandFilters = new[]
+    {
+        (Key: "truyen-thuyet-champong", Label: "Truyền Thuyết Champong", Logo: "/images/general/kig-no-bg-logo.png"),
+        (Key: "gogi-maru", Label: "Gogi Maru", Logo: "/images/general/logo-gogi-maru.webp"),
+        (Key: "kbb-cook", Label: "KBB Cook", Logo: "/images/general/logo-kbbcook.webp"),
+        (Key: "seoul-gukbap", Label: "Seoul Gukbap", Logo: "/images/general/logo-seoul-gukbap.webp")
+    };
+    var brandCounts = Model.Branches
+        .GroupBy(branch => BrandKey(branch.Name))
+        .ToDictionary(group => group.Key, group => group.Count());
+
     const string seoSiteUrl = "https://www.kigholding.vn";
     string ToAbsoluteUrl(string url) => url.StartsWith("http", StringComparison.OrdinalIgnoreCase)
         ? url
@@ -203,6 +224,27 @@
                         </a>
                     }
                 </div>
+
+                <div class="branch-brand-filter" role="group" aria-label="Lọc theo thương hiệu" data-branch-brand-filter>
+                    <button type="button" class="branch-brand-filter__chip" data-brand="" aria-pressed="true">
+                        Tất cả thương hiệu
+                        <span class="branch-brand-filter__count">@Model.Branches.Count</span>
+                    </button>
+                    @foreach (var brand in brandFilters)
+                    {
+                        var brandCount = brandCounts.TryGetValue(brand.Key, out var bc) ? bc : 0;
+                        if (brandCount == 0)
+                        {
+                            continue;
+                        }
+
+                        <button type="button" class="branch-brand-filter__chip" data-brand="@brand.Key" aria-pressed="false">
+                            <img src="@brand.Logo" alt="" class="branch-brand-filter__logo" width="22" height="22" loading="lazy" decoding="async" />
+                            @brand.Label
+                            <span class="branch-brand-filter__count">@brandCount</span>
+                        </button>
+                    }
+                </div>
             </div>
         </div>
     </section>
@@ -213,7 +255,7 @@
                 <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" data-uw-reveal="fade-up">
                     <div class="flex flex-wrap items-center gap-2">
                         <h2 class="text-sm font-black uppercase tracking-[0.16em] text-white">
-                            Hiển thị @Model.FilteredCount chi nhánh
+                            Hiển thị <span data-branch-visible-count>@Model.FilteredCount</span> chi nhánh
                         </h2>
 
                         @if (hasSearch)
@@ -248,20 +290,20 @@
                             var groupCount = groupItems.Count;
                             var isSingleResultGroup = Model.FilteredCount == 1 && groupCount == 1 && branchGroups.Count == 1;
 
-                            <section class="space-y-3" data-uw-reveal="fade-up">
+                            <section class="space-y-3" data-uw-reveal="fade-up" data-branch-group>
                                 <div class="flex items-center gap-2">
                                     <span class="flex size-6 items-center justify-center rounded-full bg-brand-red/10 text-brand-red" aria-hidden="true">
                                         <span class="h-2 w-2 rounded-full bg-brand-red"></span>
                                     </span>
                                     <h3 class="text-lg font-black text-white sm:text-xl">
                                         @group.Key
-                                        <span class="text-brand-red">(@groupCount)</span>
+                                        <span class="text-brand-red">(<span data-branch-group-count>@groupCount</span>)</span>
                                     </h3>
                                 </div>
 
                                 @if (isSingleResultGroup)
                                 {
-                                    <div class="mx-auto w-full max-w-[26rem]">
+                                    <div class="mx-auto w-full max-w-[26rem]" data-branch-brand="@BrandKey(groupItems[0].Name)">
                                         @await Component.InvokeAsync("BranchCard", new { model = groupItems[0] })
                                     </div>
                                 }
@@ -270,7 +312,9 @@
                                     <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                                         @foreach (var branch in groupItems)
                                         {
-                                            @await Component.InvokeAsync("BranchCard", new { model = branch })
+                                            <div class="h-full" data-branch-brand="@BrandKey(branch.Name)">
+                                                @await Component.InvokeAsync("BranchCard", new { model = branch })
+                                            </div>
                                         }
                                     </div>
                                 }
@@ -304,4 +348,5 @@
 
 @section Scripts {
     <script src="~/js/branch-locator.js" asp-append-version="true"></script>
+    <script src="~/js/branch-brand-filter.js" asp-append-version="true" defer></script>
 }
