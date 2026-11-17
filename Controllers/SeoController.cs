@@ -13,6 +13,7 @@ public class SeoController : Controller
         "/gioi-thieu",
         "/thanh-vien",
         "/lien-he-nhuong-quyen",
+        "/tuyen-dung",
         "/thuc-don",
         "/dat-ban",
         "/chi-nhanh",
