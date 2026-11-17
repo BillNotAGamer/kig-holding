@@ -184,3 +184,18 @@
     width: 16px;
     height: 16px;
 }
+
+/* 1024-1279px: tighten header spacing so the nav stays on one line next to both buttons. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+    [data-site-header] nav {
+        gap: 1rem;
+    }
+
+    [data-site-header] nav > div.flex-1 > div {
+        gap: 0.9rem;
+    }
+
+    [data-site-header] .nav-link {
+        white-space: nowrap;
+    }
+}
