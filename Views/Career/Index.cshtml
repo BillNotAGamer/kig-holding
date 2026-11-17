@@ -1,0 +1,180 @@
+@{
+    var positions = new[]
+    {
+        (Index: "01", Title: "Nhân viên phục vụ", Copy: "Đón khách, giới thiệu món, phục vụ bàn và giữ trải nghiệm dùng bữa trọn vẹn. Có ca full-time và part-time."),
+        (Index: "02", Title: "Phụ bếp / Đầu bếp", Copy: "Sơ chế, chế biến món Hàn Quốc theo công thức chuẩn của hệ thống: mì champong, mì tương đen, thịt nướng, gukbap."),
+        (Index: "03", Title: "Thu ngân", Copy: "Thanh toán, xuất hóa đơn, hỗ trợ đặt bàn và chương trình thành viên tại quầy."),
+        (Index: "04", Title: "Quản lý ca / Cửa hàng", Copy: "Điều phối nhân sự, kiểm soát chất lượng món và dịch vụ, báo cáo vận hành mỗi ca.")
+    };
+
+    var benefits = new[]
+    {
+        (Index: "01", Title: "Đào tạo bài bản", Copy: "Được hướng dẫn quy trình phục vụ, chế biến và vận hành chuẩn ngay từ ngày đầu."),
+        (Index: "02", Title: "Lộ trình thăng tiến", Copy: "Cơ hội phát triển từ nhân viên lên trưởng ca, quản lý trong hệ thống nhiều chi nhánh."),
+        (Index: "03", Title: "Môi trường năng động", Copy: "Làm việc cùng đội ngũ trẻ trong chuỗi nhà hàng Hàn Quốc đang mở rộng."),
+        (Index: "04", Title: "Bữa ăn tại nhà hàng", Copy: "Dùng bữa cùng đồng đội trong ca làm, trải nghiệm chính các món của thương hiệu.")
+    };
+
+    const string zaloUrl = "https://oa.zalo.me/3191309080595223416";
+    const string hiringEmail = "truyenthuyetchamponghcm@gmail.com";
+    const string hotline = "0922 055 755";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/career-page.css" asp-append-version="true" />
+}
+
+<main class="public-editorial-page career-page">
+    <div class="public-editorial-page__shell">
+        <div class="container-page">
+            <section class="public-editorial-page__section public-editorial-page__section--hero">
+                <div class="career-hero" data-uw-reveal="fade-up" data-uw-once="true">
+                    <div class="career-hero__content">
+                        <span class="public-editorial-page__eyebrow">Tuyển dụng KIG Holding</span>
+                        <h1 class="public-editorial-page__title career-hero__title">
+                            Tuyển dụng nhà hàng Hàn Quốc – gia nhập đội ngũ Truyền Thuyết Champong, Gogi Maru, KBB Cook
+                        </h1>
+                        <p class="public-editorial-page__lead">
+                            KIG Holding tìm kiếm phục vụ, bếp, thu ngân và quản lý ca cho hệ thống nhà hàng Hàn Quốc tại TP.HCM và Nha Trang.
+                            Ứng tuyển nhanh qua Zalo, email hoặc hotline.
+                        </p>
+                        <div class="public-editorial-page__actions">
+                            <a class="public-editorial-page__button public-editorial-page__button--primary"
+                               href="@zaloUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               data-tiktok-event="Contact"
+                               data-tiktok-label="Career Zalo Apply"
+                               data-tiktok-content-type="career_page">
+                                Ứng tuyển qua Zalo
+                            </a>
+                            <a class="public-editorial-page__button public-editorial-page__button--secondary"
+                               href="mailto:@hiringEmail?subject=@Uri.EscapeDataString("Ứng tuyển - KIG Holding")"
+                               data-tiktok-event="Contact"
+                               data-tiktok-label="Career Email Apply"
+                               data-tiktok-content-type="career_page">
+                                Gửi CV qua email
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="career-hero__media">
+                        <img src="/images/about/images/test-2.webp"
+                             alt="Không gian nhà hàng Hàn Quốc trong hệ thống KIG Holding"
+                             class="career-hero__image"
+                             width="1200"
+                             height="900"
+                             decoding="async"
+                             fetchpriority="high" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section" aria-labelledby="career-positions-heading">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Vị trí đang tuyển</span>
+                    <h2 class="public-editorial-page__section-title" id="career-positions-heading">
+                        Việc làm nhà hàng: phục vụ, bếp, thu ngân, quản lý
+                    </h2>
+                    <p class="public-editorial-page__section-copy">
+                        Nhu cầu tuyển dụng thay đổi theo từng chi nhánh. Liên hệ để được báo vị trí còn trống gần bạn nhất.
+                    </p>
+                </div>
+
+                <div class="public-editorial-page__grid grid-cols-1 gap-y-6 sm:grid-cols-2 xl:grid-cols-4">
+                    @foreach (var position in positions)
+                    {
+                        <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
+                            <span class="public-editorial-page__item-index">@position.Index</span>
+                            <h3 class="public-editorial-page__item-title">@position.Title</h3>
+                            <p class="public-editorial-page__item-copy">@position.Copy</p>
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section" aria-labelledby="career-benefits-heading">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Vì sao chọn KIG Holding</span>
+                    <h2 class="public-editorial-page__section-title" id="career-benefits-heading">
+                        Làm việc trong chuỗi nhà hàng Hàn Quốc đang phát triển
+                    </h2>
+                </div>
+
+                <div class="public-editorial-page__grid grid-cols-1 gap-y-6 sm:grid-cols-2 xl:grid-cols-4">
+                    @foreach (var benefit in benefits)
+                    {
+                        <article class="public-editorial-page__item" data-uw-reveal="fade-up" data-uw-once="true" data-uw-delay="80">
+                            <span class="public-editorial-page__item-index">@benefit.Index</span>
+                            <h3 class="public-editorial-page__item-title">@benefit.Title</h3>
+                            <p class="public-editorial-page__item-copy">@benefit.Copy</p>
+                        </article>
+                    }
+                </div>
+
+                <div class="career-gallery" data-uw-reveal="fade-up" data-uw-once="true">
+                    <img src="/images/home/images/banner2.webp" alt="Thịt nướng Hàn Quốc tại Gogi Maru" class="career-gallery__image" width="1672" height="941" loading="lazy" decoding="async" />
+                    <img src="/images/about/images/about-banner-1.webp" alt="Mì champong và mì tương đen Truyền Thuyết Champong" class="career-gallery__image" width="1600" height="901" loading="lazy" decoding="async" />
+                    <img src="/images/home/images/kbb-cook-img.webp" alt="Buffet nướng Hàn Quốc KBB Cook" class="career-gallery__image" width="1000" height="1000" loading="lazy" decoding="async" />
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section" aria-labelledby="career-steps-heading">
+                <div class="public-editorial-page__section-head" data-uw-reveal="fade-up" data-uw-once="true">
+                    <span class="public-editorial-page__eyebrow">Quy trình ứng tuyển</span>
+                    <h2 class="public-editorial-page__section-title" id="career-steps-heading">3 bước để gia nhập đội ngũ</h2>
+                </div>
+
+                <div class="public-editorial-page__steps mt-6">
+                    <article class="public-editorial-page__step">
+                        <span class="public-editorial-page__step-index">01</span>
+                        <div>
+                            <h3 class="public-editorial-page__step-title">Gửi thông tin</h3>
+                            <p class="public-editorial-page__step-copy">Nhắn Zalo hoặc gửi email: họ tên, số điện thoại, vị trí và khu vực muốn làm.</p>
+                        </div>
+                    </article>
+                    <article class="public-editorial-page__step">
+                        <span class="public-editorial-page__step-index">02</span>
+                        <div>
+                            <h3 class="public-editorial-page__step-title">Phỏng vấn tại chi nhánh</h3>
+                            <p class="public-editorial-page__step-copy">Bộ phận nhân sự liên hệ hẹn lịch phỏng vấn tại chi nhánh gần bạn.</p>
+                        </div>
+                    </article>
+                    <article class="public-editorial-page__step">
+                        <span class="public-editorial-page__step-index">03</span>
+                        <div>
+                            <h3 class="public-editorial-page__step-title">Nhận việc và đào tạo</h3>
+                            <p class="public-editorial-page__step-copy">Bắt đầu làm việc kèm hướng dẫn quy trình chuẩn của hệ thống.</p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="public-editorial-page__section public-editorial-page__section--cta">
+                <div class="public-editorial-page__cta" data-uw-reveal="fade-up" data-uw-once="true">
+                    <div class="public-editorial-page__cta-copy">
+                        <h2 class="public-editorial-page__section-title">Sẵn sàng ứng tuyển?</h2>
+                        <p class="public-editorial-page__section-copy">
+                            Hotline <a href="tel:@hotline.Replace(" ", string.Empty)" class="career-link">@hotline</a> ·
+                            Email <a href="mailto:@hiringEmail" class="career-link">@hiringEmail</a>
+                        </p>
+                    </div>
+                    <div class="public-editorial-page__cta-actions">
+                        <a class="public-editorial-page__button public-editorial-page__button--primary"
+                           href="@zaloUrl"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           data-tiktok-event="Contact"
+                           data-tiktok-label="Career Zalo Apply Bottom"
+                           data-tiktok-content-type="career_page">
+                            Ứng tuyển qua Zalo
+                        </a>
+                        <a class="public-editorial-page__button public-editorial-page__button--secondary" href="/lien-he-nhuong-quyen">
+                            Hợp tác nhượng quyền
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
