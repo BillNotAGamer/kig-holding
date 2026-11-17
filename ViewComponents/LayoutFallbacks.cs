@@ -39,7 +39,8 @@ internal static class LayoutFallbacks
                     CreateNavItem("Liên hệ", "/lien-he", path, exact: true)
                 ]),
             // Future route: create page/controller later if needed.
-            CreateNavItem("Nhượng quyền", "/lien-he-nhuong-quyen", path, exact: true)
+            CreateNavItem("Nhượng quyền", "/lien-he-nhuong-quyen", path, exact: true),
+            CreateNavItem("Tuyển dụng", "/tuyen-dung", path, exact: true)
         ];
     }
 
@@ -75,6 +76,12 @@ internal static class LayoutFallbacks
             {
                 Label = "Nhượng quyền",
                 Url = "/lien-he-nhuong-quyen",
+                IsActive = false
+            },
+            new NavItemViewModel
+            {
+                Label = "Tuyển dụng",
+                Url = "/tuyen-dung",
                 IsActive = false
             },
             new NavItemViewModel
