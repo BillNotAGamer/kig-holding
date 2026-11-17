@@ -3,7 +3,6 @@
     const conversionId = 'AW-17917718766';
     const labels = {
         reservation: 'nMG0COGkz_MbEO7h6t9C', // TechSol - Form đặt bàn 22118
-        messenger: 'wdgjCOnM3PMbEO7h6t9C',   // TechSol - Messenger 8597
         zalo: 'hCduCK7fubkdEO7h6t9C'         // KIG - Click Zalo (kigholding.vn)
     };
     const trackedOnLoadAttribute = 'data-gads-onload-tracked';
