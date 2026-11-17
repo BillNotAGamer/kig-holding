@@ -286,6 +286,10 @@ public static class SeoArticleComposer
         {
             title = title.ToLowerInvariant();
             title = char.ToUpperInvariant(title[0]) + title[1..];
+            foreach (var name in new[] { Champong.Name, KbbCook.Name, GogiMaru.Name, SeoulGukbap.Name, "Champong", "KIG Holding" })
+            {
+                title = Regex.Replace(title, Regex.Escape(name), name, RegexOptions.IgnoreCase);
+            }
         }
 
         title = Shorten(title, 70);
