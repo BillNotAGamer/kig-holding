@@ -34,7 +34,7 @@
         ? rawMetaDescription
         : !string.IsNullOrWhiteSpace(siteSetting?.Slogan)
             ? siteSetting!.Slogan
-            : "Truyền Thuyết Champong - nhà hàng Hàn Quốc: mì cay champong, mì tương đen, thịt nướng Gogi Maru, buffet nướng KBB Cook.";
+            : "Truyền Thuyết Champong - nhà hàng Hàn Quốc: mì tương đen, mì champong, thịt nướng Gogi Maru, buffet nướng KBB Cook.";
     metaDescription = TrimForSnippet(metaDescription, 160);
 
     var baseUrl = GetConfiguredBaseUrl(Configuration, Context.Request);
