@@ -154,9 +154,14 @@ app.UseStaticFiles(new StaticFileOptions
             return;
         }
 
+        if (path.StartsWithSegments("/images"))
+        {
+            headers[HeaderNames.CacheControl] = "public,max-age=604800";
+            return;
+        }
+
         if (path.StartsWithSegments("/css") ||
             path.StartsWithSegments("/js") ||
-            path.StartsWithSegments("/images") ||
             path.StartsWithSegments("/lib"))
         {
             headers[HeaderNames.CacheControl] = "public,max-age=3600";
