@@ -54,6 +54,7 @@ public sealed class AutoNewsPublisher
         await RunLock.WaitAsync(cancellationToken);
         try
         {
+            await RepairEvergreenLinksAsync(cancellationToken);
             var imported = await ImportFacebookPostsAsync(cancellationToken);
 
             string? evergreenTitle = null;
@@ -86,6 +87,30 @@ public sealed class AutoNewsPublisher
         {
             RunLock.Release();
         }
+    }
+
+    /// <summary>Rebuilds evergreen articles saved before internal links were made absolute.</summary>
+    private async Task RepairEvergreenLinksAsync(CancellationToken cancellationToken)
+    {
+        var slugs = KoreanFoodArticleLibrary.Articles.Select(x => x.Slug).ToList();
+        var marker = SeoArticleComposer.SiteBaseUrl + "/dat-ban";
+        var posts = await _dbContext.Posts
+            .Where(x => slugs.Contains(x.Slug) && !x.Content.Contains(marker))
+            .ToListAsync(cancellationToken);
+        if (posts.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var post in posts)
+        {
+            var article = KoreanFoodArticleLibrary.Articles.First(x => x.Slug == post.Slug);
+            post.Content = _sanitizer.Sanitize(article.BuildHtml());
+            post.UpdatedAt = DateTimeOffset.UtcNow;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        _newsService.InvalidateNewsCache();
     }
 
     private async Task<int> ImportFacebookPostsAsync(CancellationToken cancellationToken)
