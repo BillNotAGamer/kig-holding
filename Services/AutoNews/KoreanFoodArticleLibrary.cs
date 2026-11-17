@@ -18,8 +18,8 @@ public sealed record EvergreenArticle(
         return BodyHtml +
                $"<h2>Thưởng thức tại {Brand.Name}</h2>" +
                $"<p>{Brand.Name} thuộc hệ thống KIG Holding, phục vụ {Brand.Dishes} theo phong cách Hàn Quốc. " +
-               "Xem <a href=\"/thuc-don\">thực đơn</a>, <a href=\"/chi-nhanh\">địa chỉ chi nhánh</a> " +
-               "hoặc <a href=\"/dat-ban\">đặt bàn online</a> để giữ chỗ. " +
+               "Xem <a href=\"" + SeoArticleComposer.SiteBaseUrl + "/thuc-don\">thực đơn</a>, <a href=\"" + SeoArticleComposer.SiteBaseUrl + "/chi-nhanh\">địa chỉ chi nhánh</a> " +
+               "hoặc <a href=\"" + SeoArticleComposer.SiteBaseUrl + "/dat-ban\">đặt bàn online</a> để giữ chỗ. " +
                SeoArticleComposer.BookingConditions + "</p>";
     }
 }
