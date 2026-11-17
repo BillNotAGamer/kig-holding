@@ -1,0 +1,230 @@
+/* /thanh-vien hero: app download banner (mascot visual + benefits + QR + store buttons). */
+.member-app-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    overflow: hidden;
+    border-radius: 1.75rem;
+    background: #f1f2f4;
+    color: #0b0b0b;
+    padding: clamp(1.75rem, 4vw, 3.25rem) clamp(1.25rem, 4vw, 3.5rem);
+}
+
+.member-app-hero__visual {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 30rem;
+    margin-inline: auto;
+}
+
+.member-app-hero__circle {
+    position: absolute;
+    inset: 6%;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 35% 30%, #ff3b45 0%, #e50914 55%, #b91c1c 100%);
+    box-shadow: 0 30px 60px rgba(229, 9, 20, 0.25);
+}
+
+.member-app-hero__mascot {
+    position: relative;
+    z-index: 1;
+    width: 88%;
+    height: auto;
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.25));
+}
+
+.member-app-hero__badge {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    border-radius: 9999px;
+    font-weight: 800;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+    animation: member-app-hero-float 4s ease-in-out infinite;
+}
+
+.member-app-hero__badge--points {
+    top: 8%;
+    right: 2%;
+    padding: 0.55rem 0.95rem;
+    background: #e3c06a;
+    color: #0b0b0b;
+    font-size: 0.95rem;
+}
+
+.member-app-hero__badge--gift {
+    bottom: 10%;
+    left: 4%;
+    width: 3.25rem;
+    height: 3.25rem;
+    background: #0b0b0b;
+    color: #e3c06a;
+    font-size: 1.35rem;
+    animation-delay: 1.2s;
+}
+
+@keyframes member-app-hero-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .member-app-hero__badge {
+        animation: none;
+    }
+}
+
+.member-app-hero__eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #e50914;
+}
+
+.member-app-hero__title {
+    margin: 0.6rem 0 0;
+    font-size: clamp(1.75rem, 3.2vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: #0b0b0b;
+}
+
+.member-app-hero__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 1.75rem;
+}
+
+.member-app-hero__benefits {
+    display: grid;
+    gap: 1.15rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.member-app-hero__benefit {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.member-app-hero__benefit svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    color: #e50914;
+}
+
+.member-app-hero__qr {
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    background: #ffffff;
+}
+
+.member-app-hero__stores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.member-app-hero__store {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 14rem;
+    padding: 0.8rem 1.6rem;
+    border-radius: 9999px;
+    background: #0b0b0b;
+    color: #ffffff;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.member-app-hero__store:hover,
+.member-app-hero__store:focus-visible {
+    background: #e50914;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.member-app-hero__store:focus-visible {
+    outline: 2px solid #e3c06a;
+    outline-offset: 3px;
+}
+
+.member-app-hero__store svg {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.member-app-hero__store-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.member-app-hero__store-text small {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.member-app-hero__store-text strong {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+@media (max-width: 1023px) {
+    .member-app-hero {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+
+    .member-app-hero__visual {
+        max-width: 20rem;
+    }
+}
+
+@media (max-width: 639px) {
+    .member-app-hero {
+        border-radius: 1.25rem;
+    }
+
+    .member-app-hero__visual {
+        max-width: 15rem;
+    }
+
+    /* Phones can't scan their own screen: hide QR, keep the store buttons. */
+    .member-app-hero__qr {
+        display: none;
+    }
+
+    .member-app-hero__benefit {
+        font-size: 0.98rem;
+    }
+
+    .member-app-hero__stores {
+        flex-direction: column;
+    }
+
+    .member-app-hero__store {
+        justify-content: center;
+        width: 100%;
+    }
+}
