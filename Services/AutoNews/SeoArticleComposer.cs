@@ -41,6 +41,9 @@ public static class SeoArticleComposer
         "Seoul Gukbap", "gukbap", "dwaeji gukbap – canh cơm xương heo kiểu Busan",
         "/images/home/images/seoul-gukbap.webp");
 
+    /// <summary>Absolute site URL: the HTML sanitizer drops relative links.</summary>
+    public const string SiteBaseUrl = "https://www.kigholding.vn";
+
     public const string BookingConditions =
         "Điều kiện đặt bàn: thứ 2 – thứ 6 từ 6 khách, thứ 7 – chủ nhật từ 10 khách; nhóm từ 20 khách cần đặt cọc giữ bàn.";
 
@@ -140,11 +143,11 @@ public static class SeoArticleComposer
         html.Append("<h2>").Append(Encode($"Về {brand.Name}")).Append("</h2>");
         html.Append("<p>")
             .Append(Encode($"{brand.Name} thuộc hệ thống KIG Holding, phục vụ {brand.Dishes} theo phong cách Hàn Quốc. "))
-            .Append("Xem đầy đủ món tại <a href=\"/thuc-don\">thực đơn</a> và ")
-            .Append("<a href=\"/chi-nhanh\">địa chỉ chi nhánh gần bạn</a>.</p>");
+            .Append("Xem đầy đủ món tại <a href=\"" + SiteBaseUrl + "/thuc-don\">thực đơn</a> và ")
+            .Append("<a href=\"" + SiteBaseUrl + "/chi-nhanh\">địa chỉ chi nhánh gần bạn</a>.</p>");
 
         html.Append("<h2>Đặt bàn trước để giữ chỗ</h2>");
-        html.Append("<p>Bạn có thể <a href=\"/dat-ban\">đặt bàn online</a> hoặc gọi hotline chi nhánh. ")
+        html.Append("<p>Bạn có thể <a href=\"" + SiteBaseUrl + "/dat-ban\">đặt bàn online</a> hoặc gọi hotline chi nhánh. ")
             .Append(Encode(BookingConditions))
             .Append("</p>");
 
