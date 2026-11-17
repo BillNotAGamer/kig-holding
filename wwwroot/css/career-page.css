@@ -1,0 +1,75 @@
+/* /tuyen-dung: hero with photo + small gallery. Plain CSS (no Tailwind rebuild needed). */
+.career-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.career-hero__content {
+    display: grid;
+    gap: 1.1rem;
+}
+
+.career-hero__title {
+    max-width: 22ch;
+}
+
+.career-hero__media {
+    overflow: hidden;
+    border-radius: 1.5rem;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.career-hero__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.career-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.career-gallery__image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 1rem;
+}
+
+.career-link {
+    color: #fca5a5;
+    font-weight: 600;
+}
+
+.career-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+@media (max-width: 1023px) {
+    .career-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .career-hero__title {
+        max-width: none;
+    }
+}
+
+@media (max-width: 639px) {
+    .career-gallery {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .career-gallery__image:last-child {
+        display: none;
+    }
+}
