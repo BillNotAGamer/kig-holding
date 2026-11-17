@@ -172,6 +172,6 @@ public class FranchiseController : Controller
     private void SetPageMetadata()
     {
         ViewData["Title"] = "Nhượng quyền nhà hàng Hàn Quốc | Champong, Gogi Maru, KBB Cook";
-        ViewData["MetaDescription"] = "Nhượng quyền nhà hàng Hàn Quốc KIG Holding: mì cay Champong, thịt nướng Gogi Maru, buffet nướng KBB Cook. Dành cho chủ mặt bằng, nhà đầu tư.";
+        ViewData["MetaDescription"] = "Nhượng quyền nhà hàng Hàn Quốc KIG Holding: mì tương đen, mì champong Truyền Thuyết Champong, Gogi Maru, KBB Cook. Dành cho chủ mặt bằng, nhà đầu tư.";
     }
 }
