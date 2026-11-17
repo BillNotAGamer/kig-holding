@@ -4,7 +4,7 @@
 
 @{
     ViewData["Title"] = "Đặt bàn Truyền Thuyết Champong, Gogi Maru, KBB Cook";
-    ViewData["MetaDescription"] = "Đặt bàn online tại Truyền Thuyết Champong, Gogi Maru, KBB Cook. Chọn chi nhánh, giờ và số khách để giữ bàn ăn mì cay, thịt nướng, buffet nướng Hàn Quốc."; ViewData["CanonicalUrl"] = "/dat-ban";
+    ViewData["MetaDescription"] = "Đặt bàn online tại Truyền Thuyết Champong, Gogi Maru, KBB Cook. Chọn chi nhánh, giờ và số khách để giữ bàn ăn mì tương đen, mì champong, thịt nướng, buffet nướng Hàn Quốc."; ViewData["CanonicalUrl"] = "/dat-ban";
     var selectedDiningOccasionCode = ReservationOptionCatalog.NormalizeSingleCode(Model.DiningOccasionCode);
     var showDiningOccasionOther = string.Equals(selectedDiningOccasionCode, ReservationOptionCatalog.OtherCode, StringComparison.Ordinal);
     var hasReservableBranches = Model.Branches.Count > 0;
