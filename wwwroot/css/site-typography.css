@@ -1,0 +1,132 @@
+/*
+ * Site-wide typography: one font family (Be Vietnam Pro) for every page,
+ * plus calmer, easier-to-read navigation and body text.
+ * Loaded after site.css so it wins over older font declarations.
+ */
+:root {
+    --font-site: "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --hub-serif: var(--font-site);
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+.font-sans,
+.font-serif {
+    font-family: var(--font-site);
+}
+
+body *:not(code):not(pre):not(kbd):not(samp) {
+    font-family: inherit;
+}
+
+/* News hub defines its own serif variable; point it at the site font (double class beats news-hub.css). */
+.news-hub.news-hub {
+    --hub-serif: var(--font-site);
+}
+
+code,
+pre,
+kbd,
+samp {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+body {
+    line-height: 1.6;
+    letter-spacing: 0;
+}
+
+p,
+li {
+    line-height: 1.7;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+}
+
+/* Header navigation: uppercase, evenly spaced, always on one line (clean restaurant-group style). */
+[data-site-header] nav {
+    gap: 1.5rem;
+}
+
+[data-site-header] nav > div.flex-1 > div {
+    gap: 1.25rem;
+}
+
+[data-site-header] .nav-link {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+[data-site-header] .nav-link:hover,
+[data-site-header] .nav-link.is-active {
+    color: #ffffff;
+}
+
+[data-site-header] .nav-link.is-active {
+    font-weight: 600;
+}
+
+/* Below 1440px the app button uses its short label so 7 menu items + 2 buttons fit. */
+@media (max-width: 1439px) {
+    .header-app__label-full {
+        display: none;
+    }
+
+    .header-app__label-short {
+        display: inline;
+    }
+
+    .header-app__button {
+        padding: 0.625rem 0.95rem;
+        letter-spacing: 0.08em;
+    }
+}
+
+/* Small laptops (1024-1279px): compact menu, icon-only app button, smaller logo. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+    [data-site-header] nav {
+        gap: 0.9rem;
+    }
+
+    [data-site-header] nav > div.flex-1 > div {
+        gap: 0.65rem;
+    }
+
+    [data-site-header] .nav-link {
+        font-size: 12px;
+        letter-spacing: 0.01em;
+    }
+
+    [data-site-header] nav > a img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .header-app__label-short {
+        display: none;
+    }
+
+    .header-app__button {
+        padding: 0.6rem 0.7rem;
+    }
+
+    [data-site-header] nav > div.shrink-0 a[data-booking-modal-trigger] {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+        letter-spacing: 0.1em;
+    }
+}

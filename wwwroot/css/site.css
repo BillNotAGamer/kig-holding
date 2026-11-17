@@ -186,7 +186,7 @@
     font-feature-settings: normal;
     font-variation-settings: normal;
     -webkit-tap-highlight-color: transparent;
-    font-family: Quicksand, ui-sans-serif, system-ui, sans-serif;
+    font-family: Be Vietnam Pro, ui-sans-serif, system-ui, sans-serif;
     line-height: 1.5;
   }
   hr {
@@ -418,7 +418,7 @@
       radial-gradient(circle at 100% 20%, #e7d9bd99, #0000 26rem),
       linear-gradient(#faf8f3 0%, #fff 45%, #f6f2ea 100%);
     min-height: 100vh;
-    font-family: Quicksand, ui-sans-serif, system-ui, sans-serif;
+    font-family: Be Vietnam Pro, ui-sans-serif, system-ui, sans-serif;
   }
   ::selection {
     color: var(--color-white);
