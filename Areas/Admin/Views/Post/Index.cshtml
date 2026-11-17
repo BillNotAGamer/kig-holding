@@ -1,4 +1,5 @@
 @model KIGHolding.Areas.Admin.ViewModels.PostIndexViewModel
+@inject Microsoft.Extensions.Options.IOptions<KIGHolding.Options.AutoNewsSettings> AutoNewsOptions
 
 @{
     ViewData["Title"] = "Quản lý bài viết";
@@ -31,6 +32,30 @@
         </div>
 
         <a asp-action="Create" class="btn-primary w-full sm:w-auto">Tạo bài viết mới</a>
+    </div>
+
+    <div class="admin-card flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-3xl">
+            <p class="admin-label mb-1">Tự động đăng bài SEO mỗi ngày</p>
+            <p class="admin-help">
+                Mỗi 3 giờ hệ thống lấy bài mới từ Fanpage, viết lại chuẩn SEO (tiêu đề, mô tả, H2, link đặt bàn) kèm hình và đăng lên Tin tức.
+                Ngày nào Fanpage không có bài, hệ thống tự đăng 1 bài về món ăn và văn hóa Hàn Quốc.
+            </p>
+            <p class="admin-help mt-1">
+                Kết nối Fanpage:
+                @if (AutoNewsOptions.Value.FacebookConfigured)
+                {
+                    <strong class="text-emerald-700">Đã kết nối</strong>
+                }
+                else
+                {
+                    <strong class="text-amber-700">Chưa kết nối</strong><span> – thêm biến AutoNews__FacebookPageId và AutoNews__FacebookAccessToken trên Railway.</span>
+                }
+            </p>
+        </div>
+        <form method="post" asp-area="Admin" asp-controller="Post" asp-action="RunAutoNews">
+            <button type="submit" class="btn-primary w-full sm:w-auto">Chạy đăng bài ngay</button>
+        </form>
     </div>
 
     <form method="get"
