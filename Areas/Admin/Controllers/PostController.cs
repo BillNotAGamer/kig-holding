@@ -242,6 +242,24 @@ public class PostController : AdminBaseController
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RunAutoNews()
+    {
+        var publisher = HttpContext.RequestServices.GetRequiredService<KIGHolding.Services.AutoNews.AutoNewsPublisher>();
+        try
+        {
+            var result = await publisher.RunAsync(manual: true, HttpContext.RequestAborted);
+            SetSuccessMessage(result.Message);
+        }
+        catch (Exception)
+        {
+            SetErrorMessage("Không thể chạy đăng bài tự động. Vui lòng thử lại sau.");
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id)
     {
