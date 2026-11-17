@@ -112,6 +112,7 @@ builder.Services.AddScoped<IImageWebpMigrationService, ImageWebpMigrationService
 builder.Services.AddScoped<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddScoped<AdminCookieAuthenticationEvents>();
 builder.Services.AddHostedService<ReservationPolicyCleanupHostedService>();
+builder.Services.AddHostedService<MetaAudienceSyncHostedService>();
 
 var app = builder.Build();
 
