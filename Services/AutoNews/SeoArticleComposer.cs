@@ -106,7 +106,7 @@ public static class SeoArticleComposer
 
     public static ComposedArticle? Compose(FacebookPagePost post)
     {
-        var lines = CleanLines(post.Message);
+        var lines = CleanLines(StripSecondaryParts(post.Message));
         var bodyText = string.Join(' ', lines.Select(PlainText));
         if (bodyText.Length < 40)
         {
@@ -230,6 +230,18 @@ public static class SeoArticleComposer
         {
             html.Append("</ul>");
         }
+    }
+
+    /// <summary>
+    /// Keeps only the Vietnamese main part of a post: drops the "[English below]" marker and everything
+    /// after the first separator line (English translation, repeated contact/footer block).
+    /// </summary>
+    private static string StripSecondaryParts(string message)
+    {
+        var text = message.Replace("\r", string.Empty);
+        var main = Regex.Split(text, @"\n\s*[-–—_=]{5,}\s*\n")[0];
+        main = Regex.Replace(main, @"^\s*\[(english|eng)[^\]]*\]\s*$", string.Empty, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+        return main.Trim().Length >= 40 ? main : text;
     }
 
     private static List<string> CleanLines(string message)
