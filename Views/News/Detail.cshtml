@@ -21,6 +21,30 @@
         : $"/tin-tuc?category={Uri.EscapeDataString(Model.CategorySlug)}";
 }
 
+@section Styles {
+    <style>
+        /* Blog images: never upscale (stays sharp), fit any screen, keep tall photos at a readable height. */
+        .news-detail-media--hero { display: flex; justify-content: center; background: #111; }
+        .news-detail-media--hero .news-detail-media__image {
+            width: auto;
+            max-width: 100%;
+            max-height: min(85vh, 60rem);
+            margin-inline: auto;
+            object-fit: contain;
+        }
+        .article-content figure { margin: 1.75rem 0; }
+        .article-content img {
+            display: block;
+            width: auto;
+            max-width: 100%;
+            height: auto;
+            max-height: min(90vh, 64rem);
+            margin-inline: auto;
+            object-fit: contain;
+        }
+    </style>
+}
+
 @section Head {
     @if (!string.IsNullOrWhiteSpace(Model.ArticleJsonLd))
     {
