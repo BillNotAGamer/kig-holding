@@ -1,0 +1,85 @@
+/* /lien-he-nhuong-quyen: brand cards with photos + photo strip. Plain CSS (no Tailwind rebuild needed). */
+.franchise-brands {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: 2rem;
+}
+
+.franchise-brand {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.04);
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.franchise-brand:hover {
+    transform: translateY(-4px);
+    border-color: rgba(229, 9, 20, 0.45);
+}
+
+.franchise-brand__image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.franchise-brand__body {
+    padding: 1.1rem 1.2rem 1.35rem;
+}
+
+.franchise-brand__title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.franchise-brand__copy {
+    margin: 0.5rem 0 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.franchise-photos {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+}
+
+.franchise-photos__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: 22rem;
+    object-fit: cover;
+    border-radius: 1.25rem;
+}
+
+@media (max-width: 1023px) {
+    .franchise-brands {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .franchise-photos {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .franchise-photos__image--wide {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 639px) {
+    .franchise-brands {
+        grid-template-columns: 1fr;
+    }
+
+    .franchise-photos__image {
+        max-height: 16rem;
+    }
+}
