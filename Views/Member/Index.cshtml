@@ -2,40 +2,93 @@
     <div class="public-editorial-page__shell">
         <div class="container-page">
             <section class="public-editorial-page__section public-editorial-page__section--hero">
-                <div class="public-editorial-page__hero member-program__hero" data-uw-reveal="fade-up" data-uw-once="true">
-                    <span class="public-editorial-page__eyebrow">Truyền Thuyết Champong Membership</span>
-                    <h1 class="public-editorial-page__title member-program__title">
-                        Chương trình thành viên Truyền Thuyết Champong với 4 hạng tích điểm và đặc quyền dùng bữa
-                    </h1>
-                    <p class="public-editorial-page__lead member-program__lead">
-                        Trải nghiệm hành trình thành viên dành riêng cho Truyền Thuyết Champong với 4 hạng Đồng, Bạc, Vàng, Kim Cương, quyền lợi tích điểm, ưu đãi sinh nhật và quy tắc xét hạng rõ ràng sau mỗi lần dùng bữa.
-                    </p>
-                    <p class="public-editorial-page__section-copy">
-                        Thành viên khi dùng bữa tại Truyền Thuyết Champong có thể nhận điểm bằng cách sử dụng số điện thoại thành viên để đăng nhập vào hệ thống sau khi thanh toán.
-                    </p>
-
-                    <div class="member-program__hero-facts" data-uw-reveal="fade-up" data-uw-delay="100" data-uw-once="true">
-                        <article class="member-program__fact">
-                            <span class="member-program__fact-label">4 hạng thành viên</span>
-                            <strong class="member-program__fact-value">Đồng · Bạc · Vàng · Kim Cương</strong>
-                        </article>
-                        <article class="member-program__fact">
-                            <span class="member-program__fact-label">Điểm có hiệu lực</span>
-                            <strong class="member-program__fact-value">Tối đa 24 tháng</strong>
-                        </article>
-                        <article class="member-program__fact">
-                            <span class="member-program__fact-label">Xét hạng định kỳ</span>
-                            <strong class="member-program__fact-value">Ngày 1 hàng tháng</strong>
-                        </article>
+                <div class="member-app-hero" data-uw-reveal="fade-up" data-uw-once="true">
+                    <div class="member-app-hero__visual" aria-hidden="true">
+                        <span class="member-app-hero__circle"></span>
+                        <span class="member-app-hero__badge member-app-hero__badge--points">+ Điểm</span>
+                        <span class="member-app-hero__badge member-app-hero__badge--gift">%</span>
+                        <img src="/images/home/images/champong-mascot.webp"
+                             alt=""
+                             class="member-app-hero__mascot"
+                             width="1000"
+                             height="1000"
+                             decoding="async"
+                             fetchpriority="high" />
                     </div>
 
-                    <div class="public-editorial-page__actions member-program__actions">
-                        <a class="public-editorial-page__button public-editorial-page__button--primary" href="/dat-ban">
-                            Đặt bàn
-                        </a>
-                        <a class="public-editorial-page__button public-editorial-page__button--secondary" href="/chi-nhanh">
-                            Tìm chi nhánh
-                        </a>
+                    <div class="member-app-hero__content">
+                        <span class="member-app-hero__eyebrow">Chương trình thành viên Truyền Thuyết Champong</span>
+                        <h1 class="member-app-hero__title">Tải app hôm nay, tích điểm ngay mỗi bữa</h1>
+
+                        <div class="member-app-hero__row">
+                            <ul class="member-app-hero__benefits">
+                                <li class="member-app-hero__benefit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="6" y="2.5" width="12" height="19" rx="2.5"></rect>
+                                        <path d="M10.5 18h3"></path>
+                                    </svg>
+                                    <span>Đăng ký nhanh bằng số điện thoại</span>
+                                </li>
+                                <li class="member-app-hero__benefit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="8.5"></circle>
+                                        <path d="M12 7.5v9M9.5 10h3.75a1.75 1.75 0 0 1 0 3.5H10.5"></path>
+                                    </svg>
+                                    <span>Tích điểm sau mỗi lần dùng bữa</span>
+                                </li>
+                                <li class="member-app-hero__benefit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M4 10h16v10H4z"></path>
+                                        <path d="M3 7h18v3H3zM12 7v13"></path>
+                                        <path d="M12 7c-1.5-3-5-3-5-1s3 1 5 1c2 0 5 1 5-1s-3.5-2-5 1Z"></path>
+                                    </svg>
+                                    <span>4 hạng thành viên &amp; ưu đãi sinh nhật</span>
+                                </li>
+                            </ul>
+
+                            <img src="/images/general/kig-holding-qr-app.webp"
+                                 alt="Quét mã QR để tải ứng dụng Truyền Thuyết Champong"
+                                 class="member-app-hero__qr"
+                                 width="600"
+                                 height="600"
+                                 loading="lazy"
+                                 decoding="async" />
+                        </div>
+
+                        <div class="member-app-hero__stores">
+                            <a href="https://apps.apple.com/vn/app/truy%E1%BB%81n-thuy%E1%BA%BFt-champong-%EC%A0%88%EC%84%A4%EC%9D%98%EC%A7%AC%EB%BD%BB/id6753157313?l=vi"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="member-app-hero__store"
+                               aria-label="Tải ứng dụng trên App Store"
+                               data-tiktok-event="ClickButton"
+                               data-tiktok-label="Member Hero App Store"
+                               data-tiktok-content-type="member_app_hero">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M16.37 12.53c-.02-2.13 1.74-3.15 1.82-3.2-.99-1.45-2.54-1.65-3.09-1.67-1.31-.13-2.57.78-3.23.78-.67 0-1.7-.76-2.79-.74-1.43.02-2.76.84-3.5 2.12-1.5 2.6-.38 6.44 1.07 8.55.72 1.03 1.57 2.19 2.68 2.15 1.08-.04 1.48-.69 2.79-.69 1.3 0 1.67.69 2.8.67 1.16-.02 1.89-1.05 2.6-2.09.82-1.19 1.15-2.35 1.17-2.41-.03-.01-2.24-.86-2.32-3.47ZM14.24 6.27c.59-.72.99-1.71.88-2.71-.85.04-1.89.57-2.5 1.28-.55.63-1.03 1.65-.9 2.62.95.07 1.92-.48 2.52-1.19Z"></path>
+                                </svg>
+                                <span class="member-app-hero__store-text">
+                                    <small>Tải ứng dụng trên</small>
+                                    <strong>App Store</strong>
+                                </span>
+                            </a>
+                            <a href="https://play.google.com/store/apps/details?id=com.eggstech.champong.app&pcampaignid=web_share"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="member-app-hero__store"
+                               aria-label="Tải ứng dụng trên Google Play"
+                               data-tiktok-event="ClickButton"
+                               data-tiktok-label="Member Hero Google Play"
+                               data-tiktok-content-type="member_app_hero">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M4.2 2.6 13.6 12l-9.4 9.4a1.6 1.6 0 0 1-.7-1.37V3.97c0-.56.27-1.06.7-1.37Zm10.47 10.47 2.4 2.4-11.2 6.4 8.8-8.8Zm3.67-3.66 2.86 1.63c.98.56.98 1.96 0 2.52l-2.86 1.63L15.73 12l2.61-2.59ZM5.87 2.13l11.2 6.4-2.4 2.4-8.8-8.8Z"></path>
+                                </svg>
+                                <span class="member-app-hero__store-text">
+                                    <small>Tải ứng dụng trên</small>
+                                    <strong>Google Play</strong>
+                                </span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -565,6 +618,10 @@
         </div>
     </div>
 </main>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/member-app-hero.css" asp-append-version="true" />
+}
 
 @section Scripts {
     <script src="~/js/member-tier-tabs.js" asp-append-version="true" defer></script>
