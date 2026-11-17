@@ -141,20 +141,30 @@ public sealed class AutoNewsPublisher
             }
 
             var marker = SeoArticleComposer.SourceMarker(post);
-            var alreadyImported = await _dbContext.Posts.AsNoTracking()
-                .AnyAsync(x => x.Slug == article.Slug || x.Content.Contains(marker), cancellationToken);
-            if (alreadyImported)
+            var existing = await _dbContext.Posts
+                .FirstOrDefaultAsync(x => x.Slug == article.Slug || x.Content.Contains(marker), cancellationToken);
+            if (existing is not null)
             {
+                // Upgrade posts imported before full-resolution photos were supported (OgImageUrl was not set then).
+                if (existing.OgImageUrl is null && existing.Content.Contains(marker))
+                {
+                    var (upgradedThumbnail, upgradedHtml) = await BuildImagesAsync(post, article, cancellationToken);
+                    existing.Title = article.Title;
+                    existing.SeoTitle = article.SeoTitle;
+                    existing.OgTitle = article.SeoTitle;
+                    existing.Content = _sanitizer.Sanitize(upgradedHtml);
+                    existing.ThumbnailUrl = upgradedThumbnail;
+                    existing.OgImageUrl = ToAbsoluteUrl(upgradedThumbnail);
+                    existing.UpdatedAt = DateTimeOffset.UtcNow;
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    imported++;
+                }
+
                 continue;
             }
 
-            var thumbnailUrl = article.FallbackImagePath;
-            if (!string.IsNullOrWhiteSpace(post.PictureUrl))
-            {
-                thumbnailUrl = await TryUploadImageAsync(post.PictureUrl!, article.Slug, cancellationToken) ?? thumbnailUrl;
-            }
-
-            var content = _sanitizer.Sanitize(article.HtmlContent);
+            var (thumbnailUrl, htmlWithImages) = await BuildImagesAsync(post, article, cancellationToken);
+            var content = _sanitizer.Sanitize(htmlWithImages);
             _dbContext.Posts.Add(new Post
             {
                 Title = article.Title,
@@ -171,6 +181,7 @@ public sealed class AutoNewsPublisher
                 FocusKeyword = article.FocusKeyword,
                 OgTitle = article.SeoTitle,
                 OgDescription = article.SeoDescription,
+                OgImageUrl = ToAbsoluteUrl(thumbnailUrl),
                 RobotsIndex = true,
                 RobotsFollow = true,
                 CreatedAt = DateTimeOffset.UtcNow,
@@ -181,6 +192,63 @@ public sealed class AutoNewsPublisher
         }
 
         return imported;
+    }
+
+    /// <summary>
+    /// Downloads every photo of the Fanpage post in full resolution (up to 2048px), stores them,
+    /// uses the first as thumbnail and adds the others to the article as a gallery.
+    /// </summary>
+    private async Task<(string Thumbnail, string Html)> BuildImagesAsync(FacebookPagePost post, ComposedArticle article, CancellationToken cancellationToken)
+    {
+        var sources = new List<string>();
+        foreach (var photoId in post.PhotoIds.Take(6))
+        {
+            var url = await _facebookClient.GetBestPhotoUrlAsync(photoId, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                sources.Add(url);
+            }
+        }
+
+        if (sources.Count == 0 && !string.IsNullOrWhiteSpace(post.PictureUrl))
+        {
+            sources.Add(post.PictureUrl!);
+        }
+
+        var stored = new List<string>();
+        for (var i = 0; i < sources.Count; i++)
+        {
+            var url = await TryUploadImageAsync(sources[i], i == 0 ? article.Slug : $"{article.Slug}-{i + 1}", cancellationToken);
+            if (url is not null)
+            {
+                stored.Add(url);
+            }
+        }
+
+        var thumbnail = stored.Count > 0 ? stored[0] : article.FallbackImagePath;
+        var html = article.HtmlContent;
+        if (stored.Count > 1)
+        {
+            var gallery = new System.Text.StringBuilder();
+            for (var i = 1; i < stored.Count; i++)
+            {
+                gallery.Append("<figure><img src=\"")
+                    .Append(System.Net.WebUtility.HtmlEncode(stored[i]))
+                    .Append("\" alt=\"")
+                    .Append(System.Net.WebUtility.HtmlEncode($"{article.Title} – ảnh {i + 1}"))
+                    .Append("\" loading=\"lazy\" /></figure>");
+            }
+
+            var index = html.IndexOf("<h2>Về ", StringComparison.Ordinal);
+            html = index >= 0 ? html.Insert(index, gallery.ToString()) : html + gallery.ToString();
+        }
+
+        return (thumbnail, html);
+    }
+
+    private static string ToAbsoluteUrl(string url)
+    {
+        return url.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? url : SeoArticleComposer.SiteBaseUrl + url;
     }
 
     private async Task<bool> HasPostPublishedTodayAsync(DateTimeOffset vietnamNow, CancellationToken cancellationToken)
