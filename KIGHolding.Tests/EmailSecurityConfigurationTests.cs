@@ -155,7 +155,7 @@ public sealed class EmailSecurityConfigurationTests
     }
 
     [Fact]
-    public void CaseE_Production_WithMissingEnableFlag_ResolvesNoOp()
+    public void CaseE_Production_WithMissingEnableFlag_DefaultsToRealEmailService()
     {
         var sp = BuildServices(Environments.Production, new Dictionary<string, string?>
         {
@@ -164,8 +164,8 @@ public sealed class EmailSecurityConfigurationTests
         });
 
         var emailService = sp.GetRequiredService<IEmailService>();
-        Assert.IsType<NoOpEmailService>(emailService);
-        Assert.Null(sp.GetService<IResend>());
+        Assert.IsType<EmailService>(emailService);
+        Assert.NotNull(sp.GetService<IResend>());
     }
 
     [Fact]
