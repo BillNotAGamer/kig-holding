@@ -3,6 +3,7 @@ using KIGHolding.Hubs;
 using KIGHolding.Models.Entities;
 using KIGHolding.Options;
 using KIGHolding.Services;
+using KIGHolding.Services.AutoNews;
 using KIGHolding.Services.Notifications;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -113,6 +114,10 @@ builder.Services.AddScoped<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>
 builder.Services.AddScoped<AdminCookieAuthenticationEvents>();
 builder.Services.AddHostedService<ReservationPolicyCleanupHostedService>();
 builder.Services.AddHostedService<MetaAudienceSyncHostedService>();
+builder.Services.Configure<AutoNewsSettings>(builder.Configuration.GetSection("AutoNews"));
+builder.Services.AddScoped<FacebookPagePostClient>();
+builder.Services.AddScoped<AutoNewsPublisher>();
+builder.Services.AddHostedService<AutoNewsHostedService>();
 
 var app = builder.Build();
 
