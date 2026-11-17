@@ -44,7 +44,7 @@ public sealed class FacebookPagePostClient
 
         var version = string.IsNullOrWhiteSpace(_settings.GraphApiVersion) ? "v21.0" : _settings.GraphApiVersion.Trim();
         var url = $"https://graph.facebook.com/{version}/{Uri.EscapeDataString(_settings.FacebookPageId.Trim())}/posts" +
-                  $"?fields=id,message,created_time,full_picture,permalink_url,attachments{type,target{id},subattachments{type,target{id}}}&limit={Math.Clamp(limit, 1, 50)}" +
+                  $"?fields=id,message,created_time,full_picture,permalink_url,attachments{{type,target{{id}},subattachments{{type,target{{id}}}}}}&limit={Math.Clamp(limit, 1, 50)}" +
                   $"&access_token={Uri.EscapeDataString(_settings.FacebookAccessToken.Trim())}";
 
         try
