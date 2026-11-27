@@ -52,8 +52,8 @@
         { sel: '.site-header .nav-link', inset: 3, maxH: 3.2, text: true },
         { sel: '.site-header .header-app__button, .site-header [data-booking-modal-trigger]', inset: 15, maxH: 7 },
         { sel: 'button, a[class*="btn"], a[class*="button"], [role="button"], .rounded-button, input[type="submit"]', inset: 0.14, maxH: 6, page: true },
-        { sel: '.card-hover, article', inset: 0.06, maxH: 7, page: true },
-        { sel: 'main h1, main h2', inset: 0, maxH: 3.4, text: true, page: true }
+        { sel: '.card-hover, article, figure, [class$="-card"], [class*="-card "]', inset: 0.06, maxH: 7, page: true },
+        { sel: 'main h1, main h2, main h3', inset: 0, maxH: 3.4, text: true, page: true }
     ];
 
     // Sprite dựng sẵn: lõi trắng + viền xanh nhạt để thấy được cả trên nền sáng
@@ -115,6 +115,8 @@
     var store = typeof WeakMap === 'function' ? new WeakMap() : null;   // el -> tuyết đang bám (giữ khi cuộn đi rồi quay lại)
     var candidates = [];
     var geometryDirty = true;
+    var lastRefreshY = 0;
+    var needRefresh = false;
 
     function isUsable(el, cfg) {
         if (el.closest('[data-noel-root]')) { return false; }
@@ -132,12 +134,16 @@
         var list = [];
         TARGETS.forEach(function (cfg) {
             document.querySelectorAll(cfg.sel).forEach(function (el) {
-                if (seen.indexOf(el) !== -1 || !isUsable(el, cfg)) { return; }
+                if (seen.indexOf(el) !== -1) { return; }
+                var near = el.getBoundingClientRect();   // chỉ xét phần tử gần màn hình hiện tại
+                if (near.bottom < -250 || near.top > height + 250) { return; }
+                if (!isUsable(el, cfg)) { return; }
                 seen.push(el);
                 list.push({ el: el, cfg: cfg });
             });
         });
-        candidates = list.slice(0, 120);
+        candidates = list.slice(0, 260);
+        lastRefreshY = window.pageYOffset || 0;
     }
 
     function measureLedges(full) {
@@ -164,7 +170,7 @@
             var ledge = store ? store.get(el) : null;
             if (!ledge) {
                 ledge = { el: el, n: n, h: new Float32Array(n), maxH: cfg.maxH };
-                prefill(ledge, cfg.page ? 0.35 : 1);
+                prefill(ledge, cfg.page ? 0.9 : 1);
                 if (store) { store.set(el, ledge); }
             } else if (ledge.n !== n) {
                 // đổi kích thước thì giữ nguyên lượng tuyết đã có
@@ -425,7 +431,8 @@
         var dt = Math.min((now - lastTime) / 1000 || 0.016, 0.05);
         lastTime = now;
 
-        if (now - measureTimer > 600) {
+        if (now - measureTimer > 600 || needRefresh) {
+            needRefresh = false;
             measureTimer = now;
             measureLedges(true);
             geometryDirty = false;
@@ -483,7 +490,11 @@
         ctx.globalAlpha = 1;
     }
 
-    window.addEventListener('scroll', function () { geometryDirty = true; }, { passive: true });
+    window.addEventListener('scroll', function () {
+        geometryDirty = true;
+        // cuộn xa so với lần quét trước thì quét lại danh sách phần tử để mục mới hiện ra có tuyết bám sẵn
+        if (Math.abs((window.pageYOffset || 0) - lastRefreshY) > 120) { needRefresh = true; }
+    }, { passive: true });
 
     var resizeTimer = 0;
     window.addEventListener('resize', function () {
