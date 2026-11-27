@@ -102,56 +102,62 @@
         '<rect x="20.5" y="18" width="27" height="7.5" rx="3.75" fill="#fff"/><circle cx="57" cy="17" r="4.8" fill="#fff"/>' +
         '</svg>';
 
+    // Xe trượt: dùng đúng hình gốc. Ông già Noel được tách riêng khỏi hình để tuột dây xuống.
     var SW = 190;
     var SH = Math.round(190 * 249 / 273);
+    var BUST_LEFT = 35.5;        // vị trí ông trên xe (px, theo hình đã co)
+    var BUST_TOP = 0.7;
+    var HAND_X = 74;             // bàn tay nắm dây (trong ảnh ông)
+    var HAND_Y = 65;
+
+    var LEGS_SVG =
+        '<svg class="noel-santa-legs" viewBox="0 0 78 46" width="78" height="46" xmlns="http://www.w3.org/2000/svg">' +
+        '<g data-leg="l"><rect x="22" y="0" width="14" height="30" rx="6" fill="#c41f1f"/><rect x="19.5" y="26" width="19" height="12" rx="5" fill="#1b1b1b"/></g>' +
+        '<g data-leg="r"><rect x="40" y="0" width="14" height="30" rx="6" fill="#b01818"/><rect x="37.5" y="26" width="19" height="12" rx="5" fill="#1b1b1b"/></g>' +
+        '</svg>';
 
     function startSanta() {
         if (reduceMotion || !/^\/?(home(\/index)?)?$/i.test(location.pathname.replace(/\/+$/, '') || '/')) { return; }
         var clip = document.createElement('div');
         clip.className = 'noel-climber';
         clip.setAttribute('aria-hidden', 'true');
-        clip.innerHTML = '<div class="noel-deer"><img src="/images/seasonal/santa-sleigh.webp" alt="" width="' + SW + '" height="' + SH + '" decoding="async"></div>' +
-            '<div class="noel-climber__pivot"><div class="noel-climber__rope"></div><div class="noel-climber__santa">' + SANTA_SVG + '</div></div>';
+        clip.innerHTML =
+            '<div class="noel-deer">' +
+            '<img class="noel-sleigh noel-sleigh--full" src="/images/seasonal/santa-sleigh.webp" alt="" width="' + SW + '" height="' + SH + '" decoding="async">' +
+            '<img class="noel-sleigh noel-sleigh--empty" src="/images/seasonal/santa-sleigh-empty.webp" alt="" width="' + SW + '" height="' + SH + '" decoding="async">' +
+            '</div>' +
+            '<div class="noel-climber__pivot"><div class="noel-climber__rope"></div>' +
+            '<div class="noel-climber__santa">' + LEGS_SVG + '<img class="noel-santa-bust" src="/images/seasonal/santa-bust.webp" alt="" width="78" height="86" decoding="async"></div></div>';
         root.appendChild(clip);
 
         var deer = clip.firstChild;
+        var full = deer.firstChild;
+        var empty = deer.lastChild;
         var pivot = clip.lastChild;
         var rope = pivot.firstChild;
         var santa = pivot.lastChild;
-        var armL = santa.querySelector('[data-arm="l"]');
-        var armR = santa.querySelector('[data-arm="r"]');
-        var handL = santa.querySelector('[data-hand="l"]');
-        var handR = santa.querySelector('[data-hand="r"]');
         var legL = santa.querySelector('[data-leg="l"]');
         var legR = santa.querySelector('[data-leg="r"]');
 
-        var SX = SW * 0.46;          // điểm buộc dây dưới xe trượt
-        var SY = SH * 0.80;
-        var DEER_TOP = 4;            // xe trượt chạy sát mép dưới header
-        var K_RIDE = 0.9;
-        var K_HANG = 1.45;
-        var Y_RIDE = -24;
-        var STEP = 18;
-        var HALF = 0.42;
+        var SX = BUST_LEFT + HAND_X;     // điểm buộc dây = bàn tay lúc ngồi trên xe
+        var SY = BUST_TOP + HAND_Y;
+        var DEER_TOP = 4;                // xe chạy sát mép dưới header
+        var K_HANG = 1.35;
+        var Y_RIDE = BUST_TOP - SY;      // đỉnh người so với gốc dây khi ngồi trên xe
+        var HALF = 0.5;                  // giây / nhịp leo
+        var STEP = 22;
         var phase = 'wait';
         var phaseStart = performance.now();
         var waitFor = 1500;
         var deerX = -SW - 40;
-        var gait = 0;
         var Y = Y_RIDE;
         var hidden = false;
 
         function ease(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
 
-        function pose(gripL, hy, flip, kick) {
-            var hl = gripL ? hy : 30 - hy;
-            var hr = gripL ? 30 - hy : hy;
-            armL.setAttribute('y2', hl);
-            armR.setAttribute('y2', hr);
-            handL.setAttribute('cy', hl);
-            handR.setAttribute('cy', hr);
-            legL.setAttribute('transform', 'rotate(' + (flip * kick) + ' 28.5 62)');
-            legR.setAttribute('transform', 'rotate(' + (-flip * kick) + ' 39.5 62)');
+        function legs(flip, kick) {
+            legL.setAttribute('transform', 'rotate(' + (flip * kick) + ' 29 2)');
+            legR.setAttribute('transform', 'rotate(' + (-flip * kick) + ' 47 2)');
         }
 
         function frame(now) {
@@ -169,24 +175,21 @@
             if (!show) { return; }
 
             var ropeLen = Math.max(190, Math.min(250, window.innerHeight * 0.36));
-            var yHang = ropeLen - 96;
+            var yHang = ropeLen - 62 - HAND_Y;            // đỉnh người khi treo lơ lửng
             var xDrop = Math.min(vw - 150, vw * 0.88);
             var doRope = vw >= 1100;
             var xStand = xDrop - SX;
             var pivotTop = DEER_TOP + SY;
             clip.style.top = top + 'px';
-            clip.style.height = (pivotTop + ropeLen + 100) + 'px';
+            clip.style.height = (pivotTop + ropeLen + 120) + 'px';
 
             var t = now - phaseStart;
             var ang = 0;
-            var grip = true;
-            var hy = 6;
             var flip = 1;
             var kick = 0;
-            var ropeH = 0;
-            var prevX = deerX;
-            var running = false;
             var riding = true;
+            var running = false;
+            var tilt = 0;
 
             if (phase === 'wait') {
                 deerX = -SW - 40;
@@ -198,36 +201,31 @@
                 running = true;
                 if (d1 >= 1) { phase = doRope ? 'lower' : 'leave'; phaseStart = now; }
             } else if (phase === 'lower') {
-                var d2 = Math.min(1, t / 1500);
+                var d2 = Math.min(1, t / 1700);
                 Y = Y_RIDE + (yHang - Y_RIDE) * (1 - Math.pow(1 - d2, 3));
                 ang = 7 * d2 * Math.sin(d2 * 7);
-                kick = 14 * Math.sin(t / 110) * (1 - d2);
-                ropeH = Y - Y_RIDE + 36;
-                riding = d2 < 0.15;
+                kick = 16 * Math.sin(t / 120) * (1 - d2);
+                riding = false;
                 if (d2 >= 1) { phase = 'swing'; phaseStart = now; }
             } else if (phase === 'swing') {
                 var s3 = Math.min(1, t / 2600);
                 Y = yHang;
                 ang = 9 * (1 - 0.5 * s3) * Math.sin(t / 1000 * 2.2 + 0.8);
-                kick = 22 * Math.sin(t / 1000 * 5);
-                ropeH = ropeLen + 24;
+                kick = 22 * Math.sin(t / 1000 * 4.4);
                 riding = false;
                 if (s3 >= 1) { phase = 'climb'; phaseStart = now; }
             } else if (phase === 'climb') {
-                var kc = Math.max(0.55, Math.min(K_HANG, K_RIDE + (K_HANG - K_RIDE) * ((Y - Y_RIDE) / (yHang - Y_RIDE))));
                 var k = t / 1000 / HALF;
                 var n = Math.floor(k);
                 var f = k - n;
                 var e = ease(f);
-                grip = n % 2 === 0;
-                hy = 6 + STEP * e;
-                Y = yHang - (n + e) * STEP * kc;
-                flip = grip ? 1 : -1;
-                kick = 24 * Math.sin(Math.PI * f);
-                ang = 3 * Math.sin(t / 1000 * 3) * Math.max(0.2, 1 - t / 3000);
-                ropeH = Math.max(0, Y - Y_RIDE + 36);     // dây được cuộn lên theo ông
-                riding = Y < Y_RIDE + 22;
-                if (Y <= Y_RIDE) { Y = Y_RIDE; phase = 'leave'; phaseStart = now; }
+                Y = yHang - (n + e) * STEP;
+                flip = n % 2 === 0 ? 1 : -1;
+                kick = 26 * Math.sin(Math.PI * f);
+                tilt = 3.5 * Math.sin(Math.PI * (n + e));
+                ang = 2.5 * Math.sin(t / 1000 * 2.4) * Math.max(0.2, 1 - t / 4000);
+                riding = false;
+                if (Y <= Y_RIDE) { Y = Y_RIDE; phase = 'leave'; phaseStart = now; riding = true; }
             } else if (phase === 'leave') {
                 var d4 = Math.min(1, t / 9000);
                 deerX = xStand + (vw + 60 - xStand) * d4 * d4;
@@ -240,28 +238,24 @@
                 }
             }
 
-            // xe trượt: nhấp nhô nhẹ khi chạy
-            var dx = deerX - prevX;
+            // xe trượt nhấp nhô nhẹ khi chạy
             var bob = running ? 2.5 * Math.sin(now / 420) : 0;
             deer.style.transform = 'translate(' + deerX.toFixed(1) + 'px,' + (DEER_TOP + bob).toFixed(1) + 'px)';
+            full.style.visibility = riding ? 'visible' : 'hidden';
+            empty.style.visibility = riding ? 'hidden' : 'visible';
 
-            // ông già Noel
-            var kNow = Math.max(K_RIDE, Math.min(K_HANG, K_RIDE + (K_HANG - K_RIDE) * ((Y - Y_RIDE) / (yHang - Y_RIDE))));
-            if (phase === 'climb') {
-                pose(grip, hy, flip, kick);
-            } else if (riding) {
-                pose(true, 17, 1, running ? 10 * Math.sin(gait) : 0);
-            } else {
-                pose(true, 6, 1, kick);
-            }
-            var ridingBob = riding ? bob : 0;
+            // ông già Noel (hình gốc): to dần khi tuột xuống, nhỏ lại khi leo về xe
+            var ratio = Math.max(0, Math.min(1, (Y - Y_RIDE) / (yHang - Y_RIDE)));
+            var kNow = 1 + (K_HANG - 1) * ratio;
+            legs(flip, kick);
             pivot.style.left = (deerX + SX).toFixed(1) + 'px';
-            pivot.style.top = (pivotTop + ridingBob).toFixed(1) + 'px';
+            pivot.style.top = (pivotTop + (riding ? bob : 0)).toFixed(1) + 'px';
             pivot.style.transform = 'rotate(' + ang.toFixed(2) + 'deg)';
+            var ropeH = Y + HAND_Y + 20;
             rope.style.height = Math.max(0, Math.min(ropeLen + 24, ropeH)).toFixed(1) + 'px';
-            rope.style.opacity = ropeH > 2 ? '1' : '0';
-            santa.style.transform = 'translate(0,' + Y.toFixed(1) + 'px) scale(' + kNow.toFixed(3) + ')';
-            santa.style.opacity = riding ? '0' : '1';
+            rope.style.opacity = riding ? '0' : '1';
+            santa.style.visibility = riding ? 'hidden' : 'visible';
+            santa.style.transform = 'translate(' + (-HAND_X) + 'px,' + Y.toFixed(1) + 'px) rotate(' + tilt.toFixed(2) + 'deg) scale(' + kNow.toFixed(3) + ')';
         }
         window.requestAnimationFrame(frame);
     }
