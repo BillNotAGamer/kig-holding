@@ -267,3 +267,32 @@ body.theme-noel .site-header::after {
     .noel-santa-eye,
     .noel-santa-sack { animation: none; }
 }
+
+.noel-deer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 130px;
+    height: 100px;
+    transform-origin: 0 0;
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4));
+    will-change: transform;
+}
+
+.noel-deer svg {
+    display: block;
+}
+
+.noel-deer-nose {
+    animation: noel-nose 1.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px #ff3b3b);
+}
+
+@keyframes noel-nose {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .noel-deer-nose { animation: none; }
+}
