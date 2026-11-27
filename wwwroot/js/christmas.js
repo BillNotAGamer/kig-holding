@@ -238,7 +238,6 @@
     var TARGETS = [
         { sel: '.site-header .header-app__button, .site-header [data-booking-modal-trigger]', inset: 15, maxH: 7 },
         { sel: 'button, a[class*="btn"], a[class*="button"], [role="button"], .rounded-button, input[type="submit"]', inset: 0.14, maxH: 6, page: true },
-        { sel: '.card-hover, article, figure, [class$="-card"], [class*="-card "]', inset: 0.06, maxH: 7, page: true },
         { sel: 'footer.relative', inset: 0, maxH: 24, page: true, thick: true }
     ];
 
@@ -342,6 +341,7 @@
             var cfg = candidates[ci].cfg;
             var el = candidates[ci].el;
             var r = el.getBoundingClientRect();
+            if (cfg.page && !cfg.thick && (r.width > 340 || r.height > 80)) { continue; }   // chỉ nút nhỏ, không phải hàng/tab/thẻ
             if (r.width < 40 || r.height < 12 || r.bottom < 0 || r.top > height || r.right < 0 || r.left > width) { continue; }
 
             var inset = cfg.inset < 1 ? Math.min(18, r.width * cfg.inset) : cfg.inset;
