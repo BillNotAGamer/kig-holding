@@ -47,11 +47,13 @@
     var lastTime = 0;
     var measureTimer = 0;
 
-    // Chỗ tuyết có thể bám trên header (selector, lùi vào hai bên, hạ xuống, độ dày tối đa)
-    var LEDGE_TARGETS = [
-        { sel: '.site-header .nav-link', inset: 3, drop: 0, maxH: 3.2, text: true },
-        { sel: '.site-header .header-app__button', inset: 15, drop: 0, maxH: 7 },
-        { sel: '.site-header [data-booking-modal-trigger]', inset: 15, drop: 0, maxH: 7 }
+    // Những chỗ tuyết có thể bám. text = bám lên đỉnh chữ; còn lại bám lên mép trên của khối.
+    var TARGETS = [
+        { sel: '.site-header .nav-link', inset: 3, maxH: 3.2, text: true },
+        { sel: '.site-header .header-app__button, .site-header [data-booking-modal-trigger]', inset: 15, maxH: 7 },
+        { sel: 'button, a[class*="btn"], a[class*="button"], [role="button"], .rounded-button, input[type="submit"]', inset: 0.14, maxH: 6, page: true },
+        { sel: '.card-hover, article', inset: 0.06, maxH: 7, page: true },
+        { sel: 'main h1, main h2', inset: 0, maxH: 3.4, text: true, page: true }
     ];
 
     // Sprite dựng sẵn: lõi trắng + viền xanh nhạt để thấy được cả trên nền sáng
@@ -109,41 +111,76 @@
         };
     }
 
-    /* ---------- Tuyết bám trên header ---------- */
-    function measureLedges() {
-        var next = [];
-        LEDGE_TARGETS.forEach(function (cfg) {
+    /* ---------- Tuyết bám lên nút, thẻ, tiêu đề, menu ---------- */
+    var store = typeof WeakMap === 'function' ? new WeakMap() : null;   // el -> tuyết đang bám (giữ khi cuộn đi rồi quay lại)
+    var candidates = [];
+    var geometryDirty = true;
+
+    function isUsable(el, cfg) {
+        if (el.closest('[data-noel-root]')) { return false; }
+        if (cfg.page && el.closest('.site-header, .mobile-drawer, [role="dialog"], [aria-hidden="true"]')) { return false; }
+        if (typeof el.checkVisibility === 'function') {
+            try {
+                if (!el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) { return false; }
+            } catch (e) { /* trình duyệt cũ: bỏ qua */ }
+        }
+        return true;
+    }
+
+    function refreshCandidates() {
+        var seen = [];
+        var list = [];
+        TARGETS.forEach(function (cfg) {
             document.querySelectorAll(cfg.sel).forEach(function (el) {
-                var r = el.getBoundingClientRect();
-                if (r.width < 8 || r.height < 8 || r.bottom < 0 || r.top > height) { return; }
-                var x0 = r.left + cfg.inset;
-                var x1 = r.right - cfg.inset;
-                if (x1 - x0 < 10) { return; }
-                var n = Math.ceil((x1 - x0) / COL);
-                var ledge = null;
-                for (var i = 0; i < ledges.length; i++) {
-                    if (ledges[i].el === el) { ledge = ledges[i]; break; }
-                }
-                if (!ledge) {
-                    ledge = { el: el, n: n, h: new Float32Array(n), maxH: cfg.maxH };
-                    prefill(ledge);
-                } else if (ledge.n !== n) {
-                    // đổi kích thước chút ít (font tải xong...) thì giữ nguyên lượng tuyết đã có
-                    var resized = new Float32Array(n);
-                    for (var c = 0; c < n; c++) {
-                        resized[c] = ledge.h[Math.min(ledge.n - 1, Math.round(c * ledge.n / n))];
-                    }
-                    ledge.h = resized;
-                    ledge.n = n;
-                }
-                ledge.rect = { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
-                ledge.x0 = x0;
-                ledge.x1 = x1;
-                ledge.y = cfg.text ? textTopY(el, r) : r.top + cfg.drop;
-                ledge.maxH = cfg.maxH;
-                next.push(ledge);
+                if (seen.indexOf(el) !== -1 || !isUsable(el, cfg)) { return; }
+                seen.push(el);
+                list.push({ el: el, cfg: cfg });
             });
         });
+        candidates = list.slice(0, 120);
+    }
+
+    function measureLedges(full) {
+        if (full) { refreshCandidates(); }
+        var header = document.querySelector('.site-header');
+        var headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+        var next = [];
+
+        for (var ci = 0; ci < candidates.length; ci++) {
+            var cfg = candidates[ci].cfg;
+            var el = candidates[ci].el;
+            var r = el.getBoundingClientRect();
+            if (r.width < 40 || r.height < 12 || r.bottom < 0 || r.top > height || r.right < 0 || r.left > width) { continue; }
+
+            var inset = cfg.inset < 1 ? Math.min(18, r.width * cfg.inset) : cfg.inset;
+            var x0 = Math.max(r.left + inset, 0);
+            var x1 = Math.min(r.right - inset, width);
+            if (x1 - x0 < 24) { continue; }
+
+            var y = cfg.text ? textTopY(el, r) : r.top;
+            if (cfg.page && y < headerBottom + 2) { continue; }   // đang nằm dưới header thì không vẽ
+
+            var n = Math.ceil((x1 - x0) / COL);
+            var ledge = store ? store.get(el) : null;
+            if (!ledge) {
+                ledge = { el: el, n: n, h: new Float32Array(n), maxH: cfg.maxH };
+                prefill(ledge, cfg.page ? 0.35 : 1);
+                if (store) { store.set(el, ledge); }
+            } else if (ledge.n !== n) {
+                // đổi kích thước thì giữ nguyên lượng tuyết đã có
+                var resized = new Float32Array(n);
+                for (var c = 0; c < n; c++) {
+                    resized[c] = ledge.h[Math.min(ledge.n - 1, Math.round(c * ledge.n / n))];
+                }
+                ledge.h = resized;
+                ledge.n = n;
+            }
+            ledge.rect = { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+            ledge.x0 = x0;
+            ledge.x1 = x1;
+            ledge.y = y;
+            next.push(ledge);
+        }
         ledges = next;
     }
 
@@ -160,14 +197,15 @@
     }
 
     // Mở trang là tuyết đã bám sẵn: lớp nền mỏng cong hai đầu + vài mô tuyết dày hơn
-    function prefill(ledge) {
+    function prefill(ledge, scale) {
+        scale = scale || 1;
         var n = ledge.n;
         for (var i = 0; i < n; i++) {
-            ledge.h[i] = ledge.maxH * 0.42 * Math.pow(Math.sin(Math.PI * (i + 0.5) / n), 0.6);
+            ledge.h[i] = scale * ledge.maxH * 0.42 * Math.pow(Math.sin(Math.PI * (i + 0.5) / n), 0.6);
         }
         var bumps = Math.max(2, Math.round(n / 7));
         for (var b = 0; b < bumps; b++) {
-            addSnow(ledge, (Math.random() * n) | 0, ledge.maxH * (0.35 + Math.random() * 0.4));
+            addSnow(ledge, (Math.random() * n) | 0, scale * ledge.maxH * (0.35 + Math.random() * 0.4));
         }
         for (var j = 0; j < n; j++) { ledge.h[j] = Math.min(ledge.h[j], ledge.maxH * 0.88); }
     }
@@ -379,7 +417,7 @@
         var target = Math.max(28, Math.min(Math.round(width / 24), 64));
         while (flakes.length < target) { flakes.push(makeFlake(true)); }
         if (flakes.length > target) { flakes.length = target; }
-        measureLedges();
+        measureLedges(true);
     }
 
     function tick(now) {
@@ -389,7 +427,11 @@
 
         if (now - measureTimer > 600) {
             measureTimer = now;
-            measureLedges();
+            measureLedges(true);
+            geometryDirty = false;
+        } else if (geometryDirty) {
+            measureLedges(false);
+            geometryDirty = false;
         }
 
         updateSnowPhysics(dt);
@@ -440,6 +482,8 @@
         }
         ctx.globalAlpha = 1;
     }
+
+    window.addEventListener('scroll', function () { geometryDirty = true; }, { passive: true });
 
     var resizeTimer = 0;
     window.addEventListener('resize', function () {
