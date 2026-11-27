@@ -201,7 +201,7 @@ body.theme-noel .site-header::after {
     height: 0;
     overflow: hidden;
     pointer-events: none;
-    z-index: 41;
+    z-index: 54;
     transition: opacity 0.4s ease;
 }
 

@@ -103,7 +103,7 @@
         '</svg>';
 
     function startSanta() {
-        if (reduceMotion || location.pathname.replace(/\/+$/, '') !== '') { return; }
+        if (reduceMotion || !/^\/?(home(\/index)?)?$/i.test(location.pathname.replace(/\/+$/, '') || '/')) { return; }
         var clip = document.createElement('div');
         clip.className = 'noel-climber';
         clip.setAttribute('aria-hidden', 'true');
@@ -120,7 +120,7 @@
         var legL = santa.querySelector('[data-leg="l"]');
         var legR = santa.querySelector('[data-leg="r"]');
 
-        var K = 1.15;                // phóng to nhân vật
+        var K = 1.5;                // phóng to nhân vật
         var STEP = 18;               // mỗi nhịp kéo người lên 18 đơn vị svg
         var HALF = 0.62;             // giây / nhịp kéo
         var phase = 'wait';
@@ -160,10 +160,10 @@
             if (!show) { return; }
 
             ropeLen = Math.max(230, Math.min(360, window.innerHeight * 0.46));
-            hang = ropeLen - 62;
+            hang = ropeLen - 96;
             clip.style.top = top + 'px';
-            clip.style.height = (ropeLen + 70) + 'px';
-            pivot.style.left = Math.max(120, vw - Math.max(72, Math.min(150, vw * 0.075))) + 'px';
+            clip.style.height = (ropeLen + 90) + 'px';
+            pivot.style.left = Math.max(120, vw - Math.max(90, Math.min(170, vw * 0.085))) + 'px';
             rope.style.height = (ropeLen + 24) + 'px';
 
             var t = now - phaseStart;
