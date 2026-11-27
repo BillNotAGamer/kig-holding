@@ -73,7 +73,7 @@ body.theme-noel .site-header::after {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 45;
+  z-index: 55; /* trên header (50) để tuyết bám được lên nút/link, dưới menu mobile (60) */
   pointer-events: none;
 }
 
