@@ -18,6 +18,7 @@
             if (originalClass !== null) { img.setAttribute('class', originalClass); }
             img.removeAttribute('data-noel-logo');
         });
+        document.querySelectorAll('.noel-mascot-overlay').forEach(function (o) { o.parentNode && o.parentNode.removeChild(o); });
         body.classList.remove('theme-noel');
         root.parentNode && root.parentNode.removeChild(root);
         var greeting = document.querySelector('.noel-footer-greeting');
@@ -31,6 +32,192 @@
     }
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---------- Linh vật hổ: đội mũ Noel + chớp mắt nhẹ ---------- */
+    var HAT_SVG =
+        '<svg viewBox="0 0 1000 1000" width="100%" height="100%" style="overflow:visible" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+        '<linearGradient id="noelHatRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e5222f"/><stop offset="1" stop-color="#a10c16"/></linearGradient>' +
+        '<linearGradient id="noelFur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe8f3"/></linearGradient>' +
+        '<radialGradient id="noelLid" cx="50%" cy="40%" r="65%"><stop offset="0" stop-color="#fbe0cf"/><stop offset="1" stop-color="#f0c4ac"/></radialGradient>' +
+        '</defs>' +
+        '<g class="noel-lid noel-lid--l"><ellipse cx="414" cy="500" rx="62" ry="72" transform="rotate(-10 414 500)" fill="url(#noelLid)"/>' +
+        '<path d="M356 506 Q414 548 474 496" fill="none" stroke="#2a1510" stroke-width="9" stroke-linecap="round" transform="rotate(-10 414 500)"/></g>' +
+        '<g class="noel-lid noel-lid--r"><ellipse cx="636" cy="454" rx="64" ry="66" transform="rotate(-10 636 454)" fill="url(#noelLid)"/>' +
+        '<path d="M574 458 Q636 498 698 450" fill="none" stroke="#2a1510" stroke-width="9" stroke-linecap="round" transform="rotate(-10 636 454)"/></g>' +
+        '<g class="noel-hat" transform="rotate(-7 520 160)">' +
+        '<path d="M350 170 C352 86 430 24 530 22 C612 20 676 62 704 132 L700 176 Z" fill="url(#noelHatRed)"/>' +
+        '<path d="M520 30 C600 26 664 70 692 140" fill="none" stroke="#ff6b73" stroke-opacity=".35" stroke-width="10" stroke-linecap="round"/>' +
+        '<rect x="326" y="140" width="392" height="66" rx="33" fill="url(#noelFur)"/>' +
+        '<rect x="326" y="190" width="392" height="16" rx="8" fill="#b9c8dc" opacity=".35"/>' +
+        '<g class="noel-pom"><circle cx="716" cy="150" r="36" fill="url(#noelFur)"/><circle cx="706" cy="140" r="12" fill="#fff" opacity=".7"/></g>' +
+        '</g></svg>';
+
+    function dressMascot() {
+        var img = document.querySelector('img.champong-takehome__mascot');
+        if (!img || !img.parentNode) { return; }
+        var host = img.parentNode;
+        var overlay = document.createElement('div');
+        overlay.className = 'noel-mascot-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.innerHTML = HAT_SVG;
+        host.appendChild(overlay);
+
+        function place() {
+            // ảnh dùng object-fit: contain → hình thực là hình vuông căn giữa trong khung ảnh
+            var w = img.clientWidth;
+            var h = img.clientHeight;
+            var side = Math.min(w, h);
+            overlay.style.left = (img.offsetLeft + (w - side) / 2) + 'px';
+            overlay.style.top = (img.offsetTop + (h - side) / 2) + 'px';
+            overlay.style.width = side + 'px';
+            overlay.style.height = side + 'px';
+            overlay.style.display = side > 40 ? '' : 'none';
+        }
+        place();
+        img.addEventListener('load', place);
+        window.addEventListener('resize', place);
+        if (typeof ResizeObserver === 'function') { new ResizeObserver(place).observe(img); }
+    }
+    dressMascot();
+
+    /* ---------- Ông già Noel đu dây leo lên (trang chủ) ---------- */
+    var SANTA_SVG =
+        '<svg viewBox="0 0 68 100" width="68" height="100" xmlns="http://www.w3.org/2000/svg">' +
+        '<g class="noel-santa-sack"><circle cx="52" cy="66" r="11" fill="#8a5a33"/><path d="M46 57 Q52 52 58 57" fill="none" stroke="#5a3519" stroke-width="2.4" stroke-linecap="round"/></g>' +
+        '<g data-leg="l"><rect x="24" y="62" width="9" height="19" rx="4" fill="#a50d17"/><rect x="22.5" y="77" width="12" height="10" rx="3.5" fill="#1b1b1b"/></g>' +
+        '<g data-leg="r"><rect x="35" y="62" width="9" height="19" rx="4" fill="#a50d17"/><rect x="33.5" y="77" width="12" height="10" rx="3.5" fill="#1b1b1b"/></g>' +
+        '<rect x="18" y="34" width="32" height="33" rx="11" fill="#d4121f"/>' +
+        '<rect x="18" y="55" width="32" height="6" fill="#1b1b1b"/><rect x="30.5" y="54.5" width="7" height="7" rx="1.5" fill="#f2c230"/>' +
+        '<line data-arm="l" x1="23" y1="40" x2="31" y2="24" stroke="#d4121f" stroke-width="7" stroke-linecap="round"/>' +
+        '<line data-arm="r" x1="45" y1="40" x2="37" y2="24" stroke="#d4121f" stroke-width="7" stroke-linecap="round"/>' +
+        '<circle data-hand="l" cx="31" cy="24" r="4.2" fill="#fff"/><circle data-hand="r" cx="37" cy="24" r="4.2" fill="#fff"/>' +
+        '<circle cx="34" cy="27" r="11" fill="#f6d2b8"/>' +
+        '<ellipse cx="34" cy="35" rx="11.5" ry="8.5" fill="#fff"/>' +
+        '<ellipse cx="29.5" cy="31" rx="4.6" ry="2.8" fill="#fff"/><ellipse cx="38.5" cy="31" rx="4.6" ry="2.8" fill="#fff"/>' +
+        '<circle cx="34" cy="29" r="2.3" fill="#e8998a"/>' +
+        '<circle cx="29.5" cy="25" r="1.4" fill="#222" class="noel-santa-eye"/><circle cx="38.5" cy="25" r="1.4" fill="#222" class="noel-santa-eye"/>' +
+        '<circle cx="26" cy="29" r="2.2" fill="#f2a99a" opacity=".7"/><circle cx="42" cy="29" r="2.2" fill="#f2a99a" opacity=".7"/>' +
+        '<path d="M22 21 Q25 4 40 3 Q53 3 57 17 Q49 13 46 21 Z" fill="#d4121f"/>' +
+        '<rect x="20.5" y="18" width="27" height="7.5" rx="3.75" fill="#fff"/><circle cx="57" cy="17" r="4.8" fill="#fff"/>' +
+        '</svg>';
+
+    function startSanta() {
+        if (reduceMotion || location.pathname.replace(/\/+$/, '') !== '') { return; }
+        var clip = document.createElement('div');
+        clip.className = 'noel-climber';
+        clip.setAttribute('aria-hidden', 'true');
+        clip.innerHTML = '<div class="noel-climber__pivot"><div class="noel-climber__rope"></div><div class="noel-climber__santa">' + SANTA_SVG + '</div></div>';
+        root.appendChild(clip);
+
+        var pivot = clip.firstChild;
+        var rope = pivot.firstChild;
+        var santa = pivot.lastChild;
+        var armL = santa.querySelector('[data-arm="l"]');
+        var armR = santa.querySelector('[data-arm="r"]');
+        var handL = santa.querySelector('[data-hand="l"]');
+        var handR = santa.querySelector('[data-hand="r"]');
+        var legL = santa.querySelector('[data-leg="l"]');
+        var legR = santa.querySelector('[data-leg="r"]');
+
+        var K = 1.15;                // phóng to nhân vật
+        var STEP = 18;               // mỗi nhịp kéo người lên 18 đơn vị svg
+        var HALF = 0.62;             // giây / nhịp kéo
+        var phase = 'wait';
+        var phaseStart = performance.now();
+        var waitFor = 1800;
+        var ropeLen = 300;
+        var hang = 0;
+        var Y = -140;
+        var hidden = false;
+
+        function ease(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+        function pose(gripL, hy, flip, kick) {
+            // gripL: tay trái đang bám (ở cao) ; hy: độ cao tay bám (svg), tay kia ở vị trí đối xứng
+            var hl = gripL ? hy : 30 - hy;
+            var hr = gripL ? 30 - hy : hy;
+            armL.setAttribute('x2', 31); armL.setAttribute('y2', hl);
+            armR.setAttribute('x2', 37); armR.setAttribute('y2', hr);
+            handL.setAttribute('cy', hl);
+            handR.setAttribute('cy', hr);
+            legL.setAttribute('transform', 'rotate(' + (flip * kick) + ' 28.5 62)');
+            legR.setAttribute('transform', 'rotate(' + (-flip * kick) + ' 39.5 62)');
+        }
+
+        function frame(now) {
+            if (!root.isConnected) { return; }
+            window.requestAnimationFrame(frame);
+
+            var header = document.querySelector('.site-header');
+            var top = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+            var vw = window.innerWidth;
+            var show = vw >= 760 && (window.pageYOffset || 0) < 260;
+            if (show === hidden) {
+                hidden = !show;
+                clip.style.opacity = show ? '1' : '0';
+            }
+            if (!show) { return; }
+
+            ropeLen = Math.max(230, Math.min(360, window.innerHeight * 0.46));
+            hang = ropeLen - 62;
+            clip.style.top = top + 'px';
+            clip.style.height = (ropeLen + 70) + 'px';
+            pivot.style.left = Math.max(120, vw - Math.max(72, Math.min(150, vw * 0.075))) + 'px';
+            rope.style.height = (ropeLen + 24) + 'px';
+
+            var t = now - phaseStart;
+            var ang = 0;
+            var grip = true;
+            var hy = 6;
+            var flip = 1;
+            var kick = 0;
+
+            if (phase === 'wait') {
+                Y = -150;
+                if (t > waitFor) { phase = 'drop'; phaseStart = now; }
+            } else if (phase === 'drop') {
+                var d = Math.min(1, t / 1500);
+                Y = -150 + (hang + 150) * (1 - Math.pow(1 - d, 3));
+                ang = 9 * d * Math.sin(d * 9);
+                kick = 14 * Math.sin(t / 110) * (1 - d);
+                if (d >= 1) { phase = 'swing'; phaseStart = now; }
+            } else if (phase === 'swing') {
+                var s = Math.min(1, t / 4200);
+                Y = hang;
+                ang = 15 * (1 - 0.55 * s) * Math.sin(t / 1000 * 2.4 + 0.7) * Math.cos(0) ;
+                kick = 20 * Math.sin(t / 1000 * 4.8) * (1 - s * 0.4);
+                if (s >= 1) { phase = 'climb'; phaseStart = now; }
+            } else if (phase === 'climb') {
+                var k = t / 1000 / HALF;
+                var n = Math.floor(k);
+                var f = k - n;
+                var e = ease(f);
+                grip = n % 2 === 0;
+                hy = 6 + STEP * e;                     // tay bám kéo xuống => người đi lên
+                Y = hang - (n + e) * STEP * K;
+                flip = grip ? 1 : -1;
+                kick = 24 * Math.sin(Math.PI * f);
+                ang = 4.5 * Math.sin(t / 1000 * 2.4) * Math.max(0.35, 1 - t / 9000)
+                    + 2 * Math.sin(Math.PI * (n + e));
+                if (Y < -150) {
+                    phase = 'wait';
+                    phaseStart = now;
+                    waitFor = 14000 + Math.random() * 6000;
+                }
+            }
+
+            if (phase === 'climb') {
+                pose(grip, hy, flip, kick);
+            } else {
+                pose(true, 6, 1, kick);
+            }
+            pivot.style.transform = 'rotate(' + ang.toFixed(2) + 'deg)';
+            santa.style.transform = 'translate(0,' + Y.toFixed(1) + 'px) scale(' + K + ')';
+        }
+        window.requestAnimationFrame(frame);
+    }
+    startSanta();
     var canvas = root.querySelector('[data-noel-snow]');
     var ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
     if (!ctx || reduceMotion) {
@@ -49,11 +236,10 @@
 
     // Những chỗ tuyết có thể bám. text = bám lên đỉnh chữ; còn lại bám lên mép trên của khối.
     var TARGETS = [
-        { sel: '.site-header .nav-link', inset: 3, maxH: 3.2, text: true },
         { sel: '.site-header .header-app__button, .site-header [data-booking-modal-trigger]', inset: 15, maxH: 7 },
         { sel: 'button, a[class*="btn"], a[class*="button"], [role="button"], .rounded-button, input[type="submit"]', inset: 0.14, maxH: 6, page: true },
         { sel: '.card-hover, article, figure, [class$="-card"], [class*="-card "]', inset: 0.06, maxH: 7, page: true },
-        { sel: 'main h1, main h2, main h3', inset: 0, maxH: 3.4, text: true, page: true }
+        { sel: 'footer.relative', inset: 0, maxH: 24, page: true, thick: true }
     ];
 
     // Sprite dựng sẵn: lõi trắng + viền xanh nhạt để thấy được cả trên nền sáng
@@ -170,7 +356,7 @@
             var ledge = store ? store.get(el) : null;
             if (!ledge) {
                 ledge = { el: el, n: n, h: new Float32Array(n), maxH: cfg.maxH };
-                prefill(ledge, cfg.page ? 0.9 : 1);
+                prefill(ledge, cfg.thick ? 1.1 : cfg.page ? 0.9 : 1);
                 if (store) { store.set(el, ledge); }
             } else if (ledge.n !== n) {
                 // đổi kích thước thì giữ nguyên lượng tuyết đã có

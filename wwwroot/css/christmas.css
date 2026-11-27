@@ -78,20 +78,6 @@ body.theme-noel .site-header::after {
 }
 
 /* ---------- Footer: tuyết phủ + lời chúc ---------- */
-body.theme-noel footer.relative::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 24px;
-  z-index: 5;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 20px 0, #ffffff 0 19px, transparent 20px) 0 0 / 40px 24px repeat-x,
-    radial-gradient(circle at 0 0, #eef4fb 0 13px, transparent 14px) 0 0 / 40px 18px repeat-x;
-  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3));
-}
 
 .noel-footer-greeting {
   margin: 0 auto 2.25rem;
@@ -164,4 +150,120 @@ body.theme-noel footer.relative::before {
   .noel-tree .l,
   .noel-tree-star { animation: none !important; }
   .noel-snow { display: none !important; }
+}
+
+
+/* ---------- Linh vật hổ: mũ Noel + chớp mắt ---------- */
+.noel-mascot-overlay {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.noel-mascot-overlay .noel-lid {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+    transform: scaleY(0.02);
+    opacity: 0;
+    animation: noel-blink 4.8s infinite;
+}
+
+.noel-mascot-overlay .noel-lid--r {
+    animation-delay: 0.06s;
+}
+
+.noel-mascot-overlay .noel-hat {
+    filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.35));
+}
+
+.noel-mascot-overlay .noel-pom {
+    transform-box: fill-box;
+    transform-origin: 20% 20%;
+    animation: noel-pom-sway 3.6s ease-in-out infinite;
+}
+
+@keyframes noel-blink {
+    0%, 90%, 100% { transform: scaleY(0.02); opacity: 0; }
+    93%, 95.5% { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes noel-pom-sway {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(7deg); }
+}
+
+/* ---------- Ông già Noel đu dây leo lên ---------- */
+.noel-climber {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 41;
+    transition: opacity 0.4s ease;
+}
+
+.noel-climber__pivot {
+    position: absolute;
+    top: 0;
+    width: 0;
+    height: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.noel-climber__rope {
+    position: absolute;
+    left: -2px;
+    top: -4px;
+    width: 4px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(180deg, #e8d3a2 0 5px, #b08a4a 5px 9px);
+    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.35);
+}
+
+.noel-climber__santa {
+    position: absolute;
+    left: -34px;
+    top: 0;
+    width: 68px;
+    height: 100px;
+    transform-origin: 34px 0;
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4));
+    will-change: transform;
+}
+
+.noel-climber__santa svg {
+    display: block;
+    overflow: visible;
+}
+
+.noel-santa-eye {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: noel-santa-blink 4.2s infinite;
+}
+
+.noel-santa-sack {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+    animation: noel-pom-sway 2.4s ease-in-out infinite;
+}
+
+@keyframes noel-santa-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+}
+
+@media (max-width: 759px) {
+    .noel-climber { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .noel-mascot-overlay .noel-lid,
+    .noel-mascot-overlay .noel-pom,
+    .noel-santa-eye,
+    .noel-santa-sack { animation: none; }
 }
