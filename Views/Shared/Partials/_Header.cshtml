@@ -1,11 +1,19 @@
 @model KIGHolding.ViewModels.Shared.HeaderViewModel
+@{
+    var isNoel = SeasonalTheme.IsChristmas(Context);
+    const string normalLogoClass = "h-20 w-20 rounded-full object-contain ring-1 ring-white/70 lg:h-20 lg:w-20";
+}
 
 <header data-site-header class="site-header">
     <nav class="container-page flex h-20 items-center gap-6 xl:gap-10 lg:h-[5.5rem]">
         <a href="/" class="group flex shrink-0 items-center gap-3" aria-label="@Model.BrandName">
             @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
             {
-                <img src="@Model.LogoUrl" alt="@Model.BrandName" class="h-20 w-20 rounded-full object-contain ring-1 ring-white/70 lg:h-20 lg:w-20" />
+                <img src="@(isNoel ? SeasonalTheme.ChristmasLogoUrl : Model.LogoUrl)" alt="@Model.BrandName"
+                     class="@(isNoel ? "noel-logo" : normalLogoClass)"
+                     data-noel-logo="@(isNoel ? "true" : null)"
+                     data-normal-src="@(isNoel ? Model.LogoUrl : null)"
+                     data-normal-class="@(isNoel ? normalLogoClass : null)" />
             }
             else
             {
