@@ -102,30 +102,15 @@
         '<rect x="20.5" y="18" width="27" height="7.5" rx="3.75" fill="#fff"/><circle cx="57" cy="17" r="4.8" fill="#fff"/>' +
         '</svg>';
 
-    var DEER_SVG =
-        '<svg viewBox="0 0 130 100" width="130" height="100" style="overflow:visible" xmlns="http://www.w3.org/2000/svg">' +
-        '<g data-dleg="0"><rect x="27" y="58" width="7" height="34" rx="3.5" fill="#6a4220"/><rect x="26" y="88" width="9" height="7" rx="3" fill="#2b1b0e"/></g>' +
-        '<g data-dleg="1"><rect x="78" y="58" width="7" height="34" rx="3.5" fill="#6a4220"/><rect x="77" y="88" width="9" height="7" rx="3" fill="#2b1b0e"/></g>' +
-        '<path d="M26 44 Q12 36 9 50 Q18 52 27 56 Z" fill="#fff"/>' +
-        '<ellipse cx="60" cy="50" rx="36" ry="19" fill="#8b5a2b"/><ellipse cx="62" cy="60" rx="28" ry="8" fill="#d2a46c" opacity=".6"/>' +
-        '<g data-dleg="2"><rect x="38" y="58" width="7" height="34" rx="3.5" fill="#8b5a2b"/><rect x="37" y="88" width="9" height="7" rx="3" fill="#2b1b0e"/></g>' +
-        '<g data-dleg="3"><rect x="89" y="58" width="7" height="34" rx="3.5" fill="#8b5a2b"/><rect x="88" y="88" width="9" height="7" rx="3" fill="#2b1b0e"/></g>' +
-        '<path d="M84 42 Q96 32 100 20 L114 28 Q106 52 94 62 Z" fill="#8b5a2b"/>' +
-        '<ellipse cx="108" cy="24" rx="13" ry="10.5" fill="#8b5a2b"/><ellipse cx="120" cy="28" rx="8.5" ry="6.2" fill="#a56d3a"/>' +
-        '<circle cx="127" cy="27" r="4.4" fill="#ff2d2d" class="noel-deer-nose"/>' +
-        '<path d="M99 20 Q92 12 96 8 Q103 10 104 17 Z" fill="#6a4220"/>' +
-        '<path d="M106 16 Q102 3 93 -2 M101 8 Q95 9 91 4 M110 15 Q112 3 120 -3 M114 8 Q120 8 124 3" stroke="#dcb882" stroke-width="3.2" fill="none" stroke-linecap="round"/>' +
-        '<circle cx="111" cy="21" r="1.9" fill="#111"/>' +
-        '<path d="M83 40 Q88 54 81 68" stroke="#d4121f" stroke-width="5" fill="none" stroke-linecap="round"/>' +
-        '<rect x="44" y="31" width="28" height="9" rx="4" fill="#d4121f"/><circle cx="82" cy="68" r="3.4" fill="#f2c230"/>' +
-        '</svg>';
+    var SW = 190;
+    var SH = Math.round(190 * 249 / 273);
 
     function startSanta() {
         if (reduceMotion || !/^\/?(home(\/index)?)?$/i.test(location.pathname.replace(/\/+$/, '') || '/')) { return; }
         var clip = document.createElement('div');
         clip.className = 'noel-climber';
         clip.setAttribute('aria-hidden', 'true');
-        clip.innerHTML = '<div class="noel-deer">' + DEER_SVG + '</div>' +
+        clip.innerHTML = '<div class="noel-deer"><img src="/images/seasonal/santa-sleigh.webp" alt="" width="' + SW + '" height="' + SH + '" decoding="async"></div>' +
             '<div class="noel-climber__pivot"><div class="noel-climber__rope"></div><div class="noel-climber__santa">' + SANTA_SVG + '</div></div>';
         root.appendChild(clip);
 
@@ -139,23 +124,19 @@
         var handR = santa.querySelector('[data-hand="r"]');
         var legL = santa.querySelector('[data-leg="l"]');
         var legR = santa.querySelector('[data-leg="r"]');
-        var dLegs = deer.querySelectorAll('[data-dleg]');
-        var DLEG_X = [30.5, 81.5, 41.5, 92.5];
-        var DLEG_OFF = [0, 0.5, Math.PI, Math.PI + 0.5];
 
-        var DS = 1.25;               // tỉ lệ tuần lộc
-        var SX = 58 * DS;            // vị trí yên (tâm dây) so với tuần lộc
-        var SY = 31 * DS;
-        var DEER_TOP = 44;
-        var K_RIDE = 0.85;           // ông ngồi trên lưng thì nhỏ hơn
-        var K_HANG = 1.5;
-        var Y_RIDE = -70;
+        var SX = SW * 0.46;          // điểm buộc dây dưới xe trượt
+        var SY = SH * 0.80;
+        var DEER_TOP = 4;            // xe trượt chạy sát mép dưới header
+        var K_RIDE = 0.9;
+        var K_HANG = 1.45;
+        var Y_RIDE = -24;
         var STEP = 18;
-        var HALF = 0.34;
+        var HALF = 0.42;
         var phase = 'wait';
         var phaseStart = performance.now();
         var waitFor = 1500;
-        var deerX = -220;
+        var deerX = -SW - 40;
         var gait = 0;
         var Y = Y_RIDE;
         var hidden = false;
@@ -189,7 +170,8 @@
 
             var ropeLen = Math.max(190, Math.min(250, window.innerHeight * 0.36));
             var yHang = ropeLen - 96;
-            var xDrop = vw * 0.72;
+            var xDrop = Math.min(vw - 150, vw * 0.88);
+            var doRope = vw >= 1100;
             var xStand = xDrop - SX;
             var pivotTop = DEER_TOP + SY;
             clip.style.top = top + 'px';
@@ -207,26 +189,26 @@
             var riding = true;
 
             if (phase === 'wait') {
-                deerX = -220;
+                deerX = -SW - 40;
                 Y = Y_RIDE;
                 if (t > waitFor) { phase = 'enter'; phaseStart = now; }
             } else if (phase === 'enter') {
-                var d1 = Math.min(1, t / 2200);
-                deerX = -220 + (xStand + 220) * (1 - Math.pow(1 - d1, 2));
+                var d1 = Math.min(1, t / 11000);
+                deerX = -SW - 40 + (xStand + SW + 40) * (1 - Math.pow(1 - d1, 2));
                 running = true;
-                if (d1 >= 1) { phase = 'lower'; phaseStart = now; }
+                if (d1 >= 1) { phase = doRope ? 'lower' : 'leave'; phaseStart = now; }
             } else if (phase === 'lower') {
-                var d2 = Math.min(1, t / 1000);
+                var d2 = Math.min(1, t / 1500);
                 Y = Y_RIDE + (yHang - Y_RIDE) * (1 - Math.pow(1 - d2, 3));
-                ang = 8 * d2 * Math.sin(d2 * 8);
+                ang = 7 * d2 * Math.sin(d2 * 7);
                 kick = 14 * Math.sin(t / 110) * (1 - d2);
                 ropeH = Y - Y_RIDE + 36;
                 riding = d2 < 0.15;
                 if (d2 >= 1) { phase = 'swing'; phaseStart = now; }
             } else if (phase === 'swing') {
-                var s3 = Math.min(1, t / 1500);
+                var s3 = Math.min(1, t / 2600);
                 Y = yHang;
-                ang = 14 * (1 - 0.5 * s3) * Math.sin(t / 1000 * 3 + 0.8);
+                ang = 9 * (1 - 0.5 * s3) * Math.sin(t / 1000 * 2.2 + 0.8);
                 kick = 22 * Math.sin(t / 1000 * 5);
                 ropeH = ropeLen + 24;
                 riding = false;
@@ -247,26 +229,21 @@
                 riding = Y < Y_RIDE + 22;
                 if (Y <= Y_RIDE) { Y = Y_RIDE; phase = 'leave'; phaseStart = now; }
             } else if (phase === 'leave') {
-                var d4 = Math.min(1, t / 1700);
+                var d4 = Math.min(1, t / 9000);
                 deerX = xStand + (vw + 60 - xStand) * d4 * d4;
                 Y = Y_RIDE;
                 running = true;
                 if (d4 >= 1) {
                     phase = 'wait';
                     phaseStart = now;
-                    waitFor = 600;
+                    waitFor = 2500;
                 }
             }
 
-            // tuần lộc: chân phi nước đại khi chạy, đứng yên khi chờ
+            // xe trượt: nhấp nhô nhẹ khi chạy
             var dx = deerX - prevX;
-            if (running) { gait += Math.abs(dx) * 0.05; }
-            var bob = running ? 3 * Math.sin(gait * 2) : 0;
-            for (var i = 0; i < dLegs.length; i++) {
-                var a = running ? 36 * Math.sin(gait + DLEG_OFF[i]) : 0;
-                dLegs[i].setAttribute('transform', 'rotate(' + a.toFixed(1) + ' ' + DLEG_X[i] + ' 58)');
-            }
-            deer.style.transform = 'translate(' + deerX.toFixed(1) + 'px,' + (DEER_TOP + bob).toFixed(1) + 'px) scale(' + DS + ')';
+            var bob = running ? 2.5 * Math.sin(now / 420) : 0;
+            deer.style.transform = 'translate(' + deerX.toFixed(1) + 'px,' + (DEER_TOP + bob).toFixed(1) + 'px)';
 
             // ông già Noel
             var kNow = Math.max(K_RIDE, Math.min(K_HANG, K_RIDE + (K_HANG - K_RIDE) * ((Y - Y_RIDE) / (yHang - Y_RIDE))));
@@ -284,6 +261,7 @@
             rope.style.height = Math.max(0, Math.min(ropeLen + 24, ropeH)).toFixed(1) + 'px';
             rope.style.opacity = ropeH > 2 ? '1' : '0';
             santa.style.transform = 'translate(0,' + Y.toFixed(1) + 'px) scale(' + kNow.toFixed(3) + ')';
+            santa.style.opacity = riding ? '0' : '1';
         }
         window.requestAnimationFrame(frame);
     }
