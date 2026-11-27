@@ -106,8 +106,62 @@ body.theme-noel footer.relative::before {
 
 .noel-footer-greeting span { color: #fff; }
 
+/* ---------- Hai cây thông nhỏ ở hai bên ---------- */
+.noel-tree {
+  position: fixed;
+  bottom: 0;
+  z-index: 41;
+  width: 64px;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.3));
+}
+
+.noel-tree svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* trái: nằm dưới nút "lên đầu trang"; phải: chừa chỗ cho cụm nút liên hệ nổi */
+.noel-tree--left { left: 0.4rem; }
+.noel-tree--right { right: 5.75rem; }
+
+.noel-tree-lights {
+  filter: drop-shadow(0 0 2px rgba(255, 238, 180, 0.95));
+}
+
+.noel-tree .l {
+  animation: noel-tree-twinkle 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.37s - var(--d, 0s));
+}
+
+.noel-tree-star {
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 3px rgba(255, 209, 102, 0.95));
+  animation: noel-tree-star 3s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes noel-tree-twinkle {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@keyframes noel-tree-star {
+  0%, 100% { opacity: 0.8; transform: scale(0.94); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@media (max-width: 639px) {
+  .noel-tree { display: none; }
+}
+
 /* ---------- Người dùng muốn giảm chuyển động ---------- */
 @media (prefers-reduced-motion: reduce) {
-  img.noel-logo { animation: none !important; }
+  img.noel-logo,
+  .noel-tree .l,
+  .noel-tree-star { animation: none !important; }
   .noel-snow { display: none !important; }
 }
