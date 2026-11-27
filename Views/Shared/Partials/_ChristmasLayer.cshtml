@@ -1,4 +1,46 @@
 @* Lớp tuyết rơi Giáng Sinh (nhẹ). Chỉ render khi SeasonalTheme.IsChristmas(...) = true (xem _Layout). *@
 <div data-noel-root data-noel-end="@SeasonalTheme.EndIso(Context)">
     <canvas class="noel-snow" data-noel-snow aria-hidden="true"></canvas>
+
+    @* Hai cây thông nhỏ hai bên, đèn lấp lánh nhẹ *@
+    @for (var side = 0; side < 2; side++)
+    {
+        <div class="noel-tree @(side == 0 ? "noel-tree--left" : "noel-tree--right")" style="--d:@(side == 0 ? "0s" : "0.8s")" aria-hidden="true">
+            <svg viewBox="0 -4 80 112" xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+                <rect x="34" y="92" width="12" height="13" rx="2" fill="#6b4429" />
+                <g stroke-linejoin="round" stroke-width="5">
+                    <path d="M40 46 L10 92 L70 92Z" fill="#1d7048" stroke="#1d7048" />
+                    <path d="M40 26 L15 66 L65 66Z" fill="#26905a" stroke="#26905a" />
+                    <path d="M40 8 L22 40 L58 40Z" fill="#32a76b" stroke="#32a76b" />
+                </g>
+                <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9">
+                    <path d="M26 38 Q33 34 40 38 Q47 34 54 38" />
+                    <path d="M19 64 Q30 59 40 64 Q50 59 61 64" />
+                    <path d="M13 90 Q27 85 40 90 Q53 85 67 90" />
+                </g>
+                <g class="noel-tree-lights">
+                    <circle class="l" style="--i:0" cx="40" cy="22" r="2.3" fill="#ff4d4d" />
+                    <circle class="l" style="--i:1" cx="33" cy="33" r="2.3" fill="#ffd24d" />
+                    <circle class="l" style="--i:2" cx="48" cy="31" r="2.3" fill="#4db8ff" />
+                    <circle class="l" style="--i:3" cx="31" cy="50" r="2.3" fill="#ff8fd0" />
+                    <circle class="l" style="--i:4" cx="47" cy="45" r="2.3" fill="#ff4d4d" />
+                    <circle class="l" style="--i:5" cx="40" cy="57" r="2.3" fill="#ffd24d" />
+                    <circle class="l" style="--i:6" cx="55" cy="61" r="2.3" fill="#4db8ff" />
+                    <circle class="l" style="--i:7" cx="26" cy="61" r="2.3" fill="#ff8fd0" />
+                    <circle class="l" style="--i:8" cx="30" cy="70" r="2.3" fill="#ffd24d" />
+                    <circle class="l" style="--i:9" cx="48" cy="67" r="2.3" fill="#ff4d4d" />
+                    <circle class="l" style="--i:10" cx="40" cy="77" r="2.3" fill="#4db8ff" />
+                    <circle class="l" style="--i:11" cx="22" cy="86" r="2.3" fill="#ffd24d" />
+                    <circle class="l" style="--i:12" cx="36" cy="85" r="2.3" fill="#ff8fd0" />
+                    <circle class="l" style="--i:13" cx="52" cy="86" r="2.3" fill="#ff4d4d" />
+                    <circle class="l" style="--i:14" cx="62" cy="87" r="2.3" fill="#4db8ff" />
+                </g>
+                <path class="noel-tree-star" d="M40 -2 L42.4 3.6 L48.5 4.2 L43.9 8.2 L45.3 14.2 L40 11.1 L34.7 14.2 L36.1 8.2 L31.5 4.2 L37.6 3.6Z" fill="#ffd166" />
+                <rect x="13" y="94" width="13" height="11" rx="1.5" fill="#e63946" />
+                <rect x="18" y="94" width="3" height="11" fill="#ffd166" />
+                <rect x="56" y="97" width="11" height="8" rx="1.5" fill="#ffd166" />
+                <rect x="60" y="97" width="3" height="8" fill="#e63946" />
+            </svg>
+        </div>
+    }
 </div>
