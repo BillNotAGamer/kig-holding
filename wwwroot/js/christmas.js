@@ -288,6 +288,152 @@
         window.requestAnimationFrame(frame);
     }
     startSanta();
+
+    /* ---------- Ông già Noel leo lên chữ "TINH HOA ẨM THỰC" rồi vẫy tay chào ---------- */
+    function startHeadingSanta() {
+        if (reduceMotion) { return; }
+        var heading = null;
+        document.querySelectorAll('h1, h2').forEach(function (h) {
+            if (!heading && /tinh hoa/i.test(h.textContent || '')) { heading = h; }
+        });
+        if (!heading) { return; }
+
+        var box = document.createElement('div');
+        box.className = 'noel-heading-santa';
+        box.setAttribute('aria-hidden', 'true');
+        box.innerHTML = SANTA_SVG;
+        root.appendChild(box);
+
+        var armL = box.querySelector('[data-arm="l"]');
+        var armR = box.querySelector('[data-arm="r"]');
+        var handL = box.querySelector('[data-hand="l"]');
+        var handR = box.querySelector('[data-hand="r"]');
+        var legL = box.querySelector('[data-leg="l"]');
+        var legR = box.querySelector('[data-leg="r"]');
+
+        var K = 1.25;
+        var STEP = 18;
+        var HALF = 0.36;
+        var phase = 'wait';
+        var phaseStart = performance.now();
+        var waitFor = 2500;
+        var wasVisible = false;
+
+        function ease(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+        function setArm(arm, hand, x, y) {
+            arm.setAttribute('x2', x); arm.setAttribute('y2', y);
+            hand.setAttribute('cx', x); hand.setAttribute('cy', y);
+        }
+
+        function frame(now) {
+            if (!root.isConnected) { return; }
+            window.requestAnimationFrame(frame);
+
+            var r = heading.getBoundingClientRect();
+            var vis = window.innerWidth >= 760 && r.bottom > 120 && r.top < window.innerHeight - 60;
+            if (!vis) {
+                box.style.opacity = '0';
+                wasVisible = false;
+                phase = 'wait';
+                phaseStart = now;
+                waitFor = 1200;
+                return;
+            }
+            if (!wasVisible) { wasVisible = true; phaseStart = now; }
+
+            // mép trái chữ & đỉnh dòng 1
+            var textLeft = r.left;
+            var capTop = r.top;
+            try {
+                var range = document.createRange();
+                range.selectNodeContents(heading);
+                var rects = range.getClientRects();
+                if (rects.length) {
+                    var fs = parseFloat(window.getComputedStyle(heading).fontSize) || 60;
+                    var first = rects[0];
+                    textLeft = first.left;
+                    capTop = first.top + first.height / 2 - fs * 0.36;
+                    var lastBottom = 0;
+                    for (var i = 0; i < rects.length; i++) { lastBottom = Math.max(lastBottom, rects[i].bottom); }
+                    r = { top: capTop, bottom: lastBottom, left: textLeft };
+                }
+            } catch (e) { /* dùng khung của tiêu đề */ }
+
+            var gripX = textLeft - 6;
+            var yTop = capTop - 6 * K;                  // tay bám ở đỉnh chữ
+            var yBottom = r.bottom - 6 * K;             // bắt đầu leo từ chân dòng cuối
+            var yStand = capTop - 86 * K;               // đứng trên đỉnh chữ
+            var t = now - phaseStart;
+            var Y = yBottom + 60;
+            var op = 0;
+            var kickL = 0;
+            var grip = true, hy = 6, flip = 1, kick = 0;
+            var wave = false, standing = false;
+            var xf = 0;
+
+            if (phase === 'wait') {
+                if (t > waitFor) { phase = 'climb'; phaseStart = now; }
+            } else if (phase === 'climb') {
+                var k = t / 1000 / HALF;
+                var n = Math.floor(k), f = k - n, e = ease(f);
+                grip = n % 2 === 0;
+                hy = 6 + STEP * e;
+                Y = yBottom - (n + e) * STEP * K;
+                flip = grip ? 1 : -1;
+                kick = 24 * Math.sin(Math.PI * f);
+                op = Math.min(1, t / 300);
+                if (Y <= yTop) { Y = yTop; phase = 'mount'; phaseStart = now; }
+            } else if (phase === 'mount') {
+                var m = Math.min(1, t / 700);
+                Y = yTop + (yStand - yTop) * ease(m);
+                op = 1;
+                kick = 18 * Math.sin(m * Math.PI);
+                standing = m > 0.7;
+                xf = ease(m);
+                if (m >= 1) { phase = 'wave'; phaseStart = now; }
+            } else if (phase === 'wave') {
+                Y = yStand;
+                op = 1;
+                standing = true;
+                wave = true;
+                xf = 1;
+                if (t > 4800) { phase = 'leave'; phaseStart = now; }
+            } else if (phase === 'leave') {
+                var l = Math.min(1, t / 700);
+                Y = yStand + (yTop - yStand) * ease(l);
+                op = 1 - Math.max(0, (l - 0.6) / 0.4);
+                standing = false;
+                xf = 1 - ease(l);
+                if (l >= 1) { phase = 'wait'; phaseStart = now; waitFor = 14000; op = 0; }
+            }
+
+            // tư thế
+            if (phase === 'climb') {
+                var hl = grip ? hy : 30 - hy, hr = grip ? 30 - hy : hy;
+                setArm(armL, handL, 31, hl); setArm(armR, handR, 37, hr);
+                legL.setAttribute('transform', 'rotate(' + flip * kick + ' 28.5 62)');
+                legR.setAttribute('transform', 'rotate(' + (-flip * kick) + ' 39.5 62)');
+            } else if (wave) {
+                var w = Math.sin(t / 1000 * 7);
+                setArm(armL, handL, 17, 54);                                  // tay trái buông
+                setArm(armR, handR, 56 + 3 * w, 12 + 2 * Math.cos(t / 1000 * 7)); // tay phải vẫy
+                legL.setAttribute('transform', 'rotate(0 28.5 62)');
+                legR.setAttribute('transform', 'rotate(0 39.5 62)');
+            } else if (standing) {
+                setArm(armL, handL, 17, 54); setArm(armR, handR, 51, 52);
+            } else {
+                setArm(armL, handL, 31, 6); setArm(armR, handR, 37, 20);
+                legL.setAttribute('transform', 'rotate(' + kick + ' 28.5 62)');
+                legR.setAttribute('transform', 'rotate(' + (-kick) + ' 39.5 62)');
+            }
+
+            var sway = wave ? 2.5 * Math.sin(t / 1000 * 3.5) : 0;
+            box.style.opacity = op.toFixed(2);
+            box.style.transform = 'translate(' + (gripX + 90 * xf - 34 * K).toFixed(1) + 'px,' + Y.toFixed(1) + 'px) rotate(' + sway.toFixed(2) + 'deg) scale(' + K + ')';
+        }
+        window.requestAnimationFrame(frame);
+    }
+    startHeadingSanta();
     var canvas = root.querySelector('[data-noel-snow]');
     var ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
     if (!ctx || reduceMotion) {
@@ -375,7 +521,8 @@
 
     function isUsable(el, cfg) {
         if (el.closest('[data-noel-root]')) { return false; }
-        if (cfg.page && el.closest('.site-header, .mobile-drawer, [role="dialog"], [aria-hidden="true"]')) { return false; }
+        if (cfg.page && el.closest('.site-header, .mobile-drawer, [role="dialog"], [aria-hidden="true"], [role="group"], [role="tablist"], [class*="filter"], [class*="chip"]')) { return false; }
+        if (cfg.page && /chip|filter|\bh-8\b|\bh-9\b|tab/i.test(el.className && el.className.baseVal === undefined ? el.className : '')) { return false; }
         if (typeof el.checkVisibility === 'function') {
             try {
                 if (!el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) { return false; }

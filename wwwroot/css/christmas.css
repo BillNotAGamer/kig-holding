@@ -97,9 +97,9 @@ body.theme-noel .site-header::after {
   position: fixed;
   bottom: 0;
   z-index: 41;
-  width: 64px;
+  width: 96px;
   pointer-events: none;
-  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.35));
 }
 
 .noel-tree svg {
@@ -111,15 +111,11 @@ body.theme-noel .site-header::after {
 
 /* trái: nằm dưới nút "lên đầu trang"; phải: chừa chỗ cho cụm nút liên hệ nổi */
 .noel-tree--left { left: 0.4rem; }
-.noel-tree--right { right: 5.75rem; }
-
-.noel-tree-lights {
-  filter: drop-shadow(0 0 2px rgba(255, 238, 180, 0.95));
-}
+.noel-tree--right { right: 6rem; }
 
 .noel-tree .l {
-  animation: noel-tree-twinkle 2.4s ease-in-out infinite;
-  animation-delay: calc(var(--i, 0) * -0.37s - var(--d, 0s));
+  animation: noel-tree-twinkle 2.2s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.31s - var(--d, 0s));
 }
 
 .noel-tree-star {
@@ -131,7 +127,7 @@ body.theme-noel .site-header::after {
 }
 
 @keyframes noel-tree-twinkle {
-  0%, 100% { opacity: 0.35; }
+  0%, 100% { opacity: 0.25; }
   50% { opacity: 1; }
 }
 
@@ -295,4 +291,27 @@ body.theme-noel .site-header::after {
 
 @media (prefers-reduced-motion: reduce) {
     .noel-deer-nose { animation: none; }
+}
+
+.noel-heading-santa {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 68px;
+    height: 100px;
+    transform-origin: 34px 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 42;
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45));
+    will-change: transform, opacity;
+}
+
+.noel-heading-santa svg {
+    display: block;
+    overflow: visible;
+}
+
+@media (max-width: 759px) {
+    .noel-heading-santa { display: none; }
 }
