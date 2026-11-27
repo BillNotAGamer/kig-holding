@@ -57,6 +57,8 @@
         requestPath.Equals("/lien-he-nhuong-quyen", StringComparison.OrdinalIgnoreCase)
         || requestPath.StartsWith("/lien-he-nhuong-quyen/", StringComparison.OrdinalIgnoreCase);
     var shouldRenderTikTokPixel = !isFranchisePage;
+    // Giao diện Giáng Sinh: tự bật 27/11 -> hết 31/12 (xem Helpers/SeasonalTheme.cs)
+    var isChristmas = SeasonalTheme.IsChristmas(Context);
 }
 
 <!DOCTYPE html>
@@ -110,6 +112,11 @@
     <link rel="stylesheet" href="~/css/header-app-download.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site-typography.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/booking-conditions.css" asp-append-version="true" />
+    @if (isChristmas)
+    {
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&display=swap" />
+        <link rel="stylesheet" href="~/css/christmas.css" asp-append-version="true" />
+    }
     @await RenderSectionAsync("Styles", required: false)
     <!-- Google tag (gtag.js): one loader, both tag IDs configured on it -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17917718766"></script>
@@ -127,7 +134,7 @@
     }
 </head>
 
-<body class="min-h-screen bg-brand-light text-brand-dark antialiased"
+<body class="min-h-screen bg-brand-light text-brand-dark antialiased @(isChristmas ? "theme-noel" : string.Empty)"
       data-booking-modal-auto-open="@(autoOpenBookingModal ? "true" : null)"
       data-booking-modal-auto-open-delay="@(autoOpenBookingModal ? "1000" : null)"
       data-booking-modal-auto-close-delay="@(autoOpenBookingModal ? "5000" : null)">
@@ -140,6 +147,11 @@
     @await Component.InvokeAsync("SiteFooter")
     @await Component.InvokeAsync("FloatingContactButtons")
     <partial name="Partials/_BookingModal" />
+
+    @if (isChristmas)
+    {
+        <partial name="Partials/_ChristmasLayer" />
+    }
 
     <button type="button"
             class="fixed bottom-24 left-5 z-40 hidden size-11 place-items-center rounded-md border border-brand-border bg-brand-white text-brand-dark shadow-soft transition hover:border-brand-gold hover:text-brand-goldDeep md:grid"
@@ -154,6 +166,10 @@
     <script src="~/js/booking-modal.js" asp-append-version="true"></script>
     <script src="~/js/booking-conditions.js" asp-append-version="true" defer></script>
     <script src="~/js/uw-reveal.js" asp-append-version="true"></script>
+    @if (isChristmas)
+    {
+        <script src="~/js/christmas.js" asp-append-version="true" defer></script>
+    }
     @if (shouldRenderTikTokPixel)
     {
         <script src="~/js/tiktok-tracking.js" asp-append-version="true" defer></script>

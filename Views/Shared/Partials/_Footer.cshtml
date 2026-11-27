@@ -8,6 +8,8 @@
             ? "366/3 Phạm Hữu Lầu, Nhà Bè, Hồ Chí Minh, Việt Nam"
             : Model.Address;
     var currentYear = DateTime.Now.Year;
+    var isNoel = SeasonalTheme.IsChristmas(Context);
+    const string normalFooterLogoClass = "h-full w-full object-contain";
     var hasMapLink = !string.IsNullOrWhiteSpace(Model.GoogleMapUrl);
     var hasFacebook = !string.IsNullOrWhiteSpace(Model.FacebookUrl) && !string.Equals(Model.FacebookUrl, "#", StringComparison.Ordinal);
     var hasZalo = !string.IsNullOrWhiteSpace(Model.ZaloUrl) && !string.Equals(Model.ZaloUrl, "#", StringComparison.Ordinal);
@@ -18,13 +20,21 @@
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(184,154,98,0.12),transparent_28rem),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_24rem)] opacity-80" aria-hidden="true"></div>
 
     <div class="container-page relative z-10 py-16 pb-28 sm:py-20 lg:py-16 lg:pb-16">
+        @if (isNoel)
+        {
+            <div class="noel-footer-greeting" aria-hidden="true">Merry Christmas <span>&amp;</span> Happy New Year</div>
+        }
         <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.35fr_1fr_1.1fr] lg:gap-16">
             <section aria-labelledby="footer-brand-heading" data-uw-reveal="fade-left">
                 <a href="/" class="inline-flex items-center gap-4" aria-label="Về trang chủ">
                     <span class="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] shadow-soft sm:h-20 sm:w-20">
                         @if (!string.IsNullOrWhiteSpace(footerLogoUrl))
                         {
-                            <img src="@footerLogoUrl" alt="@Model.BrandName" class="h-full w-full object-contain" />
+                            <img src="@(isNoel ? SeasonalTheme.ChristmasLogoUrl : footerLogoUrl)" alt="@Model.BrandName"
+                                 class="@(isNoel ? normalFooterLogoClass + " noel-logo" : normalFooterLogoClass)"
+                                 data-noel-logo="@(isNoel ? "true" : null)"
+                                 data-normal-src="@(isNoel ? footerLogoUrl : null)"
+                                 data-normal-class="@(isNoel ? normalFooterLogoClass : null)" />
                         }
                         else
                         {

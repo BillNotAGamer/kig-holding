@@ -1,0 +1,128 @@
+@* Lớp trang trí Giáng Sinh. Chỉ được render khi SeasonalTheme.IsChristmas(...) = true (xem _Layout). *@
+<div data-noel-root data-noel-end="@SeasonalTheme.EndIso(Context)">
+
+    @* Tuyết rơi toàn trang (vẽ bằng canvas trong christmas.js) *@
+    <canvas class="noel-snow" data-noel-snow aria-hidden="true"></canvas>
+
+    @* Dây đèn nhấp nháy dưới header *@
+    <ul class="noel-lights" data-noel-lights aria-hidden="true">
+        @for (var i = 0; i < 56; i++)
+        {
+            <li></li>
+        }
+    </ul>
+
+    @* Ông già Noel lái xe tuyết bay ngang màn hình *@
+    <div class="noel-santa" data-noel-santa aria-hidden="true">
+        <div class="noel-santa-bob">
+            <svg viewBox="-10 -34 500 230" xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+                <defs>
+                    <radialGradient id="noelNose" cx="50%" cy="50%" r="50%">
+                        <stop offset="0" stop-color="#ff6b6b" stop-opacity=".95" />
+                        <stop offset="1" stop-color="#ff3030" stop-opacity="0" />
+                    </radialGradient>
+                    <linearGradient id="noelSleigh" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#e5383b" />
+                        <stop offset="1" stop-color="#a4161a" />
+                    </linearGradient>
+                    <symbol id="noelStar" viewBox="-6 -6 12 12">
+                        <path d="M0 -6 L1.5 -1.5 L6 0 L1.5 1.5 L0 6 L-1.5 1.5 L-6 0 L-1.5 -1.5Z" fill="#fff3b0" />
+                    </symbol>
+                    <g id="noelDeer">
+                        <path d="M10 50 C0 46 -4 56 3 60" stroke="#7a4b2f" stroke-width="5" fill="none" stroke-linecap="round" />
+                        <path d="M26 64 L10 86 M34 66 L32 90" stroke="#6b4129" stroke-width="5.5" fill="none" stroke-linecap="round" />
+                        <path d="M60 64 L80 82 M52 66 L58 90" stroke="#7a4b2f" stroke-width="5.5" fill="none" stroke-linecap="round" />
+                        <ellipse cx="42" cy="52" rx="36" ry="17" fill="#8d5a3b" />
+                        <ellipse cx="42" cy="58" rx="26" ry="9" fill="#a9724d" opacity=".55" />
+                        <path d="M62 44 L82 18 L98 28 L80 58Z" fill="#8d5a3b" />
+                        <ellipse cx="94" cy="22" rx="14" ry="10" fill="#9c6644" transform="rotate(22 94 22)" />
+                        <ellipse cx="106" cy="29" rx="8" ry="6" fill="#b07a53" />
+                        <circle cx="96" cy="19" r="1.8" fill="#1d1d1d" />
+                        <ellipse cx="86" cy="13" rx="3.2" ry="7" fill="#8d5a3b" transform="rotate(-28 86 13)" />
+                        <path d="M92 12 C90 0 96 -10 100 -14 M94 4 C100 2 104 -2 106 -8 M91 9 C85 4 83 -3 83 -9" stroke="#6b4129" stroke-width="2.6" fill="none" stroke-linecap="round" />
+                        <path d="M64 42 Q54 52 56 70" stroke="#d62828" stroke-width="3.5" fill="none" stroke-linecap="round" />
+                        <circle cx="58" cy="66" r="3.4" fill="#ffd166" />
+                    </g>
+                </defs>
+
+                @* Vệt sao lấp lánh phía sau *@
+                <g class="noel-sparkles">
+                    <use href="#noelStar" x="-6" y="30" width="12" height="12" />
+                    <use href="#noelStar" x="8" y="64" width="9" height="9" />
+                    <use href="#noelStar" x="-2" y="92" width="14" height="14" />
+                    <use href="#noelStar" x="20" y="14" width="8" height="8" />
+                    <use href="#noelStar" x="26" y="112" width="8" height="8" />
+                </g>
+
+                @* Dây cương *@
+                <path d="M300 78 C250 84 214 96 170 100" stroke="#e0b24a" stroke-width="2.2" fill="none" />
+                <path d="M392 70 C360 72 330 74 300 78" stroke="#e0b24a" stroke-width="2.2" fill="none" />
+
+                @* Tuần lộc phía sau (không mũi đỏ) *@
+                <g transform="translate(222 -4)">
+                    <g class="noel-deer noel-deer-2">
+                        <use href="#noelDeer" />
+                    </g>
+                </g>
+
+                @* Tuần lộc dẫn đầu, mũi đỏ *@
+                <g transform="translate(340 -10)">
+                    <g class="noel-deer noel-deer-1">
+                        <use href="#noelDeer" />
+                        <circle cx="113" cy="27" r="9" fill="url(#noelNose)" />
+                        <circle cx="113" cy="27" r="3.8" fill="#ff3030" />
+                    </g>
+                </g>
+
+                @* Xe tuyết *@
+                <g transform="translate(14 54)">
+                    <path d="M8 112 L186 112 C206 112 208 98 192 96" stroke="#e0b24a" stroke-width="5.5" fill="none" stroke-linecap="round" />
+                    <path d="M58 94 L56 112 M142 94 L144 112" stroke="#e0b24a" stroke-width="4.5" stroke-linecap="round" />
+
+                    @* Bao quà phía sau *@
+                    <path d="M20 44 C4 4 70 -6 84 44Z" fill="#b5834a" />
+                    <path d="M30 14 C40 6 58 6 68 16" stroke="#8f6330" stroke-width="3" fill="none" stroke-linecap="round" />
+                    <rect x="42" y="-12" width="22" height="20" rx="3" fill="#2a9d8f" />
+                    <rect x="50" y="-12" width="6" height="20" fill="#ffd166" />
+                    <rect x="20" y="-4" width="20" height="18" rx="3" fill="#ffd166" transform="rotate(-8 30 5)" />
+                    <rect x="27" y="-4" width="6" height="18" fill="#e63946" transform="rotate(-8 30 5)" />
+
+                    @* Thân xe *@
+                    <path d="M8 44 L194 44 C198 68 184 92 150 96 L44 96 C20 94 6 72 8 44Z" fill="url(#noelSleigh)" />
+                    <path d="M8 44 L194 44" stroke="#ffd166" stroke-width="6" stroke-linecap="round" />
+                    <path d="M194 44 C212 40 218 24 206 16" stroke="#ffd166" stroke-width="6" fill="none" stroke-linecap="round" />
+                    <path d="M26 66 C70 76 130 76 176 66" stroke="#ffd166" stroke-width="2.4" fill="none" opacity=".75" />
+
+                    @* Ông già Noel *@
+                    <path d="M92 48 C90 10 144 8 148 48Z" fill="#e63946" />
+                    <rect x="90" y="40" width="60" height="9" rx="4.5" fill="#fff" />
+                    <path d="M144 26 C160 30 170 38 178 46" stroke="#e63946" stroke-width="11" fill="none" stroke-linecap="round" />
+                    <circle cx="180" cy="48" r="6.5" fill="#fff" />
+                    <circle cx="118" cy="6" r="15" fill="#ffd2b0" />
+                    <circle cx="124" cy="3" r="1.9" fill="#1d1d1d" />
+                    <circle cx="131" cy="8" r="3" fill="#f4a98a" opacity=".8" />
+                    <path d="M103 8 C101 40 134 42 134 12 C128 24 112 24 103 8Z" fill="#fff" />
+                    <path d="M114 10 C118 14 128 14 132 10" stroke="#f2e6dc" stroke-width="3" fill="none" stroke-linecap="round" />
+                    <path d="M103 1 C100 -26 128 -32 142 -14 C150 -6 140 0 136 1Z" fill="#e63946" />
+                    <rect x="102" y="-3" width="36" height="9" rx="4.5" fill="#fff" />
+                    <path d="M104 -14 C92 -22 84 -14 90 -6" stroke="#e63946" stroke-width="9" fill="none" stroke-linecap="round" />
+                    <circle cx="86" cy="-4" r="6.5" fill="#fff" />
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    @* Lời chúc: tự ẩn sau vài giây, chỉ hiện 1 lần mỗi phiên *@
+    <div class="noel-toast" data-noel-toast role="status">
+        <div class="noel-toast-icon">🎄</div>
+        <div class="noel-toast-body">
+            <p class="noel-toast-title">Merry Christmas!</p>
+            <p class="noel-toast-text">Truyền Thuyết Champong chúc bạn một mùa Giáng Sinh ấm áp bên người thân yêu.</p>
+            <a class="noel-toast-cta" href="/dat-ban">Đặt bàn ngay →</a>
+        </div>
+        <button type="button" class="noel-toast-close" data-noel-toast-close aria-label="Đóng lời chúc">&times;</button>
+    </div>
+
+    @* Nút tắt/bật hiệu ứng *@
+    <button type="button" class="noel-toggle" data-noel-toggle aria-pressed="true" aria-label="Tắt hiệu ứng Giáng Sinh" title="Bật/tắt hiệu ứng Giáng Sinh">❄</button>
+</div>
