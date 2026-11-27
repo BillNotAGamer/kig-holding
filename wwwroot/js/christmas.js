@@ -102,15 +102,35 @@
         '<rect x="20.5" y="18" width="27" height="7.5" rx="3.75" fill="#fff"/><circle cx="57" cy="17" r="4.8" fill="#fff"/>' +
         '</svg>';
 
+    var DEER_SVG =
+        '<svg viewBox="0 0 130 100" width="130" height="100" style="overflow:visible" xmlns="http://www.w3.org/2000/svg">' +
+        '<g data-dleg="0"><rect x="27" y="58" width="7" height="34" rx="3.5" fill="#6a4220"/><rect x="26" y="88" width="9" height="7" rx="3" fill="#2b1b0e"/></g>' +
+        '<g data-dleg="1"><rect x="78" y="58" width="7" height="34" rx="3.5" fill="#6a4220"/><rect x="77" y="88" width="9" height="7" rx="3" fill="#2b1b0e"/></g>' +
+        '<path d="M26 44 Q12 36 9 50 Q18 52 27 56 Z" fill="#fff"/>' +
+        '<ellipse cx="60" cy="50" rx="36" ry="19" fill="#8b5a2b"/><ellipse cx="62" cy="60" rx="28" ry="8" fill="#d2a46c" opacity=".6"/>' +
+        '<g data-dleg="2"><rect x="38" y="58" width="7" height="34" rx="3.5" fill="#8b5a2b"/><rect x="37" y="88" width="9" height="7" rx="3" fill="#2b1b0e"/></g>' +
+        '<g data-dleg="3"><rect x="89" y="58" width="7" height="34" rx="3.5" fill="#8b5a2b"/><rect x="88" y="88" width="9" height="7" rx="3" fill="#2b1b0e"/></g>' +
+        '<path d="M84 42 Q96 32 100 20 L114 28 Q106 52 94 62 Z" fill="#8b5a2b"/>' +
+        '<ellipse cx="108" cy="24" rx="13" ry="10.5" fill="#8b5a2b"/><ellipse cx="120" cy="28" rx="8.5" ry="6.2" fill="#a56d3a"/>' +
+        '<circle cx="127" cy="27" r="4.4" fill="#ff2d2d" class="noel-deer-nose"/>' +
+        '<path d="M99 20 Q92 12 96 8 Q103 10 104 17 Z" fill="#6a4220"/>' +
+        '<path d="M106 16 Q102 3 93 -2 M101 8 Q95 9 91 4 M110 15 Q112 3 120 -3 M114 8 Q120 8 124 3" stroke="#dcb882" stroke-width="3.2" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="111" cy="21" r="1.9" fill="#111"/>' +
+        '<path d="M83 40 Q88 54 81 68" stroke="#d4121f" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+        '<rect x="44" y="31" width="28" height="9" rx="4" fill="#d4121f"/><circle cx="82" cy="68" r="3.4" fill="#f2c230"/>' +
+        '</svg>';
+
     function startSanta() {
         if (reduceMotion || !/^\/?(home(\/index)?)?$/i.test(location.pathname.replace(/\/+$/, '') || '/')) { return; }
         var clip = document.createElement('div');
         clip.className = 'noel-climber';
         clip.setAttribute('aria-hidden', 'true');
-        clip.innerHTML = '<div class="noel-climber__pivot"><div class="noel-climber__rope"></div><div class="noel-climber__santa">' + SANTA_SVG + '</div></div>';
+        clip.innerHTML = '<div class="noel-deer">' + DEER_SVG + '</div>' +
+            '<div class="noel-climber__pivot"><div class="noel-climber__rope"></div><div class="noel-climber__santa">' + SANTA_SVG + '</div></div>';
         root.appendChild(clip);
 
-        var pivot = clip.firstChild;
+        var deer = clip.firstChild;
+        var pivot = clip.lastChild;
         var rope = pivot.firstChild;
         var santa = pivot.lastChild;
         var armL = santa.querySelector('[data-arm="l"]');
@@ -119,26 +139,34 @@
         var handR = santa.querySelector('[data-hand="r"]');
         var legL = santa.querySelector('[data-leg="l"]');
         var legR = santa.querySelector('[data-leg="r"]');
+        var dLegs = deer.querySelectorAll('[data-dleg]');
+        var DLEG_X = [30.5, 81.5, 41.5, 92.5];
+        var DLEG_OFF = [0, 0.5, Math.PI, Math.PI + 0.5];
 
-        var K = 1.5;                // phóng to nhân vật
-        var STEP = 18;               // mỗi nhịp kéo người lên 18 đơn vị svg
-        var HALF = 0.62;             // giây / nhịp kéo
+        var DS = 1.25;               // tỉ lệ tuần lộc
+        var SX = 58 * DS;            // vị trí yên (tâm dây) so với tuần lộc
+        var SY = 31 * DS;
+        var DEER_TOP = 44;
+        var K_RIDE = 0.85;           // ông ngồi trên lưng thì nhỏ hơn
+        var K_HANG = 1.5;
+        var Y_RIDE = -70;
+        var STEP = 18;
+        var HALF = 0.34;
         var phase = 'wait';
         var phaseStart = performance.now();
-        var waitFor = 1800;
-        var ropeLen = 300;
-        var hang = 0;
-        var Y = -140;
+        var waitFor = 1500;
+        var deerX = -220;
+        var gait = 0;
+        var Y = Y_RIDE;
         var hidden = false;
 
         function ease(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
 
         function pose(gripL, hy, flip, kick) {
-            // gripL: tay trái đang bám (ở cao) ; hy: độ cao tay bám (svg), tay kia ở vị trí đối xứng
             var hl = gripL ? hy : 30 - hy;
             var hr = gripL ? 30 - hy : hy;
-            armL.setAttribute('x2', 31); armL.setAttribute('y2', hl);
-            armR.setAttribute('x2', 37); armR.setAttribute('y2', hr);
+            armL.setAttribute('y2', hl);
+            armR.setAttribute('y2', hr);
             handL.setAttribute('cy', hl);
             handR.setAttribute('cy', hr);
             legL.setAttribute('transform', 'rotate(' + (flip * kick) + ' 28.5 62)');
@@ -159,12 +187,13 @@
             }
             if (!show) { return; }
 
-            ropeLen = Math.max(230, Math.min(360, window.innerHeight * 0.46));
-            hang = ropeLen - 96;
+            var ropeLen = Math.max(190, Math.min(250, window.innerHeight * 0.36));
+            var yHang = ropeLen - 96;
+            var xDrop = vw * 0.72;
+            var xStand = xDrop - SX;
+            var pivotTop = DEER_TOP + SY;
             clip.style.top = top + 'px';
-            clip.style.height = (ropeLen + 90) + 'px';
-            pivot.style.left = Math.max(120, vw - Math.max(90, Math.min(170, vw * 0.085))) + 'px';
-            rope.style.height = (ropeLen + 24) + 'px';
+            clip.style.height = (pivotTop + ropeLen + 100) + 'px';
 
             var t = now - phaseStart;
             var ang = 0;
@@ -172,48 +201,89 @@
             var hy = 6;
             var flip = 1;
             var kick = 0;
+            var ropeH = 0;
+            var prevX = deerX;
+            var running = false;
+            var riding = true;
 
             if (phase === 'wait') {
-                Y = -150;
-                if (t > waitFor) { phase = 'drop'; phaseStart = now; }
-            } else if (phase === 'drop') {
-                var d = Math.min(1, t / 1500);
-                Y = -150 + (hang + 150) * (1 - Math.pow(1 - d, 3));
-                ang = 9 * d * Math.sin(d * 9);
-                kick = 14 * Math.sin(t / 110) * (1 - d);
-                if (d >= 1) { phase = 'swing'; phaseStart = now; }
+                deerX = -220;
+                Y = Y_RIDE;
+                if (t > waitFor) { phase = 'enter'; phaseStart = now; }
+            } else if (phase === 'enter') {
+                var d1 = Math.min(1, t / 2200);
+                deerX = -220 + (xStand + 220) * (1 - Math.pow(1 - d1, 2));
+                running = true;
+                if (d1 >= 1) { phase = 'lower'; phaseStart = now; }
+            } else if (phase === 'lower') {
+                var d2 = Math.min(1, t / 1000);
+                Y = Y_RIDE + (yHang - Y_RIDE) * (1 - Math.pow(1 - d2, 3));
+                ang = 8 * d2 * Math.sin(d2 * 8);
+                kick = 14 * Math.sin(t / 110) * (1 - d2);
+                ropeH = Y - Y_RIDE + 36;
+                riding = d2 < 0.15;
+                if (d2 >= 1) { phase = 'swing'; phaseStart = now; }
             } else if (phase === 'swing') {
-                var s = Math.min(1, t / 4200);
-                Y = hang;
-                ang = 15 * (1 - 0.55 * s) * Math.sin(t / 1000 * 2.4 + 0.7) * Math.cos(0) ;
-                kick = 20 * Math.sin(t / 1000 * 4.8) * (1 - s * 0.4);
-                if (s >= 1) { phase = 'climb'; phaseStart = now; }
+                var s3 = Math.min(1, t / 1500);
+                Y = yHang;
+                ang = 14 * (1 - 0.5 * s3) * Math.sin(t / 1000 * 3 + 0.8);
+                kick = 22 * Math.sin(t / 1000 * 5);
+                ropeH = ropeLen + 24;
+                riding = false;
+                if (s3 >= 1) { phase = 'climb'; phaseStart = now; }
             } else if (phase === 'climb') {
+                var kc = Math.max(0.55, Math.min(K_HANG, K_RIDE + (K_HANG - K_RIDE) * ((Y - Y_RIDE) / (yHang - Y_RIDE))));
                 var k = t / 1000 / HALF;
                 var n = Math.floor(k);
                 var f = k - n;
                 var e = ease(f);
                 grip = n % 2 === 0;
-                hy = 6 + STEP * e;                     // tay bám kéo xuống => người đi lên
-                Y = hang - (n + e) * STEP * K;
+                hy = 6 + STEP * e;
+                Y = yHang - (n + e) * STEP * kc;
                 flip = grip ? 1 : -1;
                 kick = 24 * Math.sin(Math.PI * f);
-                ang = 4.5 * Math.sin(t / 1000 * 2.4) * Math.max(0.35, 1 - t / 9000)
-                    + 2 * Math.sin(Math.PI * (n + e));
-                if (Y < -150) {
+                ang = 3 * Math.sin(t / 1000 * 3) * Math.max(0.2, 1 - t / 3000);
+                ropeH = Math.max(0, Y - Y_RIDE + 36);     // dây được cuộn lên theo ông
+                riding = Y < Y_RIDE + 22;
+                if (Y <= Y_RIDE) { Y = Y_RIDE; phase = 'leave'; phaseStart = now; }
+            } else if (phase === 'leave') {
+                var d4 = Math.min(1, t / 1700);
+                deerX = xStand + (vw + 60 - xStand) * d4 * d4;
+                Y = Y_RIDE;
+                running = true;
+                if (d4 >= 1) {
                     phase = 'wait';
                     phaseStart = now;
-                    waitFor = 14000 + Math.random() * 6000;
+                    waitFor = 600;
                 }
             }
 
+            // tuần lộc: chân phi nước đại khi chạy, đứng yên khi chờ
+            var dx = deerX - prevX;
+            if (running) { gait += Math.abs(dx) * 0.05; }
+            var bob = running ? 3 * Math.sin(gait * 2) : 0;
+            for (var i = 0; i < dLegs.length; i++) {
+                var a = running ? 36 * Math.sin(gait + DLEG_OFF[i]) : 0;
+                dLegs[i].setAttribute('transform', 'rotate(' + a.toFixed(1) + ' ' + DLEG_X[i] + ' 58)');
+            }
+            deer.style.transform = 'translate(' + deerX.toFixed(1) + 'px,' + (DEER_TOP + bob).toFixed(1) + 'px) scale(' + DS + ')';
+
+            // ông già Noel
+            var kNow = Math.max(K_RIDE, Math.min(K_HANG, K_RIDE + (K_HANG - K_RIDE) * ((Y - Y_RIDE) / (yHang - Y_RIDE))));
             if (phase === 'climb') {
                 pose(grip, hy, flip, kick);
+            } else if (riding) {
+                pose(true, 17, 1, running ? 10 * Math.sin(gait) : 0);
             } else {
                 pose(true, 6, 1, kick);
             }
+            var ridingBob = riding ? bob : 0;
+            pivot.style.left = (deerX + SX).toFixed(1) + 'px';
+            pivot.style.top = (pivotTop + ridingBob).toFixed(1) + 'px';
             pivot.style.transform = 'rotate(' + ang.toFixed(2) + 'deg)';
-            santa.style.transform = 'translate(0,' + Y.toFixed(1) + 'px) scale(' + K + ')';
+            rope.style.height = Math.max(0, Math.min(ropeLen + 24, ropeH)).toFixed(1) + 'px';
+            rope.style.opacity = ropeH > 2 ? '1' : '0';
+            santa.style.transform = 'translate(0,' + Y.toFixed(1) + 'px) scale(' + kNow.toFixed(3) + ')';
         }
         window.requestAnimationFrame(frame);
     }
